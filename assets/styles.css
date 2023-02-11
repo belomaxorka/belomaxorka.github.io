@@ -1,0 +1,26 @@
+footer {
+    padding: 1rem;
+}
+
+.summary-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.summary {
+    flex: 1;
+    flex-direction: column;
+}
+
+.summary img {
+    max-width: 100%;
+}
+
+.summary h2 {
+    margin: 3rem;
+    font-weight: 300;
+}
+
+.heart {
+    color: red;
+}
