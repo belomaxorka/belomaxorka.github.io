@@ -14,11 +14,7 @@ footer {
 
 .summary img {
     max-width: 100%;
-}
-
-.summary h2 {
     margin: 3rem;
-    font-weight: 300;
 }
 
 .heart {
