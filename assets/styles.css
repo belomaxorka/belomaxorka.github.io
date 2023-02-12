@@ -1,5 +1,16 @@
+html, body {
+    background-color: white;
+}
+
 footer {
-    padding: 1rem;
+    background-color: black;
+    color: white;
+    padding: 2rem;
+    font-family: monospace;
+}
+
+footer p {
+    margin: 1rem;
 }
 
 .summary-container {
@@ -14,7 +25,12 @@ footer {
 
 .summary img {
     max-width: 100%;
-    margin-bottom: 3rem;
+}
+
+div.is-horizontal-align a img {
+    margin: 1rem;
+    height: 35px;
+    width: 35px;
 }
 
 .heart {
