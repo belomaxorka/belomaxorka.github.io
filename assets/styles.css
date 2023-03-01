@@ -36,3 +36,7 @@ div.is-horizontal-align a img {
 .heart {
     color: red;
 }
+
+.transition {
+    transition: 0.5s;
+}
