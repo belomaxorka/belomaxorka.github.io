@@ -7,14 +7,21 @@
     --second-font-color: #388ba6;
 }
 
+html, body {
+    height: 100%;
+    width: 100%;
+}
+
 body {
+    font-size: small;
     display: flex;
     flex-direction: column;
     font-family: "Fira Code Light", serif;
 }
 
 header {
-    width: 100%;
+    height: auto;
+    text-align: center;
     background-color: var(--main-bg-color);
 }
 
@@ -23,14 +30,14 @@ header a {
 }
 
 header a h1 {
-    text-align: center;
     color: var(--main-font-color);
 }
 
 main {
+    flex: auto;
     background-color: var(--second-bg-color);
 }
 
 footer {
-
+    height: auto;
 }

@@ -5,6 +5,6 @@
  * @returns {string}
  */
 function pickRandomEmoji() {
-    let emojis = ['🟢', '🟩', '💚', '👽', '🍀', '🍏'];
+    let emojis = ['🟢', '🟩', '💚'];
     return emojis[Math.floor(Math.random() * emojis.length)];
 }
