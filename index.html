@@ -22,7 +22,8 @@
         > languages: ru, en<br>
         > born in: Greece<br><br>
         C:\Users\Admin>belomaxorka miscellaneous<br><br>
-        > favorite colors: #000, #fff<br><br>
+        > favorite colors: #000, #fff<br>
+        > <span id="nowPlaying"></span><br><br>
         C:\Users\Admin>belomaxorka social<br><br>
         > e-mail: <a href="mailto: me@belomaxorka.duckdns.org">me@belomaxorka.duckdns.org</a><br>
         > telegram: <a href="https://t.me/belomaxorka">@belomaxorka</a><br>
@@ -35,5 +36,7 @@
     document.getElementById("placeEmoji").innerHTML = pickRandomEmoji();
     // Calculate mine age :D
     document.getElementById("calculatedAge").innerHTML = calculateAge('2006-05-25');
+    // Now playing
+    document.getElementById("nowPlaying").innerHTML = nowPlaying();
 </script>
 </html>
