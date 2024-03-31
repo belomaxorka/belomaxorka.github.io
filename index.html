@@ -32,7 +32,7 @@
         > e-mail: <a href="mailto: me@belomaxorka.duckdns.org">me@belomaxorka.duckdns.org</a><br>
         > telegram: <a href="https://t.me/belomaxorka">@belomaxorka</a><br>
         > github: <a href="https://github.com/belomaxorka">belomaxorka</a><br><br>
-        C:\Users\Admin>
+        C:\Users\Admin> <span id="consoleCursor"></span>
     </code>
 </main>
 </body>
@@ -43,5 +43,10 @@
     document.getElementById("calculatedAge").innerHTML = calculateAge('2006-05-25');
     // Now playing
     document.getElementById("nowPlaying").innerHTML = nowPlaying();
+    // Console cursor
+    const cursor = document.getElementById("cursor");
+    setInterval(() => {
+        cursor.style.visibility = (cursor.style.visibility === 'visible') ? 'hidden' : 'visible';
+    }, 500);
 </script>
 </html>

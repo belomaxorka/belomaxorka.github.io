@@ -31,3 +31,10 @@ a {
 code {
     color: var(--main-font-color);
 }
+
+#consoleCursor {
+    display: inline-block;
+    width: 7px;
+    height: 20px;
+    background-color: var(--main-font-color);
+}
