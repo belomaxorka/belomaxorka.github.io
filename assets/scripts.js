@@ -39,16 +39,19 @@ function httpGet(url) {
     return xmlHttp.responseText;
 }
 
+/**
+ * Get now playing song
+ *
+ * @returns {string}
+ */
 function nowPlaying() {
     const LAST_FM_API_KEY = '174991b55eeb7dd7252cc0c051c490f4';
     const USERNAME = 'belomaxorka';
     const URL = "https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&format=json&api_key=" + LAST_FM_API_KEY + "&limit=1&user=" + USERNAME;
-
     let json = JSON.parse(httpGet(URL));
-    let last_track = json.recenttracks.track[0];
-    let track = last_track.name;
-    let artist = last_track.artist['#text'];
-    let now_playing = (last_track["@attr"] !== undefined)
-
-    return (now_playing ? "now playing: " : "last played: ") + artist + ' - ' + track;
+    let lastTrack = json.recenttracks.track[0];
+    let track = lastTrack.name;
+    let artist = lastTrack.artist['#text'];
+    let nowPlaying = (lastTrack["@attr"] !== undefined)
+    return (nowPlaying ? "now playing: " : "last played: ") + artist + ' - ' + track;
 }
