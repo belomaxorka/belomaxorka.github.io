@@ -50,8 +50,5 @@ function nowPlaying() {
     const URL = "https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&format=json&api_key=" + LAST_FM_API_KEY + "&limit=1&user=" + USERNAME;
     let json = JSON.parse(httpGet(URL));
     let lastTrack = json.recenttracks.track[0];
-    let track = lastTrack.name;
-    let artist = lastTrack.artist['#text'];
-    let nowPlaying = (lastTrack["@attr"] !== undefined)
-    return (nowPlaying ? "now playing: " : "last played: ") + artist + ' - ' + track;
+    return lastTrack.artist['#text'] + ' - ' + lastTrack.name;
 }
