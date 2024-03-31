@@ -35,7 +35,8 @@ code {
 
 #consoleCursor {
     display: inline-block;
+    vertical-align: middle;
     width: 8px;
-    height: 20px;
+    height: 18px;
     background-color: var(--main-font-color);
 }
