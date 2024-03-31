@@ -3,6 +3,7 @@
 :root {
     --main-bg-color: black;
     --main-font-color: white;
+    --error-font-color: #e74e4e;
 }
 
 ::selection,
@@ -33,10 +34,13 @@ code {
     color: var(--main-font-color);
 }
 
-#consoleCursor {
-    display: inline-block;
-    vertical-align: middle;
-    width: 8px;
-    height: 18px;
-    background-color: var(--main-font-color);
+#submittedText {
+    background: transparent;
+    border: none;
+    color: inherit;
+}
+
+#errorMessage {
+    display: none;
+    color: var(--error-font-color);
 }

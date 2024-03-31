@@ -31,7 +31,8 @@
         > e-mail: <a href="mailto: me@belomaxorka.duckdns.org">me@belomaxorka.duckdns.org</a><br>
         > telegram: <a href="https://t.me/belomaxorka">@belomaxorka</a><br>
         > github: <a href="https://github.com/belomaxorka">belomaxorka</a><br><br>
-        C:\Users\Admin> <span id="consoleCursor"></span>
+        C:\Users\Admin><label><input placeholder="type here something" id="submittedText" type="text"></label><br>
+        <span id="errorMessage"></span>
     </code>
 </main>
 </body>
@@ -42,10 +43,14 @@
     document.getElementById("calculatedAge").innerHTML = calculateAge('2006-05-25');
     // Now playing
     document.getElementById("nowPlaying").innerHTML = nowPlaying();
-    // Console cursor
-    const consoleCursor = document.getElementById("consoleCursor");
-    setInterval(() => {
-        consoleCursor.style.visibility = (consoleCursor.style.visibility === 'visible') ? 'hidden' : 'visible';
-    }, 500);
+    // Input
+    document.querySelector("#submittedText")
+        .addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                let enteredCommand = document.getElementById("submittedText").value;
+                document.getElementById("errorMessage").style.display = 'inline-block';
+                document.getElementById("errorMessage").innerHTML = '<br>' + enteredCommand + ' : The term \'' + enteredCommand + '\' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.';
+            }
+        });
 </script>
 </html>
