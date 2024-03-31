@@ -1,0 +1,36 @@
+@import "fonts.css";
+
+:root {
+    --main-bg-color: #052c00;
+    --main-font-color: #a5e07e;
+    --second-bg-color: #367930;
+    --second-font-color: #388ba6;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    font-family: "Fira Code Light", serif;
+}
+
+header {
+    width: 100%;
+    background-color: var(--main-bg-color);
+}
+
+header a {
+    text-decoration: none;
+}
+
+header a h1 {
+    text-align: center;
+    color: var(--main-font-color);
+}
+
+main {
+    background-color: var(--second-bg-color);
+}
+
+footer {
+
+}
