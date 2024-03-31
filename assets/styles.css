@@ -5,6 +5,12 @@
     --main-font-color: white;
 }
 
+::selection,
+::-moz-selection {
+    background-color: var(--main-font-color);
+    color: var(--main-bg-color);
+}
+
 html, body {
     height: 100%;
     width: 100%;
@@ -15,6 +21,11 @@ main {
     height: 100vh;
     padding: 2rem;
     background-color: var(--main-bg-color);
+}
+
+a {
+    color: inherit;
+    text-decoration: none !important;
 }
 
 code {
