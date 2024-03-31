@@ -13,7 +13,6 @@ html, body {
 }
 
 body {
-    font-size: small;
     display: flex;
     flex-direction: column;
     font-family: "Fira Code Light", serif;
