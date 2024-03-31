@@ -47,7 +47,7 @@
     document.querySelector("#submittedText")
         .addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
-                let enteredCommand = document.getElementById("submittedText").value;
+                let enteredCommand = document.getElementById("submittedText").replace(/ /g,'').value;
                 document.getElementById("errorMessage").style.display = 'inline-block';
                 document.getElementById("errorMessage").innerHTML = '<br>' + enteredCommand + ' : The term \'' + enteredCommand + '\' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.';
             }
