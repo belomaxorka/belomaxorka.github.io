@@ -23,8 +23,8 @@ html, body {
 }
 
 main {
-    height: 100svh;
     background-color: var(--main-bg-color);
+    height: 100vh;
     min-width: 1024px;
     padding: 2rem;
 }
