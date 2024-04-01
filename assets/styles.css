@@ -18,15 +18,14 @@
 html, body {
     height: 100%;
     width: 100%;
+    background-color: var(--main-bg-color);
     font-family: "Fira Code Light", serif;
 }
 
 main {
     min-width: 1024px;
-    height: 100vh;
     overflow: auto;
     padding: 2rem;
-    background-color: var(--main-bg-color);
 }
 
 a {
