@@ -43,14 +43,19 @@
     document.getElementById("calculatedAge").innerHTML = calculateAge('2006-05-25');
     // Now playing
     document.getElementById("nowPlaying").innerHTML = nowPlaying();
-    // Input
-    document.querySelector("#submittedText")
-        .addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                let enteredCommand = document.getElementById("submittedText").value;
+    // Console input
+    let submittedText = document.querySelector("#submittedText");
+    submittedText.value = ''; // Reset input by default
+    submittedText.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            let enteredCommand = submittedText.value;
+            if (enteredCommand.length !== 0) {
                 document.getElementById("errorMessage").style.display = 'inline-block';
-                document.getElementById("errorMessage").innerHTML = '<br>' + enteredCommand + ' : The term \'' + enteredCommand + '\' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.';
+                document.getElementById("errorMessage").innerHTML = '<br> \'' + enteredCommand + '\' is not recognized as an internal or external command,<br>operable program or batch file.';
+            } else {
+                alert('123');
             }
-        });
+        }
+    });
 </script>
 </html>

@@ -6,7 +6,11 @@
     --error-font-color: #e74e4e;
 }
 
-::selection,
+::selection {
+    background-color: var(--main-font-color);
+    color: var(--main-bg-color);
+}
+
 ::-moz-selection {
     background-color: var(--main-font-color);
     color: var(--main-bg-color);
@@ -39,9 +43,4 @@ code {
     border: none;
     outline: none;
     color: inherit;
-}
-
-#errorMessage {
-    display: none;
-    color: var(--error-font-color);
 }
