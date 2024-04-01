@@ -83,16 +83,17 @@
                 let enteredCommand = submittedText.value;
                 enteredCommand = enteredCommand.trim();
                 if (enteredCommand.length !== 0) {
+                    document.getElementById("notifyMessage").style.display = 'inline-block';
                     switch (enteredCommand) {
                         case 'belomaxorka':
                         case 'belomaxorka about':
                         case 'belomaxorka misc':
                         case 'belomaxorka miscellaneous':
                         case 'belomaxorka social':
+                            document.getElementById("notifyMessage").innerHTML = '<br>🤍🤍🤍';
                             break;
                         default:
                             enteredCommand = enteredCommand.split(' ')[0];
-                            document.getElementById("notifyMessage").style.display = 'inline-block';
                             document.getElementById("notifyMessage").innerHTML = '<br> \'' + enteredCommand + '\' is not recognized as an internal or external command,<br>operable program or batch file.';
                             break;
                     }
