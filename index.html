@@ -53,7 +53,7 @@
     <code>> telegram: <a href="https://t.me/belomaxorka">@belomaxorka</a><br></code>
     <code>> github: <a href="https://github.com/belomaxorka">belomaxorka</a><br><br></code>
     <code>C:\Users\Admin><label><input id="submittedText" maxlength="40" size="40" type="text"></label><br></code>
-    <code id="errorMessage"></code>
+    <code id="notifyMessage"></code>
 </main>
 </body>
 <script type="text/javascript">
@@ -79,7 +79,7 @@
         submittedText.value = ''; // Reset input by default
         submittedText.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
-                document.getElementById("errorMessage").style.display = 'none';
+                document.getElementById("notifyMessage").style.display = 'none';
                 let enteredCommand = submittedText.value;
                 enteredCommand = enteredCommand.trim();
                 if (enteredCommand.length !== 0) {
@@ -92,8 +92,8 @@
                             break;
                         default:
                             enteredCommand = enteredCommand.split(' ')[0];
-                            document.getElementById("errorMessage").style.display = 'inline-block';
-                            document.getElementById("errorMessage").innerHTML = '<br> \'' + enteredCommand + '\' is not recognized as an internal or external command,<br>operable program or batch file.';
+                            document.getElementById("notifyMessage").style.display = 'inline-block';
+                            document.getElementById("notifyMessage").innerHTML = '<br> \'' + enteredCommand + '\' is not recognized as an internal or external command,<br>operable program or batch file.';
                             break;
                     }
                 }

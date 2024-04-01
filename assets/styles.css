@@ -3,7 +3,6 @@
 :root {
     --main-bg-color: black;
     --main-font-color: white;
-    --error-font-color: #e74e4e;
 }
 
 ::selection {
@@ -46,6 +45,6 @@ code {
     color: inherit;
 }
 
-#errorMessage {
+#notifyMessage {
     display: none;
 }
