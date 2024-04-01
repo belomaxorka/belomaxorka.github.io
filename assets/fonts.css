@@ -2,8 +2,3 @@
     font-family: 'Fira Code Light';
     src: url("fonts/FiraCode-Light.ttf") format('truetype');
 }
-
-@font-face {
-    font-family: 'Fira Code Regular';
-    src: url("fonts/FiraCode-Regular.ttf") format('truetype');
-}
