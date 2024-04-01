@@ -79,14 +79,23 @@
         submittedText.value = ''; // Reset input by default
         submittedText.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
+                document.getElementById("errorMessage").style.display = 'none';
                 let enteredCommand = submittedText.value;
                 enteredCommand = enteredCommand.trim();
-                enteredCommand = enteredCommand.split(' ')[0];
                 if (enteredCommand.length !== 0) {
-                    document.getElementById("errorMessage").style.display = 'inline-block';
-                    document.getElementById("errorMessage").innerHTML = '<br> \'' + enteredCommand + '\' is not recognized as an internal or external command,<br>operable program or batch file.';
-                } else {
-                    document.getElementById("errorMessage").style.display = 'none';
+                    switch (enteredCommand) {
+                        case 'belomaxorka':
+                        case 'belomaxorka about':
+                        case 'belomaxorka misc':
+                        case 'belomaxorka miscellaneous':
+                        case 'belomaxorka social':
+                            break;
+                        default:
+                            enteredCommand = enteredCommand.split(' ')[0];
+                            document.getElementById("errorMessage").style.display = 'inline-block';
+                            document.getElementById("errorMessage").innerHTML = '<br> \'' + enteredCommand + '\' is not recognized as an internal or external command,<br>operable program or batch file.';
+                            break;
+                    }
                 }
             }
         });
