@@ -23,6 +23,7 @@ html, body {
 
 main {
     min-width: 1024px;
+    height: 100vh;
     overflow: auto;
     padding: 2rem;
     background-color: var(--main-bg-color);
