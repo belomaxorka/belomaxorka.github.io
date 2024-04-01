@@ -1,12 +1,22 @@
 /**
- * Random emoji picker
+ * Random picker
  *
- * @link https://gist.github.com/ikr7/c72843556ef3a12014c3
+ * @param type
  * @returns {string}
  */
-function pickRandomEmoji() {
-    let emojis = ['✨', '🪐', '💫', '☄️', '🌙', '🌏', '🌈', '🌚', '🌝', '🌞', '❄️', '💥'];
-    return emojis[Math.floor(Math.random() * emojis.length)];
+function pickRandom(type) {
+    let elements;
+
+    switch (type) {
+        default:
+        case 'emoji':
+            elements = ['✨', '🪐', '💫', '☄️', '🌙', '🌏', '🌈', '🌚', '🌝', '🌞', '❄️', '💥'];
+            break;
+        case 'version':
+            elements = ['10.0.22631.3374', '10.0.19042.867', '6.2.9200', '6.1.7600', '6.0.6000', '5.1.2600', '5.00.2195'];
+            break;
+    }
+    return elements[Math.floor(Math.random() * elements.length)];
 }
 
 /**

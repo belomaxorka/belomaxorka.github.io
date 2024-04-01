@@ -12,7 +12,7 @@
 </head>
 <body>
 <main>
-    <code>belomaxorka's space! <span id="placeEmoji"></span> [Version 1.3.3.7]<br></code>
+    <code>belomaxorka's space! <span id="placeEmoji"></span> [Version <span id="placeVersion"></span>]<br></code>
     <code>Copyleft 1337-2956. All wrongs reserved.<br><br></code>
     <code>C:\Users\Admin>belomaxorka about<br></code>
     <pre>
@@ -58,7 +58,9 @@
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", () => {
         // Place emoji
-        document.getElementById("placeEmoji").innerHTML = pickRandomEmoji();
+        document.getElementById("placeEmoji").innerHTML = pickRandom('emoji');
+        // Place version
+        document.getElementById("placeVersion").innerHTML = pickRandom('version');
         // Calculate mine age :D
         document.getElementById("calculatedAge").innerHTML = calculateAge('2006-05-25');
         // Now playing
