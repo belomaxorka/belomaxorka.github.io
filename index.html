@@ -6,6 +6,7 @@
     <meta property="og:title" content="belomaxorka's space!">
     <meta name="description" content="belomaxorka's personal webpage!">
     <title>belomaxorka's space!</title>
+    <link rel="icon" href="assets/favicon.png" type="image/png">
     <link href="assets/modern-normalize.min.css" rel="stylesheet">
     <link href="assets/styles.css" rel="stylesheet">
     <script type="text/javascript" src="assets/scripts.js"></script>
@@ -57,6 +58,14 @@
 </body>
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", () => {
+        // Dynamic favicon
+        let favicon = document.querySelector('link[rel=icon]');
+        let favicons = ['favicon.png', 'favicon_cursor.png'];
+        let startIndexFavicon = 0;
+        setInterval(function () {
+            let icon = (++startIndexFavicon % favicons.length);
+            favicon.href = 'assets/' + favicons[icon];
+        }, 1000);
         // Place emoji
         document.getElementById("placeEmoji").innerHTML = pickRandom('emoji');
         // Place version
