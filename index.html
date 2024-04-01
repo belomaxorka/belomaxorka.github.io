@@ -80,6 +80,7 @@
         submittedText.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 let enteredCommand = submittedText.value;
+                enteredCommand = enteredCommand.trim();
                 if (enteredCommand.length !== 0) {
                     document.getElementById("errorMessage").style.display = 'inline-block';
                     document.getElementById("errorMessage").innerHTML = '<br> \'' + enteredCommand + '\' is not recognized as an internal or external command,<br>operable program or batch file.';
