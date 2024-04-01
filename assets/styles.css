@@ -44,3 +44,7 @@ code {
     outline: none;
     color: inherit;
 }
+
+#errorMessage {
+    display: none;
+}
