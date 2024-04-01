@@ -6,7 +6,6 @@
  */
 function pickRandom(type) {
     let elements;
-
     switch (type) {
         default:
         case 'emoji':
