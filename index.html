@@ -56,25 +56,27 @@
 </main>
 </body>
 <script type="text/javascript">
-    // Place emoji
-    document.getElementById("placeEmoji").innerHTML = pickRandomEmoji();
-    // Calculate mine age :D
-    document.getElementById("calculatedAge").innerHTML = calculateAge('2006-05-25');
-    // Now playing
-    document.getElementById("nowPlaying").innerHTML = nowPlaying();
-    // Console input
-    let submittedText = document.querySelector("#submittedText");
-    submittedText.value = ''; // Reset input by default
-    submittedText.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            let enteredCommand = submittedText.value;
-            if (enteredCommand.length !== 0) {
-                document.getElementById("errorMessage").style.display = 'inline-block';
-                document.getElementById("errorMessage").innerHTML = '<br> \'' + enteredCommand + '\' is not recognized as an internal or external command,<br>operable program or batch file.';
-            } else {
-                // ....
+    document.addEventListener("DOMContentLoaded", () => {
+        // Place emoji
+        document.getElementById("placeEmoji").innerHTML = pickRandomEmoji();
+        // Calculate mine age :D
+        document.getElementById("calculatedAge").innerHTML = calculateAge('2006-05-25');
+        // Now playing
+        document.getElementById("nowPlaying").innerHTML = nowPlaying();
+        // Console input
+        let submittedText = document.querySelector("#submittedText");
+        submittedText.value = ''; // Reset input by default
+        submittedText.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                let enteredCommand = submittedText.value;
+                if (enteredCommand.length !== 0) {
+                    document.getElementById("errorMessage").style.display = 'inline-block';
+                    document.getElementById("errorMessage").innerHTML = '<br> \'' + enteredCommand + '\' is not recognized as an internal or external command,<br>operable program or batch file.';
+                } else {
+                    document.getElementById("errorMessage").style.display = 'none';
+                }
             }
-        }
+        });
     });
 </script>
 </html>
