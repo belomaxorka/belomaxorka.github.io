@@ -1,20 +1,10 @@
 /**
- * Random picker
+ * Place version
  *
- * @param type
  * @returns {string}
  */
-function pickRandom(type) {
-    let elements;
-    switch (type) {
-        default:
-        case 'emoji':
-            elements = ['✨', '🪐', '💫', '☄️', '🌙', '🌏', '🌈', '🌚', '🌝', '🌞', '❄️', '💥'];
-            break;
-        case 'version':
-            elements = ['10.0.22631.3374', '10.0.19042.867', '10.0.16299.19', '6.3.9600', '6.2.9200', '6.1.7600', '6.0.6000', '5.1.2600', '5.00.2195'];
-            break;
-    }
+function placeVersion() {
+	let elements = ['10.0.22631.3374', '10.0.19042.867', '10.0.16299.19', '6.3.9600', '6.2.9200', '6.1.7600', '6.0.6000', '5.1.2600', '5.00.2195'];
     return elements[Math.floor(Math.random() * elements.length)];
 }
 

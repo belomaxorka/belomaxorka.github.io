@@ -1,4 +1,7 @@
-@import "fonts.css";
+@font-face {
+    font-family: 'Fira Code Light';
+    src: url("FiraCode-Light.ttf") format('truetype');
+}
 
 :root {
     --main-bg-color: black;
