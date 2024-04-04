@@ -38,6 +38,7 @@ main {
 a {
     color: inherit;
     text-decoration: underline !important;
+    font-weight: bold;
 }
 
 .whiteTheme {
