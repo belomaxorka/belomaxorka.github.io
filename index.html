@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta property="og:type" content="profile">
     <meta property="og:title" content="belomaxorka's space!">
-    <meta name="robots" content="index, follow">
-    <meta name="keywords" content="belomaxorka, roman kelesidis, belomaxorka homepage, belomaxorka space">
-    <meta name="description" content="belomaxorka's personal homepage!">
+    <meta name="description" content="belomaxorka's homepage!">
     <title>belomaxorka's space!</title>
-    <link rel="icon" href="assets/favicons/favicon.png" type="image/png">
     <link href="assets/modern-normalize.min.css" rel="stylesheet">
     <link href="assets/styles.css" rel="stylesheet">
     <script type="text/javascript" src="assets/scripts.js"></script>
@@ -76,14 +73,6 @@
         if (Cookie.exists('whiteTheme')) {
             document.body.classList.toggle('whiteTheme');
         }
-        // Dynamic favicon
-        let favicon = document.querySelector('link[rel=icon]');
-        let favicons = ['favicon.png', 'favicon_cursor.png'];
-        let startIndexFavicon = 0;
-        setInterval(function () {
-            let icon = (++startIndexFavicon % favicons.length);
-            favicon.href = 'assets/favicons/' + favicons[icon];
-        }, 1000);
         // Place version
         document.getElementById("placeVersion").innerHTML = placeVersion();
         // Calculate mine age :D

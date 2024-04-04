@@ -21,10 +21,10 @@
 html, body {
     height: 100%;
     width: 100%;
-    font-family: "Fira Code Light", serif;
 }
 
 body {
+    font-family: "Fira Code Light", serif;
     background-color: var(--main-bg-color);
     color: var(--main-font-color);
 }
