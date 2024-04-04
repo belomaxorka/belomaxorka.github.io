@@ -8,16 +8,6 @@
     --main-font-color: white;
 }
 
-::selection {
-    background-color: var(--main-font-color);
-    color: var(--main-bg-color);
-}
-
-::-moz-selection {
-    background-color: var(--main-font-color);
-    color: var(--main-bg-color);
-}
-
 html, body {
     height: 100%;
     width: 100%;
