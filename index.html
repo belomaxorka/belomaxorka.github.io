@@ -72,6 +72,8 @@
         // Set white theme
         if (Cookie.exists('whiteTheme')) {
             document.body.classList.toggle('whiteTheme');
+            document.getElementById("notifyMessage").style.display = 'inline-block';
+            document.getElementById("notifyMessage").innerHTML = '<br>> white mode activated!';
         }
         // Place version
         document.getElementById("placeVersion").innerHTML = placeVersion();
