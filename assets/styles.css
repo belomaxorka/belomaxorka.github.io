@@ -41,6 +41,11 @@ code {
     color: var(--main-font-color);
 }
 
+.darkMode {
+    background-color: var(--main-font-color) !important;
+    color: var(--main-bg-color) !important;
+}
+
 #submittedText {
     background: transparent;
     border: none;
