@@ -40,7 +40,7 @@ a {
     text-decoration: underline !important;
 }
 
-.darkMode {
+.whiteTheme {
     background-color: var(--main-font-color) !important;
     color: var(--main-bg-color) !important;
 }

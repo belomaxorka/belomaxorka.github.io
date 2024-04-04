@@ -12,6 +12,13 @@
     <link href="assets/modern-normalize.min.css" rel="stylesheet">
     <link href="assets/styles.css" rel="stylesheet">
     <script type="text/javascript" src="assets/scripts.js"></script>
+    <script type="text/javascript" src="assets/Cookie.min.js"></script>
+    <script type="text/javascript">
+        // Set white theme
+        if (Cookie.exists('whiteTheme')) {
+            document.body.classList.toggle('whiteTheme');
+        }
+    </script>
 </head>
 <body>
 <main>
@@ -100,7 +107,13 @@
                         case 'belomaxorka misc':
                         case 'belomaxorka miscellaneous':
                         case 'belomaxorka social':
-                            document.body.classList.toggle('darkMode');
+                            if (Cookie.exists('whiteTheme')) {
+                                Cookie.remove('whiteTheme');
+                            } else {
+                                Cookie.set('whiteTheme', 1, {
+                                    sameSite: 'Strict'
+                                });
+                            }
                             break;
                         default:
                             enteredCommand = enteredCommand.split(' ')[0];
