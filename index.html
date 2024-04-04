@@ -13,12 +13,6 @@
     <link href="assets/styles.css" rel="stylesheet">
     <script type="text/javascript" src="assets/scripts.js"></script>
     <script type="text/javascript" src="assets/Cookie.min.js"></script>
-    <script type="text/javascript">
-        // Set white theme
-        if (Cookie.exists('whiteTheme')) {
-            document.body.classList.toggle('whiteTheme');
-        }
-    </script>
 </head>
 <body>
 <main>
@@ -78,6 +72,10 @@
 </body>
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", () => {
+        // Set white theme
+        if (Cookie.exists('whiteTheme')) {
+            document.body.classList.toggle('whiteTheme');
+        }
         // Dynamic favicon
         let favicon = document.querySelector('link[rel=icon]');
         let favicons = ['favicon.png', 'favicon_cursor.png'];
@@ -114,6 +112,7 @@
                                     sameSite: 'Strict'
                                 });
                             }
+                            window.location.reload();
                             break;
                         default:
                             enteredCommand = enteredCommand.split(' ')[0];
