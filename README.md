@@ -1,6 +1,6 @@
 # belomaxorka's space ✨
 
-![Homepage](Screenshot.png)
+[Homepage](Screenshot.png)
 
 ## 💚 Contributors
 
