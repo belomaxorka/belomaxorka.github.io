@@ -1,7 +1,5 @@
 # belomaxorka's space ✨
 
-[Homepage](Screenshot.png)
-
 ## 💚 Contributors
 
 <a href="https://github.com/belomaxorka/belomaxorka.github.io/graphs/contributors">
