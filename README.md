@@ -1,4 +1,10 @@
-# belomaxorka's space ✨
+# belomaxorka's space
+
+## 🍩 TODO List
+
+- [x] Light theme
+- [x] Terminal style
+- [x] Integration with Last.fm API
 
 ## 💚 Contributors
 
