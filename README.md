@@ -8,7 +8,6 @@ https://belomaxorka.github.io/
 - [x] Light theme
 - [x] Integration with Last.fm API
 - [x] Function for age calculation
-- [x] Add some jokes ✅✅✅
 
 ## 💚 Contributors
 
