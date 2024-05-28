@@ -49,5 +49,5 @@ function nowPlaying() {
     const URL = "https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&format=json&api_key=" + LAST_FM_API_KEY + "&limit=1&user=" + USERNAME;
     let json = JSON.parse(httpGet(URL));
     let lastTrack = json.recenttracks.track[0];
-    return lastTrack.artist['#text'] + ' — ' + lastTrack.name;
+    return "<a target='_blank' href='https://genius.com/search?q= " + lastTrack.artist['#text'] + ' ' + lastTrack.name + "'>" + lastTrack.artist['#text'] + ' — ' + lastTrack.name + "</a>";
 }
