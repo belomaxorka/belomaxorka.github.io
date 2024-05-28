@@ -109,6 +109,7 @@
                         default:
                             enteredCommand = enteredCommand.split(' ')[0];
                             document.getElementById("notifyMessage").innerHTML = '<br> \'' + enteredCommand + '\' is not recognized as an internal or external command,<br>operable program or batch file.';
+                            window.scrollTo(0, document.body.scrollHeight);
                             break;
                     }
                 }
