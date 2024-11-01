@@ -44,7 +44,7 @@ function httpGet(url) {
  * @returns {string}
  */
 function nowPlaying() {
-    const LAST_FM_API_KEY = '174991b55eeb7dd7252cc0c051c490f4';
+    const LAST_FM_API_KEY = atob('MTc0OTkxYjU1ZWViN2RkNzI1MmNjMGMwNTFjNDkwZjQ=');
     const USERNAME = 'belomaxorka';
     const URL = "https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&format=json&api_key=" + LAST_FM_API_KEY + "&limit=1&user=" + USERNAME;
     let json = JSON.parse(httpGet(URL));
