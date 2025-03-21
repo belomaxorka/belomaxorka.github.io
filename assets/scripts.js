@@ -28,26 +28,43 @@ function calculateAge(birthDate) {
 /**
  * httpGet request
  *
- * @param url
- * @returns {string}
+ * @param {string} url
+ * @returns {Promise<string>}
  */
-function httpGet(url) {
-    let xmlHttp = new XMLHttpRequest();
-    xmlHttp.open("GET", url, false);
-    xmlHttp.send(null);
-    return xmlHttp.responseText;
+function httpGetAsync(url) {
+    return new Promise((resolve, reject) => {
+        let xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", url, true);
+        xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState === 4) {
+                if (xmlHttp.status === 200) {
+                    resolve(xmlHttp.responseText);
+                } else {
+                    reject(new Error(`Error: ${xmlHttp.status}`));
+                }
+            }
+        };
+        xmlHttp.send(null);
+    });
 }
 
 /**
  * Get now playing song
  *
- * @returns {string}
+ * @returns {Promise<string>}
  */
-function nowPlaying() {
+async function nowPlaying() {
     const LAST_FM_API_KEY = atob('MTc0OTkxYjU1ZWViN2RkNzI1MmNjMGMwNTFjNDkwZjQ=');
     const USERNAME = 'belomaxorka';
-    const URL = "https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&format=json&api_key=" + LAST_FM_API_KEY + "&limit=1&user=" + USERNAME;
-    let json = JSON.parse(httpGet(URL));
-    let lastTrack = json.recenttracks.track[0];
-    return "<a target='_blank' href='https://genius.com/search?q= " + lastTrack.artist['#text'] + ' ' + lastTrack.name + "'>" + lastTrack.artist['#text'] + ' — ' + lastTrack.name + "</a>";
+    const URL = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&format=json&api_key=${LAST_FM_API_KEY}&limit=1&user=${USERNAME}`;
+
+    try {
+        const responseText = await httpGetAsync(URL);
+        const json = JSON.parse(responseText);
+        const lastTrack = json.recenttracks.track[0];
+        return `<a target='_blank' href='https://genius.com/search?q=${encodeURIComponent(lastTrack.artist['#text'])} ${encodeURIComponent(lastTrack.name)}'>${lastTrack.artist['#text']} — ${lastTrack.name}</a>`;
+    } catch (error) {
+        console.error('Ошибка при получении данных:', error);
+        return 'Ошибка загрузки данных';
+    }
 }

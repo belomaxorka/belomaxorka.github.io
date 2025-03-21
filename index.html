@@ -64,6 +64,19 @@
 </main>
 </body>
 <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const result = await nowPlaying();
+            const element = document.getElementById("nowPlaying");
+            if (element) {
+                element.innerHTML = result;
+            } else {
+                console.error('Error: element nowPlaying not found');
+            }
+        } catch (error) {
+            console.error('Error: ', error);
+        }
+    });
     document.addEventListener("DOMContentLoaded", () => {
         // Set white theme
         if (Cookie.exists('whiteTheme')) {
@@ -75,8 +88,6 @@
         document.getElementById("placeVersion").innerHTML = placeVersion();
         // Calculate age
         document.getElementById("calculatedAge").innerHTML = calculateAge('2006-05-25');
-        // Now playing
-        document.getElementById("nowPlaying").innerHTML = nowPlaying();
         // Console input
         let submittedText = document.querySelector("#submittedText");
         submittedText.value = ''; // Reset input by default
