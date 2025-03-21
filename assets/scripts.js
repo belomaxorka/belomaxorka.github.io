@@ -64,7 +64,7 @@ async function nowPlaying() {
         const lastTrack = json.recenttracks.track[0];
         return `<a target='_blank' href='https://genius.com/search?q=${encodeURIComponent(lastTrack.artist['#text'])} ${encodeURIComponent(lastTrack.name)}'>${lastTrack.artist['#text']} — ${lastTrack.name}</a>`;
     } catch (error) {
-        console.error('Ошибка при получении данных:', error);
-        return 'Ошибка загрузки данных';
+        console.error('Error: ', error);
+        return 'Error: ' + error;
     }
 }
