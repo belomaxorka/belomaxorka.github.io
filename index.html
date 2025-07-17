@@ -65,6 +65,7 @@
 </body>
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', async () => {
+        // Now playing
         try {
             const result = await nowPlaying();
             const element = document.getElementById("nowPlaying");
@@ -76,6 +77,17 @@
         } catch (error) {
             console.error('Error: ', error);
         }
+        // Rain animation
+        let rainTimeout;
+        let lastActivity = Date.now();
+        function resetRainTimer() {
+            lastActivity = Date.now();
+            if (rainTimeout) clearTimeout(rainTimeout);
+            rainTimeout = setTimeout(() => {
+                if (typeof startRain === 'function') startRain();
+            }, 300000);
+        }
+        resetRainTimer();
     });
     document.addEventListener("DOMContentLoaded", () => {
         // Set white theme

@@ -68,3 +68,29 @@ async function nowPlaying() {
         return 'Error: ' + error;
     }
 }
+
+/**
+ * Rain animation
+ */
+function startRain() {
+    const rainContainer = document.createElement('div');
+    rainContainer.id = 'rain-container';
+    rainContainer.style.position = 'fixed';
+    rainContainer.style.top = '0';
+    rainContainer.style.left = '0';
+    rainContainer.style.width = '100vw';
+    rainContainer.style.height = '100vh';
+    rainContainer.style.pointerEvents = 'none';
+    rainContainer.style.zIndex = '9999';
+    document.body.appendChild(rainContainer);
+
+    const dropsCount = Math.floor(window.innerWidth / 30);
+    for (let i = 0; i < dropsCount; i++) {
+        const drop = document.createElement('div');
+        drop.className = 'rain-drop';
+        drop.style.left = (i * (100 / dropsCount) + Math.random() * (100 / dropsCount)) + 'vw';
+        drop.style.animationDelay = (Math.random() * 0.7) + 's';
+        drop.style.animationDuration = (0.9 + Math.random() * 0.5) + 's';
+        rainContainer.appendChild(drop);
+    }
+}
