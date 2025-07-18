@@ -51,7 +51,7 @@ a {
 }
 
 .whiteTheme .command {
-    color: #000 !important;
+    color: #595959 !important;
 }
 
 #rain-container {
@@ -69,7 +69,7 @@ a {
     top: -8vh;
     width: 1.2px;
     height: 8vh;
-    background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.1) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.1) 100%);
     border-radius: 1px;
     opacity: 0.7;
     animation-name: rain-fall;
