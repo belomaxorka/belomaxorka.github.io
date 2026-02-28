@@ -14,7 +14,7 @@ html, body {
 }
 
 body {
-    font-family: "Fira Code Light", serif;
+    font-family: "Fira Code Light", "Fira Code", monospace;
     background-color: var(--main-bg-color);
     color: var(--main-font-color);
     background-image: url('asfalt-light.png');
@@ -36,6 +36,7 @@ a {
 .whiteTheme {
     background-color: var(--main-font-color) !important;
     color: var(--main-bg-color) !important;
+    background-image: none;
 }
 
 #submittedText {
@@ -78,6 +79,10 @@ a {
     animation-name: rain-fall;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
+}
+
+.whiteTheme .rain-drop {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.1) 100%);
 }
 
 @keyframes rain-fall {
