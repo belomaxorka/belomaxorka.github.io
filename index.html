@@ -14,7 +14,7 @@
 <body class="notranslate">
 <main>
     <code>belomaxorka's space! [Version <span id="placeVersion">6.0.6000</span>]<br></code>
-    <code>Copyleft 1337-2956. All wrongs reserved.<br><br></code>
+    <code>Copyright 1970-<span id="currentYear"></span>. All wrongs reserved.<br><br></code>
     <code>A:\><span class="command">belomaxorka about</span><br></code>
     <pre>
     ___    __                __
@@ -25,6 +25,13 @@
     </pre>
     <code>hi there!👋<br></code>
     <code>i'm <a href="#">belomaxorka</a>.<br><br></code>
+    <code>I'm a full-stack web developer and DevOps enthusiast. I actively<br></code>
+    <code>contribute to open source projects and maintain several of my own.<br></code>
+    <code>Beyond web development, I work as a network engineer and continuously<br></code>
+    <code>deepen my knowledge of networking technologies. I also run a home<br></code>
+    <code>server and enjoy tinkering with self-hosted infrastructure in my<br></code>
+    <code>home lab. I find genuine inspiration in programming and love exploring<br></code>
+    <code>new technologies — for me, coding is not a job, it's a way of life.<br><br></code>
     <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br></code>
     <code>> nickname(s): belomaxorka<br></code>
     <code>> name: Roman Kelesidis<br></code>
@@ -64,6 +71,16 @@
 </body>
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', async () => {
+        if (Cookie.exists('whiteTheme')) {
+            document.body.classList.toggle('whiteTheme');
+            document.getElementById("notifyMessage").style.display = 'inline-block';
+            document.getElementById("notifyMessage").innerHTML = '<br>Made with ❤️ by belomaxorka';
+        }
+
+        document.getElementById("placeVersion").innerHTML = placeVersion();
+        document.getElementById("currentYear").innerHTML = new Date().getFullYear();
+        document.getElementById("calculatedAge").innerHTML = calculateAge('2006-05-25');
+
         // Now playing
         try {
             const result = await nowPlaying();
@@ -76,62 +93,47 @@
         } catch (error) {
             console.error('Error: ', error);
         }
-        // Rain animation
+
+        // ---------------- Rain animation ----------------
         let rainTimeout;
-        let lastActivity = Date.now();
+
         function resetRainTimer() {
-            lastActivity = Date.now();
             if (rainTimeout) clearTimeout(rainTimeout);
             rainTimeout = setTimeout(() => {
                 if (typeof startRain === 'function') startRain();
             }, 300000);
         }
+
+        ['mousemove', 'keydown', 'click'].forEach(e => document.addEventListener(e, resetRainTimer));
         resetRainTimer();
-    });
-    document.addEventListener("DOMContentLoaded", () => {
-        // Set white theme
-        if (Cookie.exists('whiteTheme')) {
-            document.body.classList.toggle('whiteTheme');
-            document.getElementById("notifyMessage").style.display = 'inline-block';
-            document.getElementById("notifyMessage").innerHTML = '<br>Made with ❤️ by belomaxorka';
-        }
-        // Place version
-        document.getElementById("placeVersion").innerHTML = placeVersion();
-        // Calculate age
-        document.getElementById("calculatedAge").innerHTML = calculateAge('2006-05-25');
-        // Console input
-        let submittedText = document.querySelector("#submittedText");
-        submittedText.value = ''; // Reset input by default
+
+        // ---------------- Console input ----------------
+        const submittedText = document.querySelector("#submittedText");
+        const notifyMessage = document.getElementById("notifyMessage");
+        const aboutCommands = ['belomaxorka about', 'belomaxorka misc', 'belomaxorka miscellaneous', 'belomaxorka social'];
+
+        submittedText.value = '';
+
         submittedText.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                document.getElementById("notifyMessage").style.display = 'none';
-                let enteredCommand = submittedText.value;
-                enteredCommand = enteredCommand.trim();
-                if (enteredCommand.length !== 0) {
-                    document.getElementById("notifyMessage").style.display = 'inline-block';
-                    switch (enteredCommand) {
-                        case 'belomaxorka about':
-                        case 'belomaxorka misc':
-                        case 'belomaxorka miscellaneous':
-                        case 'belomaxorka social':
-                            // Set cookie for white theme (Easter egg 🥚)
-                            if (Cookie.exists('whiteTheme')) {
-                                Cookie.remove('whiteTheme');
-                            } else {
-                                Cookie.set('whiteTheme', 1, {
-                                    sameSite: 'Strict'
-                                });
-                            }
-                            window.location.reload();
-                            break;
-                        default:
-                            enteredCommand = enteredCommand.split(' ')[0];
-                            document.getElementById("notifyMessage").innerHTML = '<br> \'' + enteredCommand + '\' is not recognized as an internal or external command,<br>operable program or batch file.';
-                            window.scrollTo(0, document.body.scrollHeight);
-                            break;
-                    }
-                }
+            if (event.key !== 'Enter') return;
+
+            notifyMessage.style.display = 'none';
+            const enteredCommand = submittedText.value.trim();
+
+            if (enteredCommand.length === 0) return;
+
+            notifyMessage.style.display = 'inline-block';
+
+            if (aboutCommands.includes(enteredCommand)) {
+                Cookie.exists('whiteTheme') ? Cookie.remove('whiteTheme') : Cookie.set('whiteTheme', 1, {sameSite: 'Strict'});
+                window.location.reload();
+            } else {
+                const unknownCommand = enteredCommand.split(' ')[0];
+                notifyMessage.innerHTML = `<br> '${unknownCommand}' is not recognized as an internal or external command,<br>operable program or batch file.`;
+                window.scrollTo(0, document.body.scrollHeight);
             }
+
+            submittedText.value = '';
         });
     });
 </script>
