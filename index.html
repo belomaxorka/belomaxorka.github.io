@@ -66,7 +66,7 @@
     <code>> telegram: <a target="_blank" rel="noopener noreferrer" href="https://t.me/belomaxorka">@belomaxorka</a><br></code>
     <code>> github: <a target="_blank" rel="noopener noreferrer" href="https://github.com/belomaxorka">belomaxorka</a><br></code>
     <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br><br></code>
-    <code><span id="promptPath">A:\</span>><span class="command"><label><input id="submittedText" maxlength="40" size="40" type="text"></label></span><br></code>
+    <code><span id="promptPath">A:\</span>><span class="command"><label><input id="submittedText" size="40" type="text"></label></span><br></code>
     <code id="notifyMessage"></code>
 </main>
 <script>
@@ -119,16 +119,41 @@
         const submittedText = document.querySelector("#submittedText");
         const notifyMessage = document.getElementById("notifyMessage");
         const aboutCommands = ['belomaxorka about', 'belomaxorka misc', 'belomaxorka miscellaneous', 'belomaxorka social'];
+        const commandHistory = [];
+        let historyIndex = -1;
 
         submittedText.value = '';
+        submittedText.focus({ preventScroll: true });
 
         submittedText.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    submittedText.value = commandHistory[commandHistory.length - 1 - historyIndex];
+                }
+                return;
+            }
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    submittedText.value = commandHistory[commandHistory.length - 1 - historyIndex];
+                } else {
+                    historyIndex = -1;
+                    submittedText.value = '';
+                }
+                return;
+            }
             if (event.key !== 'Enter') return;
 
             notifyMessage.style.display = 'none';
             const enteredCommand = submittedText.value.trim();
 
             if (enteredCommand.length === 0) return;
+
+            commandHistory.push(enteredCommand);
+            historyIndex = -1;
 
             notifyMessage.style.display = 'inline-block';
 
@@ -150,9 +175,45 @@
                         notifyMessage.appendChild(el);
                         submittedText.disabled = true;
                         setTimeout(() => {
-                            document.body.style.transition = 'opacity 1s';
-                            document.body.style.opacity = '0';
-                        }, 1000);
+                            document.body.textContent = '';
+                            document.body.style.cssText = 'margin:0;background:#0078d7;color:white;display:flex;flex-direction:column;justify-content:center;padding:10%;height:100vh;font-family:Segoe UI,sans-serif;cursor:default;';
+
+                            const sad = document.createElement('div');
+                            sad.style.fontSize = '8em';
+                            sad.textContent = ':(';
+
+                            const msg = document.createElement('div');
+                            msg.style.cssText = 'font-size:1.5em;margin-top:40px;';
+                            msg.textContent = 'Your PC ran into a problem and needs to restart.';
+
+                            const pct = document.createElement('div');
+                            pct.style.cssText = 'margin-top:30px;font-size:1.2em;';
+                            pct.textContent = '0% complete';
+
+                            const info = document.createElement('div');
+                            info.style.cssText = 'margin-top:20px;opacity:0.7;';
+                            info.textContent = 'If you\'d like to know more, search for: BELOMAXORKA_SPACE_SHUTDOWN';
+
+                            const hint = document.createElement('div');
+                            hint.style.cssText = 'margin-top:40px;opacity:0.5;font-size:0.9em;';
+                            hint.textContent = 'Press any key to restart...';
+
+                            document.body.appendChild(sad);
+                            document.body.appendChild(msg);
+                            document.body.appendChild(pct);
+                            document.body.appendChild(info);
+                            document.body.appendChild(hint);
+
+                            let p = 0;
+                            const iv = setInterval(() => {
+                                p += Math.floor(Math.random() * 15) + 5;
+                                if (p >= 100) { p = 100; clearInterval(iv); }
+                                pct.textContent = p + '% complete';
+                            }, 800);
+
+                            document.addEventListener('keydown', () => window.location.reload(), { once: true });
+                            document.addEventListener('click', () => window.location.reload(), { once: true });
+                        }, 1500);
                         return;
                     }
                     if (result.action === 'exit') {
