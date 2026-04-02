@@ -131,16 +131,40 @@
 
             notifyMessage.style.display = 'inline-block';
 
-            if (aboutCommands.includes(enteredCommand)) {
+            if (aboutCommands.includes(enteredCommand.toLowerCase())) {
                 Cookie.exists('whiteTheme') ? Cookie.remove('whiteTheme') : Cookie.set('whiteTheme', 1, {sameSite: 'Strict'});
                 window.location.reload();
             } else {
-                const unknownCommand = enteredCommand.split(' ')[0];
-                notifyMessage.textContent = '';
-                notifyMessage.appendChild(document.createElement('br'));
-                notifyMessage.appendChild(document.createTextNode(` '${unknownCommand}' is not recognized as an internal or external command,`));
-                notifyMessage.appendChild(document.createElement('br'));
-                notifyMessage.appendChild(document.createTextNode('operable program or batch file.'));
+                const result = processCommand(enteredCommand);
+                if (result) {
+                    if (result.action === 'cls') {
+                        window.location.reload();
+                        return;
+                    }
+                    if (result.action === 'exit') {
+                        const el = document.createElement('span');
+                        el.style.whiteSpace = 'pre';
+                        el.textContent = '\nGoodbye!';
+                        notifyMessage.textContent = '';
+                        notifyMessage.appendChild(el);
+                        submittedText.disabled = true;
+                    } else if (result.output === '') {
+                        notifyMessage.style.display = 'none';
+                    } else {
+                        const el = document.createElement('span');
+                        el.style.whiteSpace = 'pre';
+                        el.textContent = '\n' + result.output;
+                        notifyMessage.textContent = '';
+                        notifyMessage.appendChild(el);
+                    }
+                } else {
+                    const unknownCommand = enteredCommand.split(' ')[0];
+                    notifyMessage.textContent = '';
+                    notifyMessage.appendChild(document.createElement('br'));
+                    notifyMessage.appendChild(document.createTextNode(` '${unknownCommand}' is not recognized as an internal or external command,`));
+                    notifyMessage.appendChild(document.createElement('br'));
+                    notifyMessage.appendChild(document.createTextNode('operable program or batch file.'));
+                }
                 window.scrollTo(0, document.body.scrollHeight);
             }
 
