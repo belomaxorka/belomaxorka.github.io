@@ -10,6 +10,7 @@
     <link href="assets/styles.css" rel="stylesheet">
     <script defer src="assets/scripts.js"></script>
     <script defer src="assets/Cookie.min.js"></script>
+    <script defer src="assets/commands.js"></script>
 </head>
 <body class="notranslate">
 <main>
@@ -65,7 +66,7 @@
     <code>> telegram: <a target="_blank" rel="noopener noreferrer" href="https://t.me/belomaxorka">@belomaxorka</a><br></code>
     <code>> github: <a target="_blank" rel="noopener noreferrer" href="https://github.com/belomaxorka">belomaxorka</a><br></code>
     <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br><br></code>
-    <code>A:\><span class="command"><label><input id="submittedText" maxlength="40" size="40" type="text"></label></span><br></code>
+    <code><span id="promptPath">A:\</span>><span class="command"><label><input id="submittedText" maxlength="40" size="40" type="text"></label></span><br></code>
     <code id="notifyMessage"></code>
 </main>
 <script>
@@ -139,6 +140,19 @@
                 if (result) {
                     if (result.action === 'cls') {
                         window.location.reload();
+                        return;
+                    }
+                    if (result.action === 'shutdown') {
+                        const el = document.createElement('span');
+                        el.style.whiteSpace = 'pre';
+                        el.textContent = '\nShutting down...';
+                        notifyMessage.textContent = '';
+                        notifyMessage.appendChild(el);
+                        submittedText.disabled = true;
+                        setTimeout(() => {
+                            document.body.style.transition = 'opacity 1s';
+                            document.body.style.opacity = '0';
+                        }, 1000);
                         return;
                     }
                     if (result.action === 'exit') {
