@@ -45,7 +45,7 @@ async function nowPlaying() {
         const link = document.createElement('a');
         link.target = '_blank';
         link.rel = 'noopener noreferrer';
-        link.href = `https://genius.com/search?q=${encodeURIComponent(lastTrack.artist['#text'])} ${encodeURIComponent(lastTrack.name)}`;
+        link.href = `https://genius.com/search?q=${encodeURIComponent(lastTrack.artist['#text'] + ' ' + lastTrack.name)}`;
         link.textContent = `${lastTrack.artist['#text']} — ${lastTrack.name}`;
         return link;
     } catch (error) {

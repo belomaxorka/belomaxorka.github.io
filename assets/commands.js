@@ -139,7 +139,7 @@ function updatePrompt() {
 function cmdCd(args) {
     if (!args) return { output: getFullPath() };
 
-    let target = args.replace(/\//g, '\\');
+    let target = args.trim().replace(/\//g, '\\');
     let newPath = [...currentPath];
 
     if (target.match(/^[a-zA-Z]:/)) {
@@ -201,7 +201,7 @@ function processCommand(input) {
         case 'whoami': return { output: 'belomaxorka\\guest' };
         case 'ipconfig': return { output: cmdIpconfig() };
         case 'systeminfo': return { output: cmdSysteminfo() };
-        case 'ping': return args ? { output: cmdPing(args.split(/\s+/)[0]) } : { output: 'IP address must be specified.' };
+        case 'ping': return args.trim() ? { output: cmdPing(args.trim().split(/\s+/)[0]) } : { output: 'IP address must be specified.' };
         case 'tasklist': return { output: cmdTasklist() };
         case 'tree': return { output: cmdTree() };
         case 'color': return cmdColor(args);
@@ -212,13 +212,13 @@ function processCommand(input) {
         case 'cd':
         case 'chdir':
             return cmdCd(args);
-        case 'type': return args ? cmdType(args.split(/\s+/)[0]) : { output: 'The syntax of the command is incorrect.' };
+        case 'type': return args.trim() ? cmdType(args.trim().split(/\s+/)[0]) : { output: 'The syntax of the command is incorrect.' };
         case 'set': return { output: cmdSet() };
         case 'start': return cmdStart(args);
         case 'shutdown': return cmdShutdown(args);
         case 'netstat': return { output: cmdNetstat() };
         case 'nslookup':
-            return args ? { output: cmdNslookup(args.split(/\s+/)[0]) } : { output: 'Default Server:  dns.belomaxorka.local\nAddress:  127.0.0.1' };
+            return args.trim() ? { output: cmdNslookup(args.trim().split(/\s+/)[0]) } : { output: 'Default Server:  dns.belomaxorka.local\nAddress:  127.0.0.1' };
         case 'chcp': return { output: 'Active code page: 65001' };
         default: return null;
     }
@@ -501,8 +501,8 @@ function cmdSet() {
 }
 
 function cmdStart(args) {
-    if (!args) return { output: 'The syntax of the command is incorrect.' };
-    let url = args.split(/\s+/)[0];
+    if (!args.trim()) return { output: 'The syntax of the command is incorrect.' };
+    let url = args.trim().split(/\s+/)[0];
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url = 'https://' + url;
     }
