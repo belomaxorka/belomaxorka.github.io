@@ -8,8 +8,8 @@
     <title>belomaxorka's space!</title>
     <link href="assets/modern-normalize.css" rel="stylesheet">
     <link href="assets/styles.css" rel="stylesheet">
-    <script type="text/javascript" src="assets/scripts.js"></script>
-    <script type="text/javascript" src="assets/Cookie.min.js"></script>
+    <script defer src="assets/scripts.js"></script>
+    <script defer src="assets/Cookie.min.js"></script>
 </head>
 <body class="notranslate">
 <main>
@@ -62,33 +62,36 @@
 /____/\____/\___/_/\__,_/_/   \____/\/   \____/\____/_/ /_/\__/\__,_/\___/\__/____/
     </pre>
     <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br></code>
-    <code>> telegram: <a target="_blank" href="https://t.me/belomaxorka">@belomaxorka</a><br></code>
-    <code>> github: <a target="_blank" href="https://github.com/belomaxorka">belomaxorka</a><br></code>
+    <code>> telegram: <a target="_blank" rel="noopener noreferrer" href="https://t.me/belomaxorka">@belomaxorka</a><br></code>
+    <code>> github: <a target="_blank" rel="noopener noreferrer" href="https://github.com/belomaxorka">belomaxorka</a><br></code>
     <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br><br></code>
     <code>A:\><span class="command"><label><input id="submittedText" maxlength="40" size="40" type="text"></label></span><br></code>
     <code id="notifyMessage"></code>
 </main>
-</body>
-<script type="text/javascript">
+<script>
     document.addEventListener('DOMContentLoaded', async () => {
         if (Cookie.exists('whiteTheme')) {
             document.body.classList.toggle('whiteTheme');
-            document.getElementById("notifyMessage").style.display = 'inline-block';
-            document.getElementById("notifyMessage").innerHTML = '<br>Made with ❤️ by belomaxorka';
+            const notifyEl = document.getElementById("notifyMessage");
+            notifyEl.style.display = 'inline-block';
+            notifyEl.textContent = '';
+            notifyEl.appendChild(document.createElement('br'));
+            notifyEl.appendChild(document.createTextNode('Made with ❤️ by belomaxorka'));
         }
 
-        document.getElementById("placeVersion").innerHTML = placeVersion();
-        document.getElementById("currentYear").innerHTML = new Date().getFullYear();
-        document.getElementById("calculatedAge").innerHTML = calculateAge('2006-05-25');
+        document.getElementById("placeVersion").textContent = placeVersion();
+        document.getElementById("currentYear").textContent = new Date().getFullYear();
+        document.getElementById("calculatedAge").textContent = calculateAge('2006-05-25');
 
         // Now playing
         try {
             const result = await nowPlaying();
             const element = document.getElementById("nowPlaying");
-            if (element) {
-                element.innerHTML = result;
-            } else {
-                console.error('Error: element nowPlaying not found');
+            if (element && result) {
+                element.textContent = '';
+                element.appendChild(result);
+            } else if (element) {
+                element.textContent = 'N/A';
             }
         } catch (error) {
             console.error('Error: ', error);
@@ -96,8 +99,12 @@
 
         // ---------------- Rain animation ----------------
         let rainTimeout;
+        let lastReset = 0;
 
         function resetRainTimer() {
+            const now = Date.now();
+            if (now - lastReset < 1000) return;
+            lastReset = now;
             if (rainTimeout) clearTimeout(rainTimeout);
             rainTimeout = setTimeout(() => {
                 if (typeof startRain === 'function') startRain();
@@ -129,7 +136,11 @@
                 window.location.reload();
             } else {
                 const unknownCommand = enteredCommand.split(' ')[0];
-                notifyMessage.innerHTML = `<br> '${unknownCommand}' is not recognized as an internal or external command,<br>operable program or batch file.`;
+                notifyMessage.textContent = '';
+                notifyMessage.appendChild(document.createElement('br'));
+                notifyMessage.appendChild(document.createTextNode(` '${unknownCommand}' is not recognized as an internal or external command,`));
+                notifyMessage.appendChild(document.createElement('br'));
+                notifyMessage.appendChild(document.createTextNode('operable program or batch file.'));
                 window.scrollTo(0, document.body.scrollHeight);
             }
 
@@ -137,4 +148,5 @@
         });
     });
 </script>
+</body>
 </html>

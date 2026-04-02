@@ -26,32 +26,9 @@ function calculateAge(birthDate) {
 }
 
 /**
- * httpGet request
- *
- * @param {string} url
- * @returns {Promise<string>}
- */
-function httpGetAsync(url) {
-    return new Promise((resolve, reject) => {
-        let xmlHttp = new XMLHttpRequest();
-        xmlHttp.open("GET", url, true);
-        xmlHttp.onreadystatechange = function () {
-            if (xmlHttp.readyState === 4) {
-                if (xmlHttp.status === 200) {
-                    resolve(xmlHttp.responseText);
-                } else {
-                    reject(new Error(`Error: ${xmlHttp.status}`));
-                }
-            }
-        };
-        xmlHttp.send(null);
-    });
-}
-
-/**
  * Get now playing song
  *
- * @returns {Promise<string>}
+ * @returns {Promise<HTMLElement|null>}
  */
 async function nowPlaying() {
     const LAST_FM_API_KEY = atob('MTc0OTkxYjU1ZWViN2RkNzI1MmNjMGMwNTFjNDkwZjQ=');
@@ -59,13 +36,21 @@ async function nowPlaying() {
     const URL = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&format=json&api_key=${LAST_FM_API_KEY}&limit=1&user=${USERNAME}`;
 
     try {
-        const responseText = await httpGetAsync(URL);
-        const json = JSON.parse(responseText);
-        const lastTrack = json.recenttracks.track[0];
-        return `<a target='_blank' href='https://genius.com/search?q=${encodeURIComponent(lastTrack.artist['#text'])} ${encodeURIComponent(lastTrack.name)}'>${lastTrack.artist['#text']} — ${lastTrack.name}</a>`;
+        const response = await fetch(URL);
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+        const json = await response.json();
+        const lastTrack = json.recenttracks?.track?.[0];
+        if (!lastTrack) return null;
+
+        const link = document.createElement('a');
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.href = `https://genius.com/search?q=${encodeURIComponent(lastTrack.artist['#text'])} ${encodeURIComponent(lastTrack.name)}`;
+        link.textContent = `${lastTrack.artist['#text']} — ${lastTrack.name}`;
+        return link;
     } catch (error) {
         console.error('Error: ', error);
-        return 'Error: ' + error;
+        return null;
     }
 }
 
@@ -73,6 +58,8 @@ async function nowPlaying() {
  * Rain animation
  */
 function startRain() {
+    if (document.getElementById('rain-container')) return;
+
     const rainContainer = document.createElement('div');
     rainContainer.id = 'rain-container';
     rainContainer.style.position = 'fixed';
