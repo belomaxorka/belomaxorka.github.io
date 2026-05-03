@@ -1,6 +1,3 @@
-/**
- * CMD color codes mapping
- */
 const CMD_COLORS = {
     '0': '#000000', '1': '#000080', '2': '#008000', '3': '#008080',
     '4': '#800000', '5': '#800080', '6': '#808000', '7': '#C0C0C0',
@@ -8,9 +5,6 @@ const CMD_COLORS = {
     'c': '#FF0000', 'd': '#FF00FF', 'e': '#FFFF00', 'f': '#FFFFFF'
 };
 
-/**
- * Virtual filesystem
- */
 let currentPath = [];
 
 const FILE_SYSTEM = {
@@ -229,12 +223,6 @@ function cmdCd(args) {
     }
 })();
 
-/**
- * Process terminal command
- *
- * @param {string} input
- * @returns {{output: string, action: string}|null}
- */
 function processCommand(input) {
     const trimmed = input.trim();
     const spaceIdx = trimmed.indexOf(' ');
@@ -243,7 +231,7 @@ function processCommand(input) {
 
     switch (cmd) {
         case 'help': return { output: cmdHelp(args) };
-        case 'ver': return { output: 'Microsoft Windows [Version ' + placeVersion() + ']' };
+        case 'ver': return { output: 'Microsoft Windows [Version ' + randomWindowsVersion() + ']' };
         case 'cls':
             sessionStorage.setItem('cmdPath', JSON.stringify(currentPath));
             return { action: 'cls' };
@@ -339,7 +327,7 @@ function cmdDir(args) {
     const node = getNode(targetPath);
     const now = new Date();
     const pad2 = n => n.toString().padStart(2, '0');
-    const d = pad2(now.getMonth() + 1) + '/' + pad2(now.getDate()) + '/' + now.getFullYear();
+    const dateStr = pad2(now.getMonth() + 1) + '/' + pad2(now.getDate()) + '/' + now.getFullYear();
 
     const lines = [
         ' Volume in drive C is PORTFOLIO',
@@ -347,19 +335,19 @@ function cmdDir(args) {
         '',
         ' Directory of ' + buildPath(targetPath),
         '',
-        d + '  12:00 AM    <DIR>          .',
-        d + '  12:00 AM    <DIR>          ..'
+        dateStr + '  12:00 AM    <DIR>          .',
+        dateStr + '  12:00 AM    <DIR>          ..'
     ];
 
     const dirNames = Object.keys(node.dirs || {});
     for (const name of dirNames) {
-        lines.push(d + '  12:00 AM    <DIR>          ' + name);
+        lines.push(dateStr + '  12:00 AM    <DIR>          ' + name);
     }
 
     let totalSize = 0;
     const files = node.files || [];
     for (const file of files) {
-        const fileDate = file.date || (d + '  10:00 AM');
+        const fileDate = file.date || (dateStr + '  10:00 AM');
         lines.push(fileDate + file.size.toLocaleString('en-US').padStart(18) + ' ' + file.name);
         totalSize += file.size;
     }
@@ -381,9 +369,9 @@ function cmdDate() {
 function cmdTime() {
     const now = new Date();
     const pad2 = n => n.toString().padStart(2, '0');
-    const cs = Math.floor(now.getMilliseconds() / 10).toString().padStart(2, '0');
+    const centiseconds = Math.floor(now.getMilliseconds() / 10).toString().padStart(2, '0');
     return 'The current time is: ' + pad2(now.getHours()) + ':' +
-        pad2(now.getMinutes()) + ':' + pad2(now.getSeconds()) + '.' + cs;
+        pad2(now.getMinutes()) + ':' + pad2(now.getSeconds()) + '.' + centiseconds;
 }
 
 function cmdIpconfig() {
@@ -407,7 +395,7 @@ function cmdSysteminfo() {
         '',
         'Host Name:                 BELOMAXORKA-PC',
         "OS Name:                   belomaxorka's space!",
-        'OS Version:                ' + placeVersion(),
+        'OS Version:                ' + randomWindowsVersion(),
         'System Manufacturer:       belomaxorka',
         'System Model:              GitHub Pages Server',
         'Registered Owner:          Roman Kelesidis',

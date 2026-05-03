@@ -1,19 +1,8 @@
-/**
- * Place version
- *
- * @returns {string}
- */
-function placeVersion() {
-    let elements = ['10.0.22631.3374', '10.0.19042.867', '10.0.16299.19', '6.3.9600', '6.2.9200', '6.1.7600', '6.0.6000', '5.1.2600', '5.00.2195'];
-    return elements[Math.floor(Math.random() * elements.length)];
+function randomWindowsVersion() {
+    const versions = ['10.0.22631.3374', '10.0.19042.867', '10.0.16299.19', '6.3.9600', '6.2.9200', '6.1.7600', '6.0.6000', '5.1.2600', '5.00.2195'];
+    return versions[Math.floor(Math.random() * versions.length)];
 }
 
-/**
- * Calculates age by birthday
- *
- * @param birthDate
- * @returns {number}
- */
 function calculateAge(birthDate) {
     const today = new Date();
     const birth = new Date(birthDate);
@@ -25,12 +14,6 @@ function calculateAge(birthDate) {
     return age;
 }
 
-/**
- * Calculates days until next birthday
- *
- * @param birthDate
- * @returns {number}
- */
 function daysUntilBirthday(birthDate) {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -42,18 +25,13 @@ function daysUntilBirthday(birthDate) {
     return Math.round((next - today) / (1000 * 60 * 60 * 24));
 }
 
-/**
- * Get now playing song
- *
- * @returns {Promise<HTMLElement|null>}
- */
 async function nowPlaying() {
     const LAST_FM_API_KEY = atob('MTc0OTkxYjU1ZWViN2RkNzI1MmNjMGMwNTFjNDkwZjQ=');
     const USERNAME = 'belomaxorka';
-    const URL = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&format=json&api_key=${LAST_FM_API_KEY}&limit=1&user=${USERNAME}`;
+    const apiUrl = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&format=json&api_key=${LAST_FM_API_KEY}&limit=1&user=${USERNAME}`;
 
     try {
-        const response = await fetch(URL);
+        const response = await fetch(apiUrl);
         if (!response.ok) throw new Error(`Error: ${response.status}`);
         const json = await response.json();
         const lastTrack = json.recenttracks?.track?.[0];
@@ -71,27 +49,16 @@ async function nowPlaying() {
     }
 }
 
-/**
- * Sleep helper
- *
- * @param ms
- * @returns {Promise<void>}
- */
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/**
- * Plays the boot intro: reveals each section, types its command, then reveals its body
- *
- * @returns {Promise<void>}
- */
 async function playIntro() {
     const sections = document.querySelectorAll('.terminal-section');
     for (const section of sections) {
         section.hidden = false;
         const cmdEl = section.querySelector('.typed-cmd');
-        const body = section.querySelector('.section-body');
+        const bodyEl = section.querySelector('.section-body');
         const text = section.dataset.cmd || '';
         await sleep(2000);
         if (cmdEl) {
@@ -101,15 +68,12 @@ async function playIntro() {
             }
         }
         await sleep(150);
-        if (body) body.hidden = false;
+        if (bodyEl) bodyEl.hidden = false;
         await sleep(350);
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 }
 
-/**
- * Rain animation
- */
 function startRain() {
     if (document.getElementById('rain-container')) return;
 

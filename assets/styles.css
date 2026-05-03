@@ -40,7 +40,7 @@ a {
     background-image: none;
 }
 
-#submittedText {
+#commandInput {
     background: transparent;
     border: none;
     outline: none;

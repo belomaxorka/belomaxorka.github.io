@@ -14,7 +14,7 @@
 </head>
 <body class="notranslate">
 <main>
-    <code>belomaxorka's space! [Version <span id="placeVersion">6.0.6000</span>]<br></code>
+    <code>belomaxorka's space! [Version <span id="osVersion">6.0.6000</span>]<br></code>
     <code>Copyright 1970-<span id="currentYear"></span>. All wrongs reserved.<br><br></code>
     <div class="terminal-section" hidden data-cmd="belomaxorka about">
     <code>C:\><span class="command typed-cmd"></span><br></code>
@@ -79,7 +79,7 @@
     </div>
     </div>
     <div id="inputBlock" hidden>
-    <code><span id="promptPath">C:\</span>><span class="command"><label><input id="submittedText" size="40" type="text"></label></span><br></code>
+    <code><span id="promptPath">C:\</span>><span class="command"><label><input id="commandInput" size="40" type="text"></label></span><br></code>
     <code id="notifyMessage"></code>
     </div>
 </main>
@@ -94,7 +94,7 @@
             notifyEl.appendChild(document.createTextNode('Made with ❤️ by belomaxorka'));
         }
 
-        document.getElementById("placeVersion").textContent = placeVersion();
+        document.getElementById("osVersion").textContent = randomWindowsVersion();
         document.getElementById("currentYear").textContent = new Date().getFullYear();
         document.getElementById("calculatedAge").textContent = calculateAge('2006-05-25');
         const days = daysUntilBirthday('2006-05-25');
@@ -117,7 +117,6 @@
             }
         })();
 
-        // ---------------- Rain animation ----------------
         let rainTimeout;
         let lastReset = 0;
 
@@ -134,21 +133,20 @@
         ['mousemove', 'keydown', 'click'].forEach(e => document.addEventListener(e, resetRainTimer));
         resetRainTimer();
 
-        // ---------------- Console input ----------------
-        const submittedText = document.querySelector("#submittedText");
+        const commandInput = document.querySelector("#commandInput");
         const notifyMessage = document.getElementById("notifyMessage");
-        const aboutCommands = ['belomaxorka about', 'belomaxorka misc', 'belomaxorka miscellaneous', 'belomaxorka social'];
+        const themeToggleCommands = ['belomaxorka about', 'belomaxorka misc', 'belomaxorka miscellaneous', 'belomaxorka social'];
         const commandHistory = [];
         let historyIndex = -1;
 
-        submittedText.value = '';
+        commandInput.value = '';
 
-        submittedText.addEventListener('keydown', (event) => {
+        commandInput.addEventListener('keydown', (event) => {
             if (event.key === 'ArrowUp') {
                 event.preventDefault();
                 if (historyIndex < commandHistory.length - 1) {
                     historyIndex++;
-                    submittedText.value = commandHistory[commandHistory.length - 1 - historyIndex];
+                    commandInput.value = commandHistory[commandHistory.length - 1 - historyIndex];
                 }
                 return;
             }
@@ -156,17 +154,17 @@
                 event.preventDefault();
                 if (historyIndex > 0) {
                     historyIndex--;
-                    submittedText.value = commandHistory[commandHistory.length - 1 - historyIndex];
+                    commandInput.value = commandHistory[commandHistory.length - 1 - historyIndex];
                 } else {
                     historyIndex = -1;
-                    submittedText.value = '';
+                    commandInput.value = '';
                 }
                 return;
             }
             if (event.key !== 'Enter') return;
 
             notifyMessage.style.display = 'none';
-            const enteredCommand = submittedText.value.trim();
+            const enteredCommand = commandInput.value.trim();
 
             if (enteredCommand.length === 0) return;
 
@@ -175,7 +173,7 @@
 
             notifyMessage.style.display = 'inline-block';
 
-            if (aboutCommands.includes(enteredCommand.toLowerCase())) {
+            if (themeToggleCommands.includes(enteredCommand.toLowerCase())) {
                 Cookie.exists('whiteTheme') ? Cookie.remove('whiteTheme') : Cookie.set('whiteTheme', 1, {sameSite: 'Strict'});
                 window.location.reload();
             } else {
@@ -191,7 +189,7 @@
                         el.textContent = '\nShutting down...';
                         notifyMessage.textContent = '';
                         notifyMessage.appendChild(el);
-                        submittedText.disabled = true;
+                        commandInput.disabled = true;
                         setTimeout(() => {
                             document.body.textContent = '';
                             document.body.style.cssText = 'margin:0;background:#0078d7;color:white;display:flex;flex-direction:column;justify-content:center;padding:10%;height:100vh;font-family:Segoe UI,sans-serif;cursor:default;';
@@ -222,11 +220,11 @@
                             document.body.appendChild(info);
                             document.body.appendChild(hint);
 
-                            let p = 0;
-                            const iv = setInterval(() => {
-                                p += Math.floor(Math.random() * 15) + 5;
-                                if (p >= 100) { p = 100; clearInterval(iv); }
-                                pct.textContent = p + '% complete';
+                            let percent = 0;
+                            const intervalId = setInterval(() => {
+                                percent += Math.floor(Math.random() * 15) + 5;
+                                if (percent >= 100) { percent = 100; clearInterval(intervalId); }
+                                pct.textContent = percent + '% complete';
                             }, 800);
 
                             document.addEventListener('keydown', () => window.location.reload(), { once: true });
@@ -240,7 +238,7 @@
                         el.textContent = '\nGoodbye!';
                         notifyMessage.textContent = '';
                         notifyMessage.appendChild(el);
-                        submittedText.disabled = true;
+                        commandInput.disabled = true;
                     } else if (result.output === '') {
                         notifyMessage.style.display = 'none';
                     } else {
@@ -261,25 +259,24 @@
                 window.scrollTo(0, document.body.scrollHeight);
             }
 
-            submittedText.value = '';
+            commandInput.value = '';
         });
 
-        // ---------------- Intro typing animation ----------------
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (reduceMotion || sessionStorage.getItem('introPlayed') === '1') {
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion || sessionStorage.getItem('introPlayed') === '1') {
             document.querySelectorAll('.terminal-section').forEach((section) => {
                 section.hidden = false;
                 const cmdEl = section.querySelector('.typed-cmd');
                 if (cmdEl && section.dataset.cmd) cmdEl.textContent = section.dataset.cmd;
-                const body = section.querySelector('.section-body');
-                if (body) body.hidden = false;
+                const bodyEl = section.querySelector('.section-body');
+                if (bodyEl) bodyEl.hidden = false;
             });
         } else {
             await playIntro();
             sessionStorage.setItem('introPlayed', '1');
         }
         document.getElementById('inputBlock').hidden = false;
-        submittedText.focus({ preventScroll: true });
+        commandInput.focus({ preventScroll: true });
     });
 </script>
 </body>
