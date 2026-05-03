@@ -16,7 +16,9 @@
 <main>
     <code>belomaxorka's space! [Version <span id="placeVersion">6.0.6000</span>]<br></code>
     <code>Copyright 1970-<span id="currentYear"></span>. All wrongs reserved.<br><br></code>
-    <code>A:\><span class="command">belomaxorka about</span><br></code>
+    <div class="terminal-section" hidden data-cmd="belomaxorka about">
+    <code>C:\><span class="command typed-cmd"></span><br></code>
+    <div class="section-body" hidden>
     <pre>
     ___    __                __
    /   |  / /_  ____  __  __/ /_   ____ ___  ___
@@ -42,7 +44,11 @@
     <code>> born in: 🇬🇷<br></code>
     <code>> languages: ru, en<br></code>
     <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br><br></code>
-    <code>A:\><span class="command">belomaxorka miscellaneous</span><br></code>
+    </div>
+    </div>
+    <div class="terminal-section" hidden data-cmd="belomaxorka miscellaneous">
+    <code>C:\><span class="command typed-cmd"></span><br></code>
+    <div class="section-body" hidden>
     <pre>
     __  ____                ____
    /  |/  (_)____________  / / /___ _____  ___  ____  __  _______
@@ -54,7 +60,11 @@
     <code>> favorite colors: <span style="color: #000;">#000</span>, <span style="color: #fff;">#fff</span>, <span style="color: #a062de;">#a062de</span>, <span style="color: #62a0de;">#62a0de</span><br></code>
     <code>> last played song: <span id="nowPlaying">Getting API response...</span><br></code>
     <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br><br></code>
-    <code>A:\><span class="command">belomaxorka social</span><br></code>
+    </div>
+    </div>
+    <div class="terminal-section" hidden data-cmd="belomaxorka social">
+    <code>C:\><span class="command typed-cmd"></span><br></code>
+    <div class="section-body" hidden>
     <pre>
    _____            _       __   ___        ______            __             __
   / ___/____  _____(_)___ _/ /  ( _ )      / ____/___  ____  / /_____ ______/ /______
@@ -66,8 +76,12 @@
     <code>> telegram: <a target="_blank" rel="noopener noreferrer" href="https://t.me/belomaxorka">@belomaxorka</a><br></code>
     <code>> github: <a target="_blank" rel="noopener noreferrer" href="https://github.com/belomaxorka">belomaxorka</a><br></code>
     <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br><br></code>
-    <code><span id="promptPath">A:\</span>><span class="command"><label><input id="submittedText" size="40" type="text"></label></span><br></code>
+    </div>
+    </div>
+    <div id="inputBlock" hidden>
+    <code><span id="promptPath">C:\</span>><span class="command"><label><input id="submittedText" size="40" type="text"></label></span><br></code>
     <code id="notifyMessage"></code>
+    </div>
 </main>
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
@@ -87,19 +101,21 @@
         document.getElementById("daysUntilBirthday").textContent =
             days === 0 ? 'today!' : `in ${days} day${days === 1 ? '' : 's'}`;
 
-        // Now playing
-        try {
-            const result = await nowPlaying();
-            const element = document.getElementById("nowPlaying");
-            if (element && result) {
-                element.textContent = '';
-                element.appendChild(result);
-            } else if (element) {
-                element.textContent = 'N/A';
+        // Now playing — fire-and-forget so it doesn't block the intro
+        (async () => {
+            try {
+                const result = await nowPlaying();
+                const element = document.getElementById("nowPlaying");
+                if (element && result) {
+                    element.textContent = '';
+                    element.appendChild(result);
+                } else if (element) {
+                    element.textContent = 'N/A';
+                }
+            } catch (error) {
+                console.error('Error: ', error);
             }
-        } catch (error) {
-            console.error('Error: ', error);
-        }
+        })();
 
         // ---------------- Rain animation ----------------
         let rainTimeout;
@@ -126,7 +142,6 @@
         let historyIndex = -1;
 
         submittedText.value = '';
-        submittedText.focus({ preventScroll: true });
 
         submittedText.addEventListener('keydown', (event) => {
             if (event.key === 'ArrowUp') {
@@ -248,6 +263,23 @@
 
             submittedText.value = '';
         });
+
+        // ---------------- Intro typing animation ----------------
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion || sessionStorage.getItem('introPlayed') === '1') {
+            document.querySelectorAll('.terminal-section').forEach((section) => {
+                section.hidden = false;
+                const cmdEl = section.querySelector('.typed-cmd');
+                if (cmdEl && section.dataset.cmd) cmdEl.textContent = section.dataset.cmd;
+                const body = section.querySelector('.section-body');
+                if (body) body.hidden = false;
+            });
+        } else {
+            await playIntro();
+            sessionStorage.setItem('introPlayed', '1');
+        }
+        document.getElementById('inputBlock').hidden = false;
+        submittedText.focus({ preventScroll: true });
     });
 </script>
 </body>

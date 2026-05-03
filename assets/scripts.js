@@ -72,6 +72,42 @@ async function nowPlaying() {
 }
 
 /**
+ * Sleep helper
+ *
+ * @param ms
+ * @returns {Promise<void>}
+ */
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Plays the boot intro: reveals each section, types its command, then reveals its body
+ *
+ * @returns {Promise<void>}
+ */
+async function playIntro() {
+    const sections = document.querySelectorAll('.terminal-section');
+    for (const section of sections) {
+        section.hidden = false;
+        const cmdEl = section.querySelector('.typed-cmd');
+        const body = section.querySelector('.section-body');
+        const text = section.dataset.cmd || '';
+        await sleep(2000);
+        if (cmdEl) {
+            for (const ch of text) {
+                cmdEl.textContent += ch;
+                await sleep(35 + Math.random() * 35);
+            }
+        }
+        await sleep(150);
+        if (body) body.hidden = false;
+        await sleep(350);
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+}
+
+/**
  * Rain animation
  */
 function startRain() {

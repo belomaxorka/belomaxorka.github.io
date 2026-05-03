@@ -144,7 +144,7 @@ const CMD_HELP = {
 };
 
 function buildPath(pathArray) {
-    return 'A:\\' + pathArray.join('\\');
+    return 'C:\\' + pathArray.join('\\');
 }
 
 function getFullPath() {
@@ -342,7 +342,7 @@ function cmdDir(args) {
     const d = pad2(now.getMonth() + 1) + '/' + pad2(now.getDate()) + '/' + now.getFullYear();
 
     const lines = [
-        ' Volume in drive A is PORTFOLIO',
+        ' Volume in drive C is PORTFOLIO',
         ' Volume Serial Number is B3L0-M4X0',
         '',
         ' Directory of ' + buildPath(targetPath),
@@ -585,20 +585,20 @@ function cmdSet() {
         '',
         'CD=' + getFullPath(),
         'COMPUTERNAME=BELOMAXORKA-PC',
-        'HOMEDRIVE=A:',
+        'HOMEDRIVE=C:',
         'HOMEPATH=\\',
         'LOGONSERVER=\\\\BELOMAXORKA-PC',
         'OS=belomaxorka_space',
-        'PATH=A:\\;A:\\System32',
+        'PATH=C:\\;C:\\System32',
         'PROCESSOR_ARCHITECTURE=x64',
         'PROMPT=$P$G',
-        'SYSTEMDRIVE=A:',
-        'SYSTEMROOT=A:\\',
-        'TEMP=A:\\Temp',
-        'TMP=A:\\Temp',
+        'SYSTEMDRIVE=C:',
+        'SYSTEMROOT=C:\\',
+        'TEMP=C:\\Temp',
+        'TMP=C:\\Temp',
         'USERDOMAIN=BELOMAXORKA-PC',
         'USERNAME=guest',
-        'USERPROFILE=A:\\Users\\guest'
+        'USERPROFILE=C:\\Users\\guest'
     ].join('\n');
 }
 

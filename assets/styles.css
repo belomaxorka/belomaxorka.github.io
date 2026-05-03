@@ -55,6 +55,14 @@ a {
     color: #d9d9d9;
 }
 
+.terminal-section, .section-body, #inputBlock {
+    display: contents;
+}
+
+.terminal-section[hidden], .section-body[hidden], #inputBlock[hidden] {
+    display: none;
+}
+
 .whiteTheme .command {
     color: #595959 !important;
 }
