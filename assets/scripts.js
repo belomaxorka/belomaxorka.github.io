@@ -60,7 +60,7 @@ async function playIntro() {
         const cmdEl = section.querySelector('.typed-cmd');
         const bodyEl = section.querySelector('.section-body');
         const text = section.dataset.cmd || '';
-        if (index > 0) await sleep(2000);
+        if (index > 0) await sleep(1000);
         if (cmdEl) {
             let prevChar = '';
             for (const ch of text) {
