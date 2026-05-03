@@ -55,12 +55,12 @@ function sleep(ms) {
 
 async function playIntro() {
     const sections = document.querySelectorAll('.terminal-section');
-    for (const section of sections) {
+    for (const [index, section] of sections.entries()) {
         section.hidden = false;
         const cmdEl = section.querySelector('.typed-cmd');
         const bodyEl = section.querySelector('.section-body');
         const text = section.dataset.cmd || '';
-        await sleep(2000);
+        if (index > 0) await sleep(2000);
         if (cmdEl) {
             let prevChar = '';
             for (const ch of text) {
