@@ -38,7 +38,7 @@
     <code>> name: Roman Kelesidis<br></code>
     <code>> pronouns: he/him<br></code>
     <code>> age: <span id="calculatedAge">...</span> years old<br></code>
-    <code>> birthday: 25 May 2006<br></code>
+    <code>> birthday: 25 May 2006 (<span id="daysUntilBirthday">...</span>)<br></code>
     <code>> born in: 🇬🇷<br></code>
     <code>> languages: ru, en<br></code>
     <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br><br></code>
@@ -83,6 +83,9 @@
         document.getElementById("placeVersion").textContent = placeVersion();
         document.getElementById("currentYear").textContent = new Date().getFullYear();
         document.getElementById("calculatedAge").textContent = calculateAge('2006-05-25');
+        const days = daysUntilBirthday('2006-05-25');
+        document.getElementById("daysUntilBirthday").textContent =
+            days === 0 ? 'today!' : `in ${days} day${days === 1 ? '' : 's'}`;
 
         // Now playing
         try {

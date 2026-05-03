@@ -26,6 +26,23 @@ function calculateAge(birthDate) {
 }
 
 /**
+ * Calculates days until next birthday
+ *
+ * @param birthDate
+ * @returns {number}
+ */
+function daysUntilBirthday(birthDate) {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const birth = new Date(birthDate);
+    let next = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
+    if (next < today) {
+        next.setFullYear(today.getFullYear() + 1);
+    }
+    return Math.round((next - today) / (1000 * 60 * 60 * 24));
+}
+
+/**
  * Get now playing song
  *
  * @returns {Promise<HTMLElement|null>}
