@@ -62,9 +62,14 @@ async function playIntro() {
         const text = section.dataset.cmd || '';
         await sleep(2000);
         if (cmdEl) {
+            let prevChar = '';
             for (const ch of text) {
                 cmdEl.textContent += ch;
-                await sleep(35 + Math.random() * 35);
+                let delay = 25 + Math.pow(Math.random(), 1.5) * 140;
+                if (prevChar === ' ') delay += 70 + Math.random() * 120;
+                if (Math.random() < 0.08) delay += 100 + Math.random() * 350;
+                await sleep(delay);
+                prevChar = ch;
             }
         }
         await sleep(150);
