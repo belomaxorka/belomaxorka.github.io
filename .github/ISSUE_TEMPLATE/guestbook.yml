@@ -1,0 +1,17 @@
+name: Sign the guestbook
+description: Leave a note for Roman's personal site. Public messages appear on the homepage.
+title: "[guestbook] "
+labels: ["guestbook"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for visiting! Your note will be public and will appear on the homepage while this issue is open. Please keep it kind, and avoid personal information.
+  - type: textarea
+    id: note
+    attributes:
+      label: Your note
+      description: A hello, a question, or a link worth sharing.
+      placeholder: Hello from a neighboring corner of the web!
+    validations:
+      required: true

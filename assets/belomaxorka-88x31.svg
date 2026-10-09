@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="88" height="31" viewBox="0 0 88 31" shape-rendering="crispEdges">
+  <rect width="88" height="31" fill="#26352d"/>
+  <rect x="2" y="2" width="84" height="27" fill="#e5ecd8"/>
+  <rect x="5" y="5" width="21" height="21" fill="#26352d"/>
+  <rect x="8" y="8" width="5" height="5" fill="#f0a396"/><rect x="17" y="8" width="5" height="5" fill="#f0a396"/>
+  <rect x="8" y="17" width="5" height="5" fill="#a2b997"/><rect x="17" y="17" width="5" height="5" fill="#b7a6c7"/>
+  <text x="30" y="14" fill="#26352d" font-family="monospace" font-size="8" font-weight="bold">BELO</text>
+  <text x="30" y="23" fill="#26352d" font-family="monospace" font-size="7" font-weight="bold">MAXORKA</text>
+</svg>
