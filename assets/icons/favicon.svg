@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Мини-стойка: три юнита, янтарный ЖК, лампы. Те же цвета, что на сайте. -->
+  <rect x="3" y="1" width="26" height="30" rx="4" fill="#2b2e33"/>
+  <rect x="4" y="2" width="24" height="1.5" rx=".75" fill="#3b3f46"/>
+  <rect x="6" y="4.5" width="20" height="7" rx="1.5" fill="#15171a"/>
+  <rect x="6" y="12.5" width="20" height="7" rx="1.5" fill="#15171a"/>
+  <rect x="6" y="20.5" width="20" height="7" rx="1.5" fill="#15171a"/>
+  <rect x="8.5" y="6.8" width="9.5" height="2.4" rx=".6" fill="#ffb547"/>
+  <rect x="8.5" y="14.8" width="2.6" height="2.4" rx=".4" fill="#3a7bd5"/>
+  <rect x="12.2" y="14.8" width="2.6" height="2.4" rx=".4" fill="#e0b93a"/>
+  <rect x="15.9" y="14.8" width="2.6" height="2.4" rx=".4" fill="#d9534f"/>
+  <rect x="8.5" y="22.8" width="10" height="2.4" rx=".6" fill="#2a2d32"/>
+  <circle cx="22.8" cy="8" r="1.7" fill="#4ee483"/>
+  <circle cx="22.8" cy="16" r="1.7" fill="#4ee483"/>
+  <circle cx="22.8" cy="24" r="1.7" fill="#b58cf0"/>
+</svg>
