@@ -1,14 +1,19 @@
 // Питание стойки. У каждого активного юнита свой кабель от вертикального PDU на правой рейке.
 // Вилку можно вытащить мышкой или пальцем: кабель повиснет и закачается (верёвка на Verlet),
 // юнит погаснет. Поднести вилку к разъёму (или тапнуть по ней) — воткнётся, юнит загорится.
-// Кнопка на ИБП гасит всю стойку и загружает её обратно. Состояние только у посетителя (localStorage).
+// Кнопка на ИБП гасит всю стойку и загружает её обратно. Шнур самого ИБП тоже выдёргивается из розетки:
+// ИБП уходит на батарею (красный свет в зале, ЖК мигает, заряд тает), батарея села — гаснет всё; воткнул —
+// заряжается и стойка загружается. Состояние только у посетителя (localStorage).
 // Без JS всего этого нет: юниты просто горят и работают.
 (() => {
-  // Юниты с питанием; патч-панель и заглушки с наклейками пассивные, как в жизни.
-  const POWERED = ['mgmt', 'srv', 'media', 'mon', 'disks', 'log', 'sw', 'kvm'];
+  // Юниты с питанием; патч-панель и заглушки с наклейками пассивные, как в жизни. Несколько одинаковых юнитов
+  // (контейнеры в /lab) различаются атрибутом data-power.
+  const POWERED = ['mgmt', 'srv', 'media', 'mon', 'disks', 'log', 'sw', 'kvm', 'pve'];
   const NS = 'http://www.w3.org/2000/svg';
   const COLOR = '#4a4f57';
   const PLUG = '#1b1d20';
+  const MAINS = '#26292e';       // шнур ИБП
+  const DRAIN = 90, CHARGE = 30; // секунд на разрядку и зарядку батареи (ускорено, чтобы было видно)
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
   const store = {
@@ -16,13 +21,17 @@
     set(v) { try { localStorage.setItem('rack-power', JSON.stringify(v)); } catch {} },
   };
   const saved = store.get();
-  const state = { off: !!saved.off, unplugged: saved.unplugged || {} };
+  const state = {
+    off: !!saved.off, unplugged: saved.unplugged || {},
+    mains: saved.mains !== false,                                   // ИБП в розетке
+    charge: typeof saved.charge === 'number' ? saved.charge : null, // % батареи, пока идёт своя симуляция
+  };
   const save = () => store.set(state);
 
   const ropes = new Map(); // ключ юнита → верёвка
   let room = null, svg = null, raf = 0, calm = 0, drag = null;
 
-  const keyOf = (u) => POWERED.find((k) => u.classList.contains(k));
+  const keyOf = (u) => u.dataset.power || POWERED.find((k) => u.classList.contains(k));
   const units = () => [...document.querySelectorAll('#rack-body > .u')].filter(keyOf);
   const unitBy = (k) => units().find((u) => keyOf(u) === k);
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -35,7 +44,7 @@
   }
 
   // ---------- юниты: разъёмы и свет ----------
-  function powered(k) { return !state.off && !state.unplugged[k]; }
+  function powered(k) { return !state.off && !state.unplugged[k] && !dead(); }
 
   function paint(u, k, boot) {
     const on = powered(k);
@@ -65,9 +74,79 @@
       paint(u, keyOf(u), false);
     });
     const rack = document.getElementById('rack');
-    if (rack) rack.classList.toggle('powered-off', state.off);
+    if (rack) rack.classList.toggle('powered-off', state.off || dead());
     wireButton();
     return true;
+  }
+
+  // ---------- ИБП на батарее ----------
+  // Пока шнур в розетке и батарея полна, ЖК ИБП показывает настоящие данные (NUT). Иначе — своя симуляция.
+  let lcdReal = null, lightReal = null, alarmReal = false, timer = 0, wasDead = false;
+  const upsUnit = () => document.querySelector('#rack-body > .ups');
+  const upsLcd = () => document.querySelector('#rack-body > .ups .lcd');
+  const full = () => { const v = parseInt(upsLcd()?.dataset.charge, 10); return v > 0 ? v : 100; };
+  function dead() { return !state.mains && state.charge !== null && state.charge <= 0; }
+
+  function battery() {
+    const lcd = upsLcd();
+    if (!lcd || !room) return;
+    if (lcdReal === null) {
+      lcdReal = [...lcd.childNodes].map((n) => n.cloneNode(true));
+      lightReal = room.dataset.light;
+      alarmReal = lcd.classList.contains('alarm');
+    }
+    const rack = document.getElementById('rack');
+    if (state.mains && (state.charge === null || state.charge >= full())) {
+      if (state.charge !== null) { state.charge = null; save(); }
+      clearInterval(timer); timer = 0;
+      lcd.replaceChildren(...lcdReal.map((n) => n.cloneNode(true)));
+      lcd.classList.toggle('alarm', alarmReal);
+      room.dataset.light = lightReal;
+      upsUnit()?.classList.remove('off');
+      rack?.classList.toggle('powered-off', state.off);
+      return;
+    }
+    const isDead = dead();
+    room.dataset.light = state.mains ? lightReal : 'battery';
+    lcd.classList.toggle('alarm', !state.mains && !isDead);
+    upsUnit()?.classList.toggle('off', isDead);
+    rack?.classList.toggle('powered-off', state.off || isDead);
+    // ЖК: батарейка, «на батарее · 73%» или «заряжается · 40%», сколько осталось.
+    const pc = Math.round(state.charge), d = lcd.dataset;
+    const bars = document.createElement('span');
+    bars.className = 'batt' + (pc <= 20 ? ' low' : '');
+    bars.setAttribute('aria-hidden', 'true');
+    for (let i = 0; i < 5; i++) {
+      const b = document.createElement('i');
+      if (i >= Math.ceil(pc / 20)) b.className = 'e';
+      bars.appendChild(b);
+    }
+    const text = document.createElement('span');
+    text.append((state.mains ? d.charging : d.battery) + ' · ' + pc + '%', document.createElement('br'));
+    const sub = document.createElement('span');
+    sub.className = 'd';
+    sub.textContent = state.mains ? d.mains : (d.left || '%d').replace('%d', Math.ceil(state.charge / 100 * DRAIN));
+    text.append(sub);
+    lcd.replaceChildren(bars, text);
+    // Батарея села — всё гаснет; вернулось питание — юниты загружаются сверху вниз.
+    if (isDead !== wasDead) {
+      units().forEach((u, i) => setTimeout(() => paint(u, keyOf(u), true), isDead || reduce.matches ? 0 : 110 * i));
+      wasDead = isDead;
+    }
+  }
+
+  function runBattery() {
+    if (timer) { battery(); return; }
+    if (state.charge === null) state.charge = full();
+    let n = 0;
+    timer = setInterval(() => {
+      const dt = 0.5;
+      state.charge = state.mains ? Math.min(full(), state.charge + 100 / CHARGE * dt) : Math.max(0, state.charge - 100 / DRAIN * dt);
+      if (++n % 4 === 0 || state.charge <= 0) save();
+      if (!state.mains && state.charge <= 0) { clearInterval(timer); timer = 0; save(); }
+      battery();
+    }, 500);
+    battery();
   }
 
   // ---------- кнопка на ИБП ----------
@@ -81,7 +160,7 @@
       state.off = !state.off;
       save();
       b.setAttribute('aria-pressed', String(!state.off));
-      document.getElementById('rack').classList.toggle('powered-off', state.off);
+      document.getElementById('rack').classList.toggle('powered-off', state.off || dead());
       if (state.off) {
         units().forEach((u) => paint(u, keyOf(u), false));
         return;
@@ -115,11 +194,43 @@
     return pts;
   }
 
+  // Шнур ИБП: закреплён внизу ИБП (outlet — тут неподвижный конец), вилка — в розетке на стене слева от стойки
+  // или, если места нет, на полу (socket). Розетка и подпись «220 В» рисуются вместе с ним.
+  function mainsAnchors(ups) {
+    const R = room.getBoundingClientRect();
+    const rk = document.getElementById('rack').getBoundingClientRect();
+    const u = ups.getBoundingClientRect();
+    const railW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rail-w')) || 34;
+    const x0 = rk.left - R.left, b0 = rk.bottom - R.top;
+    const wall = x0 > 110;
+    const ox = wall ? x0 - 62 : x0 + railW + 120, oy = wall ? b0 - 40 : b0 + 34 + 26;
+    return { wall, s: { x: ox, y: oy + 4 }, o: { x: x0 + railW + 46, y: u.bottom - R.top - 6 } };
+  }
+
   function relayout() {
     if (!ensureDom()) return;
     const R = room.getBoundingClientRect();
     svg.setAttribute('viewBox', `0 0 ${R.width} ${R.height}`);
     const seen = new Set();
+    const ups = upsUnit();
+    if (ups) {
+      seen.add('mains');
+      const { wall, s, o } = mainsAnchors(ups);
+      let r = ropes.get('mains');
+      if (!r) {
+        const len = dist(s, o) * 1.25 + 40;
+        r = { key: 'mains', mains: true, n: 14, len, seg: len / 14, socket: s, outlet: o, pts: rest(s, o, len, 14), plugged: state.mains };
+        ropes.set('mains', r);
+      } else {
+        const dx = o.x - r.outlet.x, dy = o.y - r.outlet.y;
+        r.socket = s;
+        r.outlet = o;
+        if (r.plugged && drag?.key !== 'mains') r.pts = rest(s, o, r.len, r.n);
+        else r.pts.forEach((p) => { p.x += dx; p.y += dy; p.px += dx; p.py += dy; });
+      }
+      r.wall = wall;
+      if (!state.mains || state.charge !== null) runBattery();
+    }
     units().forEach((u) => {
       const k = keyOf(u);
       seen.add(k);
@@ -189,9 +300,39 @@
   }
 
   // ---------- рисование ----------
+  function drawMains(r) {
+    const p = r.pts, s = r.socket;
+    // Розетка на стене (или на полу) и подпись.
+    el('rect', { x: s.x - 16, y: s.y - 22, width: 32, height: 36, rx: 5, class: 'outlet' }, svg);
+    el('circle', { cx: s.x - 6, cy: s.y - 8, r: 2.6, class: 'outlet-hole' }, svg);
+    el('circle', { cx: s.x + 6, cy: s.y - 8, r: 2.6, class: 'outlet-hole' }, svg);
+    const label = document.getElementById('cables')?.dataset.power;
+    if (r.wall && label) el('text', { x: s.x - 22, y: s.y - 30, class: 'lbl' }, svg).textContent = label;
+    let d = `M${p[0].x} ${p[0].y}`;
+    for (let i = 1; i < p.length - 1; i++) {
+      const mx = (p[i].x + p[i + 1].x) / 2, my = (p[i].y + p[i + 1].y) / 2;
+      d += ` Q${p[i].x} ${p[i].y} ${mx} ${my}`;
+    }
+    d += ` L${p[p.length - 1].x} ${p[p.length - 1].y}`;
+    const line = { d, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
+    el('path', { ...line, stroke: 'rgba(0,0,0,.35)', 'stroke-width': 9, transform: 'translate(0 2)' }, svg);
+    el('path', { ...line, stroke: MAINS, 'stroke-width': 6 }, svg);
+    el('path', { ...line, stroke: 'rgba(255,255,255,.28)', 'stroke-width': 1.6, transform: 'translate(-1.2 -1.2)' }, svg);
+    // Вилка: в розетке — корпус поверх неё, кабель уходит вниз; выдернута — штыри наружу, вдоль кабеля.
+    const a = r.plugged ? -Math.PI / 2 : Math.atan2(p[0].y - p[1].y, p[0].x - p[1].x);
+    const g = el('g', { transform: `translate(${p[0].x} ${p[0].y}) rotate(${a * 180 / Math.PI})` }, svg);
+    el('rect', { x: -11, y: -9, width: 18, height: 18, rx: 4, fill: MAINS, stroke: 'rgba(0,0,0,.5)' }, g);
+    if (!r.plugged) {
+      el('rect', { x: 7, y: -6, width: 7, height: 3, rx: 1.5, fill: '#b9bec5' }, g);
+      el('rect', { x: 7, y: 3, width: 7, height: 3, rx: 1.5, fill: '#b9bec5' }, g);
+    }
+    el('circle', { cx: 0, cy: 0, r: 18, class: 'hit', 'data-key': r.key }, g);
+  }
+
   function draw() {
     svg.replaceChildren();
     for (const r of ropes.values()) {
+      if (r.mains) { drawMains(r); continue; }
       const p = r.pts;
       // Розетка PDU.
       el('rect', { x: r.outlet.x - 6, y: r.outlet.y - 5, width: 12, height: 10, rx: 2, fill: '#0c0d0f', stroke: '#3b3f46' }, svg);
@@ -269,7 +410,7 @@
       if (!drag.moved) {
         // Тап: воткнутую — вытащить, висящую — воткнуть обратно.
         if (drag.wasPlugged) unplug(r); else plug(r);
-      } else if (dist(r.pts[0], r.socket) < 22) {
+      } else if (dist(r.pts[0], r.socket) < (r.mains ? 30 : 22)) {
         plug(r);
       }
     }
@@ -279,6 +420,7 @@
 
   function unplug(r) {
     r.plugged = false;
+    if (r.mains) { state.mains = false; save(); runBattery(); return; }
     state.unplugged[r.key] = true;
     save();
     const u = unitBy(r.key);
@@ -287,6 +429,7 @@
 
   function plug(r) {
     r.plugged = true;
+    if (r.mains) { state.mains = true; save(); runBattery(); return; }
     delete state.unplugged[r.key];
     save();
     const u = unitBy(r.key);

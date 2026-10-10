@@ -1,0 +1,39 @@
+/* Стойка /lab: хост Proxmox и контейнеры по юниту (templates/units/lab.html).
+   Шкалы — сегменты, как светодиодные индикаторы: --p — процент заполнения. */
+.meter { display: inline-grid; grid-template-columns: auto minmax(60px, 1fr) auto; align-items: center; gap: 8px; min-width: 0; }
+.meter i {
+  height: 10px; min-width: 60px;
+  background: linear-gradient(90deg, var(--led-ok) calc(var(--p) * 1%), var(--led-off) 0);
+  -webkit-mask: repeating-linear-gradient(90deg, #000 0 5px, transparent 5px 7px);
+          mask: repeating-linear-gradient(90deg, #000 0 5px, transparent 5px 7px);
+}
+.meter.hot i { background: linear-gradient(90deg, var(--led-warn) calc(var(--p) * 1%), var(--led-off) 0); }
+.meter b { font: 400 16px/1 var(--f-lcd); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.pve .face { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto; gap: 12px 24px; align-items: center; padding-block: 14px; }
+.pve .ident { display: grid; gap: 4px; }
+.pve .name { margin: 0; font: 700 30px/1 var(--f-silk); letter-spacing: .02em; }
+.pve .meters { display: grid; gap: 10px; min-width: 0; }
+.pve .meter { grid-template-columns: 64px minmax(60px, 1fr) 9em; }
+.pve .meter b { text-align: right; }
+
+.ct .face { display: grid; grid-template-columns: auto 64px minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.6fr) 8em; gap: 14px; align-items: center; padding-block: 6px; }
+.ct .name { font: 600 14px/1.2 var(--f-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ct .tape { justify-self: start; }
+.ct .up { text-align: right; white-space: nowrap; }
+.ct .up.off { grid-column: 4 / -1; color: var(--led-err); }
+.ct.down .name, .ct.down .tape { opacity: .6; }
+.ct.others .face { display: flex; justify-content: center; }
+.ct.others .hand { font: 600 18px/1.1 var(--f-hand); color: var(--dim); }
+
+@media (max-width: 760px) {
+  .pve .face { grid-template-columns: minmax(0, 1fr); }
+  .ct .face { grid-template-columns: auto 56px minmax(0, 1fr) auto; row-gap: 6px; padding-block: 8px; }
+  .ct .meter { grid-column: 2 / -1; }
+  .ct .up { grid-column: 4; grid-row: 1; }
+  .ct .up.off { grid-column: 4; }
+}
+
+/* Без питания (assets/js/power.js) шкалы гаснут вместе с юнитом. */
+.u.off .meter i { background: var(--led-off); }
+.u.off .meter b, .u.off .ct .up { color: transparent; }

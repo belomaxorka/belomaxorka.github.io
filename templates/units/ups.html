@@ -1,10 +1,11 @@
-{{/* ИБП = подвал сайта. Настоящий ИБП за стойкой: заряд, нагрузка и время работы из NUT (.UPS). */}}
+{{/* ИБП = подвал сайта. Настоящий ИБП за стойкой: заряд, нагрузка и время работы из NUT (.UPS).
+     Шнур ИБП можно выдернуть из розетки (assets/js/power.js): тогда ЖК показывает свою батарею, подписи — data-*. */}}
 {{define "unit-ups"}}
 <footer class="u ups" style="--h:2">
   <div class="face">
     <button class="pwr" type="button" hidden aria-label="{{t "ups.power"}}" title="{{t "ups.power"}}">⏻</button>
     {{with .UPS}}
-    <div class="lcd{{if .OnBattery}} alarm{{end}}">
+    <div class="lcd{{if .OnBattery}} alarm{{end}}" data-charge="{{.Charge}}" data-battery="{{t "ups.battery"}}" data-charging="{{t "ups.charging"}}" data-mains="{{t "ups.back"}}" data-left="{{t "ups.left"}}">
       <span class="batt{{if .LowBattery}} low{{end}}" aria-hidden="true">{{range $i := seq 5}}<i{{if ge $i $.UPS.Bars}} class="e"{{end}}></i>{{end}}</span>
       <span>{{if .OK}}{{if .OnBattery}}{{t "ups.battery"}}{{else}}{{t "ups.mains"}}{{end}} · {{.Charge}}%<br><span class="d">{{t "ups.load" .Load}} · {{t "ups.runtime" .RuntimeMin}}</span>{{else}}{{t "ups.online"}}<br><span class="d">{{t "ups.nodata"}}</span>{{end}}</span>
     </div>

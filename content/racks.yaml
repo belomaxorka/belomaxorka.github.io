@@ -12,7 +12,7 @@
 
 - id: lab
   path: /lab
-  units: [patch, mgmt, monitor, ups]
+  units: [patch, mgmt, pve, guests, monitor, ups]
 
 - id: fun
   path: /fun

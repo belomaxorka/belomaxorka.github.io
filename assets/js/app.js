@@ -233,13 +233,12 @@
   }
 
   // ---------- провода ----------
-  // Патч-корды от вебринга к роутеру, свитч к роутеру по правой рейке, аплинк из роутера наружу,
-  // питание ИБП в розетку. Всё в одном SVG поверх комнаты, клики проходят насквозь.
+  // Патч-корды от вебринга к роутеру, свитч к роутеру по правой рейке, аплинк из роутера наружу.
+  // Всё в одном SVG поверх комнаты, клики проходят насквозь.
   const NS = 'http://www.w3.org/2000/svg';
   const PATCH = ['#3a7bd5', '#e0b93a', '#d9534f', '#3daa63'];
   const SWITCH = '#9b6bd6';
   const UPLINK = '#5b6068';
-  const POWER = '#26292e';
 
   function el(name, attrs, parent) {
     const node = document.createElementNS(NS, name);
@@ -312,23 +311,7 @@
       plug(svg, wan.cx, wan.cy, UPLINK, 8, 9);
     }
 
-    // Питание: из ИБП вниз, по полу в розетку.
-    const ups = rack.querySelector('.ups');
-    if (ups) {
-      const u = box(ups);
-      const floor = rk.b + 34;
-      const sx = rk.x + railW + 46;
-      const wall = rk.x > 110;
-      const ox = wall ? rk.x - 62 : rk.x + railW + 120;
-      const oy = wall ? rk.b - 40 : floor + 26;
-      el('rect', { x: ox - 16, y: oy - 18, width: 32, height: 36, rx: 5, class: 'outlet' }, svg);
-      el('circle', { cx: ox - 6, cy: oy - 4, r: 2.6, class: 'outlet-hole' }, svg);
-      el('circle', { cx: ox + 6, cy: oy - 4, r: 2.6, class: 'outlet-hole' }, svg);
-      const py = oy + 12;
-      cable(svg, `M${sx} ${u.b - 6} C${sx} ${floor + 30}, ${ox} ${floor + 40}, ${ox} ${py + 8}`, POWER, 6);
-      el('rect', { x: ox - 9, y: py - 4, width: 18, height: 14, rx: 3, fill: POWER, stroke: 'rgba(0,0,0,.5)' }, svg);
-      if (wall) el('text', { x: ox - 22, y: oy - 26, class: 'lbl' }, svg).textContent = svg.dataset.power || '';
-    }
+    // Шнур ИБП в розетку рисует assets/js/power.js: его можно выдернуть.
   }
 
   function layout() { snap(); cables(); document.dispatchEvent(new Event('rack:laidout')); }
