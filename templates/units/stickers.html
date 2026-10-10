@@ -1,70 +1,18 @@
-{{/* Кнопки 88x31: люди (их сайты) и сайты-штуки. Картинки лежат у нас в assets/88x31/, взяты с tei.pet и zhn.su. */}}
+{{/* Кнопки 88x31: две полосы, люди и сайты. Список — content/buttons.yaml, картинки — assets/88x31/. */}}
 {{define "unit-buttons"}}
 <section class="u stick" style="--h:2" aria-labelledby="btn-people">
   <div class="face">
     <span class="tape b" id="btn-people">{{t "btn.people"}}</span>
-    <div class="wall">
-      <a class="b88" href="https://otomir23.me/" title="otomir23"><img src="{{asset "88x31/otomir23.png"}}" width="88" height="31" alt="otomir23" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://tei.pet" title="teidesu"><img src="{{asset "88x31/teidesu.png"}}" width="88" height="31" alt="teidesu" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://zhn.su/" title="zhn.su"><img src="{{asset "88x31/zhn-su.png"}}" width="88" height="31" alt="zhn.su" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://std.mem.transmute.me/" title="polina4096"><img src="{{asset "88x31/polina4096.png"}}" width="88" height="31" alt="polina4096" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://girlboss.ceo/" title="june"><img src="{{asset "88x31/june.png"}}" width="88" height="31" alt="june" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://es3n1n.eu/" title="es3n1n"><img src="{{asset "88x31/es3n1n.png"}}" width="88" height="31" alt="es3n1n" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://calayucu.com/" title="miyuko"><img src="{{asset "88x31/miyuko.png"}}" width="88" height="31" alt="miyuko" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://vendicated.dev/" title="vendicated"><img src="{{asset "88x31/vendicated.gif"}}" width="88" height="31" alt="vendicated" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://vmfunc.gg/" title="mel (vmfunc)"><img src="{{asset "88x31/vmfunc.png"}}" width="88" height="31" alt="mel (vmfunc)" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://yui.dev" title="yui.dev"><img src="{{asset "88x31/yuidev.png"}}" width="88" height="31" alt="yui.dev" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://eva.ac" title="eva.ac"><img src="{{asset "88x31/eva-ac.png"}}" width="88" height="31" alt="eva.ac" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://asyasocute.online/" title="asyasocute"><img src="{{asset "88x31/asyasocute.png"}}" width="88" height="31" alt="asyasocute" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://nikableh.moe/" title="nikableh"><img src="{{asset "88x31/nikableh.png"}}" width="88" height="31" alt="nikableh" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://kravets.wtf" title="kravets.wtf"><img src="{{asset "88x31/kravets.gif"}}" width="88" height="31" alt="kravets.wtf" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://hideshots.eu" title="sophie!"><img src="{{asset "88x31/sophie.png"}}" width="88" height="31" alt="sophie!" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://kweiss.cat/" title="kweiss"><img src="{{asset "88x31/kweiss.gif"}}" width="88" height="31" alt="kweiss" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://boylifein.eu" title="inteko"><img src="{{asset "88x31/inteko.gif"}}" width="88" height="31" alt="inteko" loading="lazy" decoding="async"></a>
-    </div>
+    <div class="wall">{{range .Content.buttons.people}}{{template "b88" .}}{{end}}</div>
   </div>
 </section>
 <section class="u stick" style="--h:3" aria-labelledby="btn-sites">
   <div class="face">
     <span class="tape" id="btn-sites">{{t "btn.sites"}}</span>
-    <div class="wall">
-      <a class="b88" href="https://stupid.fish" title="stupid.fish"><img src="{{asset "88x31/stupid-fish.png"}}" width="88" height="31" alt="stupid.fish" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://senko.digital/" title="Hosted on Senko Digital"><img src="{{asset "88x31/senko-digital.png"}}" width="88" height="31" alt="Hosted on Senko Digital" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://www.docker.com/" title="Powered by Docker"><img src="{{asset "88x31/docker.png"}}" width="88" height="31" alt="Powered by Docker" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://www.qbittorrent.org" title="sharing is caring, seed your torrents"><img src="{{asset "88x31/seed-your-torrents.gif"}}" width="88" height="31" alt="sharing is caring, seed your torrents" loading="lazy" decoding="async"></a>
-      <span class="b88" title="piracy NOW"><img src="{{asset "88x31/piracy.png"}}" width="88" height="31" alt="piracy NOW" loading="lazy" decoding="async"></span>
-      <a class="b88" href="https://github.com/yt-dlp/yt-dlp" title="yt-dlp"><img src="{{asset "88x31/yt-dlp.webp"}}" width="88" height="31" alt="yt-dlp" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://archive.org/" title="archive.org"><img src="{{asset "88x31/archive-org.png"}}" width="88" height="31" alt="archive.org" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://www.mozilla.org/firefox/" title="Firefox"><img src="{{asset "88x31/firefox.gif"}}" width="88" height="31" alt="Firefox" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://www.thunderbird.net/" title="Thunderbird"><img src="{{asset "88x31/thunderbird.gif"}}" width="88" height="31" alt="Thunderbird" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://ublockorigin.com/" title="uBlock Origin"><img src="{{asset "88x31/ublock.png"}}" width="88" height="31" alt="uBlock Origin" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://www.torproject.org/" title="Tor"><img src="{{asset "88x31/tor.gif"}}" width="88" height="31" alt="Tor" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://helium.computer/" title="Helium"><img src="{{asset "88x31/helium.gif"}}" width="88" height="31" alt="Helium" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://www.videolan.org/" title="VLC"><img src="{{asset "88x31/vlc.png"}}" width="88" height="31" alt="VLC" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://www.foobar2000.org/" title="foobar2000"><img src="{{asset "88x31/foobar2000.png"}}" width="88" height="31" alt="foobar2000" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://bun.com/" title="Bun"><img src="{{asset "88x31/bun.gif"}}" width="88" height="31" alt="Bun" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://astro.build/" title="Astro"><img src="{{asset "88x31/astro.png"}}" width="88" height="31" alt="Astro" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://prismlauncher.org/" title="Prism Launcher"><img src="{{asset "88x31/prism.gif"}}" width="88" height="31" alt="Prism Launcher" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://dortania.github.io/OpenCore-Install-Guide/" title="OpenCore"><img src="{{asset "88x31/opencore.gif"}}" width="88" height="31" alt="OpenCore" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://store.steampowered.com/" title="Steam"><img src="{{asset "88x31/steam.gif"}}" width="88" height="31" alt="Steam" loading="lazy" decoding="async"></a>
-      <span class="b88" title="Get Quake Now!"><img src="{{asset "88x31/quake.gif"}}" width="88" height="31" alt="Get Quake Now!" loading="lazy" decoding="async"></span>
-      <span class="b88" title="Emulate NOW!"><img src="{{asset "88x31/emulate.png"}}" width="88" height="31" alt="Emulate NOW!" loading="lazy" decoding="async"></span>
-      <a class="b88" href="https://www.ifixit.com/" title="iFixit: right to repair"><img src="{{asset "88x31/right2repair.gif"}}" width="88" height="31" alt="iFixit: right to repair" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://www.defectivebydesign.org/" title="DEFECTIVE by design"><img src="{{asset "88x31/defective.webp"}}" width="88" height="31" alt="DEFECTIVE by design" loading="lazy" decoding="async"></a>
-      <span class="b88" title="best viewed with any browser"><img src="{{asset "88x31/any-browser.png"}}" width="88" height="31" alt="best viewed with any browser" loading="lazy" decoding="async"></span>
-      <span class="b88" title="лучше всего в любом браузере"><img src="{{asset "88x31/any-browser-ru.png"}}" width="88" height="31" alt="лучше всего в любом браузере" loading="lazy" decoding="async"></span>
-      <span class="b88" title="glitchy in any damn browser"><img src="{{asset "88x31/glitchy.png"}}" width="88" height="31" alt="glitchy in any damn browser" loading="lazy" decoding="async"></span>
-      <span class="b88" title="warning: page contains javascript"><img src="{{asset "88x31/js-warning.png"}}" width="88" height="31" alt="warning: page contains javascript" loading="lazy" decoding="async"></span>
-      <span class="b88" title="CSS is my passion"><img src="{{asset "88x31/css-passion.gif"}}" width="88" height="31" alt="CSS is my passion" loading="lazy" decoding="async"></span>
-      <span class="b88" title="graphic design is my passion"><img src="{{asset "88x31/design-passion.png"}}" width="88" height="31" alt="graphic design is my passion" loading="lazy" decoding="async"></span>
-      <a class="b88" href="https://neocities.org/" title="MAKE A NEOCITIES"><img src="{{asset "88x31/neocities.gif"}}" width="88" height="31" alt="MAKE A NEOCITIES" loading="lazy" decoding="async"></a>
-      <a class="b88" href="https://eightyeightthirty.one/" title="eightyeightthirty.one"><img src="{{asset "88x31/88x31.png"}}" width="88" height="31" alt="eightyeightthirty.one" loading="lazy" decoding="async"></a>
-      <span class="b88" title="webmoney"><img src="{{asset "88x31/webmoney.gif"}}" width="88" height="31" alt="webmoney" loading="lazy" decoding="async"></span>
-      <a class="b88" href="https://getfriend.ly" title="Friendly"><img src="{{asset "88x31/friendly.png"}}" width="88" height="31" alt="Friendly" loading="lazy" decoding="async"></a>
-      <span class="b88" title="HAVE A SMILE"><img src="{{asset "88x31/have-a-smile.png"}}" width="88" height="31" alt="HAVE A SMILE" loading="lazy" decoding="async"></span>
-      <span class="b88" title="Powered by Dr Pepper"><img src="{{asset "88x31/dr-pepper.png"}}" width="88" height="31" alt="Powered by Dr Pepper" loading="lazy" decoding="async"></span>
-      <a class="b88" href="https://t.me/belomaxorka" title="your ad here"><img src="{{asset "88x31/your-ad-here.png"}}" width="88" height="31" alt="your ad here" loading="lazy" decoding="async"></a>
-    </div>
+    <div class="wall">{{range .Content.buttons.sites}}{{template "b88" .}}{{end}}</div>
   </div>
 </section>
+{{end}}
+
+{{define "b88"}}{{if .link}}<a class="b88" href="{{.link}}" title="{{.title}}">{{else}}<span class="b88" title="{{.title}}">{{end}}<img src="{{asset (printf "88x31/%s" .image)}}" width="88" height="31" alt="{{.title}}" loading="lazy" decoding="async">{{if .link}}</a>{{else}}</span>{{end}}
 {{end}}

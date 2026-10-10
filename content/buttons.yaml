@@ -1,0 +1,155 @@
+# Кнопки 88x31: две полосы на сайте, порядок здесь — порядок на сайте.
+# Добавить кнопку: положить картинку в assets/88x31/ и дописать три строки.
+#   title — подсказка и alt, image — файл в assets/88x31/, link — куда ведёт (без link кнопка не кликается).
+# Изменения подхватываются сами после push: site-api перечитывает content/ без перезапуска.
+
+people:
+  - title: otomir23
+    image: otomir23.png
+    link: https://otomir23.me/
+  - title: teidesu
+    image: teidesu.png
+    link: https://tei.pet
+  - title: zhn.su
+    image: zhn-su.png
+    link: https://zhn.su/
+  - title: polina4096
+    image: polina4096.png
+    link: https://std.mem.transmute.me/
+  - title: june
+    image: june.png
+    link: https://girlboss.ceo/
+  - title: es3n1n
+    image: es3n1n.png
+    link: https://es3n1n.eu/
+  - title: miyuko
+    image: miyuko.png
+    link: https://calayucu.com/
+  - title: vendicated
+    image: vendicated.gif
+    link: https://vendicated.dev/
+  - title: "mel (vmfunc)"
+    image: vmfunc.png
+    link: https://vmfunc.gg/
+  - title: yui.dev
+    image: yuidev.png
+    link: https://yui.dev
+  - title: eva.ac
+    image: eva-ac.png
+    link: https://eva.ac
+  - title: asyasocute
+    image: asyasocute.png
+    link: https://asyasocute.online/
+  - title: nikableh
+    image: nikableh.png
+    link: https://nikableh.moe/
+  - title: kravets.wtf
+    image: kravets.gif
+    link: https://kravets.wtf
+  - title: "sophie!"
+    image: sophie.png
+    link: https://hideshots.eu
+  - title: kweiss
+    image: kweiss.gif
+    link: https://kweiss.cat/
+  - title: inteko
+    image: inteko.gif
+    link: https://boylifein.eu
+
+sites:
+  - title: stupid.fish
+    image: stupid-fish.png
+    link: https://stupid.fish
+  - title: Hosted on Senko Digital
+    image: senko-digital.png
+    link: https://senko.digital/
+  - title: Powered by Docker
+    image: docker.png
+    link: https://www.docker.com/
+  - title: "sharing is caring, seed your torrents"
+    image: seed-your-torrents.gif
+    link: https://www.qbittorrent.org
+  - title: piracy NOW
+    image: piracy.png
+  - title: yt-dlp
+    image: yt-dlp.webp
+    link: https://github.com/yt-dlp/yt-dlp
+  - title: archive.org
+    image: archive-org.png
+    link: https://archive.org/
+  - title: Firefox
+    image: firefox.gif
+    link: https://www.mozilla.org/firefox/
+  - title: Thunderbird
+    image: thunderbird.gif
+    link: https://www.thunderbird.net/
+  - title: uBlock Origin
+    image: ublock.png
+    link: https://ublockorigin.com/
+  - title: Tor
+    image: tor.gif
+    link: https://www.torproject.org/
+  - title: Helium
+    image: helium.gif
+    link: https://helium.computer/
+  - title: VLC
+    image: vlc.png
+    link: https://www.videolan.org/
+  - title: foobar2000
+    image: foobar2000.png
+    link: https://www.foobar2000.org/
+  - title: Bun
+    image: bun.gif
+    link: https://bun.com/
+  - title: Astro
+    image: astro.png
+    link: https://astro.build/
+  - title: Prism Launcher
+    image: prism.gif
+    link: https://prismlauncher.org/
+  - title: OpenCore
+    image: opencore.gif
+    link: https://dortania.github.io/OpenCore-Install-Guide/
+  - title: Steam
+    image: steam.gif
+    link: https://store.steampowered.com/
+  - title: "Get Quake Now!"
+    image: quake.gif
+  - title: "Emulate NOW!"
+    image: emulate.png
+  - title: "iFixit: right to repair"
+    image: right2repair.gif
+    link: https://www.ifixit.com/
+  - title: DEFECTIVE by design
+    image: defective.webp
+    link: https://www.defectivebydesign.org/
+  - title: best viewed with any browser
+    image: any-browser.png
+  - title: "лучше всего в любом браузере"
+    image: any-browser-ru.png
+  - title: glitchy in any damn browser
+    image: glitchy.png
+  - title: "warning: page contains javascript"
+    image: js-warning.png
+  - title: CSS is my passion
+    image: css-passion.gif
+  - title: graphic design is my passion
+    image: design-passion.png
+  - title: MAKE A NEOCITIES
+    image: neocities.gif
+    link: https://neocities.org/
+  - title: eightyeightthirty.one
+    image: 88x31.png
+    link: https://eightyeightthirty.one/
+  - title: webmoney
+    image: webmoney.gif
+  - title: Friendly
+    image: friendly.png
+    link: https://getfriend.ly
+  - title: HAVE A SMILE
+    image: have-a-smile.png
+  - title: Powered by Dr Pepper
+    image: dr-pepper.png
+  - title: your ad here
+    image: your-ad-here.png
+    link: https://t.me/belomaxorka

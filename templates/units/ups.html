@@ -1,14 +1,19 @@
-{{/* ИБП = подвал сайта. Данные: .Uptime (аптайм site-api), .Updated (время выкладки сайта). */}}
+{{/* ИБП = подвал сайта. Настоящий ИБП за стойкой: заряд, нагрузка и время работы из NUT (.UPS). */}}
 {{define "unit-ups"}}
 <footer class="u ups" style="--h:2">
   <div class="face">
-    <div class="lcd"><span class="batt" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span>{{t "ups.online"}}<br><span class="d">{{t "ups.uptime" (uptime .Uptime)}}</span></span></div>
+    {{with .UPS}}
+    <div class="lcd{{if .OnBattery}} alarm{{end}}">
+      <span class="batt{{if .LowBattery}} low{{end}}" aria-hidden="true">{{range $i := seq 5}}<i{{if ge $i $.UPS.Bars}} class="e"{{end}}></i>{{end}}</span>
+      <span>{{if .OK}}{{if .OnBattery}}{{t "ups.battery"}}{{else}}{{t "ups.mains"}}{{end}} · {{.Charge}}%<br><span class="d">{{t "ups.load" .Load}} · {{t "ups.runtime" .RuntimeMin}}</span>{{else}}{{t "ups.online"}}<br><span class="d">{{t "ups.nodata"}}</span>{{end}}</span>
+    </div>
+    {{end}}
     <div class="sticker" aria-hidden="true">{{th "ups.sticker"}}</div>
     <div class="meta">
       <span><b>hosted on belomaxorka infrastructure</b></span>
       <span>{{t "ups.updated" (date .Updated)}} · {{t "ups.sources"}} <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev">{{t "ups.site"}}</a>, <a href="https://git.belomaxorka.dev/belomaxorka/site-api">site-api</a></span>
     </div>
-    <span class="silk">{{t "ups.label"}}</span>
+    <span class="silk">{{t "ups.label"}} · cbr 1000 va</span>
   </div>
 </footer>
 {{end}}

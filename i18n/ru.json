@@ -121,7 +121,11 @@
   "blank.text": "← тут будет второй сервер (копим)",
 
   "ups.online": "онлайн",
-  "ups.uptime": "аптайм сайта %s",
+  "ups.mains": "от сети",
+  "ups.battery": "от батареи!",
+  "ups.load": "нагрузка %d%%",
+  "ups.runtime": "~%d мин",
+  "ups.nodata": "нет данных",
   "ups.updated": "обновлено %s",
   "ups.sources": "исходники:",
   "ups.site": "сайт",

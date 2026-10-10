@@ -1,13 +1,10 @@
-{{/* Проекты = корзины дисков. */}}
+{{/* Проекты = корзины дисков. Список — content/projects.yaml. */}}
 {{define "unit-disks"}}
 <section class="u disks" style="--h:3" aria-label="{{t "disks.aria"}}">
   <div class="face">
     <div class="bays">
-      <a class="bay" href="https://github.com/torrentpier/torrentpier"><span class="top"><span class="tape">torrentpier</span><i class="led blink"></i></span><p>{{t "proj.tp"}}</p></a>
-      <a class="bay" href="https://get.torrentpier.dev"><span class="top"><span class="tape">get.tp.dev</span><i class="led blink s2"></i></span><p>{{t "proj.get"}}</p></a>
-      <a class="bay" href="https://git.belomaxorka.dev/belomaxorka/site-api"><span class="top"><span class="tape r">site-api</span><i class="led blink s3"></i></span><p>{{t "proj.api"}}</p></a>
-      <div class="bay"><span class="top"><span class="tape">cs 1.6</span><i class="led off"></i></span><p>{{t "proj.cs"}}</p></div>
-      <div class="bay"><span class="top"><span class="tape b">{{t "proj.bots.tape"}}</span><i class="led blink s2"></i></span><p>{{t "proj.bots"}}</p></div>
+      {{range .Content.projects}}{{if .link}}<a class="bay" href="{{.link}}">{{else}}<div class="bay">{{end}}<span class="top"><span class="tape{{with .tape}} {{.}}{{end}}">{{loc .name}}</span><i class="led{{with .led}} {{.}}{{end}}"></i></span><p>{{loc .desc}}</p>{{if .link}}</a>{{else}}</div>{{end}}
+      {{end}}
     </div>
   </div>
 </section>

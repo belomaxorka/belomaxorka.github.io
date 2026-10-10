@@ -1,0 +1,22 @@
+# Порты свитча = контакты. Порядок здесь — порядок на сайте.
+#   name — надпись (строка или {en, ru}), link — адрес (без него порт выключен),
+#   tape — цвет ленты: пусто, r, b; led — лампа: пусто (зелёная), warn, off;
+#   title — подсказка при наведении; needs: cv — порт живой, только когда в корне сайта лежит cv.pdf.
+- name: telegram
+  link: https://t.me/belomaxorka
+  tape: b
+- name: forgejo
+  link: https://git.belomaxorka.dev/belomaxorka
+- name: github
+  link: https://github.com/belomaxorka
+  led: warn
+  title: {en: mirror, ru: зеркало}
+- name: koito · fm
+  link: https://fm.belomaxorka.dev
+  tape: r
+- name: {en: cv.pdf, ru: резюме.pdf}
+  link: /cv.pdf
+  needs: cv
+  title: {en: soon, ru: скоро}
+- name: matrix
+  title: {en: soon, ru: скоро}

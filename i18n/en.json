@@ -121,7 +121,11 @@
   "blank.text": "← a second server goes here (saving up)",
 
   "ups.online": "online",
-  "ups.uptime": "site uptime %s",
+  "ups.mains": "on mains",
+  "ups.battery": "on battery!",
+  "ups.load": "load %d%%",
+  "ups.runtime": "~%d min",
+  "ups.nodata": "no data",
   "ups.updated": "updated %s",
   "ups.sources": "source:",
   "ups.site": "site",
