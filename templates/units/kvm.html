@@ -37,13 +37,13 @@
         <textarea id="gb-text" name="text" maxlength="600" placeholder="{{t "gb.placeholder"}}" aria-label="{{t "gb.message"}}"></textarea>
       </div>
       <div class="keys">
-        <button class="key" type="button" hidden x-init="$el.hidden = false" @click="open = !open" :aria-pressed="open">{{t "gb.draw"}}</button>
+        <button class="key" type="button" hidden :hidden="false" @click="open = !open" :aria-pressed="open">{{t "gb.draw"}}</button>
         <button class="key" type="submit">{{t "gb.send"}}</button>
       </div>
       <div class="pad" hidden x-bind:hidden="!open">
         <canvas x-ref="pad" width="320" height="200" aria-label="{{t "gb.pad"}}"></canvas>
         <div class="tools">
-          <template x-for="c in colors" :key="c"><button type="button" class="sw" x-init="$el.style.background = c" @click="color = c" :aria-pressed="c === color" :aria-label="c"></button></template>
+          <template x-for="c in colors" :key="c"><button type="button" class="sw" :style="{ background: c }" @click="color = c" :aria-pressed="c === color" :aria-label="c"></button></template>
           <button type="button" class="key" data-thin="{{t "gb.pad.thin"}}" data-thick="{{t "gb.pad.thick"}}" @click="size = size === 3 ? 9 : 3" x-text="size === 3 ? $el.dataset.thin : $el.dataset.thick">{{t "gb.pad.thin"}}</button>
           <button type="button" class="key" @click="clear()">{{t "gb.pad.clear"}}</button>
         </div>

@@ -4,6 +4,10 @@
 <html lang="{{lang}}" data-lcd="cover">
 <head>
 <meta charset="utf-8">
+{{/* Что странице можно загружать: только свои скрипты (Alpine — CSP-сборка, без eval; никаких inline-скриптов
+     и onclick=), стили свои и в атрибутах style, картинки отовсюду по https (обложки Koito, кнопки 88x31).
+     Остальное (frame-ancestors, base-uri, form-action) site-api шлёт заголовком. */}}
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>belomaxorka's space</title>
 <meta name="description" content="{{t "meta.description"}}">
@@ -15,19 +19,11 @@
 <link rel="apple-touch-icon" href="{{asset "icons/apple-touch-icon.png"}}">
 <link rel="stylesheet" href="{{asset "css/site.css"}}">
 <style id="cover-palette">{{template "palette" .Music}}</style>
-<script>
-  (function () {
-    try {
-      var r = document.documentElement, t = localStorage.getItem('theme'), l = localStorage.getItem('lcd');
-      if (t) r.dataset.theme = t;
-      if (l) r.dataset.lcd = l;
-    } catch (e) {}
-  })();
-</script>
+<script src="{{asset "js/theme.js"}}"></script>
 <script defer src="{{asset "vendor/htmx-2.0.4.min.js"}}"></script>
 <script defer src="{{asset "js/app.js"}}"></script>
 <script defer src="{{asset "js/power.js"}}"></script>
-<script defer src="{{asset "vendor/alpine-3.14.9.min.js"}}"></script>
+<script defer src="{{asset "vendor/alpine-csp-3.17.4.min.js"}}"></script>
 </head>
 <body>
 {{template "page" .}}

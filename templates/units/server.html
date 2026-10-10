@@ -8,8 +8,8 @@
         {{range $i, $src := .}}<img src="{{$src}}" alt="{{t "me.avatar"}}" width="640" height="640" decoding="async"{{if $i}} loading="lazy"{{end}}>{{end}}
       </div>
       {{if gt (len .) 1}}
-      <button class="nav prev" type="button" hidden x-init="$el.hidden = false" @click="go(-1)" aria-label="{{t "me.prev"}}">‹</button>
-      <button class="nav next" type="button" hidden x-init="$el.hidden = false" @click="go(1)" aria-label="{{t "me.next"}}">›</button>
+      <button class="nav prev" type="button" hidden :hidden="false" @click="go(-1)" aria-label="{{t "me.prev"}}">‹</button>
+      <button class="nav next" type="button" hidden :hidden="false" @click="go(1)" aria-label="{{t "me.next"}}">›</button>
       <span class="count" x-text="(i + 1) + ' / ' + n">1 / {{len .}}</span>
       {{end}}
     </div>

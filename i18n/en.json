@@ -106,6 +106,7 @@
   "gb.err.fast": "that was quick. wait a few seconds and send again",
   "gb.err.expired": "the form went stale, reload the page",
   "gb.err.rate": "too many messages, try again in ten minutes",
+  "gb.err.busy": "the guestbook is swamped right now, try again in an hour",
   "gb.err.fail": "something broke on my side, try later",
   "gb.draw": "✎ draw",
   "gb.send": "⏎ send",
