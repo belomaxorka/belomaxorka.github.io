@@ -1,0 +1,23 @@
+# Короткие подписи лампочек мониторинга: имя проверки в Gatus (infra gatus/config.yaml) → надпись под лампой.
+# Новая проверка без строки здесь подписывается сама: имя в нижнем регистре без скобок
+# («Proxmox» → proxmox, «Notes (Memos)» → notes).
+labels:
+  belomaxorka.dev: site
+  Blog: blog
+  Site API: api
+  Git (Forgejo): git
+  Vault (Vaultwarden): vault
+  Paste (rustypaste): paste
+  IT Tools: tools
+  Notes (Memos): memos
+  Gists (Opengist): gist
+  Coding stats (Wakapi): waka
+  Analytics (Umami): stats
+  Notifications (ntfy): ntfy
+  Scrobbles (Koito): fm
+  Status page: status
+  Proxmox: proxmox
+  Backup server (PBS): pbs
+  Reverse proxy (Caddy): caddy
+  i2pd router: i2pd
+  i2pd console: i2p ui

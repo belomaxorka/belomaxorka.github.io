@@ -1,0 +1,14 @@
+# Профиль на юните-сервере. Тексты — ключи i18n (t), непереводимое — как есть (text).
+#   birthday — по нему site-api считает возраст и «день рождения через N дней» (по времени Барнаула);
+#   tapes    — ряды лент под именем: t — ключ i18n, text — надпись как есть, age — возраст,
+#              color — цвет ленты: пусто (серая), r (красная), b (синяя).
+birthday: "2006-05-25"
+tapes:
+  - - {t: me.pronouns}
+    - {age: true}
+    - {text: infp-t, color: r}
+    - {text: ru · en}
+  - - {t: me.backend, color: b}
+    - {t: me.frontend, color: b}
+    - {t: me.devops, color: b}
+    - {t: me.selfhosted, color: b}
