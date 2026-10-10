@@ -9,11 +9,9 @@
 a.b88:hover, a.b88:focus-visible { transform: translateY(-2px); }
 @media (prefers-reduced-motion: reduce) { .b88 { transition: none; } }
 
-/* Мои кнопки: группы по темам, у каждой кнопки код для копирования. */
+/* Мои кнопки: один ряд, у каждой кнопки код для копирования. */
 .mine-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
-.mine .groups { display: flex; flex-wrap: wrap; gap: 14px 22px; width: 100%; }
-.mine .group { display: grid; gap: 6px; align-content: start; }
-.mine .items { display: flex; flex-wrap: wrap; gap: 10px; }
+.mine .items { display: flex; flex-wrap: wrap; gap: 10px 14px; }
 .mine .item { display: grid; grid-template-columns: 88px; gap: 4px; justify-items: start; width: 88px; position: relative; }
 .mine .item img.b88 { image-rendering: pixelated; }
 .mine .item .key { font-size: 9px; padding: 5px 6px; min-height: 22px; width: 100%; justify-content: center; }

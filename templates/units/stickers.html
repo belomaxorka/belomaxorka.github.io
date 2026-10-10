@@ -3,19 +3,12 @@
 <section class="u stick mine" style="--h:3" aria-labelledby="btn-mine">
   <div class="face">
     <div class="mine-head"><span class="tape r" id="btn-mine">{{t "btn.mine"}}</span><span class="silk">{{t "btn.mine_hint"}}</span></div>
-    <div class="groups">
-      {{range .Content.buttons.mine}}
-      <div class="group">
-        <span class="silk">{{loc .category}}</span>
-        <div class="items">
-          {{range .items}}{{$code := printf "<a href=\"https://belomaxorka.dev\"><img src=\"https://belomaxorka.dev/88x31/%s\" width=\"88\" height=\"31\" alt=\"belomaxorka\"></a>" .image}}
-          <div class="item" x-data="copyCode">
-            <img class="b88" src="/88x31/{{.image}}" width="88" height="31" alt="{{.title}}" loading="lazy" decoding="async">
-            <button class="key" type="button" hidden x-init="$el.hidden = false" data-code="{{$code}}" data-copy="{{t "btn.copy"}}" data-done="{{t "btn.copied"}}" @click="copy($el)" x-text="label">{{t "btn.copy"}}</button>
-            <details><summary class="silk">{{t "btn.code"}}</summary><input class="code" readonly value="{{$code}}" aria-label="{{t "btn.code"}}" onfocus="this.select()"></details>
-          </div>
-          {{end}}
-        </div>
+    <div class="items">
+      {{range .Content.buttons.mine}}{{$code := printf "<a href=\"https://belomaxorka.dev\"><img src=\"https://belomaxorka.dev/88x31/%s\" width=\"88\" height=\"31\" alt=\"belomaxorka\"></a>" .image}}
+      <div class="item" x-data="copyCode">
+        <img class="b88" src="/88x31/{{.image}}" width="88" height="31" alt="{{.title}}" loading="lazy" decoding="async">
+        <button class="key" type="button" hidden x-init="$el.hidden = false" data-code="{{$code}}" data-copy="{{t "btn.copy"}}" data-done="{{t "btn.copied"}}" @click="copy($el)" x-text="label">{{t "btn.copy"}}</button>
+        <details><summary class="silk">{{t "btn.code"}}</summary><input class="code" readonly value="{{$code}}" aria-label="{{t "btn.code"}}" onfocus="this.select()"></details>
       </div>
       {{end}}
     </div>
