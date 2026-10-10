@@ -78,6 +78,18 @@
       destroy() { clearInterval(this.timer); },
     }));
 
+    // Код моей кнопки 88x31 в буфер обмена; подписи на языке страницы в data-атрибутах.
+    Alpine.data('copyCode', () => ({
+      label: '',
+      init() { this.label = this.$root.querySelector('[data-copy]').dataset.copy; },
+      copy(btn) {
+        const done = () => { this.label = btn.dataset.done; setTimeout(() => { this.label = btn.dataset.copy; }, 1600); };
+        const fallback = () => { const d = this.$root.querySelector('details'); d.open = true; d.querySelector('input').select(); };
+        if (!navigator.clipboard) return fallback();
+        navigator.clipboard.writeText(btn.dataset.code).then(done, fallback);
+      },
+    }));
+
     // Аватарки: листаются и без JS (scroll-snap); здесь стрелки, счётчик и прокрутка по кругу.
     Alpine.data('gallery', () => ({
       i: 0,

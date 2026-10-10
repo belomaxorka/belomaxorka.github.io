@@ -112,6 +112,11 @@
 
   "lb.close": "close",
 
+  "btn.mine": "my buttons",
+  "btn.mine_hint": "put any of them on your site",
+  "btn.copy": "copy code",
+  "btn.copied": "copied!",
+  "btn.code": "code",
   "btn.people": "people",
   "btn.sites": "sites and things",
 

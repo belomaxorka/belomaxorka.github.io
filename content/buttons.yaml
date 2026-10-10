@@ -3,6 +3,28 @@
 #   title — подсказка и alt, image — файл в assets/88x31/, link — куда ведёт (без link кнопка не кликается).
 # Изменения подхватываются сами после push: site-api перечитывает content/ без перезапуска.
 
+# Мои кнопки: файлы лежат в /88x31/ (стабильный адрес, чтобы другие могли вставить к себе),
+# у каждой на сайте есть код для копирования. category — подпись группы, строка или {en, ru}.
+mine:
+  - category: {en: rack, ru: стойка}
+    items:
+      - title: belomaxorka · rack
+        image: rack.gif
+      - title: belomaxorka · lcd
+        image: lcd.gif
+  - category: {en: network, ru: сеть}
+    items:
+      - title: belomaxorka · link up
+        image: patch.gif
+  - category: {en: terminal, ru: терминал}
+    items:
+      - title: belomaxorka · whoami
+        image: terminal.gif
+  - category: {en: ponies, ru: пони}
+    items:
+      - title: belomaxorka · 20% cooler
+        image: rainbow-bolt.gif
+
 people:
   - title: otomir23
     image: otomir23.png
