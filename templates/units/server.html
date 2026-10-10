@@ -4,23 +4,29 @@
   <div class="face">
     <div class="photo" role="img" aria-label="место для фото"><span>photo</span></div>
     <div class="ident">
-      <h1 class="name" id="who">belomaxorka<small>рома келесидис · фулстек · php / laravel · devops</small></h1>
+      <h1 class="name" id="who">belomaxorka<small>рома келесидис · веб-разработчик</small></h1>
       <div class="tapes">
         <span class="tape">он/его</span>
         <span class="tape">{{.Age}} {{plural .Age "год" "года" "лет"}}</span>
-        <span class="tape r">enfp-t</span>
+        <span class="tape r">infp-t</span>
         <span class="tape">ru · en</span>
-        <span class="tape b">🇬🇷 греция</span>
       </div>
-      <p class="intro">привет~ делаю всё подряд: в первую очередь php и laravel, но и фронт, телеграм-боты, апишки, интеграции.
-        мейнтейню <a href="https://github.com/torrentpier/torrentpier">torrentpier</a>. эта стойка настоящая — сайт отдаётся из дома.</p>
+      <div class="tapes">
+        <span class="tape b">бэкенд</span>
+        <span class="tape b">фронтенд</span>
+        <span class="tape b">devops</span>
+        <span class="tape b">self-hosted</span>
+      </div>
+      <p class="intro">привет~ делаю веб целиком: бэкенд на php, laravel и go, фронтенд на vue, alpine и typescript,
+        а вокруг — docker, ci/cd, linux и свои серверы. пишу телеграм-ботов и интеграции, мейнтейню
+        <a href="https://github.com/torrentpier/torrentpier">torrentpier</a>. эта стойка настоящая — сайт отдаётся из дома.</p>
     </div>
     <div class="status-col">
       <div class="lcd two" x-data="cycle(3200)">
         <ul class="msgs">
           <li class="on">привет~ я рома<br><span class="d">{{if eq .DaysToBirthday 0}}сегодня др!{{else}}др через {{.DaysToBirthday}} {{plural .DaysToBirthday "день" "дня" "дней"}}{{end}}</span></li>
-          <li>php · laravel<br><span class="d">и всё остальное</span></li>
-          <li>enfp-t<br><span class="d">да, верю</span></li>
+          <li>веб целиком<br><span class="d">бэк, фронт, devops</span></li>
+          <li>infp-t<br><span class="d">посредник</span></li>
           <li>сайт на go<br><span class="d">рендер на сервере</span></li>
         </ul>
       </div>

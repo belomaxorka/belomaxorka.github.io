@@ -76,17 +76,6 @@
       },
       destroy() { clearInterval(this.timer); },
     }));
-
-    Alpine.data('copyBadge', () => ({
-      label: 'скопировать мою кнопку',
-      init() { this.$el.hidden = false; },
-      copy() {
-        const code = '<a href="https://belomaxorka.dev"><img src="https://belomaxorka.dev/88x31.gif" width="88" height="31" alt="belomaxorka"></a>';
-        const done = (text) => { this.label = text; setTimeout(() => { this.label = 'скопировать мою кнопку'; }, 1600); };
-        if (!navigator.clipboard) return done('не вышло, код в исходниках');
-        navigator.clipboard.writeText(code).then(() => done('скопировано'), () => done('не вышло, код в исходниках'));
-      },
-    }));
   });
 
   // ---------- высота юнитов кратна U, номера на рейках ----------

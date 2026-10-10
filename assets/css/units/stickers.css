@@ -1,9 +1,10 @@
-/* Заглушка с наклейками = кнопки 88x31. */
-.stick .face { gap: 10px; justify-content: center; padding-block: 12px; }
+/* Кнопки 88x31: две заглушки-панели, на каждой лента с подписью и стена кнопок. */
+.stick .face { flex-direction: column; align-items: flex-start; gap: 8px; padding-block: 10px; }
+.wall { display: flex; flex-wrap: wrap; gap: 4px; }
 .b88 {
-  width: 88px; height: 31px; flex: none; display: grid; place-items: center;
-  font: 700 9px/1.05 var(--f-silk); letter-spacing: .04em; text-align: center; text-decoration: none;
-  border: 1px solid #000; color: #fff; box-shadow: 0 2px 3px #0006;
+  display: block; width: 88px; height: 31px; flex: none; line-height: 0;
+  box-shadow: 0 1px 2px #0008; transition: transform .12s;
 }
-.b88:nth-child(3n) { transform: rotate(-2deg); }
-.b88:nth-child(3n+1) { transform: rotate(1.5deg); }
+.b88 img { width: 88px; height: 31px; image-rendering: pixelated; }
+a.b88:hover, a.b88:focus-visible { transform: translateY(-2px); }
+@media (prefers-reduced-motion: reduce) { .b88 { transition: none; } }
