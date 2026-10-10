@@ -1,5 +1,7 @@
 /* KVM-консоль = гостевая книга: экран с записями и клавиатура с формой и холстом. */
 .kvm .face { flex-direction: column; align-items: stretch; padding-block: 12px; gap: 10px; }
+/* Части не сжимаются: при открытом холсте должен расти юнит, а не сплющиваться форма. */
+.kvm .face > * { flex-shrink: 0; }
 .kvm .bar { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .screen {
   background: var(--crt); border-radius: 4px; padding: 10px 12px;
@@ -45,9 +47,10 @@
 .kb label { display: inline-flex; align-items: center; gap: 6px; min-height: 26px; }
 .kb .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
-.pad { grid-column: 1 / -1; display: grid; gap: 8px; justify-items: start; }
+/* flex, не grid: в сетке ряд считался по исходным 200px холста, а не по его реальной высоте. */
+.pad { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 0; }
 .pad canvas {
-  width: 100%; max-width: 480px; aspect-ratio: 16 / 10; height: auto; background: #fff;
+  width: 480px; max-width: 100%; aspect-ratio: 16 / 10; height: auto; background: #fff;
   border: 3px solid var(--edge); border-radius: 3px; touch-action: none; cursor: crosshair;
 }
 .pad .tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
