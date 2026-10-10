@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Pack site
-        run: git archive --format=tar -o site.tar HEAD -- . ':(exclude).forgejo' ':(exclude)README.md'
+        run: git archive --format=tar -o site.tar HEAD -- . ':(exclude,glob).*' ':(exclude,glob).*/**' ':(exclude)README.md'
 
       - name: Ship to server
         env:
