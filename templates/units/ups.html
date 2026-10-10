@@ -2,6 +2,7 @@
 {{define "unit-ups"}}
 <footer class="u ups" style="--h:2">
   <div class="face">
+    <button class="pwr" type="button" hidden aria-label="{{t "ups.power"}}" title="{{t "ups.power"}}">⏻</button>
     {{with .UPS}}
     <div class="lcd{{if .OnBattery}} alarm{{end}}">
       <span class="batt{{if .LowBattery}} low{{end}}" aria-hidden="true">{{range $i := seq 5}}<i{{if ge $i $.UPS.Bars}} class="e"{{end}}></i>{{end}}</span>

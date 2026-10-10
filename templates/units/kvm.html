@@ -5,7 +5,7 @@
 <section class="u kvm" style="--h:5" aria-labelledby="gbh" id="unit-kvm">
   <div class="face">
     <div class="bar"><span class="silk" id="gbh">{{t "gb.title"}}</span><span class="silk">{{t "gb.moderated"}}</span></div>
-    <div class="screen" id="guestbook" x-data="lightbox">
+    <div class="screen" id="guestbook" x-data="lightbox" data-nosignal="{{t "kvm.nosignal"}}">
       {{range .Entries}}
       <article class="e" id="gb{{.ID}}">
         <span class="m">{{or .Name (t "gb.anon")}} · #{{.ID}} · {{stamp .At}}</span>

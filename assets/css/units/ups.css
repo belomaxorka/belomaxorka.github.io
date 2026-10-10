@@ -1,5 +1,5 @@
 /* ИБП = подвал сайта. Стикер наклеен на угол экрана. */
-.ups .face { justify-content: space-between; gap: 10px 20px; padding-block: 12px; }
+.ups .face { justify-content: space-between; gap: 10px 16px; padding-block: 12px; }
 .ups .lcd { font-size: 20px; display: flex; gap: 12px; align-items: center; padding-right: 40px; }
 .batt { display: inline-grid; grid-template-columns: repeat(5, 7px); gap: 2px; padding: 2px; border: 2px solid var(--lcd); position: relative; }
 .batt::after { content: ""; position: absolute; right: -6px; top: 4px; width: 3px; height: 6px; background: var(--lcd); }

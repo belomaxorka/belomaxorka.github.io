@@ -132,6 +132,8 @@
   "ups.runtime": "~%d мин",
   "ups.nodata": "нет данных",
   "visits": "просмотры: %s · посетители: %s",
+  "ups.power": "питание стойки: выкл / вкл",
+  "kvm.nosignal": "нет сигнала",
   "ups.updated": "обновлено %s",
   "ups.sources": "исходники:",
   "ups.site": "сайт",

@@ -283,7 +283,7 @@
     }
   }
 
-  function layout() { snap(); cables(); }
+  function layout() { snap(); cables(); document.dispatchEvent(new Event('rack:laidout')); }
 
   let pending = 0;
   const later = () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(layout); };

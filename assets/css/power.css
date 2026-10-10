@@ -1,0 +1,37 @@
+/* Питание юнитов (assets/js/power.js): разъём на каждом юните, кабели к PDU, погасший юнит, кнопка ИБП. */
+.psu {
+  position: absolute; z-index: 2; right: calc(var(--ear) + 2px); top: 50%; transform: translateY(-50%);
+  width: 13px; height: 11px; border-radius: 2px;
+  background: var(--hole); box-shadow: inset 0 0 0 1px #000, 0 0 0 1px var(--panel-hi);
+}
+.u.has-psu .face { padding-right: 36px; }
+.cables.power { z-index: 6; }
+.cables.power .hit { fill: transparent; pointer-events: auto; cursor: grab; touch-action: none; }
+.cables.power .hit:active { cursor: grabbing; }
+
+/* Юнит без питания: тусклый, экраны пустые, лампы погасли. Текст остаётся в разметке. */
+.u.off .face { filter: saturate(.2) brightness(.6); }
+.u.off .lcd, .u.off .lcd * { color: transparent !important; text-shadow: none !important; }
+.u.off .led, .u.off .vu i { background: var(--led-off) !important; box-shadow: inset 0 1px 1px #0006 !important; animation: none !important; }
+.u.off img { filter: grayscale(1) brightness(.4); }
+.u.off .screen { position: relative; }
+.u.off .screen > * { visibility: hidden; }
+.u.off .screen::after {
+  content: attr(data-nosignal); position: absolute; inset: 0; display: grid; place-items: center;
+  font: 500 12px/1 var(--f-silk); letter-spacing: .2em; text-transform: uppercase; color: #3d4a3f;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .u .face { transition: filter .25s; }
+  .u.booting .face { animation: boot .7s steps(5); }
+}
+@keyframes boot { 0% { filter: brightness(1.9); } 30% { filter: brightness(.5); } 60% { filter: brightness(1.4); } 100% { filter: none; } }
+
+/* Кнопка питания на ИБП: горит зелёным, стойка выключена — красным. */
+.ups .pwr {
+  width: 34px; height: 34px; flex: none; border-radius: 50%; cursor: pointer;
+  border: 2px solid var(--edge); background: radial-gradient(circle at 50% 40%, var(--panel-hi), var(--key));
+  color: var(--led-ok); font: 700 15px/1 var(--f-silk); text-shadow: 0 0 6px var(--led-ok);
+  box-shadow: 0 2px 0 var(--edge), inset 0 1px 0 var(--panel-hi);
+}
+.ups .pwr:active { transform: translateY(1px); }
+.rack.powered-off .ups .pwr { color: var(--led-err); text-shadow: 0 0 6px var(--led-err); }

@@ -132,6 +132,8 @@
   "ups.runtime": "~%d min",
   "ups.nodata": "no data",
   "visits": "views: %s · visitors: %s",
+  "ups.power": "rack power: off / on",
+  "kvm.nosignal": "no signal",
   "ups.updated": "updated %s",
   "ups.sources": "source:",
   "ups.site": "site",
