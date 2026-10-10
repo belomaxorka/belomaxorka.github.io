@@ -1,16 +1,47 @@
-{{/* KVM-консоль = гостевая книга. Пока заглушка: бэкенд гостевой ещё не написан. */}}
+{{/* KVM-консоль = гостевая книга. Форма работает и без JS (обычный POST и редирект назад),
+     с JS уходит через htmx и умеет рисунок. Записи появляются после модерации.
+     Данные: .Enabled, .Entries (ID, Name, Text, Reply, At, Drawing), .Status, .Stamp. */}}
 {{define "unit-kvm"}}
-<section class="u kvm" style="--h:4" aria-labelledby="gbh">
+<section class="u kvm" style="--h:5" aria-labelledby="gbh" id="unit-kvm">
   <div class="face">
-    <div class="bar"><span class="silk" id="gbh">{{t "gb.title"}}</span><span class="silk">{{t "gb.soon"}}</span></div>
-    <div class="screen">
-      <p class="empty">{{t "gb.empty"}}</p>
+    <div class="bar"><span class="silk" id="gbh">{{t "gb.title"}}</span><span class="silk">{{t "gb.moderated"}}</span></div>
+    <div class="screen" id="guestbook">
+      {{range .Entries}}
+      <article class="e" id="gb{{.ID}}">
+        <span class="m">{{or .Name (t "gb.anon")}} · #{{.ID}} · {{stamp .At}}</span>
+        {{with .Text}}<p class="txt">{{.}}</p>{{end}}
+        {{with .Reply}}<p class="rep">{{.}}</p>{{end}}
+        {{with .Drawing}}<a class="pic" href="{{.}}" target="_blank" rel="noopener"><img src="{{.}}" alt="{{t "gb.drawing_alt"}}" loading="lazy"></a>{{end}}
+      </article>
+      {{else}}
+      <p class="empty">{{if .Enabled}}{{t "gb.none"}}{{else}}{{t "gb.off"}}{{end}}</p>
+      {{end}}
     </div>
-    <div class="kb">
-      <label for="gbtext" class="silk" style="grid-column: 1 / -1; min-height: 0">{{t "gb.message"}}</label>
-      <textarea id="gbtext" placeholder="{{t "gb.placeholder"}}" disabled></textarea>
-      <div class="keys"><button class="key" type="button" disabled>{{t "gb.draw"}}</button><button class="key" type="button" disabled>{{t "gb.send"}}</button></div>
-    </div>
+    {{if .Enabled}}
+    {{with .Status}}<p class="gb-status {{if eq . "sent"}}ok{{else}}err{{end}}" role="status">{{t (printf "gb.%s" .)}}</p>{{end}}
+    <form class="kb" method="post" action="/guestbook" hx-post="/guestbook" hx-target="#unit-kvm" hx-swap="outerHTML" x-data="oekaki">
+      <input type="hidden" name="stamp" value="{{.Stamp}}">
+      <input type="hidden" name="drawing" x-ref="drawing">
+      <label class="hp" aria-hidden="true">website <input name="website" tabindex="-1" autocomplete="off"></label>
+      <div class="fields">
+        <input id="gb-name" name="name" maxlength="32" placeholder="{{t "gb.name_ph"}}" autocomplete="nickname" aria-label="{{t "gb.name"}}">
+        <textarea id="gb-text" name="text" maxlength="600" placeholder="{{t "gb.placeholder"}}" aria-label="{{t "gb.message"}}"></textarea>
+      </div>
+      <div class="keys">
+        <button class="key" type="button" hidden x-init="$el.hidden = false" @click="open = !open" :aria-pressed="open">{{t "gb.draw"}}</button>
+        <button class="key" type="submit">{{t "gb.send"}}</button>
+      </div>
+      <div class="pad" hidden x-bind:hidden="!open">
+        <canvas x-ref="pad" width="320" height="200" aria-label="{{t "gb.pad"}}"></canvas>
+        <div class="tools">
+          <template x-for="c in colors" :key="c"><button type="button" class="sw" x-init="$el.style.background = c" @click="color = c" :aria-pressed="c === color" :aria-label="c"></button></template>
+          <button type="button" class="key" data-thin="{{t "gb.pad.thin"}}" data-thick="{{t "gb.pad.thick"}}" @click="size = size === 3 ? 9 : 3" x-text="size === 3 ? $el.dataset.thin : $el.dataset.thick">{{t "gb.pad.thin"}}</button>
+          <button type="button" class="key" @click="clear()">{{t "gb.pad.clear"}}</button>
+        </div>
+      </div>
+      <div class="opts"><label><input type="checkbox" name="private" value="1"> {{t "gb.private"}}</label><span>{{t "gb.rules"}}</span></div>
+    </form>
+    {{end}}
   </div>
 </section>
 {{end}}
