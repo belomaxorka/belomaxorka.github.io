@@ -2,14 +2,14 @@
 {{define "unit-kvm"}}
 <section class="u kvm" style="--h:4" aria-labelledby="gbh">
   <div class="face">
-    <div class="bar"><span class="silk" id="gbh">kvm · гостевая книга</span><span class="silk">скоро</span></div>
+    <div class="bar"><span class="silk" id="gbh">{{t "gb.title"}}</span><span class="silk">{{t "gb.soon"}}</span></div>
     <div class="screen">
-      <p class="empty">гостевая ещё собирается. скоро тут можно будет написать и нарисовать что-нибудь.</p>
+      <p class="empty">{{t "gb.empty"}}</p>
     </div>
     <div class="kb">
-      <label for="gbtext" class="silk" style="grid-column: 1 / -1; min-height: 0">сообщение</label>
-      <textarea id="gbtext" placeholder="привет из 2026" disabled></textarea>
-      <div class="keys"><button class="key" type="button" disabled>✎ рисовать</button><button class="key" type="button" disabled>⏎ отправить</button></div>
+      <label for="gbtext" class="silk" style="grid-column: 1 / -1; min-height: 0">{{t "gb.message"}}</label>
+      <textarea id="gbtext" placeholder="{{t "gb.placeholder"}}" disabled></textarea>
+      <div class="keys"><button class="key" type="button" disabled>{{t "gb.draw"}}</button><button class="key" type="button" disabled>{{t "gb.send"}}</button></div>
     </div>
   </div>
 </section>

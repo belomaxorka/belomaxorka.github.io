@@ -1,16 +1,16 @@
 {{/* Свитч = контакты. */}}
 {{define "unit-switch"}}
-<nav class="u sw" style="--h:1" aria-label="контакты">
+<nav class="u sw" style="--h:1" aria-label="{{t "sw.aria"}}">
   <div class="face">
-    <span class="silk">связь</span>
+    <span class="silk">{{t "sw.title"}}</span>
     <div class="ports">
       <a class="port" href="https://t.me/belomaxorka"><i class="jack"></i><span class="tape b">telegram</span><i class="led"></i></a>
       <a class="port" href="https://git.belomaxorka.dev/belomaxorka"><i class="jack"></i><span class="tape">forgejo</span><i class="led"></i></a>
-      <a class="port" href="https://github.com/belomaxorka"><i class="jack"></i><span class="tape">github</span><i class="led warn" title="зеркало"></i></a>
+      <a class="port" href="https://github.com/belomaxorka"><i class="jack"></i><span class="tape">github</span><i class="led warn" title="{{t "sw.mirror"}}"></i></a>
       <a class="port" href="https://fm.belomaxorka.dev"><i class="jack"></i><span class="tape r">koito · fm</span><i class="led"></i></a>
-      {{if .HasCV}}<a class="port" href="/cv.pdf"><i class="jack"></i><span class="tape">резюме.pdf</span><i class="led"></i></a>
-      {{else}}<span class="port off" title="скоро"><i class="jack"></i><span class="tape">резюме.pdf</span><i class="led off"></i></span>{{end}}
-      <span class="port off" title="скоро"><i class="jack"></i><span class="tape">matrix</span><i class="led off"></i></span>
+      {{if .HasCV}}<a class="port" href="/cv.pdf"><i class="jack"></i><span class="tape">{{t "nav.cv"}}</span><i class="led"></i></a>
+      {{else}}<span class="port off" title="{{t "soon"}}"><i class="jack"></i><span class="tape">{{t "nav.cv"}}</span><i class="led off"></i></span>{{end}}
+      <span class="port off" title="{{t "soon"}}"><i class="jack"></i><span class="tape">matrix</span><i class="led off"></i></span>
     </div>
   </div>
 </nav>

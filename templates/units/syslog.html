@@ -1,14 +1,14 @@
 {{/* Журнал: прослушивания Koito и push в Forgejo. Обновляется через htmx (/fragments/syslog). */}}
 {{define "unit-syslog"}}
-<section class="u log" style="--h:4" aria-label="журнал" id="unit-syslog"
+<section class="u log" style="--h:4" aria-label="{{t "log.aria"}}" id="unit-syslog"
   hx-get="/fragments/syslog" hx-trigger="every 60s" hx-swap="outerHTML">
   <div class="face">
-    <div class="bar"><span class="silk">syslog · koito, forgejo</span><a class="key" href="https://blog.belomaxorka.dev">блог →</a></div>
+    <div class="bar"><span class="silk">syslog · koito, forgejo</span><a class="key" href="https://blog.belomaxorka.dev">{{t "log.blog"}}</a></div>
     <div class="lcd">
       {{if .}}<ol>
-        {{range .}}<li><span class="d">{{stamp .At}}</span><span class="src">{{.Src}}</span><span>{{if .URL}}<a href="{{.URL}}">{{.Text}}</a>{{else}}{{.Text}}{{end}}</span></li>
+        {{range .}}<li><span class="d">{{stamp .At}}</span><span class="src">{{.Src}}</span><span>{{if .Now}}{{t "log.now"}} {{end}}{{if .URL}}<a href="{{.URL}}">{{.Text}}</a>{{else}}{{.Text}}{{end}}</span></li>
         {{end}}
-      </ol>{{else}}<span class="d">тихо: ни музыки, ни коммитов</span>{{end}}
+      </ol>{{else}}<span class="d">{{t "log.quiet"}}</span>{{end}}
     </div>
   </div>
 </section>

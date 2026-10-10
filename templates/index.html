@@ -3,7 +3,7 @@
 <div class="room" id="room">
   <div class="rack" id="rack">
     {{template "router" .}}
-    <div class="cap"><span>belomaxorka.dev · домашняя стойка</span></div>
+    <div class="cap"><span>{{t "rack.cap"}}</span></div>
     <div class="body" id="rack-body">
       <div class="rail l" aria-hidden="true"></div>
       <div class="rail r" aria-hidden="true"></div>
@@ -22,6 +22,6 @@
     </div>
     <div class="foot"></div>
   </div>
-  <svg class="cables" id="cables" aria-hidden="true"></svg>
+  <svg class="cables" id="cables" aria-hidden="true" data-uplink="{{t "cable.uplink"}}" data-power="{{t "cable.power"}}"></svg>
 </div>
 {{end}}

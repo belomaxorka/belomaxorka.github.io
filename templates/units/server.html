@@ -2,37 +2,35 @@
 {{define "unit-server"}}
 <section class="u srv" style="--h:4" aria-labelledby="who">
   <div class="face">
-    <div class="photo" role="img" aria-label="место для фото"><span>photo</span></div>
+    <div class="photo" role="img" aria-label="{{t "me.photo"}}"><span>photo</span></div>
     <div class="ident">
-      <h1 class="name" id="who">belomaxorka<small>рома келесидис · веб-разработчик</small></h1>
+      <h1 class="name" id="who">belomaxorka<small>{{t "me.sub"}}</small></h1>
       <div class="tapes">
-        <span class="tape">он/его</span>
-        <span class="tape">{{.Age}} {{plural .Age "год" "года" "лет"}}</span>
+        <span class="tape">{{t "me.pronouns"}}</span>
+        <span class="tape">{{.Age}} {{tn "years" .Age}}</span>
         <span class="tape r">infp-t</span>
         <span class="tape">ru · en</span>
       </div>
       <div class="tapes">
-        <span class="tape b">бэкенд</span>
-        <span class="tape b">фронтенд</span>
-        <span class="tape b">devops</span>
-        <span class="tape b">self-hosted</span>
+        <span class="tape b">{{t "me.backend"}}</span>
+        <span class="tape b">{{t "me.frontend"}}</span>
+        <span class="tape b">{{t "me.devops"}}</span>
+        <span class="tape b">{{t "me.selfhosted"}}</span>
       </div>
-      <p class="intro">привет~ делаю веб целиком: бэкенд на php, laravel и go, фронтенд на vue, alpine и typescript,
-        а вокруг — docker, ci/cd, linux и свои серверы. пишу телеграм-ботов и интеграции, мейнтейню
-        <a href="https://github.com/torrentpier/torrentpier">torrentpier</a>. эта стойка настоящая — сайт отдаётся из дома.</p>
+      <p class="intro">{{th "me.intro"}}</p>
     </div>
     <div class="status-col">
       <div class="lcd two" x-data="cycle(3200)">
         <ul class="msgs">
-          <li class="on">привет~ я рома<br><span class="d">{{if eq .DaysToBirthday 0}}сегодня др!{{else}}др через {{.DaysToBirthday}} {{plural .DaysToBirthday "день" "дня" "дней"}}{{end}}</span></li>
-          <li>веб целиком<br><span class="d">бэк, фронт, devops</span></li>
-          <li>infp-t<br><span class="d">посредник</span></li>
-          <li>сайт на go<br><span class="d">рендер на сервере</span></li>
+          <li class="on">{{t "lcd.hello"}}<br><span class="d">{{if eq .DaysToBirthday 0}}{{t "lcd.bday_today"}}{{else}}{{t "lcd.bday_in" .DaysToBirthday (tn "days" .DaysToBirthday)}}{{end}}</span></li>
+          <li>{{t "lcd.web"}}<br><span class="d">{{t "lcd.web2"}}</span></li>
+          <li>infp-t<br><span class="d">{{t "lcd.mbti2"}}</span></li>
+          <li>{{t "lcd.go"}}<br><span class="d">{{t "lcd.go2"}}</span></li>
         </ul>
       </div>
       <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led blink"></i>hdd</span><span><i class="led blink s3"></i>net</span></div>
     </div>
   </div>
-  <div class="note">не выключать!<br>тут сайт</div>
+  <div class="note">{{th "note.dont"}}</div>
 </section>
 {{end}}

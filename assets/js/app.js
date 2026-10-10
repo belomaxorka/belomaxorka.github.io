@@ -13,7 +13,8 @@
   document.addEventListener('alpine:init', () => {
     const Alpine = window.Alpine;
 
-    // Цвет ЖК: из обложки (палитру присылает site-api) или обычный янтарь.
+    // Цвет ЖК: из обложки (палитру присылает site-api) или обычный янтарь. Подписи кнопок — в data-атрибутах
+    // на языке страницы.
     Alpine.store('lcd', {
       cover: root.dataset.lcd !== 'amber',
       toggle() {
@@ -25,14 +26,14 @@
 
     Alpine.data('lcdToggle', () => ({
       init() { this.$el.hidden = false; },
-      get label() { return 'экраны: ' + (this.$store.lcd.cover ? 'обложка' : 'янтарь'); },
+      get label() { return this.$store.lcd.cover ? this.$root.dataset.cover : this.$root.dataset.amber; },
       toggle() { this.$store.lcd.toggle(); },
     }));
 
     Alpine.data('themeToggle', () => ({
       dark: isDark(),
       init() { this.$el.hidden = false; },
-      get label() { return this.dark ? 'ночь' : 'день'; },
+      get label() { return this.dark ? this.$root.dataset.dark : this.$root.dataset.light; },
       toggle() {
         this.dark = !this.dark;
         root.dataset.theme = this.dark ? 'dark' : 'light';
@@ -176,7 +177,7 @@
     if (wan) {
       if (R.width - rk.r > 130) {
         cable(svg, `M${wan.cx} ${wan.cy} C${wan.cx} ${wan.cy - 30}, ${rk.r - 20} ${wan.cy - 24}, ${R.width + 10} ${wan.cy - 8}`, UPLINK, 5);
-        el('text', { x: rk.r + 16, y: wan.cy - 26, class: 'lbl' }, svg).textContent = 'в интернет →';
+        el('text', { x: rk.r + 16, y: wan.cy - 26, class: 'lbl' }, svg).textContent = svg.dataset.uplink || '';
       } else {
         cable(svg, `M${wan.cx} ${wan.cy} C${wan.cx} ${wan.cy - 24}, ${wan.cx - 30} ${wan.cy - 20}, ${wan.cx - 30} -10`, UPLINK, 5);
       }
@@ -198,7 +199,7 @@
       const py = oy + 12;
       cable(svg, `M${sx} ${u.b - 6} C${sx} ${floor + 30}, ${ox} ${floor + 40}, ${ox} ${py + 8}`, POWER, 6);
       el('rect', { x: ox - 9, y: py - 4, width: 18, height: 14, rx: 3, fill: POWER, stroke: 'rgba(0,0,0,.5)' }, svg);
-      if (wall) el('text', { x: ox - 22, y: oy - 26, class: 'lbl' }, svg).textContent = '220 В';
+      if (wall) el('text', { x: ox - 22, y: oy - 26, class: 'lbl' }, svg).textContent = svg.dataset.power || '';
     }
   }
 

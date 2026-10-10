@@ -1,71 +1,71 @@
 <!doctype html>
-<!-- Заглушка: её отдаёт веб-сервер, если site-api не отвечает. Живую страницу рендерит site-api из templates/. -->
-<html lang="ru">
+<!-- Fallback: the web server serves it while site-api is down. The live page is rendered by site-api from templates/. -->
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>belomaxorka's space</title>
-<meta name="description" content="Рома, он же belomaxorka: фулстек на PHP и Laravel, домашняя лаборатория на Proxmox, TorrentPier.">
+<meta name="description" content="Roman, aka belomaxorka: a web developer — backend, frontend, devops — with a home lab on Proxmox.">
 <meta name="theme-color" content="#121315">
 <link rel="stylesheet" href="/assets/css/site.css">
 </head>
 <body>
 <div class="room">
   <div class="rack">
-    <div class="cap"><span>belomaxorka.dev · домашняя стойка</span></div>
+    <div class="cap"><span>belomaxorka.dev · home rack</span></div>
     <div class="body">
       <div class="rail l" aria-hidden="true"></div>
       <div class="rail r" aria-hidden="true"></div>
 
-      <nav class="u patch" style="--h:1" aria-label="вебринг otoring">
+      <nav class="u patch" style="--h:1" aria-label="otoring webring">
         <div class="face">
-          <span class="silk">otoring · патч-панель</span>
+          <span class="silk">otoring · patch panel</span>
           <div class="ports">
-            <a class="port" href="https://webring.otomir23.me/belomaxorka/prev" rel="prev"><i class="jack"></i><span class="tape">← предыдущий</span></a>
+            <a class="port" href="https://webring.otomir23.me/belomaxorka/prev" rel="prev"><i class="jack"></i><span class="tape">← previous</span></a>
             <a class="port" href="https://webring.otomir23.me/"><i class="jack"></i><span class="tape b">otoring</span><i class="led"></i></a>
-            <a class="port" href="https://webring.otomir23.me/belomaxorka/random"><i class="jack"></i><span class="tape">случайный</span></a>
-            <a class="port" href="https://webring.otomir23.me/belomaxorka/next" rel="next"><i class="jack"></i><span class="tape">следующий →</span></a>
+            <a class="port" href="https://webring.otomir23.me/belomaxorka/random"><i class="jack"></i><span class="tape">random</span></a>
+            <a class="port" href="https://webring.otomir23.me/belomaxorka/next" rel="next"><i class="jack"></i><span class="tape">next →</span></a>
           </div>
         </div>
       </nav>
 
       <section class="u srv" style="--h:4" aria-labelledby="who">
         <div class="face">
-          <div class="photo" role="img" aria-label="место для фото"><span>photo</span></div>
+          <div class="photo" role="img" aria-label="photo goes here"><span>photo</span></div>
           <div class="ident">
-            <h1 class="name" id="who">belomaxorka<small>рома келесидис · веб-разработчик</small></h1>
-            <div class="tapes"><span class="tape">он/его</span><span class="tape r">infp-t</span><span class="tape">ru · en</span></div>
-            <p class="intro">привет~ делаю веб целиком: бэкенд, фронтенд, devops и свои серверы.
-              мейнтейню <a href="https://github.com/torrentpier/torrentpier">torrentpier</a>. эта стойка настоящая — сайт отдаётся из дома.</p>
+            <h1 class="name" id="who">belomaxorka<small>roman kelesidis · web developer</small></h1>
+            <div class="tapes"><span class="tape">he/him</span><span class="tape r">infp-t</span><span class="tape">ru · en</span></div>
+            <p class="intro">hi~ i build the web end to end: backend, frontend, devops and my own servers.
+              i maintain <a href="https://github.com/torrentpier/torrentpier">torrentpier</a>. this rack is real: the site is served from my home.</p>
           </div>
           <div class="status-col">
-            <div class="lcd two">сервер сайта<br><span class="d">перезагружается</span></div>
+            <div class="lcd two">site server<br><span class="d">restarting</span></div>
             <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led warn"></i>api</span></div>
           </div>
         </div>
       </section>
 
-      <nav class="u sw" style="--h:1" aria-label="контакты">
+      <nav class="u sw" style="--h:1" aria-label="contacts">
         <div class="face">
-          <span class="silk">связь</span>
+          <span class="silk">contact</span>
           <div class="ports">
             <a class="port" href="https://t.me/belomaxorka"><i class="jack"></i><span class="tape b">telegram</span><i class="led"></i></a>
             <a class="port" href="https://git.belomaxorka.dev/belomaxorka"><i class="jack"></i><span class="tape">forgejo</span><i class="led"></i></a>
-            <a class="port" href="https://github.com/belomaxorka"><i class="jack"></i><span class="tape">github</span><i class="led warn" title="зеркало"></i></a>
+            <a class="port" href="https://github.com/belomaxorka"><i class="jack"></i><span class="tape">github</span><i class="led warn" title="mirror"></i></a>
             <a class="port" href="https://fm.belomaxorka.dev"><i class="jack"></i><span class="tape r">koito · fm</span><i class="led"></i></a>
-            <a class="port" href="https://blog.belomaxorka.dev"><i class="jack"></i><span class="tape">блог</span><i class="led"></i></a>
+            <a class="port" href="https://blog.belomaxorka.dev"><i class="jack"></i><span class="tape">blog</span><i class="led"></i></a>
           </div>
         </div>
       </nav>
 
       <footer class="u ups" style="--h:2">
         <div class="face">
-          <div class="lcd"><span class="batt" aria-hidden="true"><i></i><i></i><i></i></span><span>живые данные<br><span class="d">скоро вернутся</span></span></div>
+          <div class="lcd"><span class="batt" aria-hidden="true"><i></i><i></i><i></i></span><span>live data<br><span class="d">back soon</span></span></div>
           <div class="meta">
             <span><b>hosted on belomaxorka infrastructure</b></span>
-            <span>статус сервисов: <a href="https://status.belomaxorka.dev">status.belomaxorka.dev</a></span>
+            <span>service status: <a href="https://status.belomaxorka.dev">status.belomaxorka.dev</a></span>
           </div>
-          <span class="silk">ибп</span>
+          <span class="silk">ups</span>
         </div>
       </footer>
     </div>

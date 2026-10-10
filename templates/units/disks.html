@@ -1,13 +1,13 @@
 {{/* Проекты = корзины дисков. */}}
 {{define "unit-disks"}}
-<section class="u disks" style="--h:3" aria-label="проекты">
+<section class="u disks" style="--h:3" aria-label="{{t "disks.aria"}}">
   <div class="face">
     <div class="bays">
-      <a class="bay" href="https://github.com/torrentpier/torrentpier"><span class="top"><span class="tape">torrentpier</span><i class="led blink"></i></span><p>движок торрент-трекера на php. мейнтейню.</p></a>
-      <a class="bay" href="https://get.torrentpier.dev"><span class="top"><span class="tape">get.tp.dev</span><i class="led blink s2"></i></span><p>центр загрузок: 129 сборок, сверены по sha256.</p></a>
-      <a class="bay" href="https://git.belomaxorka.dev/belomaxorka/site-api"><span class="top"><span class="tape r">site-api</span><i class="led blink s3"></i></span><p>бэкенд этого сайта на go.</p></a>
-      <div class="bay"><span class="top"><span class="tape">cs 1.6</span><i class="led off"></i></span><p>свой сервер на rehlds. контейнер готов.</p></div>
-      <div class="bay"><span class="top"><span class="tape b">tg-боты</span><i class="led blink s2"></i></span><p>боты, апи, вебхуки и интеграции.</p></div>
+      <a class="bay" href="https://github.com/torrentpier/torrentpier"><span class="top"><span class="tape">torrentpier</span><i class="led blink"></i></span><p>{{t "proj.tp"}}</p></a>
+      <a class="bay" href="https://get.torrentpier.dev"><span class="top"><span class="tape">get.tp.dev</span><i class="led blink s2"></i></span><p>{{t "proj.get"}}</p></a>
+      <a class="bay" href="https://git.belomaxorka.dev/belomaxorka/site-api"><span class="top"><span class="tape r">site-api</span><i class="led blink s3"></i></span><p>{{t "proj.api"}}</p></a>
+      <div class="bay"><span class="top"><span class="tape">cs 1.6</span><i class="led off"></i></span><p>{{t "proj.cs"}}</p></div>
+      <div class="bay"><span class="top"><span class="tape b">{{t "proj.bots.tape"}}</span><i class="led blink s2"></i></span><p>{{t "proj.bots"}}</p></div>
     </div>
   </div>
 </section>

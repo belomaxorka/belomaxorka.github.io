@@ -2,13 +2,13 @@
 {{define "unit-ups"}}
 <footer class="u ups" style="--h:2">
   <div class="face">
-    <div class="lcd"><span class="batt" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span>онлайн<br><span class="d">аптайм сайта {{uptime .Uptime}}</span></span></div>
-    <div class="sticker" aria-hidden="true">если пищит —<br>свет выключили</div>
+    <div class="lcd"><span class="batt" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span>{{t "ups.online"}}<br><span class="d">{{t "ups.uptime" (uptime .Uptime)}}</span></span></div>
+    <div class="sticker" aria-hidden="true">{{th "ups.sticker"}}</div>
     <div class="meta">
       <span><b>hosted on belomaxorka infrastructure</b></span>
-      <span>обновлено {{date .Updated}} · исходники: <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev">сайт</a>, <a href="https://git.belomaxorka.dev/belomaxorka/site-api">site-api</a></span>
+      <span>{{t "ups.updated" (date .Updated)}} · {{t "ups.sources"}} <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev">{{t "ups.site"}}</a>, <a href="https://git.belomaxorka.dev/belomaxorka/site-api">site-api</a></span>
     </div>
-    <span class="silk">ибп</span>
+    <span class="silk">{{t "ups.label"}}</span>
   </div>
 </footer>
 {{end}}

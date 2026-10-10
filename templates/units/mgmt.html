@@ -1,16 +1,21 @@
-{{/* Управление: разделы и переключатели. Переключатели без JS не нужны, поэтому скрыты до запуска Alpine. */}}
+{{/* Управление: разделы, язык (обычные ссылки, работают без JS) и переключатели экранов и темы
+     (без JS не нужны, поэтому скрыты до запуска Alpine). */}}
 {{define "unit-mgmt"}}
 <div class="u mgmt" style="--h:1">
   <div class="face">
-    <nav class="ports" aria-label="разделы">
-      <a class="key" href="https://blog.belomaxorka.dev">блог</a>
-      {{if .HasCV}}<a class="key" href="/cv.pdf">резюме.pdf</a>{{else}}<span class="key off" title="скоро">резюме.pdf</span>{{end}}
-      <a class="key" href="https://status.belomaxorka.dev">статус</a>
-      <a class="key" href="https://git.belomaxorka.dev/belomaxorka">git</a>
+    <nav class="ports" aria-label="{{t "nav.aria"}}">
+      <a class="key" href="https://blog.belomaxorka.dev">{{t "nav.blog"}}</a>
+      {{if .HasCV}}<a class="key" href="/cv.pdf">{{t "nav.cv"}}</a>{{else}}<span class="key off" title="{{t "soon"}}">{{t "nav.cv"}}</span>{{end}}
+      <a class="key" href="https://status.belomaxorka.dev">{{t "nav.status"}}</a>
+      <a class="key" href="https://git.belomaxorka.dev/belomaxorka">{{t "nav.git"}}</a>
     </nav>
     <div class="ports">
-      <button class="key" type="button" hidden x-data="lcdToggle" @click="toggle" x-text="label">экраны: обложка</button>
-      <button class="key" type="button" hidden x-data="themeToggle" @click="toggle" aria-label="переключить тему"><i class="led pwr"></i><span x-text="label">тема</span></button>
+      <nav class="langs" aria-label="{{t "lang.aria"}}">
+        <a class="key{{if eq .Lang "en"}} on{{end}}" href="/?lang=en" hreflang="en" lang="en"{{if eq .Lang "en"}} aria-current="true"{{end}}>en</a>
+        <a class="key{{if eq .Lang "ru"}} on{{end}}" href="/?lang=ru" hreflang="ru" lang="ru"{{if eq .Lang "ru"}} aria-current="true"{{end}}>ru</a>
+      </nav>
+      <button class="key" type="button" hidden x-data="lcdToggle" data-cover="{{t "lcd.cover"}}" data-amber="{{t "lcd.amber"}}" @click="toggle" x-text="label">{{t "lcd.cover"}}</button>
+      <button class="key" type="button" hidden x-data="themeToggle" data-dark="{{t "theme.dark"}}" data-light="{{t "theme.light"}}" @click="toggle" aria-label="{{t "theme.aria"}}"><i class="led pwr"></i><span x-text="label">{{t "theme.dark"}}</span></button>
     </div>
   </div>
 </div>

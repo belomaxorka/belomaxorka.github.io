@@ -1,12 +1,12 @@
 {{/* Каркас страницы. Рендерит site-api (Go html/template), данные — в README site-api. */}}
 {{define "layout" -}}
 <!doctype html>
-<html lang="ru" data-lcd="cover">
+<html lang="{{lang}}" data-lcd="cover">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>belomaxorka's space</title>
-<meta name="description" content="Рома, он же belomaxorka: фулстек на PHP и Laravel, домашняя лаборатория на Proxmox, TorrentPier.">
+<meta name="description" content="{{t "meta.description"}}">
 <meta property="og:type" content="profile">
 <meta property="og:title" content="belomaxorka's space">
 <meta name="theme-color" content="#121315">
