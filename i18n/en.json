@@ -126,6 +126,7 @@
   "ups.load": "load %d%%",
   "ups.runtime": "~%d min",
   "ups.nodata": "no data",
+  "visits": "views: %s · visitors: %s",
   "ups.updated": "updated %s",
   "ups.sources": "source:",
   "ups.site": "site",

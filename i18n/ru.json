@@ -126,6 +126,7 @@
   "ups.load": "нагрузка %d%%",
   "ups.runtime": "~%d мин",
   "ups.nodata": "нет данных",
+  "visits": "просмотры: %s · посетители: %s",
   "ups.updated": "обновлено %s",
   "ups.sources": "исходники:",
   "ups.site": "сайт",

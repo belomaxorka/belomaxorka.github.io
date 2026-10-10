@@ -11,6 +11,7 @@
     <div class="sticker" aria-hidden="true">{{th "ups.sticker"}}</div>
     <div class="meta">
       <span><b>hosted on belomaxorka infrastructure</b></span>
+      {{with .Visits}}{{if .OK}}<span>{{t "visits" (num .Views) (num .Visitors)}}</span>{{end}}{{end}}
       <span>{{t "ups.updated" (date .Updated)}} · {{t "ups.sources"}} <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev">{{t "ups.site"}}</a>, <a href="https://git.belomaxorka.dev/belomaxorka/site-api">site-api</a></span>
     </div>
     <span class="silk">{{t "ups.label"}} · cbr 1000 va</span>
