@@ -18,6 +18,17 @@
 .screen .pic { grid-column: 2; grid-row: 1 / span 3; line-height: 0; }
 .screen .pic img { width: 120px; height: auto; aspect-ratio: 16 / 10; object-fit: contain; background: #fff; border: 1px solid #ffffff2a; border-radius: 2px; }
 
+.screen .pic { cursor: zoom-in; }
+
+/* Рисунок крупно поверх страницы; без JS ссылка просто открывает картинку. */
+.lightbox {
+  padding: 10px; border: 0; border-radius: 6px; max-width: min(92vw, 980px);
+  background: var(--panel); color: var(--ink); box-shadow: 0 0 0 1px var(--edge), 0 30px 80px -20px #000;
+}
+.lightbox::backdrop { background: #000c; }
+.lightbox img { display: block; width: min(88vw, 960px); height: auto; aspect-ratio: 16 / 10; object-fit: contain; background: #fff; border-radius: 3px; }
+.lightbox .lb-bar { display: flex; gap: 6px; align-items: center; justify-content: center; margin-top: 8px; }
+
 .gb-status { margin: 0; font-size: 14px; padding: 6px 10px; border-radius: 4px; border: 1px solid var(--edge); }
 .gb-status.ok { color: var(--led-ok); }
 .gb-status.err { color: var(--led-err); }

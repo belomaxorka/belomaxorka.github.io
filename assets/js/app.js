@@ -91,6 +91,23 @@
       },
     }));
 
+    // Рисунки гостевой открываются крупно в <dialog>, листаются стрелками и клавишами.
+    Alpine.data('lightbox', () => ({
+      i: 0,
+      n: 0,
+      links: [],
+      show(a) {
+        this.links = [...this.$root.querySelectorAll('a.pic')];
+        this.n = this.links.length;
+        this.i = Math.max(0, this.links.indexOf(a));
+        this.render();
+        this.$refs.dlg.showModal();
+      },
+      step(d) { if (this.n) { this.i = (this.i + d + this.n) % this.n; this.render(); } },
+      render() { this.$refs.img.src = this.links[this.i].href; },
+      close() { this.$refs.dlg.close(); },
+    }));
+
     // Рисовалка гостевой: палитра из цветов стойки (ЖК, лампы, ленты), картинка уходит в скрытое поле
     // после каждого штриха, так что её отправит и htmx, и обычная форма.
     Alpine.data('oekaki', () => ({

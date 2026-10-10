@@ -5,17 +5,26 @@
 <section class="u kvm" style="--h:5" aria-labelledby="gbh" id="unit-kvm">
   <div class="face">
     <div class="bar"><span class="silk" id="gbh">{{t "gb.title"}}</span><span class="silk">{{t "gb.moderated"}}</span></div>
-    <div class="screen" id="guestbook">
+    <div class="screen" id="guestbook" x-data="lightbox">
       {{range .Entries}}
       <article class="e" id="gb{{.ID}}">
         <span class="m">{{or .Name (t "gb.anon")}} · #{{.ID}} · {{stamp .At}}</span>
         {{with .Text}}<p class="txt">{{.}}</p>{{end}}
         {{with .Reply}}<p class="rep">{{.}}</p>{{end}}
-        {{with .Drawing}}<a class="pic" href="{{.}}" target="_blank" rel="noopener"><img src="{{.}}" alt="{{t "gb.drawing_alt"}}" loading="lazy"></a>{{end}}
+        {{with .Drawing}}<a class="pic" href="{{.}}" target="_blank" rel="noopener" @click.prevent="show($el)"><img src="{{.}}" alt="{{t "gb.drawing_alt"}}" loading="lazy"></a>{{end}}
       </article>
       {{else}}
       <p class="empty">{{if .Enabled}}{{t "gb.none"}}{{else}}{{t "gb.off"}}{{end}}</p>
       {{end}}
+      <dialog class="lightbox" x-ref="dlg" @click.self="close()" @keydown.arrow-left.prevent="step(-1)" @keydown.arrow-right.prevent="step(1)" aria-label="{{t "gb.drawing_alt"}}">
+        <img x-ref="img" alt="{{t "gb.drawing_alt"}}">
+        <div class="lb-bar">
+          <button type="button" class="key" @click="step(-1)" x-show="n > 1" aria-label="{{t "me.prev"}}">‹</button>
+          <span class="silk" x-text="(i + 1) + ' / ' + n"></span>
+          <button type="button" class="key" @click="step(1)" x-show="n > 1" aria-label="{{t "me.next"}}">›</button>
+          <button type="button" class="key" @click="close()" aria-label="{{t "lb.close"}}">✕</button>
+        </div>
+      </dialog>
     </div>
     {{if .Enabled}}
     {{with .Status}}<p class="gb-status {{if eq . "sent"}}ok{{else}}err{{end}}" role="status">{{t (printf "gb.%s" .)}}</p>{{end}}
