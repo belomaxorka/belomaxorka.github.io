@@ -1,6 +1,6 @@
 /* Мониторинг = Gatus: по лампочке на проверку и ЖК со сводкой. */
 .mon .face { align-items: flex-start; gap: 12px 20px; padding-block: 12px; }
-.matrix { flex: 1 1 420px; display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 8px 6px; min-width: 0; }
+.matrix { flex: 1 1 420px; display: grid; grid-template-columns: repeat(var(--cols, 9), minmax(0, 1fr)); gap: 8px 6px; min-width: 0; }
 .cell { display: grid; justify-items: center; gap: 5px; text-align: center; }
 .cell .silk { font-size: 8.5px; letter-spacing: .08em; overflow-wrap: anywhere; }
 .mon .lcd { flex: 0 1 210px; font-size: 20px; }
