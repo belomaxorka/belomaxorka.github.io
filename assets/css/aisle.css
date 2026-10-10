@@ -1,0 +1,58 @@
+/* Проход: таблички стоек и стрелки к соседям (templates/aisle.html). Переход между стойками — View Transitions
+   между страницами: стойка уезжает вбок, как камера вдоль ряда. Направление ставит assets/js/theme.js
+   (pagereveal/pageswap), без JS и в старых браузерах — обычный переход по ссылке. */
+.aisle {
+  position: relative; z-index: 5; max-width: 1000px; margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.aisle .signs { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.aisle a { text-decoration: none; }
+.aisle .signs a {
+  position: relative; display: inline-flex; align-items: baseline; gap: 6px; min-height: 30px; padding: 6px 11px;
+  font: 500 11px/1 var(--f-silk); letter-spacing: .12em; text-transform: uppercase; color: var(--dim);
+  background: var(--panel); border-radius: 3px; box-shadow: inset 0 0 0 1px var(--edge), 0 6px 14px -8px #000;
+}
+.aisle .signs b { font-weight: 700; color: var(--ink); }
+.aisle .signs a[aria-current] { color: var(--ink); background: var(--panel-hi); box-shadow: inset 0 0 0 1px var(--accent), 0 0 18px -6px var(--accent); }
+.aisle .signs a.stub { opacity: .7; }
+.aisle .step {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 36px; min-width: 36px; padding: 0 10px;
+  font: 500 11px/1 var(--f-silk); letter-spacing: .12em; text-transform: uppercase; color: var(--dim);
+}
+.aisle .step i { font: 400 28px/1 var(--f-text); font-style: normal; color: var(--ink); }
+.aisle a.step:hover, .aisle .signs a:hover { color: var(--ink); }
+.aisle .step.end { visibility: hidden; }
+@media (max-width: 560px) {
+  .aisle { gap: 4px; margin-bottom: 8px; }
+  .aisle .signs { gap: 5px; }
+  .aisle .signs a { padding: 6px 8px; }
+  .aisle .signs a:not([aria-current]) span, .aisle .step span { display: none; }
+  .aisle .step { padding: 0 6px; }
+}
+
+/* Таблички висят с потолка на цепочках, текущая подсвечена. */
+.aisle .signs a::before {
+  content: ""; position: absolute; left: 18%; right: 18%; bottom: 100%; height: 60px;
+  border-inline: 1px dashed #5a5f67; pointer-events: none;
+}
+.aisle { padding-top: 34px; }
+.aisle .signs a[aria-current] {
+  background: #f1efe8; color: #15171a; box-shadow: 0 0 22px -2px #f1efe8aa;
+}
+.aisle .signs a[aria-current] b { color: #15171a; }
+
+/* ---------- переход между стойками ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  .rack { view-transition-name: rack; }
+  .aisle { view-transition-name: aisle; }
+  ::view-transition-old(rack) { animation: rack-out .5s cubic-bezier(.5, 0, .3, 1) both; }
+  ::view-transition-new(rack) { animation: rack-in .5s cubic-bezier(.5, 0, .3, 1) both; }
+  html:active-view-transition-type(back)::view-transition-old(rack) { animation-name: rack-out-back; }
+  html:active-view-transition-type(back)::view-transition-new(rack) { animation-name: rack-in-back; }
+  ::view-transition-group(aisle) { animation: none; }
+}
+@keyframes rack-out { to { transform: translateX(-70vw) scale(.94); opacity: 0; } }
+@keyframes rack-in { from { transform: translateX(70vw) scale(.94); opacity: 0; } }
+@keyframes rack-out-back { to { transform: translateX(70vw) scale(.94); opacity: 0; } }
+@keyframes rack-in-back { from { transform: translateX(-70vw) scale(.94); opacity: 0; } }

@@ -54,3 +54,6 @@
   </div>
 </section>
 {{end}}
+
+{{/* В стойке (content/racks.yaml) юнит получает всю страницу, а сам берёт из неё .Guestbook. */}}
+{{define "slot-kvm"}}{{template "unit-kvm" .Guestbook}}{{end}}

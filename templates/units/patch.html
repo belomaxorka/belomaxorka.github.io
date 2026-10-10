@@ -12,3 +12,6 @@
   </div>
 </nav>
 {{end}}
+
+{{/* В стойке (content/racks.yaml) юнит получает всю страницу, а сам берёт из неё .Ring. */}}
+{{define "slot-patch"}}{{template "unit-patch" .Ring}}{{end}}

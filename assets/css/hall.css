@@ -1,0 +1,144 @@
+/* Серверная вокруг стойки (templates/aisle.html → hall). Только декор позади стойки.
+   Свет — .room[data-light]: day, evening, night (по Барнаулу), battery (ИБП на батарее); выключенная кнопкой
+   стойка гасит и зал. Выбран вариант A «проход в перспективе» (2026-10-11) из трёх, B и C остались только скриншотами. */
+.room > .rack { z-index: 1; }
+.hall {
+  --hall-bg: #0e1012; --hall-wall: #15181b; --tile: #1c1f23; --tile-line: #0a0b0d; --hole-c: #07080a;
+  --tray: #3a3e45; --duct: #d8b23a; --lamp: #eaf2ff; --lamp-on: 1; --cold: #3d7bd9; --cold-a: .22;
+  --nb-dim: .55;
+  position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  background: linear-gradient(var(--hall-wall), var(--hall-bg) 70%);
+  transition: filter .8s, background .8s;
+}
+.hall > * { position: absolute; }
+
+/* Потолок: кабельный лоток-лесенка, жёлтый оптический короб, светильники. */
+.hall .ceiling { inset: 0 0 auto; height: 110px; }
+.hall .tray {
+  left: -5%; right: -5%; top: 18px; height: 16px;
+  background:
+    linear-gradient(var(--tray) 0 3px, transparent 3px calc(100% - 3px), var(--tray) 0) ,
+    repeating-linear-gradient(90deg, var(--tray) 0 3px, transparent 3px 26px);
+  opacity: .8;
+}
+.hall .duct { left: -5%; right: -5%; top: 44px; height: 9px; border-radius: 4px; background: var(--duct); opacity: .55; box-shadow: 0 2px 0 #0006; }
+.hall .lamp {
+  top: 62px; width: 180px; height: 6px; border-radius: 3px; background: var(--lamp);
+  opacity: calc(.9 * var(--lamp-on)); box-shadow: 0 0 24px 6px color-mix(in srgb, var(--lamp) 50%, transparent);
+}
+.hall .lamp.a { left: 6%; } .hall .lamp.b { left: calc(50% - 90px); } .hall .lamp.c { right: 6%; }
+.hall .ceiling::after { /* свет ламп на стенах */
+  content: ""; position: absolute; inset: 60px 0 -500px;
+  background: radial-gradient(60% 420px at 50% 0, color-mix(in srgb, var(--lamp) 14%, transparent), transparent);
+  opacity: var(--lamp-on);
+}
+
+/* Соседние стойки: юниты-заглушки и диоды (настоящие лампы Gatus). */
+.hall .nb { top: 70px; bottom: 150px; width: 1000px; filter: brightness(var(--nb-dim)) blur(1.2px); }
+.hall .nb.l { right: calc(50% + 500px + 28px); }
+.hall .nb.r { left: calc(50% + 500px + 28px); }
+.hall .nbr {
+  position: relative; height: 100%; border-radius: 6px;
+  background:
+    linear-gradient(90deg, #2b2e33 0 34px, transparent 34px calc(100% - 34px), #2b2e33 0),
+    #0b0c0e;
+  box-shadow: inset 0 0 0 1px #000, 0 20px 40px -10px #000;
+  display: flex; flex-direction: column; gap: 6px; padding: 30px 40px;
+}
+.hall .nu { flex: 1; max-height: 88px; border-radius: 3px; background: linear-gradient(#24272c, #1b1d21); box-shadow: inset 0 1px 0 #ffffff10; }
+.hall .nu:nth-child(3n) { flex: 2; } .hall .nu:nth-child(5n) { background: #101113; }
+.hall .leds {
+  position: absolute; inset: 44px 60px; display: grid; grid-template-columns: repeat(2, 10px) 1fr repeat(2, 10px);
+  grid-auto-rows: 66px; gap: 0 12px; align-content: start;
+}
+.hall .leds i { width: 7px; height: 7px; border-radius: 50%; background: var(--led-ok); box-shadow: 0 0 8px var(--led-ok); }
+.hall .leds i:nth-child(5n+3) { grid-column: 5; }
+.hall .leds i.warn { background: var(--led-warn); box-shadow: 0 0 8px var(--led-warn); }
+.hall .leds i.err { background: var(--led-err); box-shadow: 0 0 10px var(--led-err); }
+@media (prefers-reduced-motion: no-preference) {
+  .hall .leds i:nth-child(3n) { animation: nb-blink 1.7s steps(2, jump-none) infinite; }
+  .hall .leds i:nth-child(4n+1) { animation: nb-blink .9s steps(2, jump-none) infinite .3s; }
+  .hall .leds i:nth-child(7n+2) { animation: nb-blink 2.6s steps(2, jump-none) infinite 1.1s; }
+}
+@keyframes nb-blink { 50% { opacity: .25; } }
+
+/* Фальшпол под стойкой: плитки и перфорация холодного коридора. */
+.hall .floor { inset: auto 0 0; height: 150px; }
+.hall .floor::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, var(--hole-c) 0 1.6px, transparent 2px) 0 0 / 10px 10px,
+    linear-gradient(90deg, var(--tile-line) 0 2px, transparent 2px) 0 0 / 60px 60px,
+    linear-gradient(var(--tile-line) 0 2px, transparent 2px) 0 0 / 60px 60px,
+    var(--tile);
+}
+.hall .vent { inset: 0; background: radial-gradient(50% 100% at 50% 100%, color-mix(in srgb, var(--cold) calc(var(--cold-a) * 100%), transparent), transparent); }
+
+/* «Выход»: горит всегда, даже без света. */
+.hall .exit {
+  top: 82px; left: 18px; padding: 3px 10px; border-radius: 3px;
+  font: 600 12px/1.2 var(--f-silk); letter-spacing: .14em; text-transform: uppercase;
+  color: #eafff0; background: #1d8a45; box-shadow: 0 0 18px #2ccf6a88, inset 0 0 0 1px #ffffff40;
+}
+
+/* ---------- свет ---------- */
+.room[data-light="evening"] .hall { --lamp: #ffd9a8; --lamp-on: .7; filter: brightness(.85); }
+.room[data-light="night"] .hall { --lamp-on: 0; --cold-a: .35; --nb-dim: .45; filter: brightness(.75); }
+.room[data-light="battery"] .hall { --lamp-on: 0; --cold-a: .1; }
+.room[data-light="battery"] .hall::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(70% 60% at 50% 0, #ff2a1a40, transparent 70%), #ff1a0a14;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .room[data-light="battery"] .hall::after { animation: alarm 2.4s ease-in-out infinite; }
+}
+@keyframes alarm { 50% { opacity: .35; } }
+/* Кнопка на ИБП погасила стойку: в зале темно, светится только «выход». */
+.room:has(.rack.powered-off) .hall > :not(.exit) { opacity: .06; transition: opacity .6s; }
+
+/* ---------- узко: соседей не видно ---------- */
+@media (max-width: 1100px) { .hall .nb { filter: brightness(calc(var(--nb-dim) * .8)) blur(1.6px); } }
+@media (max-width: 760px) {
+  .hall .nb, .hall .lamp.a, .hall .lamp.c { display: none; }
+  .hall .exit { top: 74px; left: 8px; font-size: 10px; }
+  .hall .floor { height: 110px; }
+}
+
+/* ---------- светлая тема: бежевая кладовка вместо зала ---------- */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .hall { --hall-bg: #cfc6b2; --hall-wall: #e2dac8; --tile: #b98e5e; --tile-line: #8d6a43; --hole-c: transparent; --tray: #a39b8a; --duct: #c9b98f; --lamp: #fff6dc; --cold-a: 0; --nb-dim: 1; }
+}
+:root[data-theme="light"] .hall { --hall-bg: #cfc6b2; --hall-wall: #e2dac8; --tile: #b98e5e; --tile-line: #8d6a43; --hole-c: transparent; --tray: #a39b8a; --duct: #c9b98f; --lamp: #fff6dc; --cold-a: 0; --nb-dim: 1; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .hall .nb { display: none; } :root:not([data-theme="dark"]) .hall { background: repeating-linear-gradient(90deg, #0000 0 38px, #00000008 38px 40px), linear-gradient(var(--hall-wall), var(--hall-bg)); } }
+:root[data-theme="light"] .hall .nb { display: none; }
+:root[data-theme="light"] .hall { background: repeating-linear-gradient(90deg, #0000 0 38px, #00000008 38px 40px), linear-gradient(var(--hall-wall), var(--hall-bg)); }
+
+/* ---------- проход в перспективе: пол и потолок уходят вглубь ---------- */
+.hall .floor { perspective: 420px; }
+.hall .floor::before {
+  inset: -60% -60% 0; transform: rotateX(64deg); transform-origin: 50% 100%;
+}
+/* Потолок — плоскость в перспективе: лотки и короб уходят вглубь прохода. */
+.hall .ceiling { perspective: 420px; height: 150px; overflow: hidden; }
+.hall .tray, .hall .duct { display: none; }
+.hall .ceiling::before {
+  content: ""; position: absolute; inset: 0 -60% -260%; transform: rotateX(-66deg); transform-origin: 50% 0;
+  background:
+    linear-gradient(90deg, transparent calc(41% - 6px), var(--duct) 0 calc(41% + 6px), transparent 0),
+    linear-gradient(90deg, transparent calc(30% - 22px), var(--tray) 0 calc(30% - 18px), transparent 0 calc(30% + 18px), var(--tray) 0 calc(30% + 22px), transparent 0),
+    linear-gradient(90deg, transparent calc(70% - 22px), var(--tray) 0 calc(70% - 18px), transparent 0 calc(70% + 18px), var(--tray) 0 calc(70% + 22px), transparent 0),
+    linear-gradient(90deg, var(--tile-line) 0 2px, transparent 2px) 0 0 / 80px 80px,
+    linear-gradient(var(--tile-line) 0 2px, transparent 2px) 0 0 / 80px 80px,
+    var(--hall-wall);
+  -webkit-mask: linear-gradient(#000 40%, transparent);
+          mask: linear-gradient(#000 40%, transparent);
+  opacity: .9;
+}
+
+/* Светлая тема — кладовка: без потолка с лотками, пол дощатый. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .hall .ceiling::before { display: none; }
+  :root:not([data-theme="dark"]) .hall .floor::before { background: repeating-linear-gradient(90deg, var(--tile) 0 118px, var(--tile-line) 118px 120px); }
+}
+:root[data-theme="light"] .hall .ceiling::before { display: none; }
+:root[data-theme="light"] .hall .floor::before { background: repeating-linear-gradient(90deg, var(--tile) 0 118px, var(--tile-line) 118px 120px); }

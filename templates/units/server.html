@@ -1,4 +1,5 @@
-{{/* Сервер с именем. Данные: .Age, .DaysToBirthday, .Avatars (аватарки из Telegram, новые первыми). */}}
+{{/* Сервер с именем. Данные: .Age, .DaysToBirthday (-1 — день рождения не указан), .Avatars (аватарки из Telegram,
+     новые первыми), .Data — content/profile.yaml (ленты под именем). */}}
 {{define "unit-server"}}
 <section class="u srv" style="--h:4" aria-labelledby="who">
   <div class="face">
@@ -18,24 +19,19 @@
     {{end}}
     <div class="ident">
       <h1 class="name" id="who">belomaxorka<small>{{t "me.sub"}}</small></h1>
+      {{$p := .}}
+      {{range .Data.tapes}}
       <div class="tapes">
-        <span class="tape">{{t "me.pronouns"}}</span>
-        <span class="tape">{{.Age}} {{tn "years" .Age}}</span>
-        <span class="tape r">infp-t</span>
-        <span class="tape">ru · en</span>
+        {{range .}}<span class="tape{{with .color}} {{.}}{{end}}">{{if .age}}{{$p.Age}} {{tn "years" $p.Age}}{{else if .t}}{{t .t}}{{else}}{{.text}}{{end}}</span>
+        {{end}}
       </div>
-      <div class="tapes">
-        <span class="tape b">{{t "me.backend"}}</span>
-        <span class="tape b">{{t "me.frontend"}}</span>
-        <span class="tape b">{{t "me.devops"}}</span>
-        <span class="tape b">{{t "me.selfhosted"}}</span>
-      </div>
+      {{end}}
       <p class="intro">{{th "me.intro"}}</p>
     </div>
     <div class="status-col">
       <div class="lcd two" x-data="cycle(3200)">
         <ul class="msgs">
-          <li class="on">{{t "lcd.hello"}}<br><span class="d">{{if eq .DaysToBirthday 0}}{{t "lcd.bday_today"}}{{else}}{{t "lcd.bday_in" .DaysToBirthday (tn "days" .DaysToBirthday)}}{{end}}</span></li>
+          <li class="on">{{t "lcd.hello"}}<br><span class="d">{{if eq .DaysToBirthday 0}}{{t "lcd.bday_today"}}{{else if gt .DaysToBirthday 0}}{{t "lcd.bday_in" .DaysToBirthday (tn "days" .DaysToBirthday)}}{{else}}{{t "lcd.web2"}}{{end}}</span></li>
           <li>{{t "lcd.web"}}<br><span class="d">{{t "lcd.web2"}}</span></li>
           <li>infp-t<br><span class="d">{{t "lcd.mbti2"}}</span></li>
           <li>{{t "lcd.go"}}<br><span class="d">{{t "lcd.go2"}}</span></li>
@@ -47,3 +43,6 @@
   <div class="note">{{th "note.dont"}}</div>
 </section>
 {{end}}
+
+{{/* В стойке (content/racks.yaml) юнит получает всю страницу, а сам берёт из неё .Profile. */}}
+{{define "slot-server"}}{{template "unit-server" .Profile}}{{end}}

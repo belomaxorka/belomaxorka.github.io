@@ -1,0 +1,76 @@
+/* Выдвижные юниты: ручка на левом ухе и ящик с деталями под юнитом (templates/index.html → drawer,
+   detail-<имя> в units/). Ящик выезжает сам (@starting-style), без JS приходит уже выдвинутым (/u/<имя>). */
+.u > .pull {
+  position: absolute; z-index: 3; left: 0; top: 50%; translate: 0 -50%;
+  width: var(--ear); height: min(52px, 78%); display: grid; place-items: center; cursor: pointer;
+}
+.u > .pull::after { content: ""; position: absolute; inset: -4px -6px; } /* попасть пальцем: 32px вширь */
+.u > .pull i {
+  width: 8px; height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--screw), var(--screw-hi) 45%, var(--screw));
+  box-shadow: 0 2px 3px #0008, inset 0 0 0 1px #0004;
+  transition: translate .2s;
+}
+.u > .pull:hover i, .u > .pull[aria-expanded="true"] i { translate: -3px 0; background: linear-gradient(90deg, var(--accent), #fff 45%, var(--accent)); }
+.u > .pull[aria-busy="true"] i { opacity: .6; }
+
+/* Выдвинутый юнит чуть выходит вперёд. */
+.u:has(+ .drawer.open) { z-index: 2; box-shadow: 0 16px 22px -14px #000; }
+.u:has(+ .drawer.open) .face { background: linear-gradient(var(--panel-hi), var(--panel-hi) 30%, var(--panel)); }
+
+.drawer { display: none; }
+.drawer.open {
+  display: grid; grid-template-rows: 1fr; position: relative; z-index: 1;
+  margin-inline: calc(var(--ear) * -.5);
+  transition: grid-template-rows .35s cubic-bezier(.3, .7, .3, 1);
+}
+@starting-style { .drawer.open { grid-template-rows: 0fr; } }
+.drawer.open.closing { grid-template-rows: 0fr; }
+@media (prefers-reduced-motion: reduce) { .drawer.open { transition: none; } }
+.drawer .slide {
+  min-height: 0; overflow: hidden; display: grid; gap: 10px; justify-items: start;
+  padding: 14px 18px; border-radius: 0 0 4px 4px;
+  /* салазки по бокам и решётка дна ящика */
+  background:
+    linear-gradient(90deg, var(--rail-hi) 0 6px, transparent 6px calc(100% - 6px), var(--rail-hi) 0),
+    repeating-linear-gradient(90deg, #ffffff06 0 2px, transparent 2px 8px),
+    var(--void);
+  box-shadow: inset 0 10px 14px -10px #000, 0 14px 22px -14px #000;
+}
+.drawer .slide > * { justify-self: stretch; }
+.drawer .shut { justify-self: start; }
+.detail { display: grid; gap: 10px; min-width: 0; }
+.detail > .silk { margin: 0; }
+
+/* Медиасервер: неделя в Koito. */
+.media-week .stats { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 0; }
+.media-week .tops { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 24px; }
+.media-week h3 { margin: 0 0 6px; font-size: 10px; }
+.media-week ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.media-week li { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 10px; align-items: center; }
+.media-week li img, .media-week li .nocover { grid-row: span 2; width: 32px; height: 32px; border-radius: 2px; background: var(--panel-hi); object-fit: cover; }
+.media-week li a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; }
+.media-week li a:hover { text-decoration: underline; }
+.media-week li small { grid-column: 2; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.media-week li b { grid-column: 3; grid-row: 1 / span 2; font: 400 18px/1 var(--f-lcd); color: var(--lcd); }
+.media-week li:not(:has(small)) a { grid-row: span 2; }
+
+/* Мониторинг: столбики последних проверок. */
+.mon-history .hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.mon-history .hist li { display: grid; grid-template-columns: 110px minmax(0, 1fr) 17em; gap: 12px; align-items: center; }
+.mon-history .who { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.mon-history .who .silk { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mon-history .bars { display: flex; align-items: flex-end; gap: 1px; height: 22px; min-width: 0; }
+.mon-history .bars i {
+  flex: 1; min-width: 1px; border-radius: 1px 1px 0 0; background: var(--led-ok); opacity: .8;
+  height: calc(max(2px, var(--ms) / max(var(--max), 1) * 100%));
+}
+.mon-history .bars i.x { height: 100%; background: var(--led-err); opacity: 1; }
+.mon-history li.warn .bars i:not(.x) { background: var(--led-warn); }
+.mon-history .nums { font-size: 12px; color: var(--dim); white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
+@media (max-width: 560px) {
+  .drawer .slide { padding: 12px 12px; }
+  .mon-history .hist { gap: 8px; }
+  .mon-history .hist li { grid-template-columns: minmax(0, 1fr) auto; row-gap: 4px; }
+  .mon-history .bars { grid-column: 1 / -1; grid-row: 2; }
+}

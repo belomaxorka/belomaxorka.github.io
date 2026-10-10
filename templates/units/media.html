@@ -2,6 +2,7 @@
 {{define "unit-media"}}
 <section class="u media" style="--h:2" aria-label="{{t "media.aria"}}" id="unit-media"
   hx-get="/fragments/media" hx-trigger="every 30s" hx-swap="outerHTML">
+  <a class="pull" href="/u/media" data-unit="media" x-data="pull" @click.prevent="toggle" title="{{t "drawer.pull"}}" aria-label="{{t "drawer.pull"}}: {{t "media.aria"}}"><i></i></a>
   <div class="face">
     {{if .Cover}}<img class="tray" src="{{.Cover}}" width="300" height="300" alt="{{t "media.cover"}}{{with .Album}}: {{.}}{{end}}">{{else}}<div class="tray empty" role="img" aria-label="{{t "media.nocover"}}"></div>{{end}}
     <div class="lcd">
@@ -20,4 +21,25 @@
     </div>
   </div>
 </section>
+{{end}}
+
+{{/* В стойке (content/racks.yaml) юнит получает всю страницу, а сам берёт из неё .Music. */}}
+{{define "slot-media"}}{{template "unit-media" .Music}}{{end}}
+
+{{/* Медиасервер выдвинут: неделя в Koito. Данные: вся страница; .Week — цифры и топы (обновляются раз в 5 минут). */}}
+{{define "detail-media"}}
+<div class="detail media-week">
+  <p class="silk">koito · {{t "week.title"}}</p>
+  {{with .Week}}{{if and .OK .Listens}}
+  <div class="lcd stats"><span>{{t "week.listens" .Listens}}</span><span>{{t "week.minutes" .Minutes}}</span><span>{{t "week.artists" .Artists}}</span></div>
+  <div class="tops">
+    <section><h3 class="silk">{{t "week.tracks"}}</h3>
+      <ol>{{range .TopTracks}}<li>{{if .Cover}}<img src="{{.Cover}}" width="32" height="32" alt="" loading="lazy">{{else}}<i class="nocover"></i>{{end}}<a href="{{.Link}}">{{.Name}}</a><small>{{.Artists}}</small><b>{{t "week.plays" .Count}}</b></li>{{end}}</ol>
+    </section>
+    <section><h3 class="silk">{{t "week.top_artists"}}</h3>
+      <ol>{{range .TopArtists}}<li>{{if .Cover}}<img src="{{.Cover}}" width="32" height="32" alt="" loading="lazy">{{else}}<i class="nocover"></i>{{end}}<a href="{{.Link}}">{{.Name}}</a><b>{{t "week.plays" .Count}}</b></li>{{end}}</ol>
+    </section>
+  </div>
+  {{else}}<p class="lcd">{{t "week.empty"}}</p>{{end}}{{end}}
+</div>
 {{end}}

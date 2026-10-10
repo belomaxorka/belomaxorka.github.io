@@ -1,0 +1,28 @@
+{{/* Проход между стойками: таблички R1…Rn (обычные ссылки, работают без JS), стрелки к соседям.
+     С JS ещё ←/→ и свайп (assets/js/aisle.js), переход — View Transitions (assets/css/aisle.css).
+     rel="prev/next" здесь нет специально: им помечено кольцо otoring на патч-панели. */}}
+{{define "aisle"}}
+<nav class="aisle" id="aisle" aria-label="{{t "aisle.aria"}}">
+  {{with .Rack.Prev}}<a class="step prev" href="{{.Path}}" data-step="prev"><i aria-hidden="true">‹</i><span>r{{.N}} · {{t (print "rack." .ID)}}</span></a>{{else}}<span class="step prev end" aria-hidden="true"></span>{{end}}
+  <ol class="signs">
+    {{range .Racks}}<li><a href="{{.Path}}"{{if .Current}} aria-current="page"{{end}}{{if .Stub}} class="stub"{{end}}><b>r{{.N}}</b><span>{{t (print "rack." .ID)}}</span></a></li>
+    {{end}}
+  </ol>
+  {{with .Rack.Next}}<a class="step next" href="{{.Path}}" data-step="next"><span>r{{.N}} · {{t (print "rack." .ID)}}</span><i aria-hidden="true">›</i></a>{{else}}<span class="step next end" aria-hidden="true"></span>{{end}}
+</nav>
+{{end}}
+
+{{/* Серверная вокруг стойки: потолок с лотками, соседние стойки (их диоды — настоящие лампы Gatus),
+     фальшпол, табличка «выход». Только декор: aria-hidden, без JS, свет — .room[data-light]. */}}
+{{define "hall"}}
+<div class="hall" aria-hidden="true">
+  <div class="ceiling"><i class="tray"></i><i class="duct"></i><i class="lamp a"></i><i class="lamp b"></i><i class="lamp c"></i></div>
+  <div class="nb l">{{template "nb-rack" .Status.Lamps}}</div>
+  <div class="nb r">{{template "nb-rack" .Status.Lamps}}</div>
+  <div class="floor"><i class="vent"></i></div>
+  <div class="exit">{{t "hall.exit"}}</div>
+</div>
+{{end}}
+
+{{/* Соседняя стойка: юниты-заглушки и диоды. Диоды — настоящие лампы мониторинга (зелёные, жёлтые, красные). */}}
+{{define "nb-rack"}}<div class="nbr">{{range seq 16}}<span class="nu"></span>{{end}}<div class="leds">{{range .}}<i class="{{.State}}"></i>{{end}}{{range .}}<i class="{{.State}}"></i>{{end}}</div></div>{{end}}

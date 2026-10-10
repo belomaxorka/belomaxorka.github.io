@@ -13,3 +13,6 @@
   </div>
 </section>
 {{end}}
+
+{{/* В стойке (content/racks.yaml) юнит получает всю страницу, а сам берёт из неё .Syslog. */}}
+{{define "slot-syslog"}}{{template "unit-syslog" .Syslog}}{{end}}

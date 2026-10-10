@@ -157,19 +157,67 @@
         this.$refs.drawing.value = '';
       },
     }));
+
+    // Выдвижной юнит: ручка на левом ухе. Без JS это ссылка на /u/<имя> (страница с выдвинутым юнитом), с JS
+    // htmx подгружает ящик под юнит (/fragments/unit/<имя>), повторное нажатие задвигает.
+    Alpine.data('pull', () => ({
+      toggle() {
+        const el = this.$el, name = el.dataset.unit, box = document.getElementById('drawer-' + name);
+        if (!box || !window.htmx) { location.href = el.href; return; }
+        if (box.classList.contains('open')) { box.dispatchEvent(new CustomEvent('drawer:shut')); return; }
+        el.setAttribute('aria-busy', 'true');
+        htmx.ajax('GET', '/fragments/unit/' + name, { target: box, swap: 'outerHTML' })
+          .finally(() => el.removeAttribute('aria-busy'));
+      },
+    }));
+
+    // Ящик выдвинутого юнита: выезжает, ручке ставит aria-expanded, задвигается кнопкой, Esc или ручкой.
+    Alpine.data('drawer', () => ({
+      init() {
+        const el = this.$el, name = el.id.replace('drawer-', '');
+        this.handle = document.querySelector(`.pull[data-unit="${name}"]`);
+        if (this.handle) this.handle.setAttribute('aria-expanded', 'true');
+        el.addEventListener('drawer:shut', () => this.shut());
+        // Выезжает сам (CSS @starting-style); стойку пересчитать сразу и когда доедет.
+        const layout = () => document.dispatchEvent(new Event('rack:layout'));
+        layout();
+        el.addEventListener('transitionend', layout, { once: true });
+      },
+      shut() {
+        const el = this.$el;
+        const done = () => {
+          if (!el.isConnected) return;
+          const empty = document.createElement('div');
+          empty.className = 'drawer';
+          empty.id = el.id;
+          el.replaceWith(empty);
+          if (this.handle && this.handle.isConnected) {
+            this.handle.setAttribute('aria-expanded', 'false');
+            this.handle.focus({ preventScroll: true });
+          }
+          document.dispatchEvent(new Event('rack:layout'));
+        };
+        if (!motion()) return done();
+        el.style.minHeight = '';
+        el.classList.add('closing');
+        el.addEventListener('transitionend', done, { once: true });
+        setTimeout(done, 450);
+      },
+    }));
   });
 
   // ---------- высота юнитов кратна U, номера на рейках ----------
+  // Выдвинутый ящик тоже занимает место в стойке: считается, как юнит.
   function snap() {
     const body = document.getElementById('rack-body');
     if (!body) return;
     const U = parseFloat(getComputedStyle(body).getPropertyValue('--U'));
-    const units = [...body.querySelectorAll(':scope > .u')];
+    const units = [...body.querySelectorAll(':scope > .u, :scope > .drawer.open')];
     let total = 0;
     units.forEach(u => {
       u.style.minHeight = '';
       const n = Math.ceil((u.offsetHeight - 1) / U);
-      u.style.minHeight = n * U + 'px';
+      if (!u.classList.contains('closing')) u.style.minHeight = n * U + 'px';
       total += n;
     });
     body.querySelectorAll('.rail').forEach(rail => {

@@ -1,27 +1,45 @@
-{{/* Главная: стойка сверху вниз. Каждый юнит — свой шаблон в units/. */}}
+{{/* Страница = одна стойка из ряда (content/racks.yaml): проход с табличками сверху, зал вокруг, юниты сверху
+     вниз. Юнит рисует {{unit "имя" $}}: шаблон templates/units/<имя>.html. Юнит с шаблоном detail-<имя>
+     выдвигается: под ним ящик, который наполняет htmx (/fragments/unit/<имя>) или, без JS, страница /u/<имя>. */}}
 {{define "page"}}
-<div class="room" id="room">
-  <div class="rack" id="rack">
-    {{template "router" .}}
-    <div class="cap"><span>{{t "rack.cap"}}</span></div>
+<div class="room" id="room" data-rack="{{.Rack.ID}}" data-light="{{template "light" .}}">
+  {{template "hall" .}}
+  {{template "aisle" .}}
+  <div class="rack{{if .Rack.Stub}} stub{{end}}" id="rack">
+    {{if .Rack.Router}}{{template "router" .}}{{end}}
+    <div class="cap"><span>{{t "rack.cap"}} · r{{.Rack.N}} · {{t (print "rack." .Rack.ID)}}</span></div>
     <div class="body" id="rack-body">
       <div class="rail l" aria-hidden="true"></div>
       <div class="rail r" aria-hidden="true"></div>
-      {{template "unit-patch" .Ring}}
-      {{template "unit-mgmt" .}}
-      {{template "unit-server" .Profile}}
-      {{template "unit-media" .Music}}
-      {{template "unit-monitor" .Status}}
-      {{template "unit-disks" .}}
-      {{template "unit-syslog" .Syslog}}
-      {{template "unit-switch" .}}
-      {{template "unit-kvm" .Guestbook}}
-      {{template "unit-buttons" .}}
-      {{template "unit-blank" .}}
-      {{template "unit-ups" .}}
+      {{range .Rack.Units}}
+      {{unit . $}}
+      {{if has (print "detail-" .)}}{{if eq . $.Open}}{{template "drawer" $}}{{else}}<div class="drawer" id="drawer-{{.}}"></div>{{end}}{{end}}
+      {{end}}
+      {{if .Rack.Stub}}{{template "stub" .}}{{end}}
     </div>
     <div class="foot"></div>
   </div>
   <svg class="cables" id="cables" aria-hidden="true" data-uplink="{{t "cable.uplink"}}" data-power="{{t "cable.power"}}"></svg>
+</div>
+{{end}}
+
+{{/* Свет в зале: ночь и день по времени Барнаула, на батарее ИБП — аварийный. */}}
+{{define "light"}}{{if .UPS.OnBattery}}battery{{else if or (lt .Now.Hour 7) (ge .Now.Hour 23)}}night{{else if ge .Now.Hour 19}}evening{{else}}day{{end}}{{end}}
+
+{{/* Стойку ещё монтируют: заглушки и табличка. */}}
+{{define "stub"}}
+<div class="u blank stub-note" style="--h:3">
+  <div class="face"><p class="lcd two">{{t "rack.stub"}}<br><span class="d">{{t (print "rack." .Rack.ID ".sub")}}</span></p></div>
+</div>
+<div class="u blank free" style="--h:4" aria-hidden="true"><div class="face"></div></div>
+{{end}}
+
+{{/* Выдвинутый юнит: детали из detail-<имя> и ручка «задвинуть». Данные: вся страница, .Open — имя юнита. */}}
+{{define "drawer"}}
+<div class="drawer open" id="drawer-{{.Open}}" x-data="drawer" @keydown.escape="shut()">
+  <div class="slide">
+    {{detail .Open .}}
+    <a class="key shut" href="{{.Rack.Path}}#unit-{{.Open}}" @click.prevent="shut()">{{t "drawer.shut"}}</a>
+  </div>
 </div>
 {{end}}

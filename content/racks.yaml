@@ -1,0 +1,25 @@
+# Ряд стоек: каждая стойка — своя страница, порядок здесь — порядок в проходе (стрелки, ←/→, свайп).
+#   id    — имя; подпись на табличке берётся из i18n: rack.<id> (и rack.<id>.sub — строка под ней);
+#   path  — адрес страницы; у первой стойки должен быть "/" (на главной наверху кольцо otoring);
+#   units — юниты сверху вниз: имя = шаблон templates/units/*.html с {{define "unit-<имя>"}};
+#   router — роутер на крыше (к нему тянутся патч-корды и аплинк);
+#   stub  — стойку ещё монтируют: вместо юнитов заглушки.
+# Новый юнит в стойке — строка здесь; новая стойка — блок здесь и подписи в i18n, без Go.
+- id: home
+  path: /
+  router: true
+  units: [patch, mgmt, server, media, monitor, disks, syslog, switch, kvm, buttons, blank, ups]
+
+- id: lab
+  path: /lab
+  units: [patch, mgmt, monitor, ups]
+
+- id: fun
+  path: /fun
+  stub: true
+  units: [patch, mgmt]
+
+- id: archive
+  path: /archive
+  stub: true
+  units: [patch, mgmt]

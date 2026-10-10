@@ -1,7 +1,7 @@
 {{/* Каркас страницы. Рендерит site-api (Go html/template), данные — в README site-api. */}}
 {{define "layout" -}}
 <!doctype html>
-<html lang="{{lang}}" data-lcd="cover">
+<html lang="{{lang}}" data-lcd="cover" data-racks="{{range .Racks}}{{.Path}} {{end}}">
 <head>
 <meta charset="utf-8">
 {{/* Что странице можно загружать: только свои скрипты (Alpine — CSP-сборка, без eval; никаких inline-скриптов
@@ -23,6 +23,7 @@
 <script defer src="{{asset "vendor/htmx-2.0.4.min.js"}}"></script>
 <script defer src="{{asset "js/app.js"}}"></script>
 <script defer src="{{asset "js/power.js"}}"></script>
+<script defer src="{{asset "js/aisle.js"}}"></script>
 <script defer src="{{asset "vendor/alpine-csp-3.17.4.min.js"}}"></script>
 </head>
 <body>
