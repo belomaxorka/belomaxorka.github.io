@@ -35,3 +35,13 @@
 }
 .ups .pwr:active { transform: translateY(1px); }
 .rack.powered-off .ups .pwr { color: var(--led-err); text-shadow: 0 0 6px var(--led-err); }
+
+/* Стикер отклеился (assets/js/sticker.js): на юните пусто, копия падает и лежит на полу; тап — обратно. */
+.peeled { visibility: hidden; }
+.fallen-sticker {
+  position: absolute; z-index: 5; left: 0; top: 0; margin: 0; max-width: none; box-sizing: border-box;
+  pointer-events: none; transform-origin: 50% 50%; will-change: transform; user-select: none;
+}
+.fallen-sticker.on-floor { pointer-events: auto; cursor: pointer; filter: brightness(.9) saturate(.9); }
+.fallen-sticker.on-floor:hover { filter: none; }
+.fallen-sticker.returning { transition: transform .7s cubic-bezier(.3, .7, .3, 1); }

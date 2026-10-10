@@ -1,5 +1,5 @@
 {{/* KVM-консоль = гостевая книга. Форма работает и без JS (обычный POST и редирект назад),
-     с JS уходит через htmx и умеет рисунок. Записи появляются после модерации.
+     с JS уходит через htmx и умеет рисунок (assets/js/oekaki.js). Записи появляются после модерации.
      Данные: .Enabled, .Entries (ID, Name, Text, Reply, At, Drawing), .Status, .Stamp. */}}
 {{define "unit-kvm"}}
 <section class="u kvm" style="--h:5" aria-labelledby="gbh" id="unit-kvm">
@@ -37,15 +37,29 @@
         <textarea id="gb-text" name="text" maxlength="600" placeholder="{{t "gb.placeholder"}}" aria-label="{{t "gb.message"}}"></textarea>
       </div>
       <div class="keys">
-        <button class="key" type="button" hidden :hidden="false" @click="open = !open" :aria-pressed="open">{{t "gb.draw"}}</button>
+        <button class="key" type="button" hidden :hidden="false" @click="toggle" :aria-pressed="open">{{t "gb.draw"}}</button>
         <button class="key" type="submit">{{t "gb.send"}}</button>
       </div>
-      <div class="pad" hidden x-bind:hidden="!open">
-        <canvas x-ref="pad" width="320" height="200" aria-label="{{t "gb.pad"}}"></canvas>
-        <div class="tools">
-          <template x-for="c in colors" :key="c"><button type="button" class="sw" :style="{ background: c }" @click="color = c" :aria-pressed="c === color" :aria-label="c"></button></template>
-          <button type="button" class="key" data-thin="{{t "gb.pad.thin"}}" data-thick="{{t "gb.pad.thick"}}" @click="size = size === 3 ? 9 : 3" x-text="size === 3 ? $el.dataset.thin : $el.dataset.thick">{{t "gb.pad.thin"}}</button>
-          <button type="button" class="key" @click="clear()">{{t "gb.pad.clear"}}</button>
+      <div class="pad" hidden :hidden="!open" :class="{ full: full }" @keydown.escape="setFull(false)">
+        <div class="stage"><canvas x-ref="pad" width="640" height="400" aria-label="{{t "gb.pad"}}"></canvas></div>
+        <div class="tools" role="toolbar" aria-label="{{t "gb.pad.tools"}}">
+          <div class="grp">
+            <button type="button" class="key" @click="use('brush')" :aria-pressed="isTool('brush')" title="{{t "gb.pad.brush"}}">✎<span>{{t "gb.pad.brush"}}</span></button>
+            <button type="button" class="key" @click="use('eraser')" :aria-pressed="isTool('eraser')" title="{{t "gb.pad.eraser_tip"}}">⌫<span>{{t "gb.pad.eraser"}}</span></button>
+            <button type="button" class="key" @click="use('fill')" :aria-pressed="isTool('fill')" title="{{t "gb.pad.fill"}}">◪<span>{{t "gb.pad.fill"}}</span></button>
+          </div>
+          <div class="grp swatches">
+            <template x-for="c in colors" :key="c"><button type="button" class="sw" :style="{ background: c }" @click="pick(c)" :aria-pressed="isColor(c)" :aria-label="c" :title="c"></button></template>
+            <label class="sw custom" title="{{t "gb.pad.custom"}}"><span class="sr-only">{{t "gb.pad.custom"}}</span><input type="color" x-ref="custom" value="#7b4fd6" @input="pickCustom"></label>
+          </div>
+          <label class="grp size"><span class="silk">{{t "gb.pad.size"}}</span><input type="range" min="1" max="40" :value="size" @input="setSize($event)" aria-label="{{t "gb.pad.size"}}"><span class="dot" :style="{ width: size + 'px', height: size + 'px', background: color }" aria-hidden="true"></span></label>
+          <div class="grp">
+            <button type="button" class="key" @click="undo" :disabled="!canUndo" title="{{t "gb.pad.undo"}} (Ctrl+Z)" aria-label="{{t "gb.pad.undo"}}">↶</button>
+            <button type="button" class="key" @click="redo" :disabled="!canRedo" title="{{t "gb.pad.redo"}} (Ctrl+Shift+Z)" aria-label="{{t "gb.pad.redo"}}">↷</button>
+            <button type="button" class="key" @click="clear">{{t "gb.pad.clear"}}</button>
+            <button type="button" class="key" @click="toggleFull" :aria-pressed="full" title="{{t "gb.pad.full"}}" aria-label="{{t "gb.pad.full"}}">⛶</button>
+          </div>
+          <p class="pad-warn" x-show="tooBig" role="status">{{t "gb.pad.toobig"}}</p>
         </div>
       </div>
       <div class="opts"><label><input type="checkbox" name="private" value="1"> {{t "gb.private"}}</label><span>{{t "gb.rules"}}</span></div>

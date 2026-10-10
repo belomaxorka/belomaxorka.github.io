@@ -3,4 +3,4 @@
 #   tag   — все гости с этим тегом в Proxmox (тег ставится в Proxmox: Options → Tags);
 #   vmids — и ещё эти номера, без тега.
 tag: belomaxorka-dev
-vmids: [117] # cs16, мой сервер CS 1.6
+vmids: []

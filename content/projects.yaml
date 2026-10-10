@@ -16,9 +16,6 @@
   tape: r
   led: blink s3
   desc: {en: this site's backend in go., ru: бэкенд этого сайта на go.}
-- name: cs 1.6
-  led: off
-  desc: {en: my own server on rehlds. the container is ready., ru: свой сервер на rehlds. контейнер готов.}
 - name: {en: tg bots, ru: tg-боты}
   tape: b
   led: blink s2

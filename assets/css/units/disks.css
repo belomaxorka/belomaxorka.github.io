@@ -1,5 +1,5 @@
 /* Проекты = корзины дисков с защёлкой и лампой активности. */
-.bays { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; width: 100%; }
+.bays { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; width: 100%; } /* сколько проектов в content/projects.yaml, столько колонок */
 .bay {
   border-radius: 3px; padding: 9px 9px 10px 22px; position: relative; min-width: 0;
   background: linear-gradient(90deg, var(--key) 0 14px, var(--panel-hi) 14px);

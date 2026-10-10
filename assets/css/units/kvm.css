@@ -47,18 +47,50 @@
 .kb label { display: inline-flex; align-items: center; gap: 6px; min-height: 26px; }
 .kb .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
-/* flex, не grid: в сетке ряд считался по исходным 200px холста, а не по его реальной высоте. */
-.pad { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 0; }
+/* Рисовалка (assets/js/oekaki.js). flex, не grid: в сетке ряд считался по исходному размеру холста. */
+.pad { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: stretch; gap: 10px; min-width: 0; }
+.pad .stage { display: flex; justify-content: center; min-width: 0; }
 .pad canvas {
-  width: 480px; max-width: 100%; aspect-ratio: 16 / 10; height: auto; background: #fff;
+  width: 640px; max-width: 100%; aspect-ratio: 16 / 10; height: auto; background: #fff;
   border: 3px solid var(--edge); border-radius: 3px; touch-action: none; cursor: crosshair;
+  box-shadow: 0 10px 22px -14px #000;
 }
-.pad .tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.pad .sw { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--edge); cursor: pointer; padding: 0; }
+.pad .tools { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: center; }
+.pad .grp { display: inline-flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.pad .key { min-height: 30px; min-width: 30px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.pad .key[aria-pressed="true"] { color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.pad .key:disabled { opacity: .4; cursor: default; }
+.pad .swatches { max-width: 360px; justify-content: center; }
+.pad .sw { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--edge); cursor: pointer; padding: 0; }
 .pad .sw[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink); }
+.pad .sw.custom { position: relative; overflow: hidden; background: conic-gradient(#e0322b, #ffd23f, #3daa63, #2bb3c0, #3a7bd5, #7b4fd6, #e0322b); }
+.pad .sw.custom input { position: absolute; inset: -6px; width: 40px; height: 40px; opacity: 0; cursor: pointer; }
+.pad .size { gap: 8px; }
+.pad .size input { width: 110px; accent-color: var(--accent); }
+.pad .size .dot { flex: none; border-radius: 50%; max-width: 40px; max-height: 40px; box-shadow: 0 0 0 1px var(--edge); }
+.pad .pad-warn { flex-basis: 100%; margin: 0; text-align: center; font-size: 13px; color: var(--led-warn); }
+
+/* Во весь экран: холст сколько влезет, инструменты под ним. Прокрутку страницы держим, пока открыто. */
+.pad.full {
+  position: fixed; inset: 0; z-index: 60; background: var(--panel); justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+}
+.pad.full .stage { flex: 1 1 auto; min-height: 0; align-items: center; }
+.pad.full canvas { width: auto; height: auto; max-width: 100%; max-height: 100%; }
+:root.pad-full { overflow: hidden; }
+/* Холст живёт внутри стойки и юнита, а у них свои слои: на время полного экрана поднять их над проходом и проводами. */
+:root.pad-full .room > .rack { z-index: 70; }
+:root.pad-full .u.kvm { z-index: 80; }
+/* Телефон боком: инструменты справа от холста. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .pad.full { flex-direction: row; align-items: center; }
+  .pad.full .tools { flex: 0 0 auto; width: min(300px, 42vw); max-height: 100%; overflow-y: auto; }
+}
 
 @media (max-width: 560px) {
   .kb { grid-template-columns: 1fr; }
   .kb .keys { grid-auto-flow: column; justify-content: start; }
   .screen .pic img { width: 88px; }
+  .pad .key span { display: none; }
+  .pad .size input { width: 90px; }
 }

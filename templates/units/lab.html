@@ -11,7 +11,7 @@
     </div>
     {{with .Lab}}{{if .OK}}
     <div class="meters">
-      <span class="meter{{if ge .Node.CPU 80}} hot{{end}}" style="--p: {{.Node.CPU}}"><span class="silk">cpu · {{.Node.Cores}}</span><i></i><b>{{.Node.CPU}}%</b></span>
+      <span class="meter{{if ge .Node.CPU 80}} hot{{end}}" style="--p: {{.Node.CPU}}"><span class="silk">cpu · {{.Node.Cores}}</span><i></i><b>{{.Node.CPUText}}%</b></span>
       <span class="meter{{if ge .Node.Mem 85}} hot{{end}}" style="--p: {{.Node.Mem}}"><span class="silk">ram</span><i></i><b>{{printf "%.1f" .Node.MemGiB}} / {{printf "%.0f" .Node.MaxGiB}} {{t "lab.gib"}}</b></span>
     </div>
     <div class="lcd two">{{t "lab.guests_up" .Up .Total}}<br><span class="d">{{t "lab.uptime" (uptime .Node.Uptime)}} · {{ago .Checked}}</span></div>
@@ -22,7 +22,8 @@
 </section>
 {{end}}
 
-{{/* Контейнеры: по юниту на каждый, лампа, номер, имя, процессор и память; в конце — сколько чужих. */}}
+{{/* Контейнеры: по юниту на каждый, лампа, номер, имя, процессор и память; в конце — сколько чужих.
+     CPU — доля собственных ядер контейнера (как в Proxmox: «0.4% of 2 CPUs»), .CPUText — с десятыми и сотыми. */}}
 {{define "unit-guests"}}
 {{with .Lab}}{{if .OK}}
 {{range .Guests}}
@@ -32,7 +33,7 @@
     <span class="tape{{if eq .Type "qemu"}} b{{end}}">{{if eq .Type "qemu"}}vm{{else}}ct{{end}}{{.ID}}</span>
     <span class="name">{{.Name}}</span>
     {{if .Running}}
-    <span class="meter{{if ge .CPU 80}} hot{{end}}" style="--p: {{.CPU}}"><span class="silk">cpu</span><i></i><b>{{.CPU}}%</b></span>
+    <span class="meter{{if ge .CPU 80}} hot{{end}}" style="--p: {{.CPU}}" title="{{t "lab.cpu_title" .Cores}}"><span class="silk">cpu · {{.Cores}}</span><i></i><b>{{.CPUText}}%</b></span>
     <span class="meter{{if ge .Mem 85}} hot{{end}}" style="--p: {{.Mem}}"><span class="silk">ram</span><i></i><b>{{.MemMiB}} / {{.MaxMiB}} {{t "lab.mib"}}</b></span>
     <span class="up silk">{{t "lab.uptime" (uptime .Uptime)}}</span>
     {{else}}

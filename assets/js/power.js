@@ -418,8 +418,12 @@
     wake();
   }
 
+  // Кто ещё следит за вилками (assets/js/sticker.js): событие на каждую выдернутую и воткнутую.
+  const told = (key, on) => document.dispatchEvent(new CustomEvent('rack:plug', { detail: { key, on } }));
+
   function unplug(r) {
     r.plugged = false;
+    told(r.key, false);
     if (r.mains) { state.mains = false; save(); runBattery(); return; }
     state.unplugged[r.key] = true;
     save();
@@ -429,6 +433,7 @@
 
   function plug(r) {
     r.plugged = true;
+    told(r.key, true);
     if (r.mains) { state.mains = true; save(); runBattery(); return; }
     delete state.unplugged[r.key];
     save();

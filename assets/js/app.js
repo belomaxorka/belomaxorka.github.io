@@ -120,42 +120,12 @@
       close() { this.$refs.dlg.close(); },
     }));
 
-    // Рисовалка гостевой: палитра из цветов стойки (ЖК, лампы, ленты), картинка уходит в скрытое поле
-    // после каждого штриха, так что её отправит и htmx, и обычная форма.
-    Alpine.data('oekaki', () => ({
-      open: false,
-      size: 3,
-      color: '#000000',
-      colors: [],
-      init() {
-        const cs = getComputedStyle(root);
-        const pick = ['--lcd', '--accent', '--tape-r', '--tape-b', '--led-ok', '--led-warn'].map(v => cs.getPropertyValue(v).trim()).filter(Boolean);
-        this.colors = [...new Set(['#111111', ...pick, '#ffffff'])];
-        this.color = this.colors[0];
-        const c = this.$refs.pad, g = c.getContext('2d');
-        g.fillStyle = '#ffffff';
-        g.fillRect(0, 0, c.width, c.height);
-        const pos = (e) => { const r = c.getBoundingClientRect(); return [(e.clientX - r.left) * c.width / r.width, (e.clientY - r.top) * c.height / r.height]; };
-        let last = null;
-        const stroke = (a, b) => {
-          g.strokeStyle = g.fillStyle = this.color; g.lineWidth = this.size; g.lineCap = g.lineJoin = 'round';
-          g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.stroke();
-        };
-        c.addEventListener('pointerdown', (e) => { last = pos(e); c.setPointerCapture(e.pointerId); stroke(last, [last[0] + .1, last[1]]); });
-        c.addEventListener('pointermove', (e) => { if (!last) return; const p = pos(e); stroke(last, p); last = p; });
-        const end = () => { if (last) { last = null; this.$refs.drawing.value = c.toDataURL('image/png'); } };
-        c.addEventListener('pointerup', end);
-        c.addEventListener('pointercancel', end);
-        this.g = g;
-        // Открытый холст меняет высоту юнита: пересчитать стойку и провода.
-        this.$watch('open', () => this.$nextTick(() => document.dispatchEvent(new Event('rack:layout'))));
-      },
-      clear() {
-        const c = this.$refs.pad;
-        this.g.fillStyle = '#ffffff';
-        this.g.fillRect(0, 0, c.width, c.height);
-        this.$refs.drawing.value = '';
-      },
+    // Журнал: фильтр по источнику, у посетителя запоминается.
+    Alpine.data('logView', () => ({
+      f: '',
+      init() { this.f = store.get('log-filter') || ''; },
+      show(f) { this.f = f; store.set('log-filter', f); },
+      is(f) { return this.f === f; },
     }));
 
     // Выдвижной юнит: ручка на левом ухе. Без JS это ссылка на /u/<имя> (страница с выдвинутым юнитом), с JS
@@ -324,5 +294,14 @@
   let resizeTimer;
   addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(layout, 120); });
   document.addEventListener('htmx:afterSettle', later);
+  // Журнал раз в минуту приходит целиком: прокрутку списка сохранить.
+  let logScroll = 0;
+  document.addEventListener('htmx:beforeSwap', (e) => {
+    if (e.detail.target?.id === 'unit-syslog') logScroll = e.detail.target.querySelector('ol')?.scrollTop || 0;
+  });
+  document.addEventListener('htmx:afterSettle', () => {
+    const ol = document.querySelector('#unit-syslog ol');
+    if (ol && logScroll) ol.scrollTop = logScroll;
+  });
   document.addEventListener('rack:layout', later);
 })();

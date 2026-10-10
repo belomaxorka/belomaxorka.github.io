@@ -10,7 +10,7 @@
       <span>{{if .OK}}{{if .OnBattery}}{{t "ups.battery"}}{{else}}{{t "ups.mains"}}{{end}} · {{.Charge}}%<br><span class="d">{{t "ups.load" .Load}} · {{t "ups.runtime" .RuntimeMin}}</span>{{else}}{{t "ups.online"}}<br><span class="d">{{t "ups.nodata"}}</span>{{end}}</span>
     </div>
     {{end}}
-    <div class="sticker" aria-hidden="true">{{th "ups.sticker"}}</div>
+    <div class="sticker" aria-hidden="true" data-sticker="mains" data-back="{{t "note.back"}}">{{th "ups.sticker"}}</div>
     <div class="meta">
       <span><b>hosted on belomaxorka infrastructure</b></span>
       {{with .Visits}}{{if .OK}}<span>{{t "visits" (num .Views) (num .Visitors)}}</span>{{end}}{{end}}

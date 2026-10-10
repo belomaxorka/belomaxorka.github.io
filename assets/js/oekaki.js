@@ -1,0 +1,212 @@
+// Рисовалка гостевой (KVM, templates/units/kvm.html). Холст 640×400 (больше site-api не примет), белый фон.
+// Кисть с нажимом пера, ластик (кнопка или обратный конец пера), заливка, палитра и любой цвет, размер ползунком,
+// отмена и повтор (кнопки, Ctrl+Z, Ctrl+Shift+Z / Ctrl+Y), во весь экран. Картинка после каждого действия
+// уходит в скрытое поле формы, поэтому её отправит и htmx, и обычная форма. Без JS рисовалки нет, форма работает.
+document.addEventListener('alpine:init', () => {
+  const Alpine = window.Alpine;
+  const W = 640, H = 400;
+  const MAX_URL = 400 << 10;   // site-api: guestbook.MaxDrawing
+  const HISTORY = 25;          // шагов отмены (по 1 МБ на шаг)
+  const BASE = ['#111111', '#ffffff', '#8a8f98', '#e0322b', '#ff8a00', '#ffd23f', '#3daa63', '#2bb3c0',
+    '#3a7bd5', '#7b4fd6', '#ff6fb5', '#8b5a2b'];
+
+  Alpine.data('oekaki', () => ({
+    open: false,
+    full: false,
+    tool: 'brush', // brush, eraser, fill
+    color: '#111111',
+    size: 6,
+    colors: [],
+    undoN: 0,
+    redoN: 0,
+    tooBig: false,
+
+    init() {
+      // К основной палитре — цвета стойки: ЖК (меняется с обложкой трека) и акцент.
+      const cs = getComputedStyle(document.documentElement);
+      const rack = ['--lcd', '--accent'].map((v) => cs.getPropertyValue(v).trim()).filter((c) => /^#[0-9a-f]{6}$/i.test(c));
+      this.colors = [...new Set([...BASE, ...rack.map((c) => c.toLowerCase())])];
+      const c = this.$refs.pad;
+      c.width = W; c.height = H;
+      this.g = c.getContext('2d', { willReadFrequently: true });
+      this.wipe();
+      this.past = [this.snap()];
+      this.future = [];
+      this.stroke = null;
+      c.addEventListener('pointerdown', (e) => this.down(e));
+      c.addEventListener('pointermove', (e) => this.move(e));
+      c.addEventListener('pointerup', (e) => this.up(e));
+      c.addEventListener('pointercancel', (e) => this.up(e));
+      c.addEventListener('contextmenu', (e) => e.preventDefault());
+      this.onKey = (e) => this.key(e);
+      addEventListener('keydown', this.onKey);
+      // Открытый холст меняет высоту юнита: пересчитать стойку и провода.
+      this.$watch('open', () => this.$nextTick(() => document.dispatchEvent(new Event('rack:layout'))));
+    },
+    destroy() { removeEventListener('keydown', this.onKey); document.documentElement.classList.remove('pad-full'); },
+
+    // ---------- кнопки ----------
+    toggle() { this.open = !this.open; if (!this.open) this.setFull(false); },
+    use(tool) { this.tool = tool; },
+    isTool(tool) { return this.tool === tool; },
+    pick(c) { this.color = c; if (this.tool === 'eraser') this.tool = 'brush'; },
+    isColor(c) { return this.color === c && this.tool !== 'eraser'; },
+    pickCustom() { this.pick(this.$refs.custom.value); },
+    setSize(e) { this.size = Number(e.target.value); },
+    get canUndo() { return this.undoN > 0; },
+    get canRedo() { return this.redoN > 0; },
+    setFull(on) {
+      this.full = on;
+      document.documentElement.classList.toggle('pad-full', on);
+    },
+    toggleFull() { this.setFull(!this.full); },
+
+    // ---------- холст ----------
+    wipe() {
+      this.g.globalCompositeOperation = 'source-over';
+      this.g.fillStyle = '#ffffff';
+      this.g.fillRect(0, 0, W, H);
+    },
+    snap() { return this.g.getImageData(0, 0, W, H); },
+    commit() {
+      this.past.push(this.snap());
+      if (this.past.length > HISTORY + 1) this.past.shift();
+      this.future = [];
+      this.sync();
+    },
+    sync() {
+      this.undoN = this.past.length - 1;
+      this.redoN = this.future.length;
+      const url = this.$refs.pad.toDataURL('image/png');
+      this.tooBig = url.length > MAX_URL;
+      this.$refs.drawing.value = this.blank() ? '' : url;
+    },
+    blank() {
+      const d = this.past[this.past.length - 1].data;
+      for (let i = 0; i < d.length; i += 4) if (d[i] !== 255 || d[i + 1] !== 255 || d[i + 2] !== 255) return false;
+      return true;
+    },
+    undo() {
+      if (this.past.length < 2) return;
+      this.future.push(this.past.pop());
+      this.g.putImageData(this.past[this.past.length - 1], 0, 0);
+      this.sync();
+    },
+    redo() {
+      if (!this.future.length) return;
+      const img = this.future.pop();
+      this.past.push(img);
+      this.g.putImageData(img, 0, 0);
+      this.sync();
+    },
+    clear() { this.wipe(); this.commit(); },
+
+    key(e) {
+      if (!this.open || !(e.ctrlKey || e.metaKey) || e.altKey) return;
+      if (e.target instanceof Element && e.target.closest('input:not([type="range"]):not([type="color"]), textarea')) return; // там своя отмена
+      const k = e.key.toLowerCase();
+      if (k === 'z' && !e.shiftKey) { e.preventDefault(); this.undo(); }
+      else if ((k === 'z' && e.shiftKey) || k === 'y') { e.preventDefault(); this.redo(); }
+    },
+
+    // ---------- рисование ----------
+    pos(e) {
+      const r = this.$refs.pad.getBoundingClientRect();
+      return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height };
+    },
+    // Толщина: у пера от нажима, у мыши и пальца — как на ползунке.
+    width(e) {
+      const p = e.pointerType === 'pen' && e.pressure > 0 ? e.pressure : 0.5;
+      return Math.max(0.6, this.size * (0.25 + p * 1.5));
+    },
+    down(e) {
+      if (e.button !== 0 && e.button !== 5) return;
+      e.preventDefault();
+      const p = this.pos(e);
+      if (this.tool === 'fill') { this.fill(Math.floor(p.x), Math.floor(p.y)); this.commit(); return; }
+      try { this.$refs.pad.setPointerCapture(e.pointerId); } catch { /* указатель уже ушёл: рисуем без захвата */ }
+      // Обратный конец пера — ластик, даже если выбрана кисть.
+      const erase = this.tool === 'eraser' || (e.pointerType === 'pen' && (e.buttons & 32) !== 0);
+      this.stroke = { id: e.pointerId, erase, pts: [p], w: this.width(e) };
+      this.dot(p, this.stroke.w, erase);
+    },
+    move(e) {
+      const s = this.stroke;
+      if (!s || e.pointerId !== s.id) return;
+      const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+      for (const ev of events.length ? events : [e]) {
+        const p = this.pos(ev), w = this.width(ev);
+        s.pts.push(p);
+        // Сглаживание: кривая через середины соседних отрезков, толщина плавно тянется к новой.
+        const n = s.pts.length;
+        if (n < 3) { this.line(s.pts[0], p, w, s.erase); s.w = w; continue; }
+        const a = s.pts[n - 3], b = s.pts[n - 2];
+        const m1 = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, m2 = { x: (b.x + p.x) / 2, y: (b.y + p.y) / 2 };
+        s.w += (w - s.w) * 0.5;
+        this.curve(m1, b, m2, s.w, s.erase);
+      }
+    },
+    up(e) {
+      const s = this.stroke;
+      if (!s || e.pointerId !== s.id) return;
+      this.stroke = null;
+      this.commit();
+    },
+    ink(w, erase) {
+      const g = this.g;
+      g.globalCompositeOperation = 'source-over';
+      g.strokeStyle = g.fillStyle = erase ? '#ffffff' : this.color;
+      g.lineWidth = erase ? Math.max(w, this.size * 1.5) : w;
+      g.lineCap = g.lineJoin = 'round';
+    },
+    dot(p, w, erase) {
+      this.ink(w, erase);
+      this.g.beginPath();
+      this.g.arc(p.x, p.y, this.g.lineWidth / 2, 0, Math.PI * 2);
+      this.g.fill();
+    },
+    line(a, b, w, erase) {
+      this.ink(w, erase);
+      this.g.beginPath(); this.g.moveTo(a.x, a.y); this.g.lineTo(b.x, b.y); this.g.stroke();
+    },
+    curve(a, c, b, w, erase) {
+      this.ink(w, erase);
+      this.g.beginPath(); this.g.moveTo(a.x, a.y); this.g.quadraticCurveTo(c.x, c.y, b.x, b.y); this.g.stroke();
+    },
+
+    // Заливка: построчно, с допуском, чтобы сглаженные края линий не оставляли щелей.
+    fill(x, y) {
+      if (x < 0 || y < 0 || x >= W || y >= H) return;
+      const img = this.snap(), d = img.data;
+      const hex = this.color.replace('#', '');
+      const to = [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)];
+      const at = (y * W + x) * 4, from = [d[at], d[at + 1], d[at + 2]];
+      if (Math.abs(from[0] - to[0]) + Math.abs(from[1] - to[1]) + Math.abs(from[2] - to[2]) < 8) return;
+      const TOL = 96;
+      const like = (i) => Math.abs(d[i] - from[0]) + Math.abs(d[i + 1] - from[1]) + Math.abs(d[i + 2] - from[2]) <= TOL;
+      const seen = new Uint8Array(W * H);
+      const stack = [[x, y]];
+      while (stack.length) {
+        let [cx, cy] = stack.pop();
+        while (cx >= 0 && !seen[cy * W + cx] && like((cy * W + cx) * 4)) cx--;
+        cx++;
+        let up = false, down = false;
+        while (cx < W && !seen[cy * W + cx] && like((cy * W + cx) * 4)) {
+          const k = cy * W + cx, i = k * 4;
+          seen[k] = 1;
+          d[i] = to[0]; d[i + 1] = to[1]; d[i + 2] = to[2]; d[i + 3] = 255;
+          if (cy > 0) {
+            const u = (cy - 1) * W + cx;
+            if (!seen[u] && like(u * 4)) { if (!up) { stack.push([cx, cy - 1]); up = true; } } else up = false;
+          }
+          if (cy < H - 1) {
+            const v = (cy + 1) * W + cx;
+            if (!seen[v] && like(v * 4)) { if (!down) { stack.push([cx, cy + 1]); down = true; } } else down = false;
+          }
+          cx++;
+        }
+      }
+      this.g.putImageData(img, 0, 0);
+    },
+  }));
+});
