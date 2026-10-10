@@ -78,6 +78,19 @@
       destroy() { clearInterval(this.timer); },
     }));
 
+    // Аватарки: листаются и без JS (scroll-snap); здесь стрелки, счётчик и прокрутка по кругу.
+    Alpine.data('gallery', () => ({
+      i: 0,
+      n: 1,
+      init() { this.n = this.$refs.slides.children.length; },
+      sync() { const s = this.$refs.slides; this.i = Math.round(s.scrollLeft / s.clientWidth); },
+      go(d) {
+        const s = this.$refs.slides;
+        this.i = (this.i + d + this.n) % this.n;
+        s.scrollTo({ left: this.i * s.clientWidth, behavior: motion() ? 'smooth' : 'auto' });
+      },
+    }));
+
     // Рисовалка гостевой: палитра из цветов стойки (ЖК, лампы, ленты), картинка уходит в скрытое поле
     // после каждого штриха, так что её отправит и htmx, и обычная форма.
     Alpine.data('oekaki', () => ({

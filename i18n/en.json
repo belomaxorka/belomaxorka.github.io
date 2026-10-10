@@ -23,6 +23,10 @@
   "theme.light": "day",
 
   "me.photo": "photo goes here",
+  "me.photos": "my telegram avatars",
+  "me.avatar": "avatar",
+  "me.prev": "previous photo",
+  "me.next": "next photo",
   "me.sub": "roman kelesidis · web developer",
   "me.pronouns": "he/him",
   "years": ["year", "years"],

@@ -1,8 +1,21 @@
-{{/* Сервер с именем. Данные: .Age, .DaysToBirthday. */}}
+{{/* Сервер с именем. Данные: .Age, .DaysToBirthday, .Avatars (аватарки из Telegram, новые первыми). */}}
 {{define "unit-server"}}
 <section class="u srv" style="--h:4" aria-labelledby="who">
   <div class="face">
+    {{with .Avatars}}
+    <div class="photo gallery" x-data="gallery" role="region" aria-roledescription="carousel" aria-label="{{t "me.photos"}}">
+      <div class="slides" x-ref="slides" tabindex="0" @scroll.debounce.80ms="sync()">
+        {{range $i, $src := .}}<img src="{{$src}}" alt="{{t "me.avatar"}}" width="640" height="640" decoding="async"{{if $i}} loading="lazy"{{end}}>{{end}}
+      </div>
+      {{if gt (len .) 1}}
+      <button class="nav prev" type="button" hidden x-init="$el.hidden = false" @click="go(-1)" aria-label="{{t "me.prev"}}">‹</button>
+      <button class="nav next" type="button" hidden x-init="$el.hidden = false" @click="go(1)" aria-label="{{t "me.next"}}">›</button>
+      <span class="count" x-text="(i + 1) + ' / ' + n">1 / {{len .}}</span>
+      {{end}}
+    </div>
+    {{else}}
     <div class="photo" role="img" aria-label="{{t "me.photo"}}"><span>photo</span></div>
+    {{end}}
     <div class="ident">
       <h1 class="name" id="who">belomaxorka<small>{{t "me.sub"}}</small></h1>
       <div class="tapes">
