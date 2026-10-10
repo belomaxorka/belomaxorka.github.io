@@ -1,0 +1,23 @@
+{{/* Медиасервер = Koito. Обновляется через htmx (/fragments/media), вместе с ним приходит палитра ЖК. */}}
+{{define "unit-media"}}
+<section class="u media" style="--h:2" aria-label="музыка" id="unit-media"
+  hx-get="/fragments/media" hx-trigger="every 30s" hx-swap="outerHTML">
+  <div class="face">
+    {{if .Cover}}<img class="tray" src="{{.Cover}}" width="300" height="300" alt="обложка{{with .Album}}: {{.}}{{end}}">{{else}}<div class="tray empty" role="img" aria-label="нет обложки"></div>{{end}}
+    <div class="lcd">
+      {{if .OK}}
+      <span class="d">{{if .Playing}}▶ koito · сейчас играет{{else}}■ koito · последнее, {{ago .At}}{{end}}</span><br>
+      <a href="{{.Link}}">{{.Track}}</a><br>
+      <span class="row2">{{.Artists}}{{with .Album}} · {{.}}{{end}}{{with .Duration}} · {{mmss .}}{{end}}</span>
+      {{else}}
+      <span class="d">■ koito</span><br>в эфире тишина<br><span class="row2 d">прослушиваний пока нет</span>
+      {{end}}
+    </div>
+    <div class="vu" x-data="vu({{.Playing}})" aria-hidden="true">
+      <div class="row"></div><div class="row"></div>
+      <span class="silk">l · r</span>
+      <span class="silk" x-text="$store.lcd.cover ? 'экраны в цвет обложки' : 'экраны: обычный янтарь'">экраны в цвет обложки</span>
+    </div>
+  </div>
+</section>
+{{end}}

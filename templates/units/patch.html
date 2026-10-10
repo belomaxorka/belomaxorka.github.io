@@ -1,0 +1,14 @@
+{{/* Патч-панель = вебринг otoring. Обычные ссылки, работают без JS; имена соседей из /{slug}/data. */}}
+{{define "unit-patch"}}
+<nav class="u patch" style="--h:1" aria-label="вебринг otoring">
+  <div class="face">
+    <span class="silk">otoring · патч-панель</span>
+    <div class="ports">
+      <a class="port" href="{{.PrevURL}}" rel="prev"><i class="jack"></i><span class="tape">← {{.PrevName}}</span></a>
+      <a class="port" href="{{.Home}}"><i class="jack"></i><span class="tape b">otoring</span>{{if .Joined}}<i class="led"></i>{{else}}<i class="led warn" title="заявка в кольцо ещё не принята"></i>{{end}}</a>
+      <a class="port" href="{{.RandomURL}}"><i class="jack"></i><span class="tape">случайный</span></a>
+      <a class="port" href="{{.NextURL}}" rel="next"><i class="jack"></i><span class="tape">{{.NextName}} →</span></a>
+    </div>
+  </div>
+</nav>
+{{end}}

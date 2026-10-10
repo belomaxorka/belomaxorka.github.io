@@ -1,0 +1,9 @@
+/* Заглушка с наклейками = кнопки 88x31. */
+.stick .face { gap: 10px; justify-content: center; padding-block: 12px; }
+.b88 {
+  width: 88px; height: 31px; flex: none; display: grid; place-items: center;
+  font: 700 9px/1.05 var(--f-silk); letter-spacing: .04em; text-align: center; text-decoration: none;
+  border: 1px solid #000; color: #fff; box-shadow: 0 2px 3px #0006;
+}
+.b88:nth-child(3n) { transform: rotate(-2deg); }
+.b88:nth-child(3n+1) { transform: rotate(1.5deg); }

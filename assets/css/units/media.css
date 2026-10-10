@@ -1,0 +1,17 @@
+/* Медиасервер = Koito: обложка в лотке, трек на ЖК, VU-метр. */
+.media .face { gap: 12px 18px; }
+.tray {
+  width: 84px; height: 84px; max-width: 100%; flex: none; display: block; object-fit: cover;
+  border-radius: 3px; border: 3px solid var(--edge); background: var(--void);
+  box-shadow: 0 0 0 1px var(--panel-hi);
+}
+.tray.empty { background: repeating-linear-gradient(135deg, var(--void) 0 6px, var(--panel) 6px 12px); }
+.media .lcd { flex: 1 1 300px; font-size: 24px; }
+.media .lcd .row2 { font-size: 18px; }
+.vu { display: grid; gap: 3px; flex: 0 1 200px; min-width: 150px; }
+.vu .row { display: grid; grid-template-columns: repeat(14, 1fr); gap: 2px; min-height: 9px; }
+.vu i { height: 9px; border-radius: 1px; background: var(--led-off); }
+.vu i.on { background: var(--led-ok); box-shadow: 0 0 4px var(--led-ok); }
+.vu i.on.w { background: var(--led-warn); box-shadow: 0 0 4px var(--led-warn); }
+.vu i.on.e { background: var(--led-err); box-shadow: 0 0 4px var(--led-err); }
+.vu .silk + .silk { margin-top: 2px; }

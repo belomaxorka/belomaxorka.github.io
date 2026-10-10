@@ -1,0 +1,18 @@
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: radial-gradient(120% 70% at 50% 0%, var(--panel-hi), var(--room) 60%) fixed, var(--room);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--f-text);
+}
+a { color: inherit; }
+a:focus-visible, button:focus-visible, textarea:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+.room { position: relative; overflow-x: clip; padding: 10px 16px 110px; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 560px) {
+  .room { padding-inline: 8px; }
+}

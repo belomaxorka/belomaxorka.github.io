@@ -1,0 +1,17 @@
+{{/* Управление: разделы и переключатели. Переключатели без JS не нужны, поэтому скрыты до запуска Alpine. */}}
+{{define "unit-mgmt"}}
+<div class="u mgmt" style="--h:1">
+  <div class="face">
+    <nav class="ports" aria-label="разделы">
+      <a class="key" href="https://blog.belomaxorka.dev">блог</a>
+      {{if .HasCV}}<a class="key" href="/cv.pdf">резюме.pdf</a>{{else}}<span class="key off" title="скоро">резюме.pdf</span>{{end}}
+      <a class="key" href="https://status.belomaxorka.dev">статус</a>
+      <a class="key" href="https://git.belomaxorka.dev/belomaxorka">git</a>
+    </nav>
+    <div class="ports">
+      <button class="key" type="button" hidden x-data="lcdToggle" @click="toggle" x-text="label">экраны: обложка</button>
+      <button class="key" type="button" hidden x-data="themeToggle" @click="toggle" aria-label="переключить тему"><i class="led pwr"></i><span x-text="label">тема</span></button>
+    </div>
+  </div>
+</div>
+{{end}}

@@ -1,0 +1,16 @@
+{{/* Заглушка с наклейками = кнопки 88x31. Своей картинки 88x31 пока нет. */}}
+{{define "unit-stickers"}}
+<section class="u stick" style="--h:2" aria-label="кнопки 88x31">
+  <div class="face">
+    <a class="b88" href="/" style="background: linear-gradient(90deg, #a062de, #62a0de); font-size: 10px">belomaxorka<br>.dev</a>
+    <a class="b88" href="https://webring.otomir23.me" style="background: #1d2a5c">otoring<br>webring</a>
+    <a class="b88" href="https://www.proxmox.com" style="background: #e5e5e5; color: #c0392b; border-color: #888">proxmox<br>powered</a>
+    <a class="b88" href="https://laravel.com" style="background: #ff2d20">made with<br>laravel</a>
+    <a class="b88" href="https://forgejo.org" style="background: #2b2b2b; color: #ff6600">forgejo<br>not github</a>
+    <a class="b88" href="https://status.belomaxorka.dev" style="background: #0f3d2e; color: #7fe0a0">self<br>hosted</a>
+    <a class="b88" href="https://www.16personalities.com/enfp-personality" style="background: #ffd23f; color: #111">enfp-t<br>inside</a>
+    <span class="b88" style="background: #000; color: #0f0">best viewed<br>with js off</span>
+    <button class="key" type="button" hidden x-data="copyBadge" @click="copy" x-text="label">скопировать мою кнопку</button>
+  </div>
+</section>
+{{end}}

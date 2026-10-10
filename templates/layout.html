@@ -1,0 +1,38 @@
+{{/* Каркас страницы. Рендерит site-api (Go html/template), данные — в README site-api. */}}
+{{define "layout" -}}
+<!doctype html>
+<html lang="ru" data-lcd="cover">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>belomaxorka's space</title>
+<meta name="description" content="Рома, он же belomaxorka: фулстек на PHP и Laravel, домашняя лаборатория на Proxmox, TorrentPier.">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="belomaxorka's space">
+<meta name="theme-color" content="#121315">
+<link rel="stylesheet" href="{{asset "css/site.css"}}">
+<style id="cover-palette">{{template "palette" .Music}}</style>
+<script>
+  (function () {
+    try {
+      var r = document.documentElement, t = localStorage.getItem('theme'), l = localStorage.getItem('lcd');
+      if (t) r.dataset.theme = t;
+      if (l) r.dataset.lcd = l;
+    } catch (e) {}
+  })();
+</script>
+<script defer src="{{asset "vendor/htmx-2.0.4.min.js"}}"></script>
+<script defer src="{{asset "js/app.js"}}"></script>
+<script defer src="{{asset "vendor/alpine-3.14.9.min.js"}}"></script>
+</head>
+<body>
+{{template "page" .}}
+</body>
+</html>
+{{- end}}
+
+{{/* Цвета ЖК из обложки текущего трека. Пусто — остаётся янтарь из tokens.css. */}}
+{{define "palette"}}{{with .Palette}}:root[data-lcd="cover"] { {{.}} }{{end}}{{end}}
+
+{{/* То же для htmx: при обновлении медиасервера палитра меняется вне юнита. */}}
+{{define "palette-oob"}}<style id="cover-palette" hx-swap-oob="true">{{template "palette" .}}</style>{{end}}

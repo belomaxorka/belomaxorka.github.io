@@ -1,0 +1,19 @@
+/* Точка входа стилей. site-api склеивает эти @import в один файл (/assets/css/site.css?v=...),
+   а статическая заглушка index.html грузит их как есть. Порядок важен. */
+@import "fonts.css";
+@import "tokens.css";
+@import "base.css";
+@import "rack.css";
+@import "parts.css";
+@import "units/router.css";
+@import "units/patch.css";
+@import "units/mgmt.css";
+@import "units/server.css";
+@import "units/media.css";
+@import "units/monitor.css";
+@import "units/disks.css";
+@import "units/syslog.css";
+@import "units/kvm.css";
+@import "units/stickers.css";
+@import "units/ups.css";
+@import "cables.css";

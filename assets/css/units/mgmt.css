@@ -1,0 +1,3 @@
+/* Управление: разделы слева, переключатели справа. */
+.mgmt .face { justify-content: space-between; }
+.mgmt .ports { gap: 6px; }

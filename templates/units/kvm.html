@@ -1,0 +1,16 @@
+{{/* KVM-консоль = гостевая книга. Пока заглушка: бэкенд гостевой ещё не написан. */}}
+{{define "unit-kvm"}}
+<section class="u kvm" style="--h:4" aria-labelledby="gbh">
+  <div class="face">
+    <div class="bar"><span class="silk" id="gbh">kvm · гостевая книга</span><span class="silk">скоро</span></div>
+    <div class="screen">
+      <p class="empty">гостевая ещё собирается. скоро тут можно будет написать и нарисовать что-нибудь.</p>
+    </div>
+    <div class="kb">
+      <label for="gbtext" class="silk" style="grid-column: 1 / -1; min-height: 0">сообщение</label>
+      <textarea id="gbtext" placeholder="привет из 2026" disabled></textarea>
+      <div class="keys"><button class="key" type="button" disabled>✎ рисовать</button><button class="key" type="button" disabled>⏎ отправить</button></div>
+    </div>
+  </div>
+</section>
+{{end}}

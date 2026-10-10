@@ -1,0 +1,27 @@
+{{/* Главная: стойка сверху вниз. Каждый юнит — свой шаблон в units/. */}}
+{{define "page"}}
+<div class="room" id="room">
+  <div class="rack" id="rack">
+    {{template "router" .}}
+    <div class="cap"><span>belomaxorka.dev · домашняя стойка</span></div>
+    <div class="body" id="rack-body">
+      <div class="rail l" aria-hidden="true"></div>
+      <div class="rail r" aria-hidden="true"></div>
+      {{template "unit-patch" .Ring}}
+      {{template "unit-mgmt" .}}
+      {{template "unit-server" .Profile}}
+      {{template "unit-media" .Music}}
+      {{template "unit-monitor" .Status}}
+      {{template "unit-disks" .}}
+      {{template "unit-syslog" .Syslog}}
+      {{template "unit-switch" .}}
+      {{template "unit-kvm" .}}
+      {{template "unit-stickers" .}}
+      {{template "unit-blank" .}}
+      {{template "unit-ups" .}}
+    </div>
+    <div class="foot"></div>
+  </div>
+  <svg class="cables" id="cables" aria-hidden="true"></svg>
+</div>
+{{end}}

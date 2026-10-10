@@ -1,0 +1,12 @@
+{{/* Роутер на крыше: к нему app.js тянет патч-корды, свитч и аплинк. */}}
+{{define "router"}}
+<div class="shelf" aria-hidden="true">
+  <div class="router">
+    <span class="silk">opnsense</span>
+    <span class="leds"><i class="led blink s3"></i><i class="led blink"></i><i class="led"></i></span>
+    <span class="rports">
+      <i class="rport wan" data-port="wan"></i><i class="rport" data-port="1"></i><i class="rport" data-port="2"></i><i class="rport" data-port="3"></i><i class="rport" data-port="4"></i><i class="rport" data-port="5"></i>
+    </span>
+  </div>
+</div>
+{{end}}

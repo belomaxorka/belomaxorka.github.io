@@ -1,0 +1,19 @@
+/* ИБП = подвал сайта. Стикер наклеен на угол экрана. */
+.ups .face { justify-content: space-between; gap: 10px 20px; padding-block: 12px; }
+.ups .lcd { font-size: 20px; display: flex; gap: 12px; align-items: center; padding-right: 40px; }
+.batt { display: inline-grid; grid-template-columns: repeat(5, 7px); gap: 2px; padding: 2px; border: 2px solid var(--lcd); position: relative; }
+.batt::after { content: ""; position: absolute; right: -6px; top: 4px; width: 3px; height: 6px; background: var(--lcd); }
+.batt i { height: 10px; background: var(--lcd); }
+.ups .sticker {
+  position: relative; z-index: 3; align-self: flex-start;
+  margin: -14px auto 0 -52px;
+  font: 600 18px/1.05 var(--f-hand); color: var(--note-fg); background: var(--note-bg);
+  padding: 6px 10px 8px; transform: rotate(-4deg); box-shadow: 0 6px 12px -6px #000c;
+}
+.ups .meta { display: grid; gap: 4px; font-size: 13px; color: var(--dim); }
+.ups .meta a { color: var(--accent); }
+.ups .meta b { color: var(--ink); font-weight: 600; }
+@media (max-width: 560px) {
+  .ups .lcd { font-size: 18px; padding-right: 10px; }
+  .ups .sticker { margin: -4px 0 0 8px; }
+}

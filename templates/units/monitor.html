@@ -1,0 +1,16 @@
+{{/* Мониторинг = Gatus. Обновляется через htmx (/fragments/monitor). */}}
+{{define "unit-monitor"}}
+<section class="u mon" style="--h:2" aria-label="состояние сервисов" id="unit-monitor"
+  hx-get="/fragments/monitor" hx-trigger="every 60s" hx-swap="outerHTML">
+  <div class="face">
+    <div class="matrix">
+      {{range .Lamps}}<div class="cell" title="{{.Title}}"><i class="led {{.State}}"></i><span class="silk">{{.Label}}</span></div>
+      {{end}}
+    </div>
+    <div class="lcd">
+      {{if .OK}}{{.Up}}/{{.Total}} в строю<br><span class="d">{{.Note}}<br>gatus · {{ago .Checked}}</span>
+      {{else}}gatus молчит<br><span class="d">статусы недоступны</span>{{end}}
+    </div>
+  </div>
+</section>
+{{end}}

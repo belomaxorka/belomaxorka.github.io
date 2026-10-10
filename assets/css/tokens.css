@@ -1,0 +1,69 @@
+/* Токены. По умолчанию тёмная тема (чёрная стойка), светлая — бежевое железо из 90-х.
+   Цвета ЖК заданы парами -d/-l: site-api подставляет пару из обложки трека в <style id="cover-palette">. */
+@property --lcd { syntax: "<color>"; inherits: true; initial-value: #ffb547; }
+@property --lcd-bg { syntax: "<color>"; inherits: true; initial-value: #1b1306; }
+@property --lcd-dim { syntax: "<color>"; inherits: true; initial-value: #a87a35; }
+
+:root {
+  transition: --lcd .8s, --lcd-bg .8s, --lcd-dim .8s;
+  --room: #121315;
+  --void: #0a0b0c;
+  --rail: #2b2e33;
+  --rail-hi: #3b3f46;
+  --hole: #060707;
+  --num: #7d8188;
+  --panel: #1d1f23;
+  --panel-hi: #2a2d33;
+  --edge: #0b0c0e;
+  --ink: #ebe8e2;
+  --dim: #8f9299;
+  --lcd-bg-d: #1b1306; --lcd-d: #ffb547; --lcd-dim-d: #a87a35;
+  --lcd-bg-l: #a3b18c; --lcd-l: #1d2715; --lcd-dim-l: #344029;
+  --lcd-bg: var(--lcd-bg-d);
+  --lcd: var(--lcd-d);
+  --lcd-dim: var(--lcd-dim-d);
+  --led-ok: #4ee483;
+  --led-warn: #ffb547;
+  --led-err: #ff5a4e;
+  --led-off: #33363b;
+  --accent: #b58cf0;
+  --screw: #8b8f96;
+  --screw-hi: #c9ccd1;
+  --key: #2a2d32;
+  --key-ink: #e9e6df;
+  --tape-k: #161616;
+  --tape-r: #b8322b;
+  --tape-b: #2456a6;
+  --tape-ink: #f3f1ec;
+  --note-bg: #fff07a;
+  --note-fg: #3b331c;
+  --crt: #0c100d;
+  --U: 44px;
+  --rail-w: 34px;
+  --ear: 20px;
+  --f-silk: "Tektur", "Bahnschrift", "Arial Narrow", sans-serif;
+  --f-lcd: "Handjet", "Consolas", monospace;
+  --f-text: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-hand: "Caveat", "Segoe Print", cursive;
+  color-scheme: dark;
+}
+@media (prefers-reduced-motion: reduce) { :root { transition: none; } }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --room: #d8d2c4; --void: #a49d8e; --rail: #bdb6a6; --rail-hi: #d0caba; --hole: #5d584e; --num: #5f5a50;
+    --panel: #e9e3d3; --panel-hi: #f6f1e5; --edge: #aaa392; --ink: #2b2925; --dim: #6c675d;
+    --lcd-bg: var(--lcd-bg-l); --lcd: var(--lcd-l); --lcd-dim: var(--lcd-dim-l); --led-off: #c9c2b1;
+    --accent: #7438bb; --screw: #8f8b82; --screw-hi: #f2efe8; --key: #d9d2c0; --key-ink: #2b2925;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --room: #d8d2c4; --void: #a49d8e; --rail: #bdb6a6; --rail-hi: #d0caba; --hole: #5d584e; --num: #5f5a50;
+  --panel: #e9e3d3; --panel-hi: #f6f1e5; --edge: #aaa392; --ink: #2b2925; --dim: #6c675d;
+  --lcd-bg: var(--lcd-bg-l); --lcd: var(--lcd-l); --lcd-dim: var(--lcd-dim-l); --led-off: #c9c2b1;
+  --accent: #7438bb; --screw: #8f8b82; --screw-hi: #f2efe8; --key: #d9d2c0; --key-ink: #2b2925;
+  color-scheme: light;
+}
+@media (max-width: 560px) {
+  :root { --U: 40px; --rail-w: 26px; --ear: 16px; }
+}

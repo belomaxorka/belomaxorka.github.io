@@ -1,0 +1,14 @@
+{{/* ИБП = подвал сайта. Данные: .Uptime (аптайм site-api), .Updated (время выкладки сайта). */}}
+{{define "unit-ups"}}
+<footer class="u ups" style="--h:2">
+  <div class="face">
+    <div class="lcd"><span class="batt" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span>онлайн<br><span class="d">аптайм сайта {{uptime .Uptime}}</span></span></div>
+    <div class="sticker" aria-hidden="true">если пищит —<br>свет выключили</div>
+    <div class="meta">
+      <span><b>hosted on belomaxorka infrastructure</b></span>
+      <span>обновлено {{date .Updated}} · исходники: <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev">сайт</a>, <a href="https://git.belomaxorka.dev/belomaxorka/site-api">site-api</a></span>
+    </div>
+    <span class="silk">ибп</span>
+  </div>
+</footer>
+{{end}}

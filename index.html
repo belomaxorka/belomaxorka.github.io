@@ -1,283 +1,76 @@
-<!DOCTYPE html>
-<html dir="ltr" lang="en" translate="no">
+<!doctype html>
+<!-- Заглушка: её отдаёт веб-сервер, если site-api не отвечает. Живую страницу рендерит site-api из templates/. -->
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta property="og:type" content="profile">
-    <meta property="og:title" content="belomaxorka's space!">
-    <meta name="description" content="belomaxorka's space!">
-    <title>belomaxorka's space!</title>
-    <link href="assets/modern-normalize.css" rel="stylesheet">
-    <link href="assets/styles.css" rel="stylesheet">
-    <script defer src="assets/scripts.js"></script>
-    <script defer src="assets/Cookie.min.js"></script>
-    <script defer src="assets/commands.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>belomaxorka's space</title>
+<meta name="description" content="Рома, он же belomaxorka: фулстек на PHP и Laravel, домашняя лаборатория на Proxmox, TorrentPier.">
+<meta name="theme-color" content="#121315">
+<link rel="stylesheet" href="/assets/css/site.css">
 </head>
-<body class="notranslate">
-<main>
-    <code>belomaxorka's space! [Version <span id="osVersion">6.0.6000</span>]<br></code>
-    <code>Copyright 1970-<span id="currentYear"></span>. All wrongs reserved.<br><br></code>
-    <div class="terminal-section" hidden data-cmd="belomaxorka about">
-    <code>C:\><span class="command typed-cmd"></span><br></code>
-    <div class="section-body" hidden>
-    <pre>
-    ___    __                __
-   /   |  / /_  ____  __  __/ /_   ____ ___  ___
-  / /| | / __ \/ __ \/ / / / __/  / __ `__ \/ _ \
- / ___ |/ /_/ / /_/ / /_/ / /_   / / / / / /  __/
-/_/  |_/_.___/\____/\__,_/\__/  /_/ /_/ /_/\___/
-    </pre>
-    <code>hi there!👋<br></code>
-    <code>i'm <a href="#">belomaxorka</a>.<br><br></code>
-    <code>I'm a full-stack web developer and DevOps enthusiast. I actively<br></code>
-    <code>contribute to open source projects and maintain several of my own.<br></code>
-    <code>Beyond web development, I work as a network engineer and continuously<br></code>
-    <code>deepen my knowledge of networking technologies. I also run a home<br></code>
-    <code>server and enjoy tinkering with self-hosted infrastructure in my<br></code>
-    <code>home lab. I find genuine inspiration in programming and love exploring<br></code>
-    <code>new technologies — for me, coding is not a job, it's a way of life.<br><br></code>
-    <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br></code>
-    <code>> nickname(s): belomaxorka<br></code>
-    <code>> name: Roman Kelesidis<br></code>
-    <code>> pronouns: he/him<br></code>
-    <code>> age: <span id="calculatedAge">...</span> years old<br></code>
-    <code>> birthday: 25 May 2006 (<span id="daysUntilBirthday">...</span>)<br></code>
-    <code>> born in: 🇬🇷<br></code>
-    <code>> languages: ru, en<br></code>
-    <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br><br></code>
+<body>
+<div class="room">
+  <div class="rack">
+    <div class="cap"><span>belomaxorka.dev · домашняя стойка</span></div>
+    <div class="body">
+      <div class="rail l" aria-hidden="true"></div>
+      <div class="rail r" aria-hidden="true"></div>
+
+      <nav class="u patch" style="--h:1" aria-label="вебринг otoring">
+        <div class="face">
+          <span class="silk">otoring · патч-панель</span>
+          <div class="ports">
+            <a class="port" href="https://webring.otomir23.me/belomaxorka/prev" rel="prev"><i class="jack"></i><span class="tape">← предыдущий</span></a>
+            <a class="port" href="https://webring.otomir23.me/"><i class="jack"></i><span class="tape b">otoring</span><i class="led"></i></a>
+            <a class="port" href="https://webring.otomir23.me/belomaxorka/random"><i class="jack"></i><span class="tape">случайный</span></a>
+            <a class="port" href="https://webring.otomir23.me/belomaxorka/next" rel="next"><i class="jack"></i><span class="tape">следующий →</span></a>
+          </div>
+        </div>
+      </nav>
+
+      <section class="u srv" style="--h:4" aria-labelledby="who">
+        <div class="face">
+          <div class="photo" role="img" aria-label="место для фото"><span>photo</span></div>
+          <div class="ident">
+            <h1 class="name" id="who">belomaxorka<small>рома келесидис · фулстек · php / laravel · devops</small></h1>
+            <div class="tapes"><span class="tape">он/его</span><span class="tape r">enfp-t</span><span class="tape">ru · en</span><span class="tape b">🇬🇷 греция</span></div>
+            <p class="intro">привет~ делаю всё подряд: в первую очередь php и laravel, но и фронт, телеграм-боты, апишки, интеграции.
+              мейнтейню <a href="https://github.com/torrentpier/torrentpier">torrentpier</a>. эта стойка настоящая — сайт отдаётся из дома.</p>
+          </div>
+          <div class="status-col">
+            <div class="lcd two">сервер сайта<br><span class="d">перезагружается</span></div>
+            <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led warn"></i>api</span></div>
+          </div>
+        </div>
+      </section>
+
+      <nav class="u sw" style="--h:1" aria-label="контакты">
+        <div class="face">
+          <span class="silk">связь</span>
+          <div class="ports">
+            <a class="port" href="https://t.me/belomaxorka"><i class="jack"></i><span class="tape b">telegram</span><i class="led"></i></a>
+            <a class="port" href="https://git.belomaxorka.dev/belomaxorka"><i class="jack"></i><span class="tape">forgejo</span><i class="led"></i></a>
+            <a class="port" href="https://github.com/belomaxorka"><i class="jack"></i><span class="tape">github</span><i class="led warn" title="зеркало"></i></a>
+            <a class="port" href="https://fm.belomaxorka.dev"><i class="jack"></i><span class="tape r">koito · fm</span><i class="led"></i></a>
+            <a class="port" href="https://blog.belomaxorka.dev"><i class="jack"></i><span class="tape">блог</span><i class="led"></i></a>
+          </div>
+        </div>
+      </nav>
+
+      <footer class="u ups" style="--h:2">
+        <div class="face">
+          <div class="lcd"><span class="batt" aria-hidden="true"><i></i><i></i><i></i></span><span>живые данные<br><span class="d">скоро вернутся</span></span></div>
+          <div class="meta">
+            <span><b>hosted on belomaxorka infrastructure</b></span>
+            <span>статус сервисов: <a href="https://status.belomaxorka.dev">status.belomaxorka.dev</a></span>
+          </div>
+          <span class="silk">ибп</span>
+        </div>
+      </footer>
     </div>
-    </div>
-    <div class="terminal-section" hidden data-cmd="belomaxorka miscellaneous">
-    <code>C:\><span class="command typed-cmd"></span><br></code>
-    <div class="section-body" hidden>
-    <pre>
-    __  ____                ____
-   /  |/  (_)____________  / / /___ _____  ___  ____  __  _______
-  / /|_/ / / ___/ ___/ _ \/ / / __ `/ __ \/ _ \/ __ \/ / / / ___/
- / /  / / (__  ) /__/  __/ / / /_/ / / / /  __/ /_/ / /_/ (__  )
-/_/  /_/_/____/\___/\___/_/_/\__,_/_/ /_/\___/\____/\__,_/____/
-    </pre>
-    <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br></code>
-    <code>> favorite colors: <span style="color: #000;">#000</span>, <span style="color: #fff;">#fff</span>, <span style="color: #a062de;">#a062de</span>, <span style="color: #62a0de;">#62a0de</span><br></code>
-    <code>> last played song: <span id="nowPlaying">Getting API response...</span><br></code>
-    <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br><br></code>
-    </div>
-    </div>
-    <div class="terminal-section" hidden data-cmd="belomaxorka social">
-    <code>C:\><span class="command typed-cmd"></span><br></code>
-    <div class="section-body" hidden>
-    <pre>
-   _____            _       __   ___        ______            __             __
-  / ___/____  _____(_)___ _/ /  ( _ )      / ____/___  ____  / /_____ ______/ /______
-  \__ \/ __ \/ ___/ / __ `/ /  / __ \/|   / /   / __ \/ __ \/ __/ __ `/ ___/ __/ ___/
- ___/ / /_/ / /__/ / /_/ / /  / /_/  <   / /___/ /_/ / / / / /_/ /_/ / /__/ /_(__  )
-/____/\____/\___/_/\__,_/_/   \____/\/   \____/\____/_/ /_/\__/\__,_/\___/\__/____/
-    </pre>
-    <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br></code>
-    <code>> telegram: <a target="_blank" rel="noopener noreferrer" href="https://t.me/belomaxorka">@belomaxorka</a><br></code>
-    <code>> github: <a target="_blank" rel="noopener noreferrer" href="https://github.com/belomaxorka">belomaxorka</a><br></code>
-    <code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br><br></code>
-    </div>
-    </div>
-    <div id="inputBlock" hidden>
-    <code><span id="promptPath">C:\</span>><span class="command"><label><input id="commandInput" size="40" type="text"></label></span><br></code>
-    <code id="notifyMessage"></code>
-    </div>
-</main>
-<script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        if (Cookie.exists('whiteTheme')) {
-            document.body.classList.toggle('whiteTheme');
-            const notifyEl = document.getElementById("notifyMessage");
-            notifyEl.style.display = 'inline-block';
-            notifyEl.textContent = '';
-            notifyEl.appendChild(document.createElement('br'));
-            notifyEl.appendChild(document.createTextNode('Made with ❤️ by belomaxorka'));
-        }
-
-        document.getElementById("osVersion").textContent = randomWindowsVersion();
-        document.getElementById("currentYear").textContent = new Date().getFullYear();
-        document.getElementById("calculatedAge").textContent = calculateAge('2006-05-25');
-        const days = daysUntilBirthday('2006-05-25');
-        document.getElementById("daysUntilBirthday").textContent =
-            days === 0 ? 'today!' : `in ${days} day${days === 1 ? '' : 's'}`;
-
-        // Now playing — fire-and-forget so it doesn't block the intro
-        (async () => {
-            try {
-                const result = await nowPlaying();
-                const element = document.getElementById("nowPlaying");
-                if (element && result) {
-                    element.textContent = '';
-                    element.appendChild(result);
-                } else if (element) {
-                    element.textContent = 'N/A';
-                }
-            } catch (error) {
-                console.error('Error: ', error);
-            }
-        })();
-
-        let rainTimeout;
-        let lastReset = 0;
-
-        function resetRainTimer() {
-            const now = Date.now();
-            if (now - lastReset < 1000) return;
-            lastReset = now;
-            if (rainTimeout) clearTimeout(rainTimeout);
-            rainTimeout = setTimeout(() => {
-                if (typeof startRain === 'function') startRain();
-            }, 300000);
-        }
-
-        ['mousemove', 'keydown', 'click'].forEach(e => document.addEventListener(e, resetRainTimer));
-        resetRainTimer();
-
-        const commandInput = document.querySelector("#commandInput");
-        const notifyMessage = document.getElementById("notifyMessage");
-        const themeToggleCommands = ['belomaxorka about', 'belomaxorka misc', 'belomaxorka miscellaneous', 'belomaxorka social'];
-        const commandHistory = [];
-        let historyIndex = -1;
-
-        commandInput.value = '';
-
-        commandInput.addEventListener('keydown', (event) => {
-            if (event.key === 'ArrowUp') {
-                event.preventDefault();
-                if (historyIndex < commandHistory.length - 1) {
-                    historyIndex++;
-                    commandInput.value = commandHistory[commandHistory.length - 1 - historyIndex];
-                }
-                return;
-            }
-            if (event.key === 'ArrowDown') {
-                event.preventDefault();
-                if (historyIndex > 0) {
-                    historyIndex--;
-                    commandInput.value = commandHistory[commandHistory.length - 1 - historyIndex];
-                } else {
-                    historyIndex = -1;
-                    commandInput.value = '';
-                }
-                return;
-            }
-            if (event.key !== 'Enter') return;
-
-            notifyMessage.style.display = 'none';
-            const enteredCommand = commandInput.value.trim();
-
-            if (enteredCommand.length === 0) return;
-
-            commandHistory.push(enteredCommand);
-            historyIndex = -1;
-
-            notifyMessage.style.display = 'inline-block';
-
-            if (themeToggleCommands.includes(enteredCommand.toLowerCase())) {
-                Cookie.exists('whiteTheme') ? Cookie.remove('whiteTheme') : Cookie.set('whiteTheme', 1, {sameSite: 'Strict'});
-                window.location.reload();
-            } else {
-                const result = processCommand(enteredCommand);
-                if (result) {
-                    if (result.action === 'cls') {
-                        window.location.reload();
-                        return;
-                    }
-                    if (result.action === 'shutdown') {
-                        const el = document.createElement('span');
-                        el.style.whiteSpace = 'pre';
-                        el.textContent = '\nShutting down...';
-                        notifyMessage.textContent = '';
-                        notifyMessage.appendChild(el);
-                        commandInput.disabled = true;
-                        setTimeout(() => {
-                            document.body.textContent = '';
-                            document.body.style.cssText = 'margin:0;background:#0078d7;color:white;display:flex;flex-direction:column;justify-content:center;padding:10%;height:100vh;font-family:Segoe UI,sans-serif;cursor:default;';
-
-                            const sad = document.createElement('div');
-                            sad.style.fontSize = '8em';
-                            sad.textContent = ':(';
-
-                            const msg = document.createElement('div');
-                            msg.style.cssText = 'font-size:1.5em;margin-top:40px;';
-                            msg.textContent = 'Your PC ran into a problem and needs to restart.';
-
-                            const pct = document.createElement('div');
-                            pct.style.cssText = 'margin-top:30px;font-size:1.2em;';
-                            pct.textContent = '0% complete';
-
-                            const info = document.createElement('div');
-                            info.style.cssText = 'margin-top:20px;opacity:0.7;';
-                            info.textContent = 'If you\'d like to know more, search for: BELOMAXORKA_SPACE_SHUTDOWN';
-
-                            const hint = document.createElement('div');
-                            hint.style.cssText = 'margin-top:40px;opacity:0.5;font-size:0.9em;';
-                            hint.textContent = 'Press any key to restart...';
-
-                            document.body.appendChild(sad);
-                            document.body.appendChild(msg);
-                            document.body.appendChild(pct);
-                            document.body.appendChild(info);
-                            document.body.appendChild(hint);
-
-                            let percent = 0;
-                            const intervalId = setInterval(() => {
-                                percent += Math.floor(Math.random() * 15) + 5;
-                                if (percent >= 100) { percent = 100; clearInterval(intervalId); }
-                                pct.textContent = percent + '% complete';
-                            }, 800);
-
-                            document.addEventListener('keydown', () => window.location.reload(), { once: true });
-                            document.addEventListener('click', () => window.location.reload(), { once: true });
-                        }, 1500);
-                        return;
-                    }
-                    if (result.action === 'exit') {
-                        const el = document.createElement('span');
-                        el.style.whiteSpace = 'pre';
-                        el.textContent = '\nGoodbye!';
-                        notifyMessage.textContent = '';
-                        notifyMessage.appendChild(el);
-                        commandInput.disabled = true;
-                    } else if (result.output === '') {
-                        notifyMessage.style.display = 'none';
-                    } else {
-                        const el = document.createElement('span');
-                        el.style.whiteSpace = 'pre';
-                        el.textContent = '\n' + result.output;
-                        notifyMessage.textContent = '';
-                        notifyMessage.appendChild(el);
-                    }
-                } else {
-                    const unknownCommand = enteredCommand.split(' ')[0];
-                    notifyMessage.textContent = '';
-                    notifyMessage.appendChild(document.createElement('br'));
-                    notifyMessage.appendChild(document.createTextNode(` '${unknownCommand}' is not recognized as an internal or external command,`));
-                    notifyMessage.appendChild(document.createElement('br'));
-                    notifyMessage.appendChild(document.createTextNode('operable program or batch file.'));
-                }
-                window.scrollTo(0, document.body.scrollHeight);
-            }
-
-            commandInput.value = '';
-        });
-
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReducedMotion || sessionStorage.getItem('introPlayed') === '1') {
-            document.querySelectorAll('.terminal-section').forEach((section) => {
-                section.hidden = false;
-                const cmdEl = section.querySelector('.typed-cmd');
-                if (cmdEl && section.dataset.cmd) cmdEl.textContent = section.dataset.cmd;
-                const bodyEl = section.querySelector('.section-body');
-                if (bodyEl) bodyEl.hidden = false;
-            });
-        } else {
-            await playIntro();
-            sessionStorage.setItem('introPlayed', '1');
-        }
-        document.getElementById('inputBlock').hidden = false;
-        commandInput.focus({ preventScroll: true });
-    });
-</script>
+    <div class="foot"></div>
+  </div>
+</div>
 </body>
 </html>

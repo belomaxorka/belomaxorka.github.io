@@ -1,0 +1,32 @@
+{{/* Сервер с именем. Данные: .Age, .DaysToBirthday. */}}
+{{define "unit-server"}}
+<section class="u srv" style="--h:4" aria-labelledby="who">
+  <div class="face">
+    <div class="photo" role="img" aria-label="место для фото"><span>photo</span></div>
+    <div class="ident">
+      <h1 class="name" id="who">belomaxorka<small>рома келесидис · фулстек · php / laravel · devops</small></h1>
+      <div class="tapes">
+        <span class="tape">он/его</span>
+        <span class="tape">{{.Age}} {{plural .Age "год" "года" "лет"}}</span>
+        <span class="tape r">enfp-t</span>
+        <span class="tape">ru · en</span>
+        <span class="tape b">🇬🇷 греция</span>
+      </div>
+      <p class="intro">привет~ делаю всё подряд: в первую очередь php и laravel, но и фронт, телеграм-боты, апишки, интеграции.
+        мейнтейню <a href="https://github.com/torrentpier/torrentpier">torrentpier</a>. эта стойка настоящая — сайт отдаётся из дома.</p>
+    </div>
+    <div class="status-col">
+      <div class="lcd two" x-data="cycle(3200)">
+        <ul class="msgs">
+          <li class="on">привет~ я рома<br><span class="d">{{if eq .DaysToBirthday 0}}сегодня др!{{else}}др через {{.DaysToBirthday}} {{plural .DaysToBirthday "день" "дня" "дней"}}{{end}}</span></li>
+          <li>php · laravel<br><span class="d">и всё остальное</span></li>
+          <li>enfp-t<br><span class="d">да, верю</span></li>
+          <li>сайт на go<br><span class="d">рендер на сервере</span></li>
+        </ul>
+      </div>
+      <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led blink"></i>hdd</span><span><i class="led blink s3"></i>net</span></div>
+    </div>
+  </div>
+  <div class="note">не выключать!<br>тут сайт</div>
+</section>
+{{end}}
