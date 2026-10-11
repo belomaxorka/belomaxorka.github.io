@@ -213,6 +213,7 @@
   const DATA = '#3a7bd5', MGMT = '#9b6bd6', LAN = '#3daa63', FIBER = '#e8c21a', UPFIBER = '#2bb3c0';
   // Юниты с сетевой картой: как питаемые в power.js, плюс контейнеры /lab (data-power).
   const NETWORKED = ['mgmt', 'srv', 'media', 'mon', 'log', 'sw', 'kvm', 'pve'];
+  const keyOf = (u) => u.dataset.power || NETWORKED.find((k) => u.classList.contains(k)); // как в power.js
 
   function el(name, attrs, parent) {
     const node = document.createElementNS(NS, name);
@@ -239,6 +240,14 @@
     el('rect', { x: b.cx - b.w * .18, y: b.cy - b.h * .16, width: b.w * .36, height: b.h * .32, rx: 1, fill: 'rgba(0,0,0,.22)', class: 'boot' }, svg);
   }
 
+  // Кубическая кривая [a, b, c, d] делится в точке t на две (де Кастельжо).
+  function split([a, b, c, d], t) {
+    const m = (p, q) => ({ x: p.x + (q.x - p.x) * t, y: p.y + (q.y - p.y) * t });
+    const ab = m(a, b), bc = m(b, c), cd = m(c, d), abc = m(ab, bc), bcd = m(bc, cd), x = m(abc, bcd);
+    return [[a, ab, abc, x], [x, bcd, cd, d]];
+  }
+  const xy = (p) => `${p.x} ${p.y}`;
+
   // Сетевые карты юнитов и вертикальный органайзер: декор, который есть только с JS (как разъёмы питания).
   function wire() {
     const body = document.getElementById('rack-body');
@@ -249,10 +258,12 @@
       vm.setAttribute('aria-hidden', 'true');
       body.prepend(vm);
     }
-    const units = [...body.querySelectorAll(':scope > .u')].filter(u => u.dataset.power || NETWORKED.some(k => u.classList.contains(k)));
+    const units = [...body.querySelectorAll(':scope > .u')].filter(keyOf);
     // Экраны подключённых юнитов знают, что показать без связи (CSS: network.css, «нет связи»). После каждого
-    // обновления htmx юнит приходит заново, поэтому подписи ставятся при каждой раскладке.
+    // обновления htmx юнит приходит заново, поэтому подписи ставятся при каждой раскладке. Счётчик фото под
+    // аватарками (.gal-ctl) — не экран сети: фото свои, и надпись туда не влезет.
     units.forEach(u => u.querySelectorAll('.lcd, .screen').forEach(d => {
+      if (d.closest('.gal-ctl')) return;
       d.dataset.nolink = body.dataset.nolink || '';
       d.dataset.nonet = body.dataset.nonet || '';
     }));
@@ -270,10 +281,24 @@
     return units;
   }
 
+  // Где кубическая кривая (монотонная по высоте) проходит высоту y: t от 0 до 1.
+  function cross(c, y) {
+    const at = (t) => (1 - t) ** 3 * c[0].y + 3 * (1 - t) ** 2 * t * c[1].y + 3 * (1 - t) * t * t * c[2].y + t ** 3 * c[3].y;
+    const up = at(1) < at(0);
+    let lo = 0, hi = 1;
+    for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; if ((at(m) > y) === up) lo = m; else hi = m; }
+    return Math.min(.85, Math.max(.15, (lo + hi) / 2));
+  }
+
+  // Возвращает корды стойки для assets/js/net.js (получает их с rack:laidout): у каждого ключ, порт коммутатора (его
+  // лампу net.js зажигает, когда линк есть), номер провода в SVG (по нему — когда вилка встаёт в порт при протяжке).
+  // У тех, что можно выдернуть, ещё гнездо, хвост — кривая от вилки до места, где корд держит органайзер (оттуда
+  // выдернутый и свисает), и куда хватать.
   function cables() {
     const svg = document.getElementById('cables');
     const room = document.getElementById('room');
-    if (!svg || !room) return;
+    const cords = [];
+    if (!svg || !room) return cords;
     svg.replaceChildren();
     const R = room.getBoundingClientRect();
     svg.setAttribute('viewBox', `0 0 ${R.width} ${R.height}`);
@@ -283,16 +308,27 @@
     };
     const rack = document.getElementById('rack');
     const tor = rack?.querySelector('#rack-body > .tor');
-    if (!rack || !tor) return;
-    const rk = box(rack), cap = box(rack.querySelector('.cap'));
+    if (!rack || !tor) return cords;
+    const cap = box(rack.querySelector('.cap'));
     const port = (n) => tor.querySelector(`.tp[data-port="${n - 1}"]`);
     const used = new Set();
-    // data-wire — номер провода, который держит линк: когда провода протягиваются (.draw), лампа загорается,
-    // только когда его вилка встала в порт.
     const wireNo = () => svg.querySelectorAll(':scope > g').length - 1;
-    const lit = (n) => { used.add(n); const t = port(n); if (t) { t.classList.add('link'); t.dataset.wire = wireNo(); } };
+    // Лампы портов зажигает net.js — у кого линк есть.
     tor.querySelectorAll('.tp.link').forEach(t => t.classList.remove('link'));
-    rack.querySelectorAll('[data-wire]').forEach(t => delete t.dataset.wire);
+
+    // Какие корды этой стойки выдернуты, знает net.js: хвост и вилку такого корда рисует он, здесь — остальной путь
+    // до коммутатора (или до лотков).
+    const pulled = new Set();
+    document.dispatchEvent(new CustomEvent('rack:pulled', { detail: pulled }));
+    // Корд с хвостом tail ([от вилки, …, до органайзера]) и путём дальше rest (продолжение: «L…», «C…»). Вилку в гнезде
+    // at ставит сам, на дальнем конце — тот, кто позвал. hit — куда хватать (по умолчанию само гнездо).
+    const pullable = (key, type, port, at, color, w, tail, rest, hit) => {
+      const out = pulled.has(key);
+      cable(svg, out ? `M${xy(tail[3])} ${rest}` : `M${xy(tail[0])} C${xy(tail[1])}, ${xy(tail[2])}, ${xy(tail[3])} ${rest}`, color, w);
+      if (!out) seat(svg, at, color);
+      cords.push({ key, type, port, wire: wireNo(), grab: true, color, w, tail, at: { x: at.cx, y: at.cy }, hit: hit || { x: at.cx, y: at.cy, r: 15 } });
+      return out;
+    };
 
     // Кольцо: гнёзда 1–4 патч-панели → порты 1, 3, 5, 7 (верхний ряд), сверху вниз через щётку. Если гнёзда
     // переносятся в два ряда (телефон), корды только из нижнего: из верхнего они легли бы поверх подписей.
@@ -305,7 +341,9 @@
       cable(svg, `M${j.cx} ${j.b - 3} C${j.cx} ${j.b + 26}, ${p.cx} ${p.y - 30}, ${p.cx} ${p.y + 3}`, RING[i], 3.5);
       seat(svg, j, RING[i]);
       seat(svg, p, RING[i]);
-      lit(n);
+      used.add(n);
+      // Корды кольца не выдёргиваются: их гнёзда — ссылки кольца, а оно работает всегда.
+      cords.push({ key: 'ring' + (i + 1), type: 'ring', port: t, wire: wireNo() });
     });
 
     // Оптика (WAN роутера или аплинк коммутатора): вверх в щётку под коммутатором, по ней влево в вертикальный
@@ -314,8 +352,8 @@
     const lowEl = tor.nextElementSibling?.classList.contains('brush') ? tor.nextElementSibling : null;
     // Над стойкой — в жёлтый короб на потолке: точка ввода на его оси (метки .mark в зале, hall.css) на высоте
     // ~40 px, над табличками прохода; к ней по потолку и в короб через ввод, повёрнутый вдоль короба. Потолка нет
-    // (светлая тема) или короб ниже крыши стойки — просто вверх.
-    const fiber = (from, color, label) => {
+    // (светлая тема) или короб ниже крыши стойки — просто вверх. Хвост — от гнезда до щётки: выдернутая свисает из неё.
+    const fiber = (key, from, color, label) => {
       if (!vmEl || !vmEl.offsetParent) return;
       const v = box(vmEl), x = v.x + v.w - 4;
       const y = lowEl ? box(lowEl).cy + 6 : from.y - 14;
@@ -325,8 +363,8 @@
       const top = j && j.cy < cap.y - 30
         ? `L${x} ${j.cy + r} Q${x} ${j.cy}, ${x + s * r} ${j.cy} L${j.cx} ${j.cy}`
         : `C${x} ${cap.y - 16}, ${x} ${cap.y - 30}, ${x} -10`;
-      cable(svg, `M${from.cx} ${from.y + 2} C${from.cx} ${y + 8}, ${from.cx - 10} ${y}, ${from.cx - 24} ${y} L${x + 14} ${y} C${x + 4} ${y}, ${x} ${y - 6}, ${x} ${y - 18} L${x} ${cap.y + 4} ${top}`, color, 3);
-      seat(svg, from, color);
+      const tail = [{ x: from.cx, y: from.y + 2 }, { x: from.cx, y: y + 8 }, { x: from.cx - 10, y }, { x: from.cx - 24, y }];
+      pullable(key, key, null, from, color, 3, tail, `L${x + 14} ${y} C${x + 4} ${y}, ${x} ${y - 6}, ${x} ${y - 18} L${x} ${cap.y + 4} ${top}`);
       if (j && j.cy < cap.y - 30) {
         const n = marks[Math.max(0, marks.indexOf(j) - 1)];
         const len = Math.hypot(n.cx - j.cx, n.cy - j.cy) || 1;
@@ -346,21 +384,23 @@
       const last = [...tor.querySelectorAll('.tp')].filter(t => t.offsetParent && Number(t.dataset.port) % 2 === 1).pop();
       if (last) {
         const p = box(last.querySelector('.jack')), n = Number(last.dataset.port) + 1;
-        cable(svg, `M${lan.cx} ${lan.y + 2} C${lan.cx} ${lan.y - 22}, ${p.cx} ${p.b + 22}, ${p.cx} ${p.b - 3}`, LAN, 3.5);
-        seat(svg, lan, LAN);
+        const c = [{ x: lan.cx, y: lan.y + 2 }, { x: lan.cx, y: lan.y - 22 }, { x: p.cx, y: p.b + 22 }, { x: p.cx, y: p.b - 3 }];
+        // Хвост — от роутера до щётки между ним и коммутатором: выдернутый корд свисает из неё.
+        const [tail, rest] = split(c, lowEl ? cross(c, box(lowEl).cy) : .5);
+        pullable('lan', 'lan', last, lan, LAN, 3.5, tail, `C${xy(rest[1])}, ${xy(rest[2])}, ${xy(rest[3])}`);
         seat(svg, p, LAN);
-        lit(n);
+        used.add(n);
       }
-      fiber(box(rtr.querySelector('[data-port="wan"]')), FIBER, svg.dataset.uplink);
+      fiber('wan', box(rtr.querySelector('[data-port="wan"]')), FIBER, svg.dataset.uplink);
     } else {
       // Остальные стойки: оптика из SFP коммутатора к R1.
       const sfp = tor.querySelector('.sfp');
-      if (sfp && sfp.offsetParent) fiber(box(sfp), UPFIBER, svg.dataset.uplinkR1);
+      if (sfp && sfp.offsetParent) fiber('uplink', box(sfp), UPFIBER, svg.dataset.uplinkR1);
     }
 
     // Сетевые карты: влево в вертикальный органайзер, по нему вверх до коммутатора, под ним вправо к порту.
     const vm = rack.querySelector('#rack-body > .vm');
-    if (!vm || !vm.offsetParent) return;
+    if (!vm || !vm.offsetParent) return cords;
     const lane = box(vm);
     const nics = [...rack.querySelectorAll('#rack-body > .u > .nic')];
     // Поперёк — через щёточный органайзер под коммутатором (если он есть), иначе прямо под коммутатором.
@@ -374,12 +414,12 @@
       const x = lane.x + 4 + (i % 6) * 2.2;              // жилы в органайзере рядом, не одна поверх другой
       const y = yBase + (i % 6) * 2.4;                   // и поперёк — своими полосками
       const color = u.classList.contains('mgmt') ? MGMT : DATA;
-      cable(svg, `M${j.x + 2} ${j.cy} C${j.x - 14} ${j.cy}, ${x + 10} ${j.cy}, ${x} ${j.cy - 12} L${x} ${y + 10} C${x} ${y}, ${x + 6} ${y}, ${x + 14} ${y} L${p.cx - 12} ${y} C${p.cx - 3} ${y}, ${p.cx} ${y - 4}, ${p.cx} ${p.b - 3}`, color, 2.4);
-      seat(svg, j, color);
+      // Хвост — от сетевой карты до органайзера. Хватать — чуть правее гнезда: слева на ухе ручка ящика.
+      const tail = [{ x: j.x + 2, y: j.cy }, { x: j.x - 14, y: j.cy }, { x: x + 10, y: j.cy }, { x, y: j.cy - 12 }];
+      pullable(keyOf(u), 'nic', port(n), j, color, 2.4, tail, `L${x} ${y + 10} C${x} ${y}, ${x + 6} ${y}, ${x + 14} ${y} L${p.cx - 12} ${y} C${p.cx - 3} ${y}, ${p.cx} ${y - 4}, ${p.cx} ${p.b - 3}`, { x: j.cx + 6, y: j.cy, r: 13 });
       seat(svg, p, color);
-      if (!u.classList.contains('off')) port(n).classList.add('link');
-      port(n).dataset.wire = nic.dataset.wire = wireNo();
     });
+    return cords;
   }
 
   // Стойка поменяла высоту (юнит погас и что-то в нём сдвинулось, пришло обновление htmx, открылся холст,
@@ -388,13 +428,15 @@
   // а не кадром позже: иначе при каждом изменении они дёргаются. Сами юниты (snap меняет высоты) — кадром позже,
   // чтобы наблюдатель не зациклился. Новая стойка после перехода — свой наблюдатель.
   let watched = null;
+  // Разложили: провода на местах. Корды — net.js, силовые кабели перерисует power.js.
+  const laidout = (cords) => document.dispatchEvent(new CustomEvent('rack:laidout', { detail: { cords } }));
   const ro = window.ResizeObserver ? new ResizeObserver(() => {
-    cables(); document.dispatchEvent(new Event('rack:laidout')); later();
+    laidout(cables()); later();
   }) : null;
   function layout() {
     const body = document.getElementById('rack-body');
     if (ro && body && body !== watched) { if (watched) ro.unobserve(watched); ro.observe(body); watched = body; }
-    wire(); snap(); cables(); document.dispatchEvent(new Event('rack:laidout'));
+    wire(); snap(); laidout(cables());
   }
 
   let pending = 0;
@@ -420,29 +462,27 @@
   // Стойку подменили без перезагрузки (assets/js/aisle.js): разложить сразу, пока её не показали.
   document.addEventListener('rack:swap', layout);
   // Доехала: провода по местам и протягиваются от гнезда к роутеру, вилки встают в порты (cables.css, .draw).
-  let drawn = 0, lamps = [];
+  let drawn = 0;
   document.addEventListener('rack:landed', (e) => {
     layout();
     const svg = document.getElementById('cables');
-    if (!svg || e.detail?.quiet || !motion()) return;
-    let i = -1, k = 0;
-    for (const n of svg.children) {
-      if (n.tagName === 'g') {
-        i++; k = 0;
-        n.querySelectorAll('path').forEach(p => p.setAttribute('pathLength', '100'));
+    const draw = !!svg && !e.detail?.quiet && motion();
+    if (draw) {
+      let i = -1, k = 0;
+      for (const n of svg.children) {
+        if (n.tagName === 'g') {
+          i++; k = 0;
+          n.querySelectorAll('path').forEach(p => p.setAttribute('pathLength', '100'));
+        }
+        n.style.setProperty('--i', Math.max(0, i));
+        if (n.tagName !== 'g') n.style.setProperty('--k', n.classList.contains('boot') ? k - 1 : k++);
       }
-      n.style.setProperty('--i', Math.max(0, i));
-      if (n.tagName !== 'g') n.style.setProperty('--k', n.classList.contains('boot') ? k - 1 : k++);
+      svg.classList.add('draw');
+      clearTimeout(drawn);
+      drawn = setTimeout(() => svg.classList.remove('draw'), 1600);
     }
-    svg.classList.add('draw');
-    clearTimeout(drawn);
-    drawn = setTimeout(() => svg.classList.remove('draw'), 1600);
-    // Лампы портов и сетевых карт: гаснут и загораются по одной, когда вилка дальнего конца встала на место
-    // (cables.css: провод .55 с, вилка через 480 мс на .3 с, у каждого провода сдвиг 70 мс).
-    lamps.forEach(clearTimeout);
-    lamps = [...document.querySelectorAll('#rack [data-wire]')].map(t => {
-      t.classList.add('wait');
-      return setTimeout(() => t.classList.remove('wait'), Number(t.dataset.wire) * 70 + 700);
-    });
+    // Стойка выходит в сеть (net.js): юнит — когда вилка его корда встала в порт, провод i — через lag + i·step мс
+    // (cables.css: провод .55 с, вилка через 480 мс на .3 с, у каждого провода сдвиг 70 мс). Без протяжки — все сразу.
+    document.dispatchEvent(new CustomEvent('rack:drawing', { detail: draw ? { lag: 700, step: 70 } : null }));
   });
 })();

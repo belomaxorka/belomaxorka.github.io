@@ -5,6 +5,11 @@
 .cables .outlet-hole { fill: var(--hole); }
 /* Ввод оптики в жёлтый короб на потолке (app.js, fiber). */
 .cables .inlet { fill: #202328; stroke: #000b; stroke-width: 1.5; stroke-linejoin: round; }
+/* Патч-корды, которые выдёргиваются (assets/js/net.js): выдернутые висят над разводкой, под силовыми кабелями; у вилок
+   невидимые зоны, за которые хватать. */
+.cables.net { z-index: 5; }
+.cables.net .hit { fill: transparent; pointer-events: auto; cursor: grab; touch-action: none; }
+.cables.net .hit:active { cursor: grabbing; }
 
 /* Стойка приехала (assets/js/aisle.js → app.js, .draw): корды протягиваются по очереди от гнезда, вилки встают
    в порты, когда провод дотянулся. --i — номер провода, --k — его вилка (0 у начала, 1 у конца). */

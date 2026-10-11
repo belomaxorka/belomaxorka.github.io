@@ -1,7 +1,8 @@
 {{/* Сетевой отсек стойки (вариант B): под патч-панелью щёточный органайзер, коммутатор на 24 порта, на главной —
      роутер. Порты коммутатора: верхний ряд нечётные (1, 3, 5, 7 — кольцо из патч-панели), нижний — чётные (сетевые
-     карты юнитов, роутер). Какие порты заняты и мигают, решает assets/js/app.js, когда тянет провода; без JS
-     горит только питание. Всё здесь декор: aria-hidden, кликать нечего. */}}
+     карты юнитов, роутер). Какие порты заняты, решает assets/js/app.js, когда тянет провода, мигают — те, где линк есть
+     (assets/js/net.js); без JS горит только питание. Всё здесь декор: aria-hidden, кликать нечего. Корды роутера
+     выдёргиваются (net.js): без WAN или LAN его ЖК говорит data-nowan или data-nolan. */}}
 
 {{define "unit-brush"}}
 <div class="u brush" style="--h:1" aria-hidden="true"><div class="face"><span class="slot"></span><span class="silk">cable mgmt</span></div></div>
@@ -23,8 +24,8 @@
   <div class="face">
     <div class="tor-id"><span class="brand">opnsense</span><span class="silk">{{t "net.router"}}</span></div>
     <div class="rtr-ports"><span class="silk">wan</span><i class="jack wan" data-port="wan"></i><span class="silk">lan</span><i class="jack" data-port="lan"></i><i class="jack"></i><i class="jack"></i></div>
-    <span class="lcd">{{t "net.router_lcd"}}</span>
-    <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led blink s3"></i>wan</span></div>
+    <span class="lcd" data-nowan="{{t "net.router_nowan"}}" data-nolan="{{t "net.router_nolan"}}">{{t "net.router_lcd"}}</span>
+    <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led blink s3 wan"></i>wan</span></div>
   </div>
 </div>
 {{end}}

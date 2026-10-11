@@ -81,7 +81,7 @@
   html.hop::view-transition-old(root), html.hop::view-transition-old(aisle) { animation: none; opacity: 0; }
   html.hop::view-transition-new(root), html.hop::view-transition-new(aisle) { animation: none; }
   html.hop::view-transition-group(rack), html.hop::view-transition-group(hop-cables),
-  html.hop::view-transition-group(hop-power) { animation: none; }
+  html.hop::view-transition-group(hop-power), html.hop::view-transition-group(hop-net) { animation: none; }
   html.hop::view-transition-old(rack) {
     transform-origin: 50% var(--hop-oy);
     animation: hop-out var(--hop-t) var(--hop-ease) both, hop-dim-out var(--hop-t) linear both;
@@ -90,7 +90,7 @@
     transform-origin: 50% var(--hop-oy);
     animation: hop-in var(--hop-t) var(--hop-ease) both, hop-dim-in var(--hop-t) linear both;
   }
-  html.hop::view-transition-old(hop-cables), html.hop::view-transition-old(hop-power) {
+  html.hop::view-transition-old(hop-cables), html.hop::view-transition-old(hop-power), html.hop::view-transition-old(hop-net) {
     transform-origin: var(--hop-ox) var(--hop-ry);
     animation: hop-out var(--hop-t) var(--hop-ease) both, hop-dim-out var(--hop-t) linear both;
   }
@@ -108,8 +108,8 @@
   }
 
   /* Провода новой стойки появятся, когда она встанет на место (app.js и power.js, событие rack:landed). */
-  html.hop #cables, html.hop #power { opacity: 0; }
-  html.hop-land #power { animation: hop-fade .45s ease-out both; }
+  html.hop #cables, html.hop #power, html.hop #net { opacity: 0; }
+  html.hop-land :is(#power, #net) { animation: hop-fade .45s ease-out both; }
 
   /* Зал: соседи едут вместе со стойками; потолок, лампы и пол — от прошлой стойки к этой. */
   html.hop .hall .nb { visibility: visible; animation: hop-nb var(--hop-t) var(--hop-ease) both; }

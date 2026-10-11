@@ -204,6 +204,8 @@
   "net.nointernet": "нет интернета",
   "net.router": "роутер · файрвол",
   "net.router_lcd": "wan в порядке · dns по tls",
+  "net.router_nowan": "wan: нет линка",
+  "net.router_nolan": "lan: нет линка",
   "cable.uplink_r1": "аплинк к r1 ↑",
   "cable.uplink": "в интернет ↑",
   "cable.power": "220 В",

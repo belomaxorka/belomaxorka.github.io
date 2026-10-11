@@ -4,7 +4,8 @@
 // (assets/css/aisle.css): через View Transitions, где они есть, иначе старая стойка уезжает копией.
 // Остальные скрипты узнают о подмене из событий на document:
 //   rack:swap   — новая комната уже на месте (app.js раскладывает юниты, power.js перечитывает ИБП, sticker.js
-//                 убирает упавшие стикеры старой стойки);
+//                 убирает упавшие стикеры старой стойки, net.js держит юниты без сети, пока не протянут провода);
+//                 detail.quiet — приедет без анимаций;
 //   rack:landed — стойка доехала (detail.dir: 1 вперёд, -1 назад; detail.quiet — без анимаций): провода.
 // Без JS работают сами ссылки; не вышло загрузить — обычный переход по ссылке.
 (() => {
@@ -156,7 +157,7 @@
     'link[rel="canonical"], link[rel="alternate"], link[rel="me"], script[type="application/ld+json"]';
   const OWN = new Set(['class', 'style', 'data-theme', 'data-lcd']);
 
-  function swap(doc) {
+  function swap(doc, quiet = false) {
     const olds = [...document.head.querySelectorAll(HEAD)];
     const anchor = olds[0] || null;
     doc.head.querySelectorAll(HEAD).forEach((n) => document.head.insertBefore(n, anchor));
@@ -169,7 +170,7 @@
     const room = doc.getElementById('room');
     $('#room').replaceWith(room); // старые юниты: Alpine их разберёт, опрос htmx у отцепленных сам кончится
     if (window.htmx) htmx.process(room);
-    document.dispatchEvent(new CustomEvent('rack:swap'));
+    document.dispatchEvent(new CustomEvent('rack:swap', { detail: { quiet } }));
   }
 
   // После подмены: старая табличка гаснет (.was), фокус — туда же, где был (на стрелку или табличку),
@@ -205,7 +206,7 @@
   function hop(doc, from, to, url) {
     const dir = Math.sign(to - from), focus = focusOf();
     if (reduce.matches || !dir || !$('#rack')) {
-      swap(doc);
+      swap(doc, true);
       settle(from, focus, url);
       document.dispatchEvent(new CustomEvent('rack:landed', { detail: { dir, quiet: true } }));
       return;
@@ -230,18 +231,19 @@
       root.classList.add('hop', dir > 0 ? 'hop-fwd' : 'hop-back', 'hop-signs');
       me.timers.push(setTimeout(() => root.classList.remove('hop-signs'), 1400));
     };
-    const cab = $('#cables'), pow = $('#power');
+    const cab = $('#cables'), pow = $('#power'), net = $('#net');
     if (document.startViewTransition) {
       // Провода старой стойки — отдельными снимками, чтобы уехали вместе с ней.
       cab?.style.setProperty('view-transition-name', 'hop-cables');
       pow?.style.setProperty('view-transition-name', 'hop-power');
+      net?.style.setProperty('view-transition-name', 'hop-net');
       root.classList.add('hop-vt');
       me.vt = document.startViewTransition(() => { swap(doc); on(); settle(from, focus, url); });
       me.vt.ready.catch(() => {}); // пропущенный переход (вкладка скрыта, следующий клик) — не ошибка
       me.vt.finished.then(() => land(me), () => land(me));
       me.vt.updateCallbackDone.catch(() => { location.href = url.href; });
     } else {
-      me.ghost = ghost(room, rack, cab, pow);
+      me.ghost = ghost(room, rack, cab, pow, net);
       swap(doc);
       $('#room').append(me.ghost);
       on();

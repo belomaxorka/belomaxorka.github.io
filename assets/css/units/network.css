@@ -48,8 +48,6 @@
 @media (max-width: 760px) { .tp:nth-child(n + 9) { display: none; } .tor-sfp { display: none; } }
 
 @keyframes port-act { 50% { opacity: .2; } }
-/* Провода ещё протягиваются (app.js, rack:landed): линка нет, пока вилка не встала в порт. */
-.tp.wait .led, .nic.wait .led { background: var(--led-off) !important; box-shadow: none !important; animation: none !important; }
 
 /* ---------- роутер ---------- */
 .rtr-ports { display: flex; align-items: center; gap: 6px; }
@@ -67,8 +65,9 @@
 .nic .led { width: 4px; height: 4px; }
 @media (prefers-reduced-motion: no-preference) { .nic .led { animation: port-act 1.3s steps(2, jump-none) infinite var(--d, 0s); } }
 .u.has-nic .face { padding-left: 38px; }
-/* Обесточен юнит или коммутатор — линка нет. */
-.u.off .nic .led, .rack:has(.u.tor.off) .nic .led { background: var(--led-off); box-shadow: none; animation: none; }
+/* Обесточен юнит или коммутатор, выдернут его корд или ещё не встал в порт (.unlinked, assets/js/net.js) — линка нет.
+   Лампы портов коммутатора зажигает net.js. */
+.u.off .nic .led, .u.unlinked .nic .led, .rack:has(.u.tor.off) .nic .led { background: var(--led-off); box-shadow: none; animation: none; }
 .rack:has(.u.tor.off) .tp .led { background: var(--led-off); box-shadow: none; animation: none; }
 .vm {
   position: absolute; z-index: 0; top: 0; bottom: 0; left: -22px; width: 20px; border-radius: 3px;
@@ -83,36 +82,56 @@
 }
 
 /* ---------- нет связи ----------
-   Обесточен роутер (на главной) — у подключённых юнитов «нет интернета»; обесточен коммутатор — «связь потеряна»
-   (правило ниже перекрывает). Данные на экранах никуда не деваются, их просто не видно; вернули питание — вернулись.
-   Юниты без сетевой карты (ИБП, заглушки) и обесточенные сами (у них «нет сигнала») не трогаются. */
-.rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet],
-.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nolink] { position: relative; }
-.rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet] *,
-.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nolink] * { visibility: hidden; }
-.rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) .lcd[data-nonet],
-.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) .lcd[data-nolink] { color: transparent; text-shadow: none; }
+   Связи нет — обесточен коммутатор или у юнита выдернут корд (.unlinked; пока стойка приезжает и провода тянутся —
+   тоже; ставит assets/js/net.js): «связь потеряна» и «нет интернета». Интернета нет — обесточен роутер, выдернут его LAN
+   или WAN, на других стойках — аплинк (.nonet на стойке, net.js): «нет интернета». Данные на экранах никуда не деваются,
+   их просто не видно (а сам юнит без сети не обновляется, net.js); вернули — вернулись. Юниты без сетевой карты (ИБП,
+   заглушки) и обесточенные сами (у них «нет сигнала») не трогаются. */
+:is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet],
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)[data-nolink] { position: relative; }
+:is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet] *,
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)[data-nolink] * { visibility: hidden; }
+:is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) .lcd[data-nonet],
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) .lcd[data-nolink] { color: transparent; text-shadow: none; }
 /* Надпись — поверх экрана, а не в потоке: иначе экран вырастает, юниты ниже съезжают, а провода остаются. */
-.rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet]::after,
-.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nolink]::after {
+:is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet]::after,
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)[data-nolink]::after {
   content: attr(data-nonet); position: absolute; inset: 0; display: grid; place-content: center; text-align: center;
   white-space: pre-line; font: 400 20px/1.05 var(--f-lcd); letter-spacing: .06em;
   color: var(--lcd); text-shadow: 0 0 6px color-mix(in srgb, var(--lcd) 45%, transparent);
 }
-/* Без коммутатора нет ни связи, ни интернета: две строки. */
-.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nolink]::after { content: attr(data-nolink) "\A" attr(data-nonet); }
-.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) .screen[data-nolink]::after,
-.rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) .screen[data-nonet]::after { color: #9fb09c; text-shadow: none; }
+/* Без линка нет ни связи, ни интернета: две строки. */
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)[data-nolink]::after { content: attr(data-nolink) "\A" attr(data-nonet); }
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) .screen[data-nolink]::after,
+:is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) .screen[data-nonet]::after { color: #9fb09c; text-shadow: none; }
 @media (prefers-reduced-motion: no-preference) {
-  .rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.has-nic:not(.off) :is(.lcd, .screen)::after { animation: nolink 1.6s steps(2, jump-none) infinite; }
+  :is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.has-nic, .rack.nonet .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)::after { animation: nolink 1.6s steps(2, jump-none) infinite; }
 }
 @keyframes nolink { 50% { opacity: .35; } }
 /* Без связи обложки не загрузить: лоток пустой, в ящике медиасервера — серые квадраты (как без питания, power.css). */
-.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.media.has-nic img.tray,
-.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) #drawer-media .media-week img { object-position: 200px 0; }
-.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.media.has-nic img.tray { background: repeating-linear-gradient(135deg, var(--void) 0 6px, var(--panel) 6px 12px); }
+:is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) .u.media.has-nic img.tray, .u.media.unlinked img.tray,
+:is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) #drawer-media .media-week img,
+.u.media.unlinked + #drawer-media .media-week img { object-position: 200px 0; }
+:is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) .u.media.has-nic img.tray,
+.u.media.unlinked img.tray { background: repeating-linear-gradient(135deg, var(--void) 0 6px, var(--panel) 6px 12px); }
 /* И играть нечему: VU-метр гаснет. */
-.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.media.has-nic .vu i { background: var(--led-off); box-shadow: none; }
-/* Без связи статусы неизвестны: лампы мониторинга и шкалы контейнеров гаснут. */
-.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.mon.has-nic:not(.off) .matrix .led,
-.rack:has(#rack-body > .u.tor.off) .u.ct.has-nic:not(.off) .meter i { background: var(--led-off); box-shadow: none; animation: none; }
+:is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) .u.media.has-nic .vu i,
+.u.media.unlinked .vu i { background: var(--led-off); box-shadow: none; }
+/* Без связи статусы неизвестны: лампы мониторинга и шкалы контейнеров гаснут (контейнерам интернет не нужен). */
+:is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) .u.mon.has-nic:not(.off) .matrix .led,
+.u.mon.unlinked:not(.off) .matrix .led,
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked).ct:not(.off) .meter i { background: var(--led-off); box-shadow: none; animation: none; }
+/* Без линка гаснет и своя лампа сети у юнита (net на сервере). */
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked) .led.net { background: var(--led-off); box-shadow: none; animation: none; }
+
+/* Роутер без WAN или без LAN (net.js): на его ЖК «нет линка», лампа WAN гаснет. */
+.rtr:is(.nowan, .nolan):not(.off) .lcd { position: relative; color: transparent; text-shadow: none; }
+.rtr:is(.nowan, .nolan):not(.off) .lcd::after {
+  content: attr(data-nolan); position: absolute; inset: 0; display: grid; place-content: center; font: inherit;
+  white-space: nowrap; color: var(--lcd); text-shadow: 0 0 6px color-mix(in srgb, var(--lcd) 45%, transparent);
+}
+.rtr.nowan:not(.off) .lcd::after { content: attr(data-nowan); }
+.rtr.nowan .led.wan { background: var(--led-off); box-shadow: none; animation: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .rtr:is(.nowan, .nolan):not(.off) .lcd::after { animation: nolink 1.6s steps(2, jump-none) infinite; }
+}
