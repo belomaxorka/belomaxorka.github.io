@@ -30,11 +30,12 @@
 .ups .pwr {
   width: 34px; height: 34px; flex: none; border-radius: 50%; cursor: pointer;
   border: 2px solid var(--edge); background: radial-gradient(circle at 50% 40%, var(--panel-hi), var(--key));
-  color: var(--led-ok); font: 700 15px/1 var(--f-silk); text-shadow: 0 0 6px var(--led-ok);
+  color: var(--led-ok); font: 700 15px/1 var(--f-silk); display: inline-grid; place-items: center; padding: 0;
   box-shadow: 0 2px 0 var(--edge), inset 0 1px 0 var(--panel-hi);
 }
 .ups .pwr:active { transform: translateY(1px); }
-.rack.powered-off .ups .pwr { color: var(--led-err); text-shadow: 0 0 6px var(--led-err); }
+.ups .pwr .ic { width: 18px; height: 18px; stroke-width: 2.6; filter: drop-shadow(0 0 3px currentColor); }
+.rack.powered-off .ups .pwr { color: var(--led-err); }
 
 /* Стикер отклеился (assets/js/sticker.js): на юните пусто, копия падает и лежит на полу; тап — обратно. */
 .peeled { visibility: hidden; }

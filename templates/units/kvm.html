@@ -22,7 +22,7 @@
           <button type="button" class="key" @click="step(-1)" x-show="n > 1" aria-label="{{t "me.prev"}}">‹</button>
           <span class="silk" x-text="(i + 1) + ' / ' + n"></span>
           <button type="button" class="key" @click="step(1)" x-show="n > 1" aria-label="{{t "me.next"}}">›</button>
-          <button type="button" class="key" @click="close()" aria-label="{{t "lb.close"}}">✕</button>
+          <button type="button" class="key" @click="close()" aria-label="{{t "lb.close"}}">{{template "icon" "close"}}</button>
         </div>
       </dialog>
     </div>
@@ -37,16 +37,16 @@
         <textarea id="gb-text" name="text" maxlength="600" placeholder="{{t "gb.placeholder"}}" aria-label="{{t "gb.message"}}"></textarea>
       </div>
       <div class="keys">
-        <button class="key" type="button" hidden :hidden="false" @click="toggle" :aria-pressed="open">{{t "gb.draw"}}</button>
-        <button class="key" type="submit">{{t "gb.send"}}</button>
+        <button class="key" type="button" hidden :hidden="false" @click="toggle" :aria-pressed="open">{{template "icon" "pen"}} {{t "gb.draw"}}</button>
+        <button class="key" type="submit">{{template "icon" "send"}} {{t "gb.send"}}</button>
       </div>
       <div class="pad" hidden :hidden="!open" :class="{ full: full }" @keydown.escape="setFull(false)">
         <div class="stage"><canvas x-ref="pad" width="640" height="400" aria-label="{{t "gb.pad"}}"></canvas></div>
         <div class="tools" role="toolbar" aria-label="{{t "gb.pad.tools"}}">
           <div class="grp">
-            <button type="button" class="key" @click="use('brush')" :aria-pressed="isTool('brush')" title="{{t "gb.pad.brush"}}">✎<span>{{t "gb.pad.brush"}}</span></button>
-            <button type="button" class="key" @click="use('eraser')" :aria-pressed="isTool('eraser')" title="{{t "gb.pad.eraser_tip"}}">⌫<span>{{t "gb.pad.eraser"}}</span></button>
-            <button type="button" class="key" @click="use('fill')" :aria-pressed="isTool('fill')" title="{{t "gb.pad.fill"}}">◪<span>{{t "gb.pad.fill"}}</span></button>
+            <button type="button" class="key" @click="use('brush')" :aria-pressed="isTool('brush')" title="{{t "gb.pad.brush"}}">{{template "icon" "pen"}}<span>{{t "gb.pad.brush"}}</span></button>
+            <button type="button" class="key" @click="use('eraser')" :aria-pressed="isTool('eraser')" title="{{t "gb.pad.eraser_tip"}}">{{template "icon" "eraser"}}<span>{{t "gb.pad.eraser"}}</span></button>
+            <button type="button" class="key" @click="use('fill')" :aria-pressed="isTool('fill')" title="{{t "gb.pad.fill"}}">{{template "icon" "fill"}}<span>{{t "gb.pad.fill"}}</span></button>
           </div>
           <div class="grp swatches">
             <template x-for="c in colors" :key="c"><button type="button" class="sw" :style="{ background: c }" @click="pick(c)" :aria-pressed="isColor(c)" :aria-label="c" :title="c"></button></template>
@@ -54,10 +54,10 @@
           </div>
           <label class="grp size"><span class="silk">{{t "gb.pad.size"}}</span><input type="range" min="1" max="40" :value="size" @input="setSize($event)" aria-label="{{t "gb.pad.size"}}"><span class="dot" :style="{ width: size + 'px', height: size + 'px', background: color }" aria-hidden="true"></span></label>
           <div class="grp">
-            <button type="button" class="key" @click="undo" :disabled="!canUndo" title="{{t "gb.pad.undo"}} (Ctrl+Z)" aria-label="{{t "gb.pad.undo"}}">↶</button>
-            <button type="button" class="key" @click="redo" :disabled="!canRedo" title="{{t "gb.pad.redo"}} (Ctrl+Shift+Z)" aria-label="{{t "gb.pad.redo"}}">↷</button>
+            <button type="button" class="key" @click="undo" :disabled="!canUndo" title="{{t "gb.pad.undo"}} (Ctrl+Z)" aria-label="{{t "gb.pad.undo"}}">{{template "icon" "undo"}}</button>
+            <button type="button" class="key" @click="redo" :disabled="!canRedo" title="{{t "gb.pad.redo"}} (Ctrl+Shift+Z)" aria-label="{{t "gb.pad.redo"}}">{{template "icon" "redo"}}</button>
             <button type="button" class="key" @click="clear">{{t "gb.pad.clear"}}</button>
-            <button type="button" class="key" @click="toggleFull" :aria-pressed="full" title="{{t "gb.pad.full"}}" aria-label="{{t "gb.pad.full"}}">⛶</button>
+            <button type="button" class="key" @click="toggleFull" :aria-pressed="full" title="{{t "gb.pad.full"}}" aria-label="{{t "gb.pad.full"}}">{{template "icon" "full"}}</button>
           </div>
           <p class="pad-warn" x-show="tooBig" role="status">{{t "gb.pad.toobig"}}</p>
         </div>

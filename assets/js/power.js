@@ -261,6 +261,8 @@
       }
     });
     for (const k of ropes.keys()) if (!seen.has(k)) ropes.delete(k);
+    // Пол и стены комнаты: выдернутая вилка ложится на фальшпол, а не улетает за край страницы.
+    for (const r of ropes.values()) { r.floor = R.height - 34; r.right = R.width - 8; }
     wake();
   }
 
@@ -271,9 +273,15 @@
     const last = r.pts.length - 1;
     const pinned = (i) => i === last || (i === 0 && (r.plugged || drag?.key === r.key));
     let motion = 0;
+    const floor = r.floor ?? Infinity, right = r.right ?? Infinity;
+    const keepIn = (p) => {
+      if (p.y > floor) p.y = floor;
+      if (p.x < 8) p.x = 8; else if (p.x > right) p.x = right;
+    };
     r.pts.forEach((p, i) => {
       if (pinned(i)) return;
-      const vx = (p.x - p.px) * damp, vy = (p.y - p.py) * damp;
+      const rub = p.y >= floor - 0.5 ? 0.7 : 1; // на полу кабель не скользит, а ложится
+      const vx = (p.x - p.px) * damp * rub, vy = (p.y - p.py) * damp;
       p.px = p.x; p.py = p.y;
       p.x += vx; p.y += vy + g;
       motion += Math.abs(vx) + Math.abs(vy);
@@ -288,6 +296,7 @@
       if (d > max) { tx = r.outlet.x + (tx - r.outlet.x) * max / d; ty = r.outlet.y + (ty - r.outlet.y) * max / d; }
       head.px = head.x; head.py = head.y;
       head.x = tx; head.y = ty;
+      keepIn(head);
       motion += 1;
     }
     const tail = r.pts[last];
@@ -303,6 +312,7 @@
         a.x += dx * diff * wa; a.y += dy * diff * wa;
         b.x -= dx * diff * wb; b.y -= dy * diff * wb;
       }
+      r.pts.forEach((p, i) => { if (!pinned(i)) keepIn(p); });
     }
     return motion;
   }

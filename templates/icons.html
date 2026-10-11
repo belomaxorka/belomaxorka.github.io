@@ -1,0 +1,16 @@
+{{/* Значки кнопок: встроенный SVG вместо символов Юникода. ⏻, ✎, ⏎, ⌫, ⛶ и подобных нет ни в наших шрифтах,
+     ни во многих системных (на Android вместо них квадратики). Цвет — currentColor, размер — 1em (assets/css/parts.css).
+     Использование: {{template "icon" "power"}}. */}}
+{{define "icon"}}<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+{{- if eq . "power"}}<path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/>
+{{- else if eq . "pen"}}<path d="M4 20l1-4.5L16.5 4a2.1 2.1 0 0 1 3 3L8 18.5z"/><path d="M14.5 6l3 3"/>
+{{- else if eq . "send"}}<path d="M20 5v5.5a3.5 3.5 0 0 1-3.5 3.5H5"/><path d="M9 9.5L4.5 14 9 18.5"/>
+{{- else if eq . "eraser"}}<path d="M8.5 19.5L4 15a2 2 0 0 1 0-2.8l8.7-8.7a2 2 0 0 1 2.8 0l4.2 4.2a2 2 0 0 1 0 2.8L11 19.5z"/><path d="M9 19.5h11"/><path d="M8.5 8.5l7 7"/>
+{{- else if eq . "fill"}}<path d="M3.5 11.5L11 4l7.5 7.5L11 19z"/><path d="M3.5 11.5h15"/><path d="M20.5 15.5s-1.5 2-1.5 3a1.5 1.5 0 0 0 3 0c0-1-1.5-3-1.5-3z"/>
+{{- else if eq . "undo"}}<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>
+{{- else if eq . "redo"}}<path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>
+{{- else if eq . "full"}}<path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/>
+{{- else if eq . "close"}}<path d="M6 6l12 12"/><path d="M18 6L6 18"/>
+{{- else if eq . "play"}}<path class="solid" d="M7 5l12 7-12 7z"/>
+{{- else if eq . "stop"}}<path class="solid" d="M6 6h12v12H6z"/>
+{{- end}}</svg>{{end}}

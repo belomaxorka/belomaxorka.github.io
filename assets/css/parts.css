@@ -65,6 +65,10 @@
 .port .led { width: 6px; height: 6px; }
 .port.off .tape { opacity: .55; }
 
+/* Значки (templates/icons.html): линии цветом текста, 1em. */
+.ic { width: 1em; height: 1em; flex: none; vertical-align: -.14em; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ic .solid { fill: currentColor; stroke: none; }
+
 .note {
   position: absolute; z-index: 5; max-width: 180px;
   font: 600 19px/1.1 var(--f-hand); color: var(--note-fg); background: var(--note-bg);

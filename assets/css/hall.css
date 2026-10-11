@@ -74,9 +74,10 @@
 }
 .hall .vent { inset: 0; background: radial-gradient(50% 100% at 50% 100%, color-mix(in srgb, var(--cold) calc(var(--cold-a) * 100%), transparent), transparent); }
 
-/* «Выход»: горит всегда, даже без света. */
+/* «Выход»: под потолком над проходом, выше табличек — стойка его не закроет, есть у неё роутер или нет.
+   Горит всегда, даже без света. */
 .hall .exit {
-  top: 82px; left: 18px; padding: 3px 10px; border-radius: 3px;
+  top: 10px; left: 18px; padding: 3px 10px; border-radius: 3px;
   font: 600 12px/1.2 var(--f-silk); letter-spacing: .14em; text-transform: uppercase;
   color: #eafff0; background: #1d8a45; box-shadow: 0 0 18px #2ccf6a88, inset 0 0 0 1px #ffffff40;
 }
@@ -100,7 +101,7 @@
 @media (max-width: 1100px) { .hall .nb { filter: brightness(calc(var(--nb-dim) * .8)) blur(1.6px); } }
 @media (max-width: 760px) {
   .hall .nb, .hall .lamp.a, .hall .lamp.c { display: none; }
-  .hall .exit { top: 74px; left: 8px; font-size: 10px; }
+  .hall .exit { top: 6px; left: 8px; font-size: 10px; }
   .hall .floor { height: 110px; }
 }
 

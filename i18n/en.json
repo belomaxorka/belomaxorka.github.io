@@ -85,8 +85,8 @@
   "media.aria": "music",
   "media.cover": "cover",
   "media.nocover": "no cover",
-  "media.playing": "▶ koito · now playing",
-  "media.last": "■ koito · last played %s",
+  "media.playing": "koito · now playing",
+  "media.last": "koito · last played %s",
   "media.silence": "silence on air",
   "media.nolistens": "no listens yet",
   "lcd.note.cover": "screens follow the cover",
@@ -156,8 +156,8 @@
   "gb.err.rate": "too many messages, try again in ten minutes",
   "gb.err.busy": "the guestbook is swamped right now, try again in an hour",
   "gb.err.fail": "something broke on my side, try later",
-  "gb.draw": "✎ draw",
-  "gb.send": "⏎ send",
+  "gb.draw": "draw",
+  "gb.send": "send",
 
   "lb.close": "close",
 

@@ -7,11 +7,11 @@
     {{if .Cover}}<img class="tray" src="{{.Cover}}" width="300" height="300" alt="{{t "media.cover"}}{{with .Album}}: {{.}}{{end}}">{{else}}<div class="tray empty" role="img" aria-label="{{t "media.nocover"}}"></div>{{end}}
     <div class="lcd">
       {{if .OK}}
-      <span class="d">{{if .Playing}}{{t "media.playing"}}{{else}}{{t "media.last" (ago .At)}}{{end}}</span><br>
+      <span class="d">{{if .Playing}}{{template "icon" "play"}} {{t "media.playing"}}{{else}}{{template "icon" "stop"}} {{t "media.last" (ago .At)}}{{end}}</span><br>
       <a href="{{.Link}}">{{.Track}}</a><br>
       <span class="row2">{{.Artists}}{{with .Album}} · {{.}}{{end}}{{with .Duration}} · {{mmss .}}{{end}}</span>
       {{else}}
-      <span class="d">■ koito</span><br>{{t "media.silence"}}<br><span class="row2 d">{{t "media.nolistens"}}</span>
+      <span class="d">{{template "icon" "stop"}} koito</span><br>{{t "media.silence"}}<br><span class="row2 d">{{t "media.nolistens"}}</span>
       {{end}}
     </div>
     <div class="vu" x-data="vu({{.Playing}})" aria-hidden="true">
