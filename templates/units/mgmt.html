@@ -11,8 +11,8 @@
     </nav>
     <div class="ports">
       <nav class="langs" aria-label="{{t "lang.aria"}}">
-        <a class="key{{if eq .Lang "en"}} on{{end}}" href="/?lang=en" hreflang="en" lang="en"{{if eq .Lang "en"}} aria-current="true"{{end}}>en</a>
-        <a class="key{{if eq .Lang "ru"}} on{{end}}" href="/?lang=ru" hreflang="ru" lang="ru"{{if eq .Lang "ru"}} aria-current="true"{{end}}>ru</a>
+        <a class="key{{if eq .Lang "en"}} on{{end}}" href="?lang=en" hreflang="en" lang="en"{{if eq .Lang "en"}} aria-current="true"{{end}}>en</a>
+        <a class="key{{if eq .Lang "ru"}} on{{end}}" href="?lang=ru" hreflang="ru" lang="ru"{{if eq .Lang "ru"}} aria-current="true"{{end}}>ru</a>
       </nav>
       <button class="key" type="button" hidden x-data="lcdToggle" data-cover="{{t "lcd.cover"}}" data-amber="{{t "lcd.amber"}}" @click="toggle" x-text="label">{{t "lcd.cover"}}</button>
       <button class="key" type="button" hidden x-data="themeToggle" data-dark="{{t "theme.dark"}}" data-light="{{t "theme.light"}}" @click="toggle" aria-label="{{t "theme.aria"}}"><i class="led pwr"></i><span x-text="label">{{t "theme.dark"}}</span></button>
