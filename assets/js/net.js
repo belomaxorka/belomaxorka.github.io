@@ -146,8 +146,7 @@
     if (!svg) {
       svg = el('svg', { id: 'net', class: 'cables net', 'aria-hidden': 'true' }, room);
       svg.addEventListener('pointerdown', grab);
-      svg.addEventListener('pointerover', (e) => { if (e.pointerType === 'mouse' && !drag && e.target.classList?.contains('hit')) probe(e.target.dataset.key); });
-      svg.addEventListener('pointerout', (e) => { if (e.target.classList?.contains('hit')) probe(null); });
+
     }
     const R = room.getBoundingClientRect();
     svg.setAttribute('viewBox', `0 0 ${R.width} ${R.height}`);
@@ -248,6 +247,13 @@
   // Навёл мышь на вилку — корд светится целиком, а лампы его порта на коммутаторе и сетевой карты юнита мигают часто,
   // как от тестера на другом конце (только если линк есть). Пальцем наводить нечем — на телефоне тестера нет.
   // app.js перерисовывает корды при каждой раскладке: подсветка ставится заново (relayout).
+  // Цель смотрится на каждом движении мыши, не по pointerover/pointerout: draw() пересоздаёт зоны захвата, и «ушёл»
+  // исчезнувшей зоне не приходит — подсветка залипала (как и в power.js).
+  addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse' || drag) return;
+    const k = (e.target instanceof Element && e.target.closest('#net .hit')?.dataset.key) || null;
+    if (k !== probed) probe(k);
+  }, { passive: true });
   let probed = null;
   function probe(key) {
     document.querySelectorAll('#cables > g.probe, #rack .probe').forEach((n) => n.classList.remove('probe'));

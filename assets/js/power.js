@@ -160,9 +160,7 @@
     if (!svg) {
       svg = el('svg', { id: 'power', class: 'cables power', 'aria-hidden': 'true' }, room);
       svg.addEventListener('pointerdown', grab);
-      // Тестер кабеля (как в net.js): навёл мышь на вилку — шнур светится целиком.
-      svg.addEventListener('pointerover', (e) => { if (e.pointerType === 'mouse' && !drag && e.target.dataset?.key) { probing = e.target.dataset.key; draw(); } });
-      svg.addEventListener('pointerout', (e) => { if (e.target.dataset?.key) { probing = null; draw(); } });
+
     }
     units().forEach((u) => {
       if (!u.querySelector(':scope > .psu')) {
@@ -627,7 +625,7 @@
     }
     d += ` L${p[p.length - 1].x} ${p[p.length - 1].y}`;
     const line = { d, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
-    const cord = el('g', { class: r.key === probing ? 'probe' : '' }, svg);
+    const cord = el('g', { class: r.key === probing ? 'probe' : '', 'data-cord': r.key }, svg);
     el('path', { ...line, stroke: 'rgba(0,0,0,.35)', 'stroke-width': 9, transform: 'translate(0 2)' }, cord);
     el('path', { ...line, stroke: MAINS, 'stroke-width': 6 }, cord);
     el('path', { ...line, stroke: 'rgba(255,255,255,.28)', 'stroke-width': 1.6, transform: 'translate(-1.2 -1.2)' }, cord);
@@ -656,7 +654,7 @@
       }
       d += ` L${p[p.length - 1].x} ${p[p.length - 1].y}`;
       const line = { d, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
-      const cord = el('g', { class: r.key === probing ? 'probe' : '' }, svg);
+      const cord = el('g', { class: r.key === probing ? 'probe' : '', 'data-cord': r.key }, svg);
       el('path', { ...line, stroke: 'rgba(0,0,0,.35)', 'stroke-width': 7, transform: 'translate(0 2)' }, cord);
       el('path', { ...line, stroke: COLOR, 'stroke-width': 4.5 }, cord);
       el('path', { ...line, stroke: 'rgba(255,255,255,.22)', 'stroke-width': 1.2, transform: 'translate(-1 -1)' }, cord);
@@ -682,6 +680,19 @@
     calm = 0;
     if (!raf && svg) raf = requestAnimationFrame(tick);
   }
+
+  // ---------- тестер кабеля ----------
+  // Навёл мышь на вилку — шнур светится целиком. Только переключает класс у уже нарисованного шнура (data-cord), ничего
+  // не перерисовывает: перерисовка прямо на наведении уводила круг из-под нажатия (Chrome перед pointerdown шлёт
+  // pointerover новому кругу) — вилку было не схватить, а «ушёл» исчезнувшему кругу не приходит — подсветка залипала.
+  // Поэтому и смотрим цель каждого движения мыши, а не pointerover/pointerout.
+  addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse' || drag || !svg) return;
+    const k = (e.target instanceof Element && e.target.closest('#power .hit')?.dataset.key) || null;
+    if (k === probing) return;
+    probing = k;
+    svg.querySelectorAll('g[data-cord]').forEach((g) => g.classList.toggle('probe', g.dataset.cord === k));
+  }, { passive: true });
 
   // ---------- руки ----------
   function local(e) {
