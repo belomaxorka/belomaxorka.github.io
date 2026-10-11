@@ -204,6 +204,8 @@
   "cable.uplink_r1": "аплинк к r1 ↑",
   "cable.uplink": "в интернет ↑",
   "cable.power": "220 В",
+  "cable.breaker": "зал",
+  "cable.breaker_aria": "рубильник зала: розетки всех стоек",
 
   "blank.text": "← тут будет второй сервер (копим)",
 

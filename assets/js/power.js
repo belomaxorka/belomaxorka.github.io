@@ -3,8 +3,11 @@
 // юнит погаснет. Поднести вилку к разъёму (или тапнуть по ней) — воткнётся, юнит загорится.
 // Кнопка на ИБП гасит всю стойку и загружает её обратно. Шнур самого ИБП тоже выдёргивается из розетки:
 // ИБП уходит на батарею (красный свет в зале, ЖК мигает, заряд тает), батарея села — гаснет всё; воткнул —
-// заряжается и стойка загружается. Состояние только у посетителя (localStorage). Погасший юнит не нажимается
-// (inert); событие rack:unit на юните говорит тем, кто внутри, что он погас или загрузился.
+// заряжается и стойка загружается. У каждой стойки ряда своё питание: свой ИБП, кнопка, шнур, батарея, вилки.
+// Щиток на стене зала (рядом с розеткой) обесточивает розетки всего ряда разом: все ИБП уходят на батарею, каждая
+// стойка живёт, пока держит её батарея. Батарея считается по времени: ушёл к другой стойке — эта садится дальше.
+// Состояние только у посетителя (localStorage). Погасший юнит не нажимается (inert); событие rack:unit на юните
+// говорит тем, кто внутри, что он погас или загрузился.
 // Без JS всего этого нет: юниты просто горят и работают.
 (() => {
   // Юниты с питанием; патч-панель и заглушки с наклейками пассивные, как в жизни. Несколько одинаковых юнитов
@@ -21,13 +24,38 @@
     get() { try { return JSON.parse(localStorage.getItem('rack-power') || '{}'); } catch { return {}; } },
     set(v) { try { localStorage.setItem('rack-power', JSON.stringify(v)); } catch {} },
   };
+  // { racks: { <id стойки>: { off, unplugged, mains, charge, at } }, breaker, breakerAt }. Старое общее на весь ряд
+  // питание ({ off, unplugged, mains, charge }) забывается: всё включено.
   const saved = store.get();
-  const state = {
-    off: !!saved.off, unplugged: saved.unplugged || {},
-    mains: saved.mains !== false,                                   // ИБП в розетке
-    charge: typeof saved.charge === 'number' ? saved.charge : null, // % батареи, пока идёт своя симуляция
-  };
-  const save = () => store.set(state);
+  const all = { racks: saved.racks || {}, breaker: saved.breaker !== false, breakerAt: saved.breakerAt || 0 };
+  const save = () => store.set(all);
+  // Питание стойки: off — кнопка ИБП; unplugged — выдернутые вилки юнитов; mains — шнур ИБП в розетке; charge — %
+  // батареи, пока идёт своя симуляция (null — полная и на сети); at — когда charge посчитан.
+  function rackState(id) {
+    const r = (all.racks[id] ||= {});
+    r.off = !!r.off;
+    r.unplugged ||= {};
+    r.mains = r.mains !== false;
+    if (typeof r.charge !== 'number') r.charge = null;
+    return r;
+  }
+  // Есть ли ток в розетке у ИБП этой стойки: шнур воткнут и щиток включён.
+  const fed = (r) => r.mains && all.breaker;
+  // Заряд к моменту now: пока стойку не видно, батарея садится (или заряжается) так же, как на глазах. ИБП ушёл на
+  // батарею, когда пропал ток: выдернули шнур (тогда charge уже есть) или выключили щиток (breakerAt).
+  function settle(r, now) {
+    if (r.charge === null) {
+      if (fed(r)) return;
+      r.charge = 100;
+      r.at = all.breakerAt || now;
+    }
+    const dt = Math.max(0, (now - (r.at || now)) / 1000);
+    r.charge = fed(r) ? Math.min(100, r.charge + 100 / CHARGE * dt) : Math.max(0, r.charge - 100 / DRAIN * dt);
+    if (fed(r) && r.charge >= 100) r.charge = null;
+    r.at = now;
+  }
+  const here = () => document.getElementById('room')?.dataset.rack || '';
+  let state = null, stateId = null; // питание той стойки, что сейчас в комнате (useRack)
 
   const ropes = new Map(); // ключ юнита → верёвка
   let room = null, svg = null, raf = 0, calm = 0, drag = null;
@@ -43,6 +71,23 @@
     for (const k in attrs) n.setAttribute(k, attrs[k]);
     if (parent) parent.appendChild(n);
     return n;
+  }
+
+  // Стойка в комнате сменилась (или страница только открылась): её питание, досчитанное до этой минуты. Батарея
+  // прошлой стойки досчитана и сохранена, её таймер остановлен; верёвки строятся заново из нового состояния.
+  function useRack() {
+    const id = here();
+    if (state && id === stateId) return;
+    const now = Date.now();
+    if (state) settle(state, now);
+    clearInterval(timer); timer = 0; wasDead = null;
+    // Настоящие ЖК ИБП и свет в зале у новой стойки — свои; запомнить их до того, как их подменит симуляция.
+    lcdReal = lightReal = null;
+    ropes.clear();
+    stateId = id;
+    state = rackState(id);
+    settle(state, now);
+    save();
   }
 
   // ---------- юниты: разъёмы и свет ----------
@@ -109,6 +154,7 @@
   function ensureDom() {
     room = document.getElementById('room');
     if (!room || !document.getElementById('rack-body')) return false;
+    useRack();
     svg = document.getElementById('power');
     if (!svg) {
       svg = el('svg', { id: 'power', class: 'cables power', 'aria-hidden': 'true' }, room);
@@ -127,6 +173,7 @@
     const rack = document.getElementById('rack');
     if (rack) rack.classList.toggle('powered-off', state.off || dead());
     wireButton();
+    breaker();
     return true;
   }
 
@@ -140,7 +187,7 @@
   const upsUnit = () => document.querySelector('#rack-body > .ups');
   const upsLcd = () => document.querySelector('#rack-body > .ups .lcd');
   const full = () => { const v = parseInt(upsLcd()?.dataset.charge, 10); return v > 0 ? v : 100; };
-  function dead() { return !state.mains && state.charge !== null && state.charge <= 0; }
+  function dead() { return !fed(state) && state.charge !== null && state.charge <= 0; }
 
   // Стойка без ИБП (заглушки ряда) тоже живёт от него: свет в зале и юниты — как у всех, только ЖК нет.
   function battery() {
@@ -153,7 +200,7 @@
       alarmReal = lcd.classList.contains('alarm');
     }
     const rack = document.getElementById('rack');
-    if (state.mains && (state.charge === null || state.charge >= full())) {
+    if (fed(state) && (state.charge === null || state.charge >= full())) {
       if (state.charge !== null) { state.charge = null; save(); }
       clearInterval(timer); timer = 0;
       if (lcd) {
@@ -166,7 +213,7 @@
       return;
     }
     const isDead = dead();
-    room.dataset.light = state.mains ? lightReal : 'battery';
+    room.dataset.light = fed(state) ? lightReal : 'battery';
     upsUnit()?.classList.toggle('off', isDead);
     rack?.classList.toggle('powered-off', state.off || isDead);
     if (lcd) screen(lcd, isDead);
@@ -182,7 +229,7 @@
 
   // ЖК: батарейка, «на батарее · 73%» или «заряжается · 40%», сколько осталось.
   function screen(lcd, isDead) {
-    lcd.classList.toggle('alarm', !state.mains && !isDead);
+    lcd.classList.toggle('alarm', !fed(state) && !isDead);
     const pc = Math.round(state.charge), d = lcd.dataset;
     const bars = document.createElement('span');
     bars.className = 'batt' + (pc <= 20 ? ' low' : '');
@@ -193,10 +240,10 @@
       bars.appendChild(b);
     }
     const text = document.createElement('span');
-    text.append((state.mains ? d.charging : d.battery) + ' · ' + pc + '%', document.createElement('br'));
+    text.append((fed(state) ? d.charging : d.battery) + ' · ' + pc + '%', document.createElement('br'));
     const sub = document.createElement('span');
     sub.className = 'd';
-    sub.textContent = state.mains ? d.mains : (d.left || '%d').replace('%d', Math.ceil(state.charge / 100 * DRAIN));
+    sub.textContent = fed(state) ? d.mains : (d.left || '%d').replace('%d', Math.ceil(state.charge / 100 * DRAIN));
     text.append(sub);
     lcd.replaceChildren(bars, text);
   }
@@ -205,11 +252,13 @@
     if (timer) { battery(); return; }
     if (state.charge === null) state.charge = full();
     let n = 0;
+    state.at = Date.now();
     timer = setInterval(() => {
       const dt = 0.5;
-      state.charge = state.mains ? Math.min(full(), state.charge + 100 / CHARGE * dt) : Math.max(0, state.charge - 100 / DRAIN * dt);
+      state.charge = fed(state) ? Math.min(full(), state.charge + 100 / CHARGE * dt) : Math.max(0, state.charge - 100 / DRAIN * dt);
+      state.at = Date.now();
       if (++n % 4 === 0 || state.charge <= 0) save();
-      if (!state.mains && state.charge <= 0) { clearInterval(timer); timer = 0; save(); }
+      if (!fed(state) && state.charge <= 0) { clearInterval(timer); timer = 0; save(); }
       battery();
     }, 500);
     battery();
@@ -235,6 +284,45 @@
       }
       bootAll();
     });
+  }
+
+  // ---------- щиток зала ----------
+  // Рубильник на стене рядом с розеткой: ток во всех розетках ряда. Выключил — все ИБП на батарее (у каждой
+  // стойки свой заряд, досчитанный до этой минуты), включил — заряжаются. Подписи — data-* на #cables (i18n).
+  let lever = null;
+  function breaker() {
+    if (lever?.isConnected) return;
+    const d = document.getElementById('cables')?.dataset || {};
+    lever = document.createElement('button');
+    lever.type = 'button';
+    lever.className = 'breaker';
+    lever.setAttribute('aria-label', d.breakerAria || 'hall power');
+    lever.innerHTML = '<span class="box"><i class="handle"></i></span><span class="lbl"></span>';
+    lever.querySelector('.lbl').textContent = d.breaker || 'hall';
+    lever.addEventListener('click', () => {
+      const now = Date.now();
+      for (const id in all.racks) settle(all.racks[id], now);
+      all.breaker = !all.breaker;
+      if (!all.breaker) all.breakerAt = now;
+      for (const id in all.racks) settle(all.racks[id], now);
+      save();
+      showBreaker();
+      runBattery();
+    });
+    room.appendChild(lever);
+    showBreaker();
+  }
+  function showBreaker() {
+    lever.setAttribute('aria-pressed', String(all.breaker));
+    lever.classList.toggle('down', !all.breaker);
+  }
+  // Место — на стене слева от розетки ИБП; если стены не видно (узко) — на полу правее розетки.
+  function placeBreaker() {
+    if (!lever) return;
+    const { wall, s } = mainsAnchors(upsUnit());
+    lever.classList.toggle('floor', !wall);
+    lever.style.left = (wall ? s.x - 74 : s.x + 30) + 'px';
+    lever.style.top = (wall ? s.y - 46 : s.y - 22) + 'px';
   }
 
   // ---------- геометрия ----------
@@ -266,7 +354,7 @@
   function mainsAnchors(ups) {
     const R = room.getBoundingClientRect();
     const rk = document.getElementById('rack').getBoundingClientRect();
-    const u = ups.getBoundingClientRect();
+    const u = (ups || document.getElementById('rack')).getBoundingClientRect();
     const railW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rail-w')) || 34;
     const x0 = rk.left - R.left, b0 = rk.bottom - R.top;
     const wall = x0 > 110;
@@ -298,7 +386,8 @@
       }
       r.wall = wall;
     }
-    if (!state.mains || state.charge !== null) runBattery();
+    if (!fed(state) || state.charge !== null) runBattery();
+    placeBreaker();
     units().forEach((u) => {
       const k = keyOf(u);
       seen.add(k);
@@ -550,12 +639,11 @@
   document.addEventListener('htmx:afterSwap', again);
   document.addEventListener('htmx:afterSettle', again);
 
-  // Стойку подменили без перезагрузки (assets/js/aisle.js): у новой свой ИБП и свой свет в зале — их настоящие
-  // значения запомнить заново, юниты и кнопку сразу привести в состояние питания, пока стойку не показали.
+  // Стойку подменили без перезагрузки (assets/js/aisle.js): у новой своё питание (useRack), свой ИБП и свой свет в
+  // зале; юниты и кнопку сразу привести в состояние питания, пока стойку не показали.
   document.addEventListener('rack:swap', () => {
-    lcdReal = lightReal = null;
     if (!ensureDom()) return;
-    if (timer || !state.mains || state.charge !== null) runBattery();
+    if (!fed(state) || state.charge !== null) runBattery();
   });
   // Доехала: следующая раскладка качнёт кабели (app.js раскладывает стойку на это же событие).
   document.addEventListener('rack:landed', (e) => { kick = e.detail && !e.detail.quiet ? e.detail.dir || 0 : 0; });

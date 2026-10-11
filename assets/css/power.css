@@ -56,3 +56,25 @@
 .fallen-sticker.on-floor { pointer-events: auto; cursor: pointer; filter: brightness(.9) saturate(.9); }
 .fallen-sticker.on-floor:hover { filter: none; }
 .fallen-sticker.returning { transition: transform .7s cubic-bezier(.3, .7, .3, 1); }
+
+/* Щиток зала (power.js): серый ящик на стене рядом с розеткой, в нём рубильник. Вверх — в розетках ряда ток,
+   вниз — все ИБП на батареях. Кнопка настоящая: Tab, пробел, aria-pressed. */
+.breaker {
+  position: absolute; z-index: 6; display: grid; justify-items: center; gap: 4px;
+  padding: 0; border: 0; background: none; cursor: pointer; color: var(--dim);
+  font: 600 10px/1 var(--f-silk); letter-spacing: .14em; text-transform: uppercase;
+}
+.breaker .box {
+  position: relative; width: 34px; height: 46px; border-radius: 4px;
+  background: linear-gradient(#8f949b, #6d7279);
+  box-shadow: inset 0 0 0 1px #0006, inset 0 1px 0 #fff4, 0 3px 6px #0006;
+}
+.breaker .box::before { content: ""; position: absolute; left: 12px; right: 12px; top: 7px; bottom: 7px; border-radius: 3px; background: #1b1d21; }
+.breaker .handle {
+  position: absolute; left: 8px; right: 8px; top: 8px; height: 14px; border-radius: 3px;
+  background: #2bb35a; box-shadow: inset 0 -2px 0 #0004, 0 1px 2px #0008; transition: top .15s, background-color .15s;
+}
+.breaker.down .handle { top: 24px; background: #d6453d; }
+.breaker:hover .box { filter: brightness(1.08); }
+.breaker:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { .breaker .handle { transition: none; } }

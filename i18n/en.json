@@ -204,6 +204,8 @@
   "cable.uplink_r1": "uplink to r1 ↑",
   "cable.uplink": "to the internet ↑",
   "cable.power": "220 V",
+  "cable.breaker": "hall",
+  "cable.breaker_aria": "the hall's power switch: every rack's outlet",
 
   "blank.text": "← a second server goes here (saving up)",
 

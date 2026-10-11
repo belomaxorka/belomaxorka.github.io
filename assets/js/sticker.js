@@ -3,17 +3,23 @@
 //   - выдернули вилку юнита, на котором стикер (data-sticker = ключ питания юнита в power.js, srv — сервер);
 //   - погасла вся стойка: кнопка на ИБП или села батарея — тогда падают все стикеры, вразнобой.
 // Шнур ИБП из розетки стикеры не трогает: батарея ещё держит. Тап по упавшему — прилипает обратно.
-// Где лежат — только у посетителя (localStorage). Без JS стикеры просто наклеены.
+// Где лежат — только у посетителя (localStorage), у каждой стойки свои: стикер ИБП есть на каждой. Без JS стикеры
+// просто наклеены.
 (() => {
   const KEY = 'stickers-fallen';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
-  const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(fallen)); } catch {} };
-  const fallen = load();   // ключ → { fx: x центра как доля ширины комнаты, dy: разброс по высоте, rot }
-  if (fallen.mains) { fallen.ups = fallen.mains; delete fallen.mains; keep(); } // стикер ИБП раньше звался mains
+  const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(all)); } catch {} };
+  // Стойка → ключ стикера → { fx: x центра как доля ширины комнаты, dy: разброс по высоте, rot }.
+  let all = load();
+  // Раньше упавшие были общими на весь ряд (ключ → место): это была главная стойка.
+  if (Object.values(all).some((v) => v && 'fx' in v)) { all = { home: all }; if (all.home.mains) { all.home.ups = all.home.mains; delete all.home.mains; } keep(); }
   const live = new Map();  // ключ → { el, w, h, x, y, rot, flying }
 
   const room = () => document.getElementById('room');
+  // Упавшие стикеры этой стойки; shown — стойка, чьи стикеры сейчас в комнате (для подмены стойки).
+  let shown = '';
+  const fallen = () => { shown = room()?.dataset.rack || ''; return (all[shown] ||= {}); };
   const sticker = (key) => document.querySelector(`[data-sticker="${key}"]`);
   // Центр лежащего стикера: на фальшполе под стойкой.
   const floorY = (r, h, dy) => r.offsetHeight - 72 - h / 2 + dy;
@@ -32,9 +38,11 @@
     c.removeAttribute('data-sticker');
     c.className = 'fallen-sticker';
     c.setAttribute('aria-hidden', 'true');
-    for (const p of ['font', 'color', 'background', 'padding', 'lineHeight', 'letterSpacing', 'textAlign', 'boxShadow']) c.style[p] = cs[p];
-    c.style.width = src.offsetWidth + 'px';
-    c.style.height = src.offsetHeight + 'px';
+    for (const p of ['font', 'color', 'background', 'padding', 'lineHeight', 'letterSpacing', 'textAlign', 'boxShadow', 'boxSizing', 'whiteSpace']) c.style[p] = cs[p];
+    // Размер — точный, с дробью (offsetWidth округляет вниз, и последнее слово уезжало на новую строку и обрезалось),
+    // и с пикселем запаса: у копии другой шрифтовой контекст.
+    c.style.width = `calc(${cs.width} + 1px)`;
+    c.style.minHeight = cs.height;
     if (src.dataset.back) c.title = src.dataset.back;
     return c;
   }
@@ -45,7 +53,7 @@
     s.flying = false;
     s.el.classList.add('on-floor');
     const R = room();
-    fallen[key] = { fx: s.x / R.offsetWidth, dy: s.dy, rot: s.rot };
+    fallen()[key] = { fx: s.x / R.offsetWidth, dy: s.dy, rot: s.rot };
     keep();
   }
 
@@ -117,7 +125,7 @@
       s.el.remove();
       live.delete(key);
       src?.classList.remove('peeled');
-      delete fallen[key];
+      delete fallen()[key];
       keep();
     };
     if (!src || !R || reduce.matches || !src.offsetParent) return done();
@@ -136,12 +144,13 @@
   function restore() {
     const R = room();
     if (!R) return;
-    for (const key of Object.keys(fallen)) {
+    const here = fallen();
+    for (const key of Object.keys(here)) {
       const src = sticker(key);
       if (!src || !src.offsetParent) continue;
       let s = live.get(key);
       if (!s) {
-        s = { el: clone(src), w: src.offsetWidth, h: src.offsetHeight, flying: false, dy: fallen[key].dy || 0, rot: fallen[key].rot || 0 };
+        s = { el: clone(src), w: src.offsetWidth, h: src.offsetHeight, flying: false, dy: here[key].dy || 0, rot: here[key].rot || 0 };
         s.el.addEventListener('click', () => stickBack(key));
         s.el.classList.add('on-floor');
         R.appendChild(s.el);
@@ -149,7 +158,7 @@
         live.set(key, s);
       }
       if (s.flying) continue;
-      s.x = Math.min(Math.max(fallen[key].fx * R.offsetWidth, s.w / 2 + 4), R.offsetWidth - s.w / 2 - 4);
+      s.x = Math.min(Math.max(here[key].fx * R.offsetWidth, s.w / 2 + 4), R.offsetWidth - s.w / 2 - 4);
       s.y = floorY(R, s.h, s.dy);
       place(s);
     }
@@ -170,11 +179,11 @@
   // Стойку подменили без перезагрузки (assets/js/aisle.js): упавшие стикеры остались в старой комнате. Кто ещё
   // летел — ляжет на пол там, где был: вернёшься к той стойке — найдёшь его на полу.
   document.addEventListener('rack:swap', () => {
-    const w = room()?.offsetWidth || 1;
+    const w = room()?.offsetWidth || 1, old = (all[shown] ||= {});
     for (const [key, s] of live) {
       if (s.flying) {
         s.flying = false;
-        fallen[key] = { fx: s.x / w, dy: s.dy, rot: Math.max(-24, Math.min(24, s.rot % 360)) };
+        old[key] = { fx: s.x / w, dy: s.dy, rot: Math.max(-24, Math.min(24, s.rot % 360)) };
       }
       s.el.remove();
     }
