@@ -10,6 +10,8 @@
 {{- else if eq . "undo"}}<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>
 {{- else if eq . "redo"}}<path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>
 {{- else if eq . "full"}}<path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/>
+{{- else if eq . "prev"}}<path d="M14.5 5l-7 7 7 7"/>
+{{- else if eq . "next"}}<path d="M9.5 5l7 7-7 7"/>
 {{- else if eq . "close"}}<path d="M6 6l12 12"/><path d="M18 6L6 18"/>
 {{- else if eq . "play"}}<path class="solid" d="M7 5l12 7-12 7z"/>
 {{- else if eq . "stop"}}<path class="solid" d="M6 6h12v12H6z"/>

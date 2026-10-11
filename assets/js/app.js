@@ -95,12 +95,15 @@
       i: 0,
       n: 1,
       init() { this.n = this.$refs.slides.children.length; },
-      sync() { const s = this.$refs.slides; this.i = Math.round(s.scrollLeft / s.clientWidth); },
+      sync() { const s = this.$refs.slides; this.i = Math.round(s.scrollLeft / s.clientWidth); this.light(); },
       go(d) {
         const s = this.$refs.slides;
         this.i = (this.i + d + this.n) % this.n;
         s.scrollTo({ left: this.i * s.clientWidth, behavior: motion() ? 'smooth' : 'auto' });
+        this.light();
       },
+      // Лампы под фото: горит та, чьё фото на экране.
+      light() { [...(this.$refs.leds?.children || [])].forEach((l, k) => l.classList.toggle('off', k !== this.i)); },
     }));
 
     // Рисунки гостевой открываются крупно в <dialog>, листаются стрелками и клавишами.
@@ -233,7 +236,7 @@
   // Штекер, вставленный в гнездо: по его центру и почти во всё гнездо, по краю видна только рамка.
   function seat(svg, b, color) {
     plug(svg, b.cx, b.cy, color, Math.max(6, b.w - 5), Math.max(6, b.h - 4));
-    el('rect', { x: b.cx - b.w * .18, y: b.cy - b.h * .16, width: b.w * .36, height: b.h * .32, rx: 1, fill: 'rgba(0,0,0,.22)' }, svg);
+    el('rect', { x: b.cx - b.w * .18, y: b.cy - b.h * .16, width: b.w * .36, height: b.h * .32, rx: 1, fill: 'rgba(0,0,0,.22)', class: 'boot' }, svg);
   }
 
   // Сетевые карты юнитов и вертикальный органайзер: декор, который есть только с JS (как разъёмы питания).
@@ -254,13 +257,14 @@
       d.dataset.nonet = body.dataset.nonet || '';
     }));
     units.forEach((u, i) => {
+      // Класс — каждый раз: htmx, подменив юнит, на settle возвращает ему class из ответа, а карта уже вставлена.
+      u.classList.add('has-nic');
       if (u.querySelector(':scope > .nic')) return;
       const n = document.createElement('span');
       n.className = 'nic';
       n.setAttribute('aria-hidden', 'true');
       n.style.setProperty('--d', (i * 0.37 % 1.3).toFixed(2) + 's');
       n.innerHTML = '<i class="led"></i><i class="jack"></i>';
-      u.classList.add('has-nic');
       u.appendChild(n);
     });
     return units;
@@ -283,8 +287,12 @@
     const rk = box(rack), cap = box(rack.querySelector('.cap'));
     const port = (n) => tor.querySelector(`.tp[data-port="${n - 1}"]`);
     const used = new Set();
-    const lit = (n) => { used.add(n); port(n)?.classList.add('link'); };
+    // data-wire — номер провода, который держит линк: когда провода протягиваются (.draw), лампа загорается,
+    // только когда его вилка встала в порт.
+    const wireNo = () => svg.querySelectorAll(':scope > g').length - 1;
+    const lit = (n) => { used.add(n); const t = port(n); if (t) { t.classList.add('link'); t.dataset.wire = wireNo(); } };
     tor.querySelectorAll('.tp.link').forEach(t => t.classList.remove('link'));
+    rack.querySelectorAll('[data-wire]').forEach(t => delete t.dataset.wire);
 
     // Кольцо: гнёзда 1–4 патч-панели → порты 1, 3, 5, 7 (верхний ряд), сверху вниз через щётку. Если гнёзда
     // переносятся в два ряда (телефон), корды только из нижнего: из верхнего они легли бы поверх подписей.
@@ -354,13 +362,19 @@
       seat(svg, j, color);
       seat(svg, p, color);
       if (!u.classList.contains('off')) port(n).classList.add('link');
+      port(n).dataset.wire = nic.dataset.wire = wireNo();
     });
   }
 
-  // Стойка поменяла высоту (юнит погас и что-то в нём сдвинулось, пришло обновление htmx, открылся холст):
-  // провода перерисовать, иначе они останутся на старых местах. Новая стойка после перехода — свой наблюдатель.
+  // Стойка поменяла высоту (юнит погас и что-то в нём сдвинулось, пришло обновление htmx, открылся холст,
+  // выезжает ящик): провода перерисовать, иначе они останутся на старых местах. Наблюдатель срабатывает после
+  // раскладки и до отрисовки — провода (свои и силовые, power.js) встают на место в том же кадре, что и юниты,
+  // а не кадром позже: иначе при каждом изменении они дёргаются. Сами юниты (snap меняет высоты) — кадром позже,
+  // чтобы наблюдатель не зациклился. Новая стойка после перехода — свой наблюдатель.
   let watched = null;
-  const ro = window.ResizeObserver ? new ResizeObserver(() => later()) : null;
+  const ro = window.ResizeObserver ? new ResizeObserver(() => {
+    cables(); document.dispatchEvent(new Event('rack:laidout')); later();
+  }) : null;
   function layout() {
     const body = document.getElementById('rack-body');
     if (ro && body && body !== watched) { if (watched) ro.unobserve(watched); ro.observe(body); watched = body; }
@@ -384,12 +398,13 @@
     const ol = document.querySelector('#unit-syslog ol');
     if (ol && logScroll) ol.scrollTop = logScroll;
   });
-  document.addEventListener('rack:layout', later);
+  // Явная просьба (холст открыли, ящик выехал): сразу, до отрисовки этого кадра.
+  document.addEventListener('rack:layout', layout);
 
   // Стойку подменили без перезагрузки (assets/js/aisle.js): разложить сразу, пока её не показали.
   document.addEventListener('rack:swap', layout);
   // Доехала: провода по местам и протягиваются от гнезда к роутеру, вилки встают в порты (cables.css, .draw).
-  let drawn = 0;
+  let drawn = 0, lamps = [];
   document.addEventListener('rack:landed', (e) => {
     layout();
     const svg = document.getElementById('cables');
@@ -401,10 +416,17 @@
         n.querySelectorAll('path').forEach(p => p.setAttribute('pathLength', '100'));
       }
       n.style.setProperty('--i', Math.max(0, i));
-      if (n.tagName !== 'g') n.style.setProperty('--k', k++);
+      if (n.tagName !== 'g') n.style.setProperty('--k', n.classList.contains('boot') ? k - 1 : k++);
     }
     svg.classList.add('draw');
     clearTimeout(drawn);
     drawn = setTimeout(() => svg.classList.remove('draw'), 1600);
+    // Лампы портов и сетевых карт: гаснут и загораются по одной, когда вилка дальнего конца встала на место
+    // (cables.css: провод .55 с, вилка через 480 мс на .3 с, у каждого провода сдвиг 70 мс).
+    lamps.forEach(clearTimeout);
+    lamps = [...document.querySelectorAll('#rack [data-wire]')].map(t => {
+      t.classList.add('wait');
+      return setTimeout(() => t.classList.remove('wait'), Number(t.dataset.wire) * 70 + 700);
+    });
   });
 })();

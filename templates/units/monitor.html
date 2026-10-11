@@ -1,4 +1,6 @@
-{{/* Мониторинг = Gatus. Обновляется через htmx (/fragments/monitor). */}}
+{{/* Мониторинг = Gatus. Обновляется через htmx (/fragments/monitor). ЖК листает сводку (без JS видна первая):
+     сколько в строю и как быстро; аптайм за то, что помнит Gatus (до 50 проверок на сервис); последнее падение.
+     Время проверки — только когда Gatus давно не отвечал (.Stale), иначе там всегда «только что». */}}
 {{define "unit-monitor"}}
 <section class="u mon" style="--h:2" aria-label="{{t "mon.aria"}}" id="unit-monitor"
   hx-get="/fragments/monitor" hx-trigger="every 60s" hx-swap="outerHTML">
@@ -8,8 +10,12 @@
       {{range .Lamps}}<div class="cell" title="{{.Name}} · {{if eq .State "err"}}{{t "mon.notresponding"}}{{else}}{{.Ms}} {{t "ms"}}{{end}}"><i class="led {{.State}}"></i><span class="silk">{{.Label}}</span></div>
       {{end}}
     </div>
-    <div class="lcd">
-      {{if .OK}}{{t "mon.up" .Up .Total}}<br><span class="d">{{if .Down}}{{t "mon.down" (join .Down ", ")}}{{else if .Slow}}{{t "mon.slow" .Slow .SlowMs}}{{else}}{{t "mon.fast"}}{{end}}<br>gatus · {{ago .Checked}}</span>
+    <div class="lcd"{{if .OK}} x-data="cycle(4500)"{{end}}>
+      {{if .OK}}<ul class="msgs">
+        <li class="on">{{t "mon.up" .Up .Total}}<br><span class="d">{{if .Down}}{{t "mon.down" (join .Down ", ")}}{{else if .Slow}}{{t "mon.slow" .Slow .SlowMs}}{{else}}{{t "mon.fast" .AvgMs}}{{end}}{{if .Stale}}<br>gatus · {{ago .Checked}}{{end}}</span></li>
+        {{if .Span}}<li>{{t "mon.uptime_all" .Uptime}}<br><span class="d">{{t "mon.span" (uptime .Span)}}</span></li>{{end}}
+        <li>{{with .Last}}{{if .Open}}{{t "mon.out_now" .Label}}<br><span class="d">{{t "mon.out_for" (uptime .Dur)}}</span>{{else}}{{t "mon.last"}}<br><span class="d">{{.Label}} · {{uptime .Dur}}<br>{{ago .Down}}</span>{{end}}{{else}}{{t "mon.none"}}<br><span class="d">{{t "mon.none2"}}</span>{{end}}</li>
+      </ul>
       {{else}}{{t "mon.silent"}}<br><span class="d">{{t "mon.unavailable"}}</span>{{end}}
     </div>
   </div>

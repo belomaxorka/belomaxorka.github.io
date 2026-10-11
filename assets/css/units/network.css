@@ -48,6 +48,8 @@
 @media (max-width: 760px) { .tp:nth-child(n + 9) { display: none; } .tor-sfp { display: none; } }
 
 @keyframes port-act { 50% { opacity: .2; } }
+/* Провода ещё протягиваются (app.js, rack:landed): линка нет, пока вилка не встала в порт. */
+.tp.wait .led, .nic.wait .led { background: var(--led-off) !important; box-shadow: none !important; animation: none !important; }
 
 /* ---------- роутер ---------- */
 .rtr-ports { display: flex; align-items: center; gap: 6px; }

@@ -4,6 +4,8 @@
 .cell { display: grid; justify-items: center; gap: 5px; text-align: center; }
 .cell .silk { font-size: 8.5px; letter-spacing: .08em; overflow-wrap: anywhere; }
 .mon .lcd { flex: 0 1 210px; font-size: 20px; }
+/* Сводка листается: под самую длинную (три строки), чтобы юнит не прыгал и провода не съезжали. */
+.mon .lcd .msgs { min-height: 3lh; }
 @media (max-width: 760px) {
   .matrix { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

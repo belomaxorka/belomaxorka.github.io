@@ -325,6 +325,7 @@
     for (const r of ropes.values()) { r.floor = R.height - 34; r.right = R.width - 8; }
     if (kick) swing(kick);
     kick = 0;
+    draw();
     wake();
   }
 
@@ -537,8 +538,9 @@
     if (u) paint(u, r.key, true);
   }
 
-  // Раскладку стойки считает app.js; провода — после неё.
-  document.addEventListener('rack:laidout', () => requestAnimationFrame(relayout));
+  // Раскладку стойки считает app.js; провода — сразу после неё и в том же кадре (draw в relayout), иначе они
+  // догоняют юниты кадр-два спустя и дёргаются.
+  document.addEventListener('rack:laidout', relayout);
 
   // htmx подменил юнит (опрос раз в 30–60 с, отправка гостевой) или выдвинул ящик: новый элемент сразу в состоянии
   // питания — в той же задаче, что и вставка, так что между ними не пройдёт ни один клик и юнит не мигнёт светом.
