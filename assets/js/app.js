@@ -136,7 +136,9 @@
     // Ящик выдвинутого юнита: выезжает, ручке ставит aria-expanded, задвигается кнопкой, Esc или ручкой.
     Alpine.data('drawer', () => ({
       init() {
-        const el = this.$el, name = el.id.replace('drawer-', '');
+        // Сам ящик — корень компонента. В методах this.$el — элемент, на котором сработало событие (кнопка
+        // «задвинуть»), поэтому ящик запоминаем здесь.
+        const el = this.box = this.$root, name = el.id.replace('drawer-', '');
         this.handle = document.querySelector(`.pull[data-unit="${name}"]`);
         if (this.handle) this.handle.setAttribute('aria-expanded', 'true');
         el.addEventListener('drawer:shut', () => this.shut());
@@ -146,7 +148,7 @@
         el.addEventListener('transitionend', layout, { once: true });
       },
       shut() {
-        const el = this.$el;
+        const el = this.box;
         const done = () => {
           if (!el.isConnected) return;
           const empty = document.createElement('div');
