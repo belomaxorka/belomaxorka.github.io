@@ -69,6 +69,118 @@ people:
   - title: inteko
     image: inteko.gif
     link: https://boylifein.eu
+  # Дальше — кнопки участников otoring (webring.otomir23.me) в порядке списка кольца.
+  - title: senkodev
+    image: senkodev.gif
+    link: https://senko.dev/
+  - title: jsopn
+    image: jsopn.gif
+    link: https://jsopn.com/
+  - title: veselcraft
+    image: veselcraft.gif
+    link: https://veselcraft.cc/
+  - title: mrcatmann
+    image: mrcatmann.gif
+    link: https://mrcatmann.space/
+  - title: gapp
+    image: gapp.gif
+    link: https://gapp.pw/
+  - title: Timofei302
+    image: timofei302.png
+    link: https://timofei302.su/
+  - title: entitybtw
+    image: entitybtw.gif
+    link: https://entitybtw.ru/
+  - title: Delta Gamma
+    image: delta-gamma.png
+    link: https://delta-gamma.org/
+  - title: c1oudy
+    image: c1oudy.png
+    link: https://c1oudy.otlegacy.com/
+  - title: okiscape
+    image: okiscape.gif
+    link: https://oki.vodka/
+  - title: ndiuky
+    image: ndiuky.png
+    link: https://ndiuky.top/
+  - title: tarakoshka
+    image: tarakoshka.gif
+    link: https://tarakoshka.tech/
+  - title: GOOSLIME
+    image: gooslime.gif
+    link: https://gooslime.neocities.org/
+  - title: iZOtOpeV69
+    image: izotopev69.png
+    link: https://izotopev69.neocities.org/
+  - title: ALEX VOID
+    image: alex-void.png
+    link: https://voidsite.ru/
+  - title: Daniel Myslivets
+    image: myslivets.png
+    link: https://myslivets.com/
+  - title: edwardcode
+    image: edwardcode.png
+    link: https://edwardcode.net/
+  - title: nichind
+    image: nichind.gif
+    link: https://nichind.dev/
+  - title: catboybinary
+    image: catboybinary.gif
+    link: https://catboy.page/
+  - title: neverlane
+    image: neverlane.png
+    link: https://neverlane.one/
+  - title: fennec.support
+    image: fennec-support.gif
+    link: https://fennec.support/
+  - title: baechka
+    image: baechka.gif
+    link: https://baechka.me/
+  - title: synzr
+    image: synzr.gif
+    link: https://synzr.tw/
+  - title: iamtsunde.re
+    image: iamtsundere.gif
+    link: https://iamtsunde.re/
+  - title: glutesha
+    image: glutesha.png
+    link: https://glutesha.me/
+  - title: milk_cool
+    image: milkcool.gif
+    link: https://milkcool.ru/
+  - title: cerf.wtf
+    image: cerf.gif
+    link: https://cerf.wtf/
+  - title: cheat_r
+    image: cheat-r.gif
+    link: https://killmyself.ru/
+  - title: subarashi
+    image: subarashi.png
+    link: https://subarashi.cyou/
+  - title: rawr.rs
+    image: rawr-rs.png
+    link: https://rawr.rs/
+  - title: eversiege
+    image: eversiege.png
+    link: https://eversiege.network/
+  - title: keetsta
+    image: keetsta.png
+    link: https://keetsta.me/
+  - title: besh.lol
+    image: besh-lol.png
+    link: https://besh.lol/
+  - title: manule228
+    image: manule228.gif
+    link: https://manule228.lh1.in/
+  - title: Saw Ramsson
+    image: sawrams.webp
+    link: https://sawrams.ru/
+  - title: wico.lol
+    image: wico.gif
+    link: https://wico.lol/
+  - title: inuhepott
+    image: inuhepott.webp
+    link: https://inu.vesperlinux.org/
 
 sites:
   - title: stupid.fish
@@ -80,6 +192,27 @@ sites:
   - title: Powered by Docker
     image: docker.png
     link: https://www.docker.com/
+  - title: Powered by Debian
+    image: debian.gif
+    link: https://www.debian.org/
+  - title: Arch Linux
+    image: archlinux.gif
+    link: https://archlinux.org/
+  - title: Made on GNU/Linux
+    image: gnu-linux.gif
+    link: https://www.gnu.org/
+  - title: Powered by NixOS
+    image: nixos.png
+    link: https://nixos.org/
+  - title: Powered by FreeBSD
+    image: freebsd.gif
+    link: https://www.freebsd.org/
+  - title: Powered by OpenBSD
+    image: openbsd.gif
+    link: https://www.openbsd.org/
+  - title: "plan 9 rocks!"
+    image: plan9.png
+    link: https://9p.io/plan9/
   - title: "sharing is caring, seed your torrents"
     image: seed-your-torrents.gif
     link: https://www.qbittorrent.org
@@ -91,6 +224,9 @@ sites:
   - title: archive.org
     image: archive-org.png
     link: https://archive.org/
+  - title: The Mod Archive
+    image: modarchive.gif
+    link: https://modarchive.org/
   - title: Firefox
     image: firefox.gif
     link: https://www.mozilla.org/firefox/
@@ -112,21 +248,35 @@ sites:
   - title: foobar2000
     image: foobar2000.png
     link: https://www.foobar2000.org/
+  - title: FFmpeg
+    image: ffmpeg.gif
+    link: https://ffmpeg.org/
   - title: Bun
     image: bun.gif
     link: https://bun.com/
   - title: Astro
     image: astro.png
     link: https://astro.build/
+  - title: "♥ PHP"
+    image: php.png
+    link: https://www.php.net/
+  - title: Made with Neovim
+    image: neovim.png
+    link: https://neovim.io/
   - title: Prism Launcher
     image: prism.gif
     link: https://prismlauncher.org/
   - title: OpenCore
     image: opencore.gif
     link: https://dortania.github.io/OpenCore-Install-Guide/
+  - title: Made on a Mac
+    image: made-on-mac.gif
   - title: Steam
     image: steam.gif
     link: https://store.steampowered.com/
+  - title: Half-Life
+    image: half-life.gif
+    link: https://www.half-life.com/
   - title: "Get Quake Now!"
     image: quake.gif
   - title: "Emulate NOW!"
@@ -137,6 +287,10 @@ sites:
   - title: DEFECTIVE by design
     image: defective.webp
     link: https://www.defectivebydesign.org/
+  - title: "best viewed 800 x 600"
+    image: 800x600.gif
+  - title: "this page is best viewed with: a computer and a monitor"
+    image: best-viewed-computer.gif
   - title: best viewed with any browser
     image: any-browser.png
   - title: "лучше всего в любом браузере"
@@ -149,12 +303,30 @@ sites:
     image: css-passion.gif
   - title: graphic design is my passion
     image: design-passion.png
+  - title: "<I><DREAM><IN><HTML>"
+    image: html-dream.gif
+  - title: UNDER CONSTRUCTION
+    image: under-construction.webp
+  - title: WEB 1.0
+    image: web1.png
+  - title: Web 1.0 Hosting
+    image: web1-hosting.gif
+    link: https://web1.0hosting.net/
   - title: MAKE A NEOCITIES
     image: neocities.gif
     link: https://neocities.org/
+  - title: "#Octothorpes"
+    image: octothorpes.gif
+    link: https://octothorp.es/
   - title: eightyeightthirty.one
     image: 88x31.png
     link: https://eightyeightthirty.one/
+  - title: "Tom Scott: I AM IN AN 88x31 WEB BADGE"
+    image: tom-scott.png
+    link: https://web.archive.org/web/20201103102411/https://www.youtube.com/watch?v=g_EnsU88o6M&feature=youtu.be
+  - title: Serial Experiments Lain
+    image: lain.gif
+    link: https://laingame.net/
   - title: webmoney
     image: webmoney.gif
   - title: Friendly
