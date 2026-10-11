@@ -210,14 +210,14 @@
     if (!body) return;
     const U = parseFloat(getComputedStyle(body).getPropertyValue('--U'));
     const units = [...body.querySelectorAll(':scope > .u, :scope > .drawer.open')];
-    let total = 0;
-    units.forEach(u => {
-      u.style.minHeight = '';
-      const n = Math.ceil((u.offsetHeight - 1) / U);
-      if (!u.classList.contains('closing')) u.style.minHeight = n * U + 'px';
-      total += n;
-    });
+    // Clear, measure, then write: a write between two measurements would make each one lay the page out again.
+    units.forEach(u => { u.style.minHeight = ''; });
+    const heights = units.map(u => Math.ceil((u.offsetHeight - 1) / U));
+    units.forEach((u, i) => { if (!u.classList.contains('closing')) u.style.minHeight = heights[i] * U + 'px'; });
+    const total = heights.reduce((a, n) => a + n, 0);
     body.querySelectorAll('.rail').forEach(rail => {
+      if (rail.dataset.n === `${total}x${U}`) return;
+      rail.dataset.n = `${total}x${U}`;
       rail.querySelectorAll('.n').forEach(n => n.remove());
       for (let i = 0; i < total; i++) {
         const n = document.createElement('span');
@@ -312,13 +312,25 @@
   // the cable is drawn). The ones that can be pulled also have their jack, their tail (the curve from the plug to where
   // the organiser holds the cord, where a pulled one hangs from) and where to grab them.
   function cables() {
-    const svg = document.getElementById('cables');
+    const live = document.getElementById('cables');
     const room = document.getElementById('room');
-    const cords = [];
-    if (!svg || !room) return cords;
-    svg.replaceChildren();
+    if (!live || !room) return [];
+    // Drawn into a copy off the page and put in place once at the end: every change to the live SVG between two
+    // reads of the geometry made the browser recompute the whole room's style (its :has() rules) for the next read,
+    // and while a drawer slides this runs every frame.
+    const svg = live.cloneNode(false);
     const R = room.getBoundingClientRect();
-    svg.setAttribute('viewBox', `0 0 ${R.width} ${R.height}`);
+    const cords = route(svg, R);
+    live.setAttribute('viewBox', `0 0 ${R.width} ${R.height}`);
+    live.replaceChildren(...svg.childNodes);
+    // The ports' lamps are net.js's: lit for the cords with a link.
+    document.querySelectorAll('#rack-body > .tor .tp.link').forEach(t => t.classList.remove('link'));
+    return cords;
+  }
+
+  // route draws the rack's cables into svg (R: the room's box) and returns the cords; it only reads the page.
+  function route(svg, R) {
+    const cords = [];
     const box = (node) => {
       const b = node.getBoundingClientRect();
       return { x: b.left - R.left, y: b.top - R.top, r: b.right - R.left, b: b.bottom - R.top, cx: b.left - R.left + b.width / 2, cy: b.top - R.top + b.height / 2, w: b.width, h: b.height };
@@ -330,8 +342,6 @@
     const port = (n) => tor.querySelector(`.tp[data-port="${n - 1}"]`);
     const used = new Set();
     const wireNo = () => svg.querySelectorAll(':scope > g').length - 1;
-    // The ports' lamps are net.js's: lit for the cords with a link.
-    tor.querySelectorAll('.tp.link').forEach(t => t.classList.remove('link'));
 
     // net.js knows which cords of this rack are pulled: it draws their tail and plug; here the rest of the way to the
     // switch (or to the trays).

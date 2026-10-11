@@ -440,9 +440,9 @@
     lever.classList.toggle('down', !all.breaker);
   }
   // Its place: on the wall left of the UPS's socket; when the wall is out of sight (narrow), on the floor right of the socket.
-  function placeBreaker() {
+  function placeBreaker(at = mainsAnchors(upsUnit())) {
     if (!lever) return;
-    const { wall, s } = mainsAnchors(upsUnit());
+    const { wall, s } = at;
     lever.classList.toggle('floor', !wall);
     lever.style.left = (wall ? s.x - 74 : s.x + 30) + 'px';
     lever.style.top = (wall ? s.y - 46 : s.y - 22) + 'px';
@@ -488,13 +488,17 @@
 
   function relayout() {
     if (!ensureDom()) return;
+    // Every measurement first, then the writes: a write between two of them would make the browser recompute the
+    // room's style (its :has() rules) for the next one, and while a drawer slides this runs every frame.
     const R = room.getBoundingClientRect();
+    const ups = upsUnit();
+    const mainsAt = mainsAnchors(ups);
+    const placed = units().map((u) => [u, anchors(u)]);
     svg.setAttribute('viewBox', `0 0 ${R.width} ${R.height}`);
     const seen = new Set();
-    const ups = upsUnit();
     if (ups) {
       seen.add('mains');
-      const { wall, s, o } = mainsAnchors(ups);
+      const { wall, s, o } = mainsAt;
       let r = ropes.get('mains');
       if (!r) {
         const len = dist(s, o) * 1.25 + 40;
@@ -510,11 +514,10 @@
       r.wall = wall;
     }
     if (!fed(state) || state.charge !== null) runBattery();
-    placeBreaker();
-    units().forEach((u) => {
+    placeBreaker(mainsAt);
+    placed.forEach(([u, { s, o }]) => {
       const k = keyOf(u);
       seen.add(k);
-      const { s, o } = anchors(u);
       let r = ropes.get(k);
       if (!r) {
         const len = Math.max(60, dist(s, o) * 1.6);
