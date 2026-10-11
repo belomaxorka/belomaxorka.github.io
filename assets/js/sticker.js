@@ -1,13 +1,16 @@
-// Стикеры отклеиваются. Выдернули вилку юнита, на котором наклеен стикер (data-sticker = ключ питания из
-// power.js: srv — сервер, mains — шнур ИБП), — стикер отгибается от угла и падает на пол серверной, как
-// листок: раскачивается, наклоняется по ходу движения, медленно планирует. Тап по упавшему — прилипает
-// обратно. Где лежат — только у посетителя (localStorage). Без JS стикеры просто наклеены.
+// Стикеры отклеиваются и падают на пол серверной, как листок: раскачиваются, наклоняются по ходу движения,
+// медленно планируют. Когда:
+//   - выдернули вилку юнита, на котором стикер (data-sticker = ключ питания юнита в power.js, srv — сервер);
+//   - погасла вся стойка: кнопка на ИБП или села батарея — тогда падают все стикеры, вразнобой.
+// Шнур ИБП из розетки стикеры не трогает: батарея ещё держит. Тап по упавшему — прилипает обратно.
+// Где лежат — только у посетителя (localStorage). Без JS стикеры просто наклеены.
 (() => {
   const KEY = 'stickers-fallen';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
   const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(fallen)); } catch {} };
   const fallen = load();   // ключ → { fx: x центра как доля ширины комнаты, dy: разброс по высоте, rot }
+  if (fallen.mains) { fallen.ups = fallen.mains; delete fallen.mains; keep(); } // стикер ИБП раньше звался mains
   const live = new Map();  // ключ → { el, w, h, x, y, rot, flying }
 
   const room = () => document.getElementById('room');
@@ -152,7 +155,15 @@
     }
   }
 
-  // power.js сообщает о каждой выдернутой и воткнутой вилке.
+  // Все сразу, но не хором: каждый со своей задержкой.
+  function fallAll() {
+    [...document.querySelectorAll('[data-sticker]')].forEach((el, i) => {
+      setTimeout(() => fall(el.dataset.sticker), reduce.matches ? 0 : i * 280 + Math.random() * 250);
+    });
+  }
+
+  // power.js сообщает о каждой выдернутой вилке и о том, что погасла вся стойка.
   document.addEventListener('rack:plug', (e) => { if (!e.detail.on) fall(e.detail.key); });
+  document.addEventListener('rack:power', (e) => { if (!e.detail.on) fallAll(); });
   document.addEventListener('rack:laidout', () => requestAnimationFrame(restore));
 })();

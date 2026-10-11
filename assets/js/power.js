@@ -79,9 +79,13 @@
     return true;
   }
 
+  // Вся стойка погасла или загорелась: кнопкой на ИБП или села батарея (why: button, battery).
+  // Шнур ИБП из розетки сам ничего не гасит — батарея ещё держит.
+  function dark(on, why) { document.dispatchEvent(new CustomEvent('rack:power', { detail: { on, why } })); }
+
   // ---------- ИБП на батарее ----------
   // Пока шнур в розетке и батарея полна, ЖК ИБП показывает настоящие данные (NUT). Иначе — своя симуляция.
-  let lcdReal = null, lightReal = null, alarmReal = false, timer = 0, wasDead = false;
+  let lcdReal = null, lightReal = null, alarmReal = false, timer = 0, wasDead = null; // null: ещё не смотрели
   const upsUnit = () => document.querySelector('#rack-body > .ups');
   const upsLcd = () => document.querySelector('#rack-body > .ups .lcd');
   const full = () => { const v = parseInt(upsLcd()?.dataset.charge, 10); return v > 0 ? v : 100; };
@@ -128,9 +132,11 @@
     sub.textContent = state.mains ? d.mains : (d.left || '%d').replace('%d', Math.ceil(state.charge / 100 * DRAIN));
     text.append(sub);
     lcd.replaceChildren(bars, text);
-    // Батарея села — всё гаснет; вернулось питание — юниты загружаются сверху вниз.
+    // Батарея села — всё гаснет; вернулось питание — юниты загружаются сверху вниз. Сообщить только о смене
+    // на глазах у посетителя, не о состоянии, с которым страница открылась.
     if (isDead !== wasDead) {
       units().forEach((u, i) => setTimeout(() => paint(u, keyOf(u), true), isDead || reduce.matches ? 0 : 110 * i));
+      if (wasDead !== null && !state.off) dark(!isDead, 'battery');
       wasDead = isDead;
     }
   }
@@ -157,10 +163,12 @@
     b.hidden = false;
     b.setAttribute('aria-pressed', String(!state.off));
     b.addEventListener('click', () => {
+      const wasOn = !state.off && !dead();
       state.off = !state.off;
       save();
       b.setAttribute('aria-pressed', String(!state.off));
       document.getElementById('rack').classList.toggle('powered-off', state.off || dead());
+      if (wasOn !== (!state.off && !dead())) dark(!wasOn, 'button');
       if (state.off) {
         units().forEach((u) => paint(u, keyOf(u), false));
         return;
