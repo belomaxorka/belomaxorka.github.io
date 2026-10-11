@@ -73,7 +73,7 @@
     // Связь вернулась — кто пропустил обновление, обновляется, пустые ящики загружаются.
     for (const u of missed) {
       if (!u.isConnected) missed.delete(u);
-      else if (!offline(u)) { missed.delete(u); refresh(u); }
+      else if (!offline(u) && !document.hidden) { missed.delete(u); refresh(u); }
     }
     body.querySelectorAll(':scope > .drawer.open[data-later]').forEach((d) => {
       const u = d.previousElementSibling;
@@ -101,10 +101,19 @@
     const t = e.target;
     if (!(t instanceof Element)) return;
     const handle = t.closest('.pull[data-unit]'), u = handle ? handle.parentElement : t;
-    if (u.parentElement?.id !== 'rack-body' || !offline(u)) return;
+    if (u.parentElement?.id !== 'rack-body') return;
+    // A tab in the background polls nothing: nobody sees the units there. Shown again, each unit that skipped a
+    // poll catches up once (visibilitychange below).
+    if (!handle && document.hidden && u.hasAttribute('hx-trigger')) {
+      e.preventDefault();
+      missed.add(u);
+      return;
+    }
+    if (!offline(u)) return;
     e.preventDefault();
     if (handle) empty(handle); else missed.add(u);
   });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); });
   // Без связи гостевая не отправляет: форма офлайн-юнита (KVM) не уходит — ни через htmx, ни обычным POST (перехват
   // раньше всех, на фазе захвата). Над формой — почему, как на экранах: у KVM нет линка или коммутатор обесточен —
   // «связь потеряна», нет интернета у стойки или роутер обесточен — «нет интернета». Написанное и нарисованное
