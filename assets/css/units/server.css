@@ -41,3 +41,15 @@
   .album { width: 128px; }
   .gal-leds { gap: 5px; }
 }
+
+/* Любимые цвета на ЖК: квадраты в рамке цвета экрана (чёрный на тёмном ЖК иначе не виден). */
+.lcd .swatches { display: inline-flex; gap: 6px; vertical-align: middle; padding-top: 3px; }
+.lcd .swatches i { width: 18px; height: 18px; border-radius: 2px; background: var(--c); box-shadow: 0 0 0 1.5px var(--lcd), 0 0 6px color-mix(in srgb, var(--lcd) 40%, transparent); }
+/* Наклейка инвентарного номера: белая этикетка со штрихкодом, на ней отпечаток ключа PGP. */
+.asset-tag {
+  display: grid; gap: 3px; justify-self: start; max-width: 100%; padding: 5px 8px 6px; border-radius: 2px;
+  background: #f2efe4; color: #15161a; box-shadow: inset 0 0 0 1px #0002, 0 1px 0 #0005; transform: rotate(-.4deg);
+}
+.asset-tag .silk { color: #4b4d52; font-size: 8.5px; }
+.asset-tag code { font: 500 11px/1.3 ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing: .02em; max-width: 25ch; user-select: all; }
+.asset-tag .bars { height: 12px; background: repeating-linear-gradient(90deg, #15161a 0 1px, transparent 1px 3px, #15161a 3px 5px, transparent 5px 6px, #15161a 6px 7px, transparent 7px 9px); }

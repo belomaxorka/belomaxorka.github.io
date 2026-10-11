@@ -42,9 +42,13 @@
           <li>infp-t<br><span class="d">{{t "lcd.mbti2"}}</span></li>
           <li>{{t "lcd.lab"}}<br><span class="d">{{t "lcd.lab2"}}</span></li>
           <li>{{t "lcd.go"}}<br><span class="d">{{t "lcd.go2"}}</span></li>
+          {{with .Data.colors}}<li>{{t "lcd.colors"}}<br><span class="swatches">{{range .}}<i style="--c: {{.}}" title="{{.}}"></i>{{end}}</span></li>{{end}}
+          {{with .Data.pgp}}<li>{{t "lcd.pgp"}}<br><span class="d">{{slice . (len (slice . 9))}}</span></li>{{end}}
         </ul>
       </div>
       <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led blink"></i>hdd</span><span><i class="led blink s3 net"></i>net</span></div>
+      {{/* Наклейка инвентарного номера: полный отпечаток PGP, печатный — виден и без питания, выделяется. */}}
+      {{with .Data.pgp}}<div class="asset-tag"><span class="silk">pgp · {{t "me.pgp"}}</span><code translate="no">{{.}}</code><i class="bars" aria-hidden="true"></i></div>{{end}}
     </div>
   </div>
   <div class="note" data-sticker="srv" data-back="{{t "note.back"}}">{{th "note.dont"}}</div>
