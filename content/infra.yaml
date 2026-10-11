@@ -23,3 +23,7 @@ memes:
     alt:
       en: "a LEGO IT set: a sysadmin minifigure, a server rack, patch cords and a keyboard"
       ru: "набор LEGO IT: сисадмин, серверная стойка, патч-корды и клавиатура"
+  - file: oncall.jpg
+    alt:
+      en: "a grey wolf fursuiter types on a laptop at an office desk: the admin on call"
+      ru: "серый волк в фурсьюте печатает на ноутбуке за офисным столом: дежурный админ"
