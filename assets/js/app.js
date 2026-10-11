@@ -351,7 +351,15 @@
     });
   }
 
-  function layout() { wire(); snap(); cables(); document.dispatchEvent(new Event('rack:laidout')); }
+  // Стойка поменяла высоту (юнит погас и что-то в нём сдвинулось, пришло обновление htmx, открылся холст):
+  // провода перерисовать, иначе они останутся на старых местах. Новая стойка после перехода — свой наблюдатель.
+  let watched = null;
+  const ro = window.ResizeObserver ? new ResizeObserver(() => later()) : null;
+  function layout() {
+    const body = document.getElementById('rack-body');
+    if (ro && body && body !== watched) { if (watched) ro.unobserve(watched); ro.observe(body); watched = body; }
+    wire(); snap(); cables(); document.dispatchEvent(new Event('rack:laidout'));
+  }
 
   let pending = 0;
   const later = () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(layout); };

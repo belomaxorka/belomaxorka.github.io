@@ -90,11 +90,15 @@
 .rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nolink] * { visibility: hidden; }
 .rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) .lcd[data-nonet],
 .rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) .lcd[data-nolink] { color: transparent; text-shadow: none; }
-.rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet]::after {
-  content: attr(data-nonet); position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
-  font: 400 20px/1 var(--f-lcd); letter-spacing: .06em; color: var(--lcd); text-shadow: 0 0 6px color-mix(in srgb, var(--lcd) 45%, transparent);
+/* Надпись — поверх экрана, а не в потоке: иначе экран вырастает, юниты ниже съезжают, а провода остаются. */
+.rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet]::after,
+.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nolink]::after {
+  content: attr(data-nonet); position: absolute; inset: 0; display: grid; place-content: center; text-align: center;
+  white-space: pre-line; font: 400 20px/1.05 var(--f-lcd); letter-spacing: .06em;
+  color: var(--lcd); text-shadow: 0 0 6px color-mix(in srgb, var(--lcd) 45%, transparent);
 }
-.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nolink]::after { content: attr(data-nolink); }
+/* Без коммутатора нет ни связи, ни интернета: две строки. */
+.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nolink]::after { content: attr(data-nolink) "\A" attr(data-nonet); }
 .rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) .screen[data-nolink]::after,
 .rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) .screen[data-nonet]::after { color: #9fb09c; text-shadow: none; }
 @media (prefers-reduced-motion: no-preference) {
