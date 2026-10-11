@@ -222,6 +222,8 @@
   // клики проходят насквозь. Силовые кабели рисует power.js.
   const NS = 'http://www.w3.org/2000/svg';
   const RING = ['#e0b93a', '#3a7bd5', '#e0b93a', '#e0b93a'];
+  const GUEST = '#c9ccd2';  // корды гостей онлайн (assets/js/live.js)
+  let drawnGuests = 0;      // сколько их уже нарисовано: новый корд протягивается, остальные просто на месте
   const DATA = '#3a7bd5', MGMT = '#9b6bd6', LAN = '#3daa63', FIBER = '#e8c21a', UPFIBER = '#2bb3c0';
   // Юниты с сетевой картой: как питаемые в power.js, плюс контейнеры /lab (data-power).
   const NETWORKED = ['mgmt', 'srv', 'media', 'mon', 'log', 'sw', 'kvm', 'pve'];
@@ -359,6 +361,29 @@
       // Корды кольца не выдёргиваются: их гнёзда — ссылки кольца, а оно работает всегда.
       cords.push({ key: 'ring' + (i + 1), type: 'ring', port: t, wire: wireNo() });
     });
+
+    // Гости онлайн (assets/js/live.js ставит data-guests на <html>): по корду на каждого другого гостя — из свободного
+    // гнезда патч-панели (5, 6, …) в свободный порт верхнего ряда коммутатора (9, 11, …), сколько влезет на этой ширине
+    // (на телефоне свободных гнёзд не видно — и гостей нет). Пришёл новый — его корд протягивается (.fresh).
+    const guests = +document.documentElement.dataset.guests || 0;
+    const spare = [...rack.querySelectorAll('.patch .pp-free .jack')].filter(j => j.offsetParent).map(box);
+    let g = 0;
+    for (let n = 9; g < guests && g < spare.length; g++, n += 2) {
+      const t = port(n);
+      if (!t || !t.offsetParent) break;
+      const j = spare[g], p = box(t.querySelector('.jack'));
+      cable(svg, `M${j.cx} ${j.b - 3} C${j.cx} ${j.b + 26}, ${p.cx} ${p.y - 30}, ${p.cx} ${p.y + 3}`, GUEST, 2.6);
+      if (g >= drawnGuests && motion()) {
+        const fresh = svg.lastElementChild;
+        fresh.classList.add('fresh');
+        fresh.querySelectorAll('path').forEach(q => q.setAttribute('pathLength', '100'));
+      }
+      seat(svg, j, GUEST);
+      seat(svg, p, GUEST);
+      used.add(n);
+      cords.push({ key: 'guest' + (g + 1), type: 'guest', port: t, wire: wireNo() });
+    }
+    drawnGuests = g;
 
     // Оптика (WAN роутера или аплинк коммутатора): вверх в щётку под коммутатором, по ней влево в вертикальный
     // органайзер, по нему через ввод в крыше вверх, к лоткам. Данные идут слева, питание — справа.

@@ -34,3 +34,12 @@
   .tp.link.probe .led, .nic.probe .led { animation: probe-blink .14s steps(2, jump-none) infinite !important; }
 }
 @keyframes probe-blink { 50% { opacity: .15; } }
+
+/* Живые гости (live.js): корд нового гостя протягивается от патч-панели к коммутатору; пакет — светлая точка,
+   бегущая по кордам (визит, запись в гостевой). */
+@media (prefers-reduced-motion: no-preference) {
+  .cables > g.fresh path { stroke-dasharray: 100 100; animation: cable-draw .7s cubic-bezier(.45, 0, .2, 1) both; }
+}
+.cables.packets { z-index: 5; }
+.cables .packet { fill: #fff; filter: drop-shadow(0 0 4px #8ecbff) drop-shadow(0 0 2px #fff); transition: opacity .3s; }
+.cables .packet.done { opacity: 0; }
