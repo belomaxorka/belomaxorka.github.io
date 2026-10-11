@@ -192,7 +192,10 @@
   "btn.people": "люди",
   "btn.sites": "сайты и всякое",
 
-  "cable.uplink": "в интернет →",
+  "net.router": "роутер · файрвол",
+  "net.router_lcd": "wan в порядке · dns по tls",
+  "cable.uplink_r1": "аплинк к r1 ↑",
+  "cable.uplink": "в интернет ↑",
   "cable.power": "220 В",
 
   "blank.text": "← тут будет второй сервер (копим)",

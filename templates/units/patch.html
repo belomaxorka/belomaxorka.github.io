@@ -1,13 +1,16 @@
-{{/* Патч-панель = вебринг otoring. Обычные ссылки, работают без JS; имена соседей из /{slug}/data. */}}
+{{/* Патч-панель = вебринг otoring. Гнёзда 1–4 — кольцо: обычные ссылки с лентами-подписями, работают без JS,
+     имена соседей из /{slug}/data. Остальные гнёзда — декор (номера рисует CSS-счётчик). Короткие патч-корды
+     от гнёзд 1–4 идут через щёточный органайзер в коммутатор (assets/js/app.js, cables). */}}
 {{define "unit-patch"}}
 <nav class="u patch" style="--h:1" aria-label="{{t "ring.aria"}}">
   <div class="face">
-    <span class="silk">{{t "ring.panel"}}</span>
-    <div class="ports">
-      <a class="port" href="{{.PrevURL}}" rel="prev"><i class="jack"></i><span class="tape">← {{or .PrevName (t "ring.prev")}}</span></a>
-      <a class="port" href="{{.Home}}"><i class="jack"></i><span class="tape b">otoring</span>{{if .Joined}}<i class="led"></i>{{else}}<i class="led warn" title="{{t "ring.pending"}}"></i>{{end}}</a>
-      <a class="port" href="{{.RandomURL}}"><i class="jack"></i><span class="tape">{{t "ring.random"}}</span></a>
-      <a class="port" href="{{.NextURL}}" rel="next"><i class="jack"></i><span class="tape">{{or .NextName (t "ring.next")}} →</span></a>
+    <div class="pp-id"><span class="brand">cat6 · 24p</span><span class="silk">{{t "ring.panel"}}</span></div>
+    <div class="pp-ports">
+      <a class="port ring" href="{{.PrevURL}}" rel="prev"><span class="pn"></span><i class="jack"></i><span class="tape">← {{or .PrevName (t "ring.prev")}}</span></a>
+      <a class="port ring" href="{{.Home}}"><span class="pn"></span><i class="jack"></i><span class="tape b">otoring</span>{{if .Joined}}<i class="led"></i>{{else}}<i class="led warn" title="{{t "ring.pending"}}"></i>{{end}}</a>
+      <a class="port ring" href="{{.RandomURL}}"><span class="pn"></span><i class="jack"></i><span class="tape">{{t "ring.random"}}</span></a>
+      <a class="port ring" href="{{.NextURL}}" rel="next"><span class="pn"></span><i class="jack"></i><span class="tape">{{or .NextName (t "ring.next")}} →</span></a>
+      <span class="pp-free" aria-hidden="true">{{range seq 12}}<span class="port"><span class="pn"></span><i class="jack"></i></span>{{end}}</span>
     </div>
   </div>
 </nav>

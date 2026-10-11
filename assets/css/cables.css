@@ -18,3 +18,4 @@
 }
 @keyframes cable-draw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
 @keyframes cable-plug { from { opacity: 0; transform: scale(.3); } }
+.cables .lbl.small { font-size: 16px; }

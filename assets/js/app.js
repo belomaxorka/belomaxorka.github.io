@@ -195,12 +195,16 @@
   }
 
   // ---------- провода ----------
-  // Патч-корды от вебринга к роутеру, свитч к роутеру по правой рейке, аплинк из роутера наружу.
-  // Всё в одном SVG поверх комнаты, клики проходят насквозь.
+  // Структурированная разводка (вариант B): короткие патч-корды из гнёзд кольца на патч-панели через щёточный
+  // органайзер в верхний ряд коммутатора; сетевая карта каждого юнита — в левый вертикальный органайзер и по нему
+  // вверх, к нижнему ряду коммутатора; роутер (на главной) — в коммутатор, его WAN жёлтой оптикой через крышу
+  // «в интернет»; на остальных стойках из SFP коммутатора оптика уходит к R1. Всё в одном SVG поверх комнаты,
+  // клики проходят насквозь. Силовые кабели рисует power.js.
   const NS = 'http://www.w3.org/2000/svg';
-  const PATCH = ['#3a7bd5', '#e0b93a', '#d9534f', '#3daa63'];
-  const SWITCH = '#9b6bd6';
-  const UPLINK = '#5b6068';
+  const RING = ['#e0b93a', '#3a7bd5', '#e0b93a', '#e0b93a'];
+  const DATA = '#3a7bd5', MGMT = '#9b6bd6', LAN = '#3daa63', FIBER = '#e8c21a', UPFIBER = '#2bb3c0';
+  // Юниты с сетевой картой: как питаемые в power.js, плюс контейнеры /lab (data-power).
+  const NETWORKED = ['mgmt', 'srv', 'media', 'mon', 'disks', 'log', 'sw', 'kvm', 'pve'];
 
   function el(name, attrs, parent) {
     const node = document.createElementNS(NS, name);
@@ -221,6 +225,30 @@
     el('rect', { x: x - w / 2, y: y - h / 2, width: w, height: h, rx: 2, fill: color, stroke: 'rgba(0,0,0,.45)' }, svg);
   }
 
+  // Сетевые карты юнитов и вертикальный органайзер: декор, который есть только с JS (как разъёмы питания).
+  function wire() {
+    const body = document.getElementById('rack-body');
+    if (!body || !body.querySelector(':scope > .tor')) return [];
+    if (!body.querySelector(':scope > .vm')) {
+      const vm = document.createElement('div');
+      vm.className = 'vm';
+      vm.setAttribute('aria-hidden', 'true');
+      body.prepend(vm);
+    }
+    const units = [...body.querySelectorAll(':scope > .u')].filter(u => u.dataset.power || NETWORKED.some(k => u.classList.contains(k)));
+    units.forEach((u, i) => {
+      if (u.querySelector(':scope > .nic')) return;
+      const n = document.createElement('span');
+      n.className = 'nic';
+      n.setAttribute('aria-hidden', 'true');
+      n.style.setProperty('--d', (i * 0.37 % 1.3).toFixed(2) + 's');
+      n.innerHTML = '<i class="led"></i><i class="jack"></i>';
+      u.classList.add('has-nic');
+      u.appendChild(n);
+    });
+    return units;
+  }
+
   function cables() {
     const svg = document.getElementById('cables');
     const room = document.getElementById('room');
@@ -230,53 +258,89 @@
     svg.setAttribute('viewBox', `0 0 ${R.width} ${R.height}`);
     const box = (node) => {
       const b = node.getBoundingClientRect();
-      return { x: b.left - R.left, y: b.top - R.top, r: b.right - R.left, b: b.bottom - R.top, cx: b.left - R.left + b.width / 2, cy: b.top - R.top + b.height / 2 };
+      return { x: b.left - R.left, y: b.top - R.top, r: b.right - R.left, b: b.bottom - R.top, cx: b.left - R.left + b.width / 2, cy: b.top - R.top + b.height / 2, w: b.width, h: b.height };
     };
     const rack = document.getElementById('rack');
-    if (!rack) return;
-    const rk = box(rack);
-    const cap = box(rack.querySelector('.cap'));
-    const railW = parseFloat(getComputedStyle(root).getPropertyValue('--rail-w')) || 34;
-    const ports = {};
-    rack.querySelectorAll('.rport').forEach(p => { ports[p.dataset.port] = box(p); });
+    const tor = rack?.querySelector('#rack-body > .tor');
+    if (!rack || !tor) return;
+    const rk = box(rack), cap = box(rack.querySelector('.cap'));
+    const port = (n) => tor.querySelector(`.tp[data-port="${n - 1}"]`);
+    const used = new Set();
+    const lit = (n) => { used.add(n); port(n)?.classList.add('link'); };
+    tor.querySelectorAll('.tp.link').forEach(t => t.classList.remove('link'));
 
-    // Патч-корды: только первый ряд гнёзд, иначе провода лягут поверх соседних портов.
-    const jacks = [...rack.querySelectorAll('.patch .jack')].map(box);
-    const top = Math.min(...jacks.map(j => j.y));
+    // Кольцо: гнёзда 1–4 патч-панели → порты 1, 3, 5, 7 (верхний ряд), сверху вниз через щётку. Если гнёзда
+    // переносятся в два ряда (телефон), корды только из нижнего: из верхнего они легли бы поверх подписей.
+    const jacks = [...rack.querySelectorAll('.patch .ring .jack')].map(box);
+    const lowest = Math.max(...jacks.map(j => j.y));
     jacks.forEach((j, i) => {
-      const p = ports[String(i + 1)];
-      if (!p || Math.abs(j.y - top) > 4) return;
-      cable(svg, `M${j.cx} ${j.y + 3} C${j.cx} ${j.y - 40}, ${p.cx} ${p.cy + 54}, ${p.cx} ${p.cy}`, PATCH[i], 4);
-      plug(svg, j.cx, j.y + 6, PATCH[i]);
-      plug(svg, p.cx, p.cy, PATCH[i], 8, 9);
+      const n = 1 + i * 2, t = port(n);
+      if (!t || !t.offsetParent || lowest - j.y > 4) return;
+      const p = box(t.querySelector('.jack'));
+      cable(svg, `M${j.cx} ${j.b - 3} C${j.cx} ${j.b + 26}, ${p.cx} ${p.y - 30}, ${p.cx} ${p.y + 3}`, RING[i], 3.5);
+      plug(svg, j.cx, j.b - 5, RING[i], 9, 10);
+      plug(svg, p.cx, p.y + 5, RING[i], 8, 9);
+      lit(n);
     });
 
-    // Свитч: из крайнего гнезда вниз, к правой рейке, по ней вверх и в роутер.
-    const sw = [...rack.querySelectorAll('.sw .jack')].map(box).pop();
-    const p5 = ports['5'];
-    if (sw && p5) {
-      const x = rk.r - railW / 2;
-      cable(svg, `M${sw.cx} ${sw.b - 4} C${sw.cx} ${sw.b + 22}, ${x} ${sw.b + 22}, ${x} ${sw.b - 12} L${x} ${cap.b + 12} C${x} ${cap.y - 24}, ${p5.cx} ${p5.cy + 40}, ${p5.cx} ${p5.cy}`, SWITCH, 4);
-      plug(svg, sw.cx, sw.b - 6, SWITCH);
-      plug(svg, p5.cx, p5.cy, SWITCH, 8, 9);
-    }
+    // Оптика (WAN роутера или аплинк коммутатора): вверх в щётку под коммутатором, по ней влево в вертикальный
+    // органайзер, по нему через ввод в крыше вверх, к лоткам. Данные идут слева, питание — справа.
+    const vmEl = rack.querySelector('#rack-body > .vm');
+    const lowEl = tor.nextElementSibling?.classList.contains('brush') ? tor.nextElementSibling : null;
+    const fiber = (from, color, label) => {
+      if (!vmEl || !vmEl.offsetParent) return;
+      const v = box(vmEl), x = v.x + v.w - 4;
+      const y = lowEl ? box(lowEl).cy + 6 : from.y - 14;
+      cable(svg, `M${from.cx} ${from.y + 2} C${from.cx} ${y + 8}, ${from.cx - 10} ${y}, ${from.cx - 24} ${y} L${x + 14} ${y} C${x + 4} ${y}, ${x} ${y - 6}, ${x} ${y - 18} L${x} ${cap.y + 4} C${x} ${cap.y - 16}, ${x} ${cap.y - 30}, ${x} -10`, color, 3);
+      plug(svg, from.cx, from.y + 4, color, 8, 9);
+      if (label) el('text', { x: x + 10, y: cap.y - 5, class: 'lbl small' }, svg).textContent = label;
+    };
 
-    // Аплинк: из WAN-порта наружу. Есть место справа — уходит за край комнаты, нет — вверх.
-    const wan = ports.wan;
-    if (wan) {
-      if (R.width - rk.r > 130) {
-        cable(svg, `M${wan.cx} ${wan.cy} C${wan.cx} ${wan.cy - 30}, ${rk.r - 20} ${wan.cy - 24}, ${R.width + 10} ${wan.cy - 8}`, UPLINK, 5);
-        el('text', { x: rk.r + 16, y: wan.cy - 26, class: 'lbl' }, svg).textContent = svg.dataset.uplink || '';
-      } else {
-        cable(svg, `M${wan.cx} ${wan.cy} C${wan.cx} ${wan.cy - 24}, ${wan.cx - 30} ${wan.cy - 20}, ${wan.cx - 30} -10`, UPLINK, 5);
+    // Роутер: LAN → последний порт нижнего ряда, WAN — оптикой к лоткам.
+    const rtr = rack.querySelector('#rack-body > .rtr');
+    let next = 2; // нижний ряд: чётные порты по порядку
+    const bottom = () => { while (next <= 24 && (used.has(next) || !port(next)?.offsetParent)) next += 2; return next <= 24 ? next : 0; };
+    if (rtr) {
+      const lan = box(rtr.querySelector('[data-port="lan"]'));
+      const last = [...tor.querySelectorAll('.tp')].filter(t => t.offsetParent && Number(t.dataset.port) % 2 === 1).pop();
+      if (last) {
+        const p = box(last.querySelector('.jack')), n = Number(last.dataset.port) + 1;
+        cable(svg, `M${lan.cx} ${lan.y + 2} C${lan.cx} ${lan.y - 22}, ${p.cx} ${p.b + 22}, ${p.cx} ${p.b - 3}`, LAN, 3.5);
+        plug(svg, lan.cx, lan.y + 4, LAN, 8, 9);
+        plug(svg, p.cx, p.b - 5, LAN, 8, 9);
+        lit(n);
       }
-      plug(svg, wan.cx, wan.cy, UPLINK, 8, 9);
+      fiber(box(rtr.querySelector('[data-port="wan"]')), FIBER, svg.dataset.uplink);
+    } else {
+      // Остальные стойки: оптика из SFP коммутатора к R1.
+      const sfp = tor.querySelector('.sfp');
+      if (sfp && sfp.offsetParent) fiber(box(sfp), UPFIBER, svg.dataset.uplinkR1);
     }
 
-    // Шнур ИБП в розетку рисует assets/js/power.js: его можно выдернуть.
+    // Сетевые карты: влево в вертикальный органайзер, по нему вверх до коммутатора, под ним вправо к порту.
+    const vm = rack.querySelector('#rack-body > .vm');
+    if (!vm || !vm.offsetParent) return;
+    const lane = box(vm);
+    const nics = [...rack.querySelectorAll('#rack-body > .u > .nic')];
+    // Поперёк — через щёточный органайзер под коммутатором (если он есть), иначе прямо под коммутатором.
+    const low = tor.nextElementSibling?.classList.contains('brush') ? box(tor.nextElementSibling) : null;
+    const yBase = low ? low.cy - 6 : box(tor).b + 6;
+    nics.forEach((nic, i) => {
+      const n = bottom();
+      if (!n) return;
+      used.add(n);
+      const u = nic.parentElement, j = box(nic.querySelector('.jack')), p = box(port(n).querySelector('.jack'));
+      const x = lane.x + 4 + (i % 6) * 2.2;              // жилы в органайзере рядом, не одна поверх другой
+      const y = yBase + (i % 6) * 2.4;                   // и поперёк — своими полосками
+      const color = u.classList.contains('mgmt') ? MGMT : DATA;
+      cable(svg, `M${j.x + 2} ${j.cy} C${j.x - 14} ${j.cy}, ${x + 10} ${j.cy}, ${x} ${j.cy - 12} L${x} ${y + 10} C${x} ${y}, ${x + 6} ${y}, ${x + 14} ${y} L${p.cx - 12} ${y} C${p.cx - 3} ${y}, ${p.cx} ${y - 4}, ${p.cx} ${p.b - 3}`, color, 2.4);
+      plug(svg, j.x + 4, j.cy, color, 7, 8);
+      plug(svg, p.cx, p.b - 5, color, 7, 8);
+      if (!u.classList.contains('off')) port(n).classList.add('link');
+    });
   }
 
-  function layout() { snap(); cables(); document.dispatchEvent(new Event('rack:laidout')); }
+  function layout() { wire(); snap(); cables(); document.dispatchEvent(new Event('rack:laidout')); }
 
   let pending = 0;
   const later = () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(layout); };

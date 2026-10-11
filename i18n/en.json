@@ -192,7 +192,10 @@
   "btn.people": "people",
   "btn.sites": "sites and things",
 
-  "cable.uplink": "to the internet →",
+  "net.router": "router · firewall",
+  "net.router_lcd": "wan ok · dns over tls",
+  "cable.uplink_r1": "uplink to r1 ↑",
+  "cable.uplink": "to the internet ↑",
   "cable.power": "220 V",
 
   "blank.text": "← a second server goes here (saving up)",

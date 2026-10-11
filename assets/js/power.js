@@ -8,7 +8,7 @@
 (() => {
   // Юниты с питанием; патч-панель и заглушки с наклейками пассивные, как в жизни. Несколько одинаковых юнитов
   // (контейнеры в /lab) различаются атрибутом data-power.
-  const POWERED = ['mgmt', 'srv', 'media', 'mon', 'disks', 'log', 'sw', 'kvm', 'pve'];
+  const POWERED = ['tor', 'rtr', 'mgmt', 'srv', 'media', 'mon', 'disks', 'log', 'sw', 'kvm', 'pve'];
   const NS = 'http://www.w3.org/2000/svg';
   const COLOR = '#4a4f57';
   const PLUG = '#1b1d20';

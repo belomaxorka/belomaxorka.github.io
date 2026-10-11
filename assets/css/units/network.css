@@ -1,0 +1,81 @@
+/* Сетевой отсек (templates/units/patch.html, network.html): патч-панель на 24 гнезда, щёточный органайзер,
+   коммутатор, роутер; сетевые карты юнитов и вертикальный органайзер слева (их добавляет assets/js/app.js). */
+
+/* ---------- патч-панель ---------- */
+.patch .face { gap: 14px; }
+.pp-id { display: grid; gap: 3px; flex: none; }
+.brand { font: 700 12px/1 var(--f-silk); letter-spacing: .1em; color: var(--ink); white-space: nowrap; }
+.pp-ports { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; counter-reset: port; min-width: 0; }
+.pp-ports .port { position: relative; padding-top: 9px; }
+.pp-ports .pn { position: absolute; top: -1px; left: 0; width: 22px; text-align: center; font: 500 8px/1 var(--f-silk); color: var(--num); }
+.pp-ports .pn::before { counter-increment: port; content: counter(port); }
+.pp-free { display: contents; }
+.pp-free .port { gap: 0; }
+/* Свободные гнёзда — тесной гребёнкой, как на настоящей панели; лишние уходят, когда места нет. */
+.pp-free .port + .port { margin-left: -8px; }
+@media (max-width: 1100px) { .pp-free .port:nth-child(n + 9) { display: none; } }
+@media (max-width: 860px) { .pp-free { display: none; } }
+
+/* ---------- щёточный органайзер ---------- */
+.brush .face { gap: 14px; padding-block: 6px; }
+.brush .slot {
+  flex: 1; height: 18px; border-radius: 9px; background: var(--hole); position: relative; overflow: hidden;
+  box-shadow: inset 0 0 0 2px #000, 0 1px 0 var(--panel-hi);
+}
+.brush .slot::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #2a2d32 0 1px, transparent 1px 3px); }
+.brush .slot::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #000; }
+
+/* ---------- коммутатор ---------- */
+.tor .face, .rtr .face { gap: 16px; }
+.tor-id { display: grid; gap: 3px; flex: none; }
+.tor-ports { display: grid; grid-auto-flow: column; grid-template-rows: repeat(2, auto); grid-auto-columns: 22px; gap: 3px 5px; }
+.tp { display: grid; justify-items: center; gap: 1px; }
+.tp:nth-child(even) { grid-template-rows: auto auto; }
+.tp:nth-child(even) .led { order: 2; }
+.tp .led { width: 4px; height: 4px; background: var(--led-off); box-shadow: none; }
+.tp.link .led { background: var(--led-ok); box-shadow: 0 0 5px var(--led-ok); }
+.tp .jack { width: 20px; height: 15px; }
+.tp .jack::after { left: 3px; right: 3px; top: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .tp.link:nth-child(3n) .led { animation: port-act 1.1s steps(2, jump-none) infinite; }
+  .tp.link:nth-child(3n + 1) .led { animation: port-act .6s steps(2, jump-none) infinite .2s; }
+  .tp.link:nth-child(5n + 2) .led { animation: port-act 1.9s steps(2, jump-none) infinite .5s; }
+}
+.tor-sfp { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.sfp { width: 26px; height: 14px; border-radius: 1px; background: var(--hole); box-shadow: inset 0 0 0 2px #2a2d32; flex: none; }
+.tor .leds, .rtr .leds { display: grid; gap: 4px; }
+@media (max-width: 1100px) { .tp:nth-child(n + 17) { display: none; } }
+@media (max-width: 760px) { .tp:nth-child(n + 9) { display: none; } .tor-sfp { display: none; } }
+
+@keyframes port-act { 50% { opacity: .2; } }
+
+/* ---------- роутер ---------- */
+.rtr-ports { display: flex; align-items: center; gap: 6px; }
+.rtr-ports .jack.wan { box-shadow: inset 0 0 0 2px #000, 0 0 0 1.5px var(--tape-b); margin-right: 8px; }
+.rtr .lcd { margin-left: auto; font-size: 17px; padding: 4px 10px; white-space: nowrap; }
+@media (max-width: 760px) { .rtr .lcd { display: none; } .rtr .leds { margin-left: auto; } }
+
+/* ---------- сетевые карты и вертикальный органайзер (app.js) ---------- */
+.nic {
+  position: absolute; z-index: 2; left: calc(var(--ear) + 4px); top: 50%; transform: translateY(-50%);
+  display: grid; justify-items: center; gap: 2px;
+}
+.nic .jack { width: 16px; height: 13px; }
+.nic .jack::after { left: 3px; right: 3px; top: 2px; }
+.nic .led { width: 4px; height: 4px; }
+@media (prefers-reduced-motion: no-preference) { .nic .led { animation: port-act 1.3s steps(2, jump-none) infinite var(--d, 0s); } }
+.u.has-nic .face { padding-left: 38px; }
+/* Обесточен юнит или коммутатор — линка нет. */
+.u.off .nic .led, .rack:has(.u.tor.off) .nic .led { background: var(--led-off); box-shadow: none; animation: none; }
+.rack:has(.u.tor.off) .tp .led { background: var(--led-off); box-shadow: none; animation: none; }
+.vm {
+  position: absolute; z-index: 0; top: 0; bottom: 0; left: -22px; width: 20px; border-radius: 3px;
+  background: repeating-linear-gradient(#1a1c20 0 9px, #0d0e10 9px 22px);
+  box-shadow: inset 0 0 0 1px #000, inset 3px 0 0 #222529;
+}
+@media (max-width: 760px) { .vm, .nic { display: none; } .u.has-nic .face { padding-left: 14px; } }
+/* Телефон: коммутатор и роутер в один юнит — без ламп и лишних подписей. */
+@media (max-width: 560px) {
+  .tor .leds, .rtr .leds, .rtr-ports .silk, .tor-id .silk { display: none; }
+  .tor .face, .rtr .face { gap: 10px; }
+}

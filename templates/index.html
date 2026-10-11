@@ -7,7 +7,6 @@
   {{template "hall" .}}
   {{template "aisle" .}}
   <div class="rack{{if .Rack.Stub}} stub{{end}}" id="rack">
-    {{if .Rack.Router}}{{template "router" .}}{{end}}
     <div class="cap"><span>{{t "rack.cap"}} · r{{.Rack.N}} · {{t (print "rack." .Rack.ID)}}</span></div>
     <div class="body" id="rack-body">
       <div class="rail l" aria-hidden="true"></div>
@@ -20,7 +19,7 @@
     </div>
     <div class="foot"></div>
   </div>
-  <svg class="cables" id="cables" aria-hidden="true" data-uplink="{{t "cable.uplink"}}" data-power="{{t "cable.power"}}"></svg>
+  <svg class="cables" id="cables" aria-hidden="true" data-uplink="{{t "cable.uplink"}}" data-uplink-r1="{{t "cable.uplink_r1"}}" data-power="{{t "cable.power"}}"></svg>
 </div>
 {{end}}
 
