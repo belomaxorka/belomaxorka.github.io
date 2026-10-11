@@ -1,0 +1,12 @@
+# Keys of the management unit and the light version's menu, in this order.
+#   name — i18n key of the caption; link — address; needs: cv — a live key only while the site has /cv.pdf,
+#   a dimmed one ("soon") otherwise.
+- name: nav.blog
+  link: https://blog.belomaxorka.dev
+- name: nav.cv
+  link: /cv.pdf
+  needs: cv
+- name: nav.status
+  link: https://status.belomaxorka.dev
+- name: nav.git
+  link: https://git.belomaxorka.dev/belomaxorka

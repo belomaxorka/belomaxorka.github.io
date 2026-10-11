@@ -5,6 +5,8 @@
 #   person   — кто я для поисковиков и превью ссылок (<head> главной: og profile, JSON-LD Person), на странице
 #              не видно. Ссылки на мои профили (sameAs) — порты свитча с me: true в contacts.yaml.
 birthday: "2006-05-25"
+# mbti — the personality type: a tape under the name (mbti: true in tapes) and a frame of the server's LCD.
+mbti: infp-t
 person:
   first: {en: Roman, ru: Роман}
   last: {en: Kelesidis, ru: Келесидис}
@@ -18,7 +20,7 @@ pgp: "139C 8E4A 1A2B 4823 3AE3 EFEF D815 7C4D 4C4C 6DB4"
 tapes:
   - - {t: me.pronouns}
     - {age: true}
-    - {text: infp-t, color: r}
+    - {mbti: true, color: r}
     - {text: ru · en}
   - - {t: me.fullstack, color: b}
     - {text: laravel, color: b}

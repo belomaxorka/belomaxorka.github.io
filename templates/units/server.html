@@ -28,7 +28,7 @@
       {{$p := .}}
       {{range .Data.tapes}}
       <div class="tapes">
-        {{range .}}<span class="tape{{with .color}} {{.}}{{end}}">{{if .age}}{{$p.Age}} {{tn "years" $p.Age}}{{else if .t}}{{t .t}}{{else}}{{.text}}{{end}}</span>
+        {{range .}}<span class="tape{{with .color}} {{.}}{{end}}">{{if .age}}{{$p.Age}} {{tn "years" $p.Age}}{{else if .mbti}}{{$p.Data.mbti}}{{else if .t}}{{t .t}}{{else}}{{.text}}{{end}}</span>
         {{end}}
       </div>
       {{end}}
@@ -39,10 +39,10 @@
         <ul class="msgs">
           <li class="on">{{t "lcd.hello"}}<br><span class="d">{{if eq .DaysToBirthday 0}}{{t "lcd.bday_today"}}{{else if gt .DaysToBirthday 0}}{{t "lcd.bday_in" .DaysToBirthday (tn "days" .DaysToBirthday)}}{{else}}{{t "lcd.web2"}}{{end}}</span></li>
           <li>{{t "lcd.web"}}<br><span class="d">{{t "lcd.web2"}}</span></li>
-          <li>infp-t<br><span class="d">{{t "lcd.mbti2"}}</span></li>
+          {{with .Data.mbti}}<li>{{.}}<br><span class="d">{{t "lcd.mbti2"}}</span></li>{{end}}
           <li>{{t "lcd.lab"}}<br><span class="d">{{t "lcd.lab2"}}</span></li>
           {{with .Data.colors}}<li>{{t "lcd.colors"}}<br><span class="swatches">{{range .}}<i style="--c: {{.}}" title="{{.}}"></i>{{end}}</span></li>{{end}}
-          {{with .Data.pgp}}<li>{{t "lcd.pgp"}}<br><span class="d">{{slice . (len (slice . 9))}}</span></li>{{end}}
+          {{with .Data.pgp}}<li>{{t "lcd.pgp"}}<br><span class="d">{{tail 9 .}}</span></li>{{end}}
         </ul>
       </div>
       <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led hdd"></i>hdd</span><span><i class="led net"></i>net</span><span><i class="led uid"></i><button class="uid" type="button" hidden aria-pressed="false" title="{{t "srv.uid"}}">uid</button></span><button class="rst" type="button" hidden aria-label="{{t "srv.reset"}}" title="{{t "srv.reset"}}"></button></div>

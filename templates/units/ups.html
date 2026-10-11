@@ -17,7 +17,7 @@
       {{with .Visits}}{{if .OK}}<span>{{t "visits" (num .Views) (num .Visitors)}}</span>{{end}}{{end}}
       <span>{{t "ups.updated" (date .Updated)}} · {{t "ups.sources"}} <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev"{{ext "https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev"}}>{{t "ups.site"}}</a>, <a href="https://git.belomaxorka.dev/belomaxorka/site-api"{{ext "https://git.belomaxorka.dev/belomaxorka/site-api"}}>site-api</a></span>
     </div>
-    <span class="silk">{{t "ups.label"}} · cbr 1000 va</span>
+    <span class="silk">{{t "ups.label"}}{{with .Content.hardware.ups.label}} · {{.}}{{end}}</span>
   </div>
 </footer>
 {{end}}

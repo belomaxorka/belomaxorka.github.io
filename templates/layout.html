@@ -3,7 +3,7 @@
      отпечатков), настоящую не узнать, а стойка задумана тёмной. Выбор кнопкой (assets/js/theme.js) главнее. */}}
 {{define "layout" -}}
 <!doctype html>
-<html lang="{{lang}}"{{if .Onion}} data-theme="dark"{{end}} data-lcd="cover" data-racks="{{range .Racks}}{{.Path}} {{end}}">
+<html lang="{{lang}}"{{if .Onion}} data-theme="dark"{{end}} data-lcd="cover" data-tz="{{.TZ}}" data-racks="{{range .Racks}}{{.Path}} {{end}}">
 <head>
 <meta charset="utf-8">
 {{/* Что странице можно загружать: только свои скрипты (Alpine — CSP-сборка, без eval; никаких inline-скриптов

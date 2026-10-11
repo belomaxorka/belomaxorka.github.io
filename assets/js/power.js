@@ -326,7 +326,6 @@
       try { localStorage.setItem('hall-light', mode); } catch {}
       showSwitch();
       if (fed(state) && !dead()) room.dataset.light = lamp();
-      document.dispatchEvent(new CustomEvent('rack:click', { detail: { what: 'switch' } }));
     });
     sw.dataset.labels = d.lightModes || 'auto,day,evening,night';
     sw.dataset.aria = d.lightAria || 'hall lights';

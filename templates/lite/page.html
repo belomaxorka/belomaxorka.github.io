@@ -25,7 +25,7 @@
 <tr>
 <td valign="bottom"><font face="Verdana,Arial,Helvetica,sans-serif" size="5" color="#ffffff"><b>belomaxorka.dev</b></font><br>
 <font face="Verdana,Arial,Helvetica,sans-serif" size="2" color="#9aa0a8">{{t "rack.cap"}} · r{{.Rack.N}} · {{t (print "rack." .Rack.ID)}}{{if ne .Rack.Path "/"}} — {{t (print "rack." .Rack.ID ".sub")}}{{end}}</font></td>
-<td align="right" valign="bottom">{{template "f"}}{{if eq .Lang "en"}}<b>[en]</b>{{else}}[<a href="?lang=en">en</a>]{{end}} {{if eq .Lang "ru"}}<b>[ru]</b>{{else}}[<a href="?lang=ru">ru</a>]{{end}}{{template "f-end"}}</td>
+<td align="right" valign="bottom">{{template "f"}}{{range $i, $l := langs}}{{if $i}} {{end}}{{if eq $l $.Lang}}<b>[{{$l}}]</b>{{else}}[<a href="?lang={{$l}}">{{$l}}</a>]{{end}}{{end}}{{template "f-end"}}</td>
 </tr>
 <tr>
 <td colspan="2">{{template "f"}}{{t "lite.racks"}}: {{range .Racks}}{{if .Current}}<b>[r{{.N}} {{t (print "rack." .ID)}}]</b>{{else}}<a href="{{.Path}}">r{{.N}} {{t (print "rack." .ID)}}</a>{{end}} {{end}}{{template "f-end"}}</td>
@@ -90,7 +90,7 @@ best viewed with any browser</font></td></tr>
 
 {{/* Управление: разделы. */}}
 {{define "lite-mgmt"}}{{template "lite-silk" (t "nav.aria")}}
-{{template "f"}}[<a href="https://blog.belomaxorka.dev">{{t "nav.blog"}}</a>] {{if .HasCV}}[<a href="/cv.pdf">{{t "nav.cv"}}</a>] {{end}}[<a href="https://status.belomaxorka.dev">{{t "nav.status"}}</a>] [<a href="https://git.belomaxorka.dev/belomaxorka">{{t "nav.git"}}</a>]{{template "f-end"}}{{end}}
+{{template "f"}}{{$sep := ""}}{{range .Content.nav}}{{if or (not .needs) $.HasCV}}{{$sep}}[<a href="{{.link}}">{{t .name}}</a>]{{$sep = " "}}{{end}}{{end}}{{template "f-end"}}{{end}}
 
 {{/* Сервер с именем: фото, кто я, ЖК, отпечаток PGP. */}}
 {{define "lite-server"}}{{with .Profile}}
@@ -99,12 +99,12 @@ best viewed with any browser</font></td></tr>
 <td valign="top">
 <font face="Verdana,Arial,Helvetica,sans-serif" size="5" color="#ffffff"><b>belomaxorka</b></font><br>
 <font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8">{{t "me.sub"}}</font><br><br>
-{{$p := .}}{{range .Data.tapes}}{{range .}}{{$c := or .color ""}}<font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="{{if eq $c "r"}}#ff7a6b{{else if eq $c "b"}}#8ab4ff{{else}}#f1efe8{{end}}"><b>[{{if .age}}{{$p.Age}} {{tn "years" $p.Age}}{{else if .t}}{{t .t}}{{else}}{{.text}}{{end}}]</b></font> {{end}}<br>{{end}}
+{{$p := .}}{{range .Data.tapes}}{{range .}}{{$c := or .color ""}}<font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="{{if eq $c "r"}}#ff7a6b{{else if eq $c "b"}}#8ab4ff{{else}}#f1efe8{{end}}"><b>[{{if .age}}{{$p.Age}} {{tn "years" $p.Age}}{{else if .mbti}}{{$p.Data.mbti}}{{else if .t}}{{t .t}}{{else}}{{.text}}{{end}}]</b></font> {{end}}<br>{{end}}
 <br>{{template "f"}}{{th "me.intro"}}{{template "f-end"}}<br><br>
 {{template "lite-lcd-open"}}{{t "lcd.hello"}} · {{if eq .DaysToBirthday 0}}{{t "lcd.bday_today"}}{{else if gt .DaysToBirthday 0}}{{t "lcd.bday_in" .DaysToBirthday (tn "days" .DaysToBirthday)}}{{else}}{{t "lcd.web2"}}{{end}}<br>
 {{t "lcd.web"}} · {{t "lcd.web2"}}<br>
 {{t "lcd.lab"}} · {{t "lcd.lab2"}}<br>
-infp-t · {{t "lcd.mbti2"}}{{template "lite-lcd-close"}}
+{{with .Data.mbti}}{{.}} · {{t "lcd.mbti2"}}{{end}}{{template "lite-lcd-close"}}
 {{template "f"}}{{with .Data.colors}}<br>{{t "lcd.colors"}}: {{range .}}<font color="{{.}}">■</font> {{end}}{{end}}
 {{with .Data.pgp}}<br>pgp · {{t "me.pgp"}}:<br><tt>{{.}}</tt>{{end}}{{template "f-end"}}
 </td></tr></table>{{end}}{{end}}
@@ -153,14 +153,14 @@ infp-t · {{t "lcd.mbti2"}}{{template "lite-lcd-close"}}
 {{/* Кнопки 88x31: мои, люди, сайты. */}}
 {{define "lite-buttons"}}{{template "lite-silk" (print (t "btn.mine") " · " (t "btn.mine_hint"))}}
 {{range .Content.buttons.mine}}<img src="/88x31/{{.image}}" width="88" height="31" alt="{{.title}}" border="0"> {{end}}<br>
-<tt>&lt;a href="https://belomaxorka.dev"&gt;&lt;img src="https://belomaxorka.dev/88x31/rack.gif"&gt;&lt;/a&gt;</tt><br><br>
+{{range .Content.buttons.mine}}{{$code := printf "<a href=\"%s\"><img src=\"%s/88x31/%s\" width=\"88\" height=\"31\" alt=\"%s\"></a>" (or .link $.URL) $.URL .image (or .alt "belomaxorka")}}<tt>{{$code}}</tt><br>{{end}}<br>
 {{template "lite-silk" (t "btn.people")}}{{range .Content.buttons.people}}{{template "lite-b88" .}}{{end}}<br><br>
 {{template "lite-silk" (t "btn.sites")}}{{range .Content.buttons.sites}}{{template "lite-b88" .}}{{end}}{{end}}
 
 {{define "lite-b88"}}{{if .link}}<a href="{{.link}}">{{end}}<img src="{{asset (printf "88x31/%s" .image)}}" width="88" height="31" alt="{{.title}}" border="0">{{if .link}}</a>{{end}} {{end}}
 
 {{/* ИБП = подвал: заряд, нагрузка, счётчик, исходники. */}}
-{{define "lite-ups"}}{{template "lite-silk" (print (t "ups.label") " · cbr 1000 va")}}{{with .UPS}}
+{{define "lite-ups"}}{{template "lite-silk" (print (t "ups.label") " · " .Content.hardware.ups.label)}}{{with .UPS}}
 {{template "lite-lcd-open"}}{{if .OK}}{{if .OnBattery}}{{t "ups.battery"}}{{else}}{{t "ups.mains"}}{{end}} · {{.Charge}}% · {{t "ups.load" .Load}} · {{t "ups.runtime" .RuntimeMin}}{{else}}{{t "ups.online"}} · {{t "ups.nodata"}}{{end}}{{template "lite-lcd-close"}}{{end}}
 <br><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8"><b>hosted on <a href="https://infra.belomaxorka.dev/">belomaxorka infrastructure</a></b>{{with .Visits}}{{if .OK}} · {{t "visits" (num .Views) (num .Visitors)}}{{end}}{{end}}<br>
 {{t "ups.updated" (date .Updated)}} · {{t "ups.sources"}} <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev">{{t "ups.site"}}</a>, <a href="https://git.belomaxorka.dev/belomaxorka/site-api">site-api</a></font>{{end}}

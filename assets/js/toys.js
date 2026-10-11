@@ -67,7 +67,7 @@
   }
   function tick() {
     const c = shown?.querySelector('[data-clock]');
-    if (c) c.textContent = '[' + new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Barnaul' }) + ']';
+    if (c) c.textContent = '[' + new Date().toLocaleTimeString('en-GB', { timeZone: root.dataset.tz || undefined }) + ']'; // the site's zone (Page.TZ)
   }
   // Подписи значений — data-yes/data-no: атрибут data-on html/template принял бы за обработчик события (on…) и
   // экранировал бы как строку JS, с кавычками.
