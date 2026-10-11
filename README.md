@@ -23,8 +23,8 @@ works with JavaScript off. On top of that, [htmx](https://htmx.org) refreshes th
 
 - `templates/`: `layout.html` and `index.html`, one component per rack unit in `templates/units/`
 - `templates/infra.html`: [infra.belomaxorka.dev](https://infra.belomaxorka.dev), where «hosted on belomaxorka
-  infrastructure» leads: a joke page in the genre of stupid.fish technologies (a wall of homelab memes from
-  `content/infra.yaml` and `assets/infra/`) and a live fastfetch of the Proxmox host at `/fetch`; its 88x31 is
+  infrastructure» leads: a joke page in the genre of stupid.fish technologies (a wall of homelab memes: drop a
+  picture into `content/memes/` and push; site-api lists, shrinks and pages them, `/m/{id}` shows one) and a live fastfetch of the Proxmox host at `/fetch`; its 88x31 is
   `/88x31/infra.gif`
 - `assets/css/`: plain CSS split by component; `site.css` lists them as `@import`s and site-api joins
   them into one file

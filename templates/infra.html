@@ -1,6 +1,6 @@
 {{/* infra.belomaxorka.dev: «hosted on belomaxorka infrastructure» с сайта ведёт сюда. Мем в духе stupid.fish technologies
-     (teidesu): вместо их видео — коллаж мемов про «хостинг, который мы знаем» (список — content/infra.yaml, файлы —
-     assets/infra/), заголовок Times, ссылка на fastfetch, status // source, внизу плашка «минздрав предупреждает»
+     (teidesu): вместо их видео — стена мемов про «хостинг, который мы знаем» (картинки — content/memes/, подписи —
+     content/infra.yaml; site-api сам их находит, ужимает и листает по 24, /m/{id} — просмотр одной), заголовок Times, ссылка на fastfetch, status // source, внизу плашка «минздрав предупреждает»
      (belomaxorka ≈ беломор + махорка). site-api рендерит "/" шаблоном infra, "/fetch" — infra-fetch (живые данные
      хоста из Proxmox, ИБП из NUT, Gatus). Без скриптов. Кнопка 88x31 — /88x31/infra.gif (docs/tools/make_88x31.py). */}}
 {{define "infra" -}}
@@ -55,6 +55,7 @@
   .pic:nth-child(4n+3) { --r: -.7deg; } .pic:nth-child(4n) { --r: 1.8deg; }
   .pic:hover, .pic:focus-visible { transform: rotate(0) scale(1.03); position: relative; z-index: 1; }
   .pic img { display: block; height: 200px; width: auto; max-width: calc(100vw - 60px); object-fit: contain; }
+  .pages { display: flex; gap: 14px; justify-content: center; align-items: baseline; margin: 6px 0 4px; }
   @media (max-width: 540px) { .wall { gap: 16px 12px; } .pic img { height: 120px; } }
   @media (max-width: 540px) { h1 { font-size: 2rem; } }
   @media (prefers-reduced-motion: reduce) { .pic { transition: none; } }
@@ -62,11 +63,16 @@
 </head>
 <!-- 0LvRjtCx0L7Qv9GL0YLQvdC+0Lkg0LLQsNGA0LLQsNGA0LUg0L3QsCDQsdCw0LfQsNGA0LUg0L3QvtGBINC+0YLQvtGA0LLQsNC70Lg= -->
 <body>
+{{- with .Gallery}}{{if .Items}}
 <div class="wall" role="list" aria-label="{{t "infra.wall"}}">
-  {{- range .Content.infra.memes}}
-  <a class="pic" role="listitem" href="{{asset (print "infra/" .file)}}"><img src="{{asset (print "infra/" .file)}}" alt="{{loc .alt}}"></a>
+  {{- range .Items}}
+  <a class="pic" role="listitem" id="m-{{.ID}}" href="{{.Href}}"><img src="{{.Thumb}}" width="{{.TW}}" height="{{.TH}}" alt="{{or .Alt (t "infra.meme_alt")}}"{{if gt .N 6}} loading="lazy"{{end}} decoding="async"></a>
   {{- end}}
 </div>
+{{- if gt .Pages 1}}
+<nav class="pages" aria-label="{{t "infra.pages"}}">{{with .PrevHref}}<a href="{{.}}" rel="prev">← {{t "infra.newer"}}</a>{{end}} <span>{{t "infra.page" .Page .Pages}}</span> {{with .NextHref}}<a href="{{.}}" rel="next">{{t "infra.older"}} →</a>{{end}}</nav>
+{{- end}}
+{{- end}}{{end}}
 <h1>belomaxorka infrastructure</h1>
 <div><small>{{th "infra.now"}}</small></div>
 <footer>
@@ -84,6 +90,56 @@
   <details><summary>{{t "infra.badge"}}</summary><input readonly value="{{$code}}" aria-label="{{t "infra.badge"}}"></details>
 </div>
 <div class="warn" role="note"><b>{{t "infra.warn_head"}}</b>{{t "infra.warn"}}</div>
+</body>
+</html>
+{{- end}}
+
+{{/* Одна картинка стены (/m/{id}): крупно, ← → к соседям (и стрелками, и свайпом — assets/js/meme.js), Esc — назад
+     к стене. Без JS всё то же ссылками. Клик по картинке открывает её в полном размере. */}}
+{{define "meme" -}}
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{with .Meme}}#{{.N}} · {{end}}belomaxorka infrastructure</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#000000">
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; background: #000; color: #fff; }
+  body {
+    min-height: 100vh; min-height: 100dvh; box-sizing: border-box; padding: 20px 16px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+    font-family: 'Times New Roman', Times, serif; text-align: center; overflow-x: hidden;
+  }
+  a { color: #fff; }
+  .one { margin: 0; }
+  .one a { display: block; border: 4px solid #000; outline: 2px solid #fff; }
+  .one img { display: block; max-width: calc(100vw - 44px); max-height: calc(100dvh - 150px); width: auto; height: auto; }
+  .one figcaption { margin: 12px auto 0; max-width: 640px; font-size: .95rem; color: #bbb; }
+  .pager { display: flex; gap: 18px; align-items: baseline; justify-content: center; font-size: 1.15rem; }
+  .pager a { padding: 6px 4px; }
+</style>
+</head>
+<body>
+{{- with .Meme}}
+<figure class="one">
+  <a href="{{.Full}}" title="{{t "infra.full"}}"><img src="{{.Full}}" width="{{.FW}}" height="{{.FH}}" alt="{{or .Alt (t "infra.meme_alt")}}"></a>
+  {{- with .Alt}}<figcaption>{{.}}</figcaption>{{end}}
+</figure>
+<nav class="pager">
+  {{- with .Prev}}<a href="{{.Href}}" rel="prev">← {{t "infra.newer"}}</a>{{end}}
+  <span>{{t "infra.count" .N .Total}}</span>
+  {{- with .Next}}<a href="{{.Href}}" rel="next">{{t "infra.older"}} →</a>{{end}}
+</nav>
+<a class="back" href="{{.Back}}">{{t "infra.back"}}</a>
+{{- else}}
+<a class="back" href="/">{{t "infra.back"}}</a>
+{{- end}}
+<script src="{{asset "js/meme.js"}}" defer></script>
 </body>
 </html>
 {{- end}}

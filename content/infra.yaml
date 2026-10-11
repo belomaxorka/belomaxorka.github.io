@@ -1,29 +1,26 @@
 # Стена мемов на infra.belomaxorka.dev (templates/infra.html): «хостинг, который мы знаем».
-# Добавить мем: положить картинку в assets/infra/ (jpg, длинная сторона до ~1000 px, без EXIF) и дописать запись.
-# Порядок здесь — порядок на стене. alt — что на картинке, для тех, кто её не видит: строкой или {en, ru}.
-# Изменения подхватываются сами после push: site-api перечитывает content/ без перезапуска.
-memes:
-  - file: summoned.jpg
-    alt:
-      en: "a router hangs out of a wall box on its own cables, LEDs blinking; caption: «why have you summoned me, human?»"
-      ru: "роутер свисает из щитка на собственных проводах и мигает лампочками; подпись: «Зачем ты призвал меня, человек?»"
-  - file: oven.jpg
-    alt:
-      en: a Ruckus SmartZone controller rack-mounted inside a kitchen oven
-      ru: контроллер Ruckus SmartZone смонтирован в стойку прямо внутри духовки
-  - file: cabinet.jpg
-    alt:
-      en: a wall cabinet stuffed with a tangle of grey patch cords
-      ru: настенный шкаф, набитый клубком серых патч-кордов
-  - file: lego-closet.jpg
-    alt:
-      en: "a LEGO box «disorganized network closet», ages 12+: a minifigure among burning racks and cable spaghetti"
-      ru: "коробка LEGO «Disorganized network closet», 12+: человечек посреди горящих стоек и кабельной лапши"
-  - file: serverroom.jpg
-    alt:
-      en: "the server room: boxes piled on a cart in an empty room, a waterfall of cables up to the ceiling"
-      ru: "серверная: коробки свалены на тележку посреди пустой комнаты, к потолку уходит водопад кабелей"
-  - file: oncall.jpg
-    alt:
-      en: "a grey wolf fursuiter types on a laptop at an office desk: the admin on call"
-      ru: "серый волк в фурсьюте печатает на ноутбуке за офисным столом: дежурный админ"
+# Картинки — content/memes/: положить файл (jpg, png, gif, webp) и запушить, больше ничего не нужно.
+# Порядок — по дате в имени файла, новые сверху: Telegram сохраняет как photo_2026-10-12_02-11-28.jpg, свои можно
+# назвать 2026-02-20_что-угодно.jpg; без даты — в конце, по имени. По 24 на страницу, дальше «старее →».
+# Оригиналы наружу не отдаются: site-api ужимает (до 1600 px, превью 400 px) и выкидывает EXIF с геометкой.
+#
+# alt — подпись для тех, кто картинку не видит: по имени файла, строкой или {en, ru}. Необязательна.
+alt:
+  photo_2026-02-20_14-03-08.jpg:
+    en: "a router hangs out of a wall box on its own cables, LEDs blinking; caption: «why have you summoned me, human?»"
+    ru: "роутер свисает из щитка на собственных проводах и мигает лампочками; подпись: «Зачем ты призвал меня, человек?»"
+  photo_2026-01-14_19-17-13.jpg:
+    en: a Ruckus SmartZone controller rack-mounted inside a kitchen oven
+    ru: контроллер Ruckus SmartZone смонтирован в стойку прямо внутри духовки
+  photo_2026-02-22_13-09-49.jpg:
+    en: a wall cabinet stuffed with a tangle of grey patch cords
+    ru: настенный шкаф, набитый клубком серых патч-кордов
+  photo_2026-01-14_19-29-37.jpg:
+    en: "a LEGO box «disorganized network closet», ages 12+: a minifigure among burning racks and cable spaghetti"
+    ru: "коробка LEGO «Disorganized network closet», 12+: человечек посреди горящих стоек и кабельной лапши"
+  photo_2026-10-12_02-11-28.jpg:
+    en: "the server room: boxes piled on a cart in an empty room, a waterfall of cables up to the ceiling"
+    ru: "серверная: коробки свалены на тележку посреди пустой комнаты, к потолку уходит водопад кабелей"
+  photo_2026-10-12_02-09-06.jpg:
+    en: "a grey wolf fursuiter types on a laptop at an office desk: the admin on call"
+    ru: "серый волк в фурсьюте печатает на ноутбуке за офисным столом: дежурный админ"
