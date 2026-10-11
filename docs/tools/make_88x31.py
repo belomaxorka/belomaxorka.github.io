@@ -156,6 +156,7 @@ G5_SRC = {
     '>': '.#... ..#.. ...#. ....# ...#. ..#.. .#...',
     '@': '.###. #...# ....# .##.# #.#.# #.#.# .###.',
     '!': '..#.. ..#.. ..#.. ..#.. ..#.. ..... ..#..',
+    '+': '..... ..#.. ..#.. ##### ..#.. ..#.. .....',
     '\x01': '...#. ..#.. .#... ##### ...#. ..#.. .#...',  # lightning bolt (custom CGRAM-style)
     '\x02': '..... .#.#. ##### ##### .###. ..#.. .....',  # heart
     '\x03': '##### ##### ##### ##### ##### ##### #####',  # block cursor
@@ -535,60 +536,58 @@ def lcd():
 
 
 # =============================================================================
-# 6. infra (the badge of infra.belomaxorka.dev: a Belomorkanal pack, a papirosa smoking)
+# 6. infra: the badge of infra.belomaxorka.dev (Roman picked it of four, 2026-10-12)
 # =============================================================================
-def infra():
-    PACK = hx('f3f5f7')
-    INK = hx('1d3d7a')
-    INK2 = hx('3a6bc0')
-    FRAME_IN = hx('8fa9d6')
-    EDGE = hx('8f8c82')
-    TUBE = hx('fbf9f2')
-    PINCH = hx('bdb8aa')
-    PAPER = hx('efe9db')
-    ASH = (hx('9b9b9b'), hx('7d7d7d'))
-    EMBER = (hx('ff6a1a'), hx('ffb03a'))
-    SMOKE = [hx('8e98a3'), hx('a3acb6'), hx('bcc3cb'), hx('d3d8de'), hx('e3e7eb')]
-    flicker = [1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0]
+F_SUB = None
+
+
+def infra_text(d, x0, x1, nick_col, sub_col, base1=14, base2=25):
+    global F_SUB
+    F_SUB = F_SUB or font('tahoma.ttf', 9)
     nick, sub = 'belomaxorka', 'infrastructure'
-    f_sub = font('tahoma.ttf', 9)
-    x0, x1 = 24, 83  # text between the papirosa and the inner frame
-    nick_x = x0 + (x1 - x0 + 1 - ink_w(F_NICK, nick)) // 2
-    sub_x = x0 + (x1 - x0 + 1 - ink_w(f_sub, sub)) // 2
+    tt(d, x0 + (x1 - x0 + 1 - ink_w(F_NICK, nick)) // 2, base1, nick, F_NICK, nick_col)
+    tt(d, x0 + (x1 - x0 + 1 - ink_w(F_SUB, sub)) // 2, base2, sub, F_SUB, sub_col)
+
+
+def curve(d, p0, p1, p2, col, steps=24):
+    """A quadratic Bezier, one pixel wide."""
+    for k in range(steps + 1):
+        t = k / steps
+        x = (1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0]
+        y = (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1]
+        d.point((round(x), round(y)), fill=col)
+
+
+def infra():
+    """A router hanging out of a wall box on its own cables, blinking: «why have you summoned me, human?»"""
+    WALL, BOX, BOX_IN, DOOR = hx('dfe1dc'), hx('b4b8b1'), hx('2f3236'), hx('cdd0c9')
+    ROUTER, ROUTER_HI = hx('55595e'), hx('7a7f85')
+    CABLES = [hx('f4f4f2'), hx('c9cdd1'), hx('e6e2d6'), hx('aab0b6')]
+    GREEN, GREEN_OFF = hx('5dff6a'), hx('2c5a31')
     frames, durs = [], []
-    for i in range(12):
-        im, d = canvas(PACK)
-        # the pack's inner frame
-        d.rectangle((2, 2, W - 3, H - 3), outline=FRAME_IN)
-        # smoke: a ribbon from the ember that rises one pixel per frame, with gaps between the puffs
-        for y in range(21, 3, -1):
-            k = y + i
-            if k % 6 == 0:
-                continue
-            x = 20 + round(1.6 * math.sin(2 * math.pi * k / 12)) - (21 - y) // 9
-            col = SMOKE[min((21 - y) // 4, len(SMOKE) - 1)]
-            d.point((x, y), fill=col)
-            if y > 12 and k % 3 == 1:
-                d.point((x + 1, y), fill=SMOKE[min((21 - y) // 4 + 1, len(SMOKE) - 1)])
-        # the papirosa: a cardboard tube pinched twice, the paper with tobacco, ash and the ember
-        d.rectangle((3, 22, 11, 26), fill=TUBE, outline=EDGE)
-        for px in (5, 8):
-            d.line((px, 23, px, 25), fill=PINCH)
-        d.rectangle((12, 22, 17, 26), fill=PAPER, outline=EDGE)
-        d.rectangle((18, 23, 18, 25), fill=ASH[0])
-        d.point((19, 23), fill=ASH[1])
-        d.point((19, 25), fill=ASH[1])
-        hot = flicker[i]
-        d.rectangle((19, 24, 20, 24), fill=EMBER[hot])
-        d.point((20, 23), fill=EMBER[0])
-        d.point((20, 25), fill=EMBER[0])
-        if hot:
-            d.point((21, 24), fill=hx('ffc58a'))
-        tt(d, nick_x, 14, nick, F_NICK, INK)
-        tt(d, sub_x, 25, sub, f_sub, INK2)
-        border(d, INK)
+    for i in range(8):
+        im, d = canvas(WALL)
+        d.rectangle((3, 2, 23, 11), fill=BOX)               # the box in the wall
+        d.rectangle((5, 4, 21, 10), fill=BOX_IN)
+        d.line((2, 2, 2, 12), fill=DOOR)                    # its door, wide open
+        d.line((1, 3, 1, 11), fill=hx('9ea39b'))
+        sway = (0, 1, 1, 0, 0, -1, -1, 0)[i]
+        # cables: out of the box, under the router, down to the floor
+        for k, col in enumerate(CABLES * 2):
+            sx = 6 + k * 2
+            ex = 2 + k * 3 + sway
+            curve(d, (sx, 10), (sx + (3 if k % 2 else -3) + sway, 22), (ex, 30), col)
+        # the router hangs on them, a little tilted, LEDs going
+        ry = 13 + (1 if sway > 0 else 0)
+        d.polygon([(5, ry), (21, ry + 1), (21, ry + 5), (5, ry + 4)], fill=ROUTER)
+        d.line((5, ry, 21, ry + 1), fill=ROUTER_HI)
+        for k in range(6):
+            on = (i * 3 + k * 5 + k * k) % 4 != 0
+            d.point((7 + k * 2, ry + 2 + (k >= 4)), fill=GREEN if on else GREEN_OFF)
+        infra_text(d, 26, 85, hx('1d1f22'), hx('5c6168'))
+        border(d, hx('3a3e45'))
         frames.append(im)
-        durs.append(110)
+        durs.append(140)
     return frames, durs
 
 
