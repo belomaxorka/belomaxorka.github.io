@@ -101,13 +101,13 @@
 
   // ---------- RESET и UID на сервере ----------
   // Без JS эти кнопки ничего не умеют — они скрыты; показать после каждой раскладки (новая стойка, htmx).
-  const reveal = () => document.querySelectorAll('.srv .uid[hidden], .srv .rst[hidden]').forEach((b) => { b.hidden = false; });
+  const reveal = () => document.querySelectorAll('.srv button.uid[hidden], .srv .rst[hidden]').forEach((b) => { b.hidden = false; });
   document.addEventListener('rack:laidout', reveal);
   document.addEventListener('DOMContentLoaded', reveal);
   let posting = false;
   document.addEventListener('click', (e) => {
     const t = e.target instanceof Element ? e.target : null;
-    const rst = t?.closest('.srv .rst'), uid = t?.closest('.srv .uid');
+    const rst = t?.closest('.srv .rst'), uid = t?.closest('.srv button.uid');
     if (rst) {
       posting = !!opts.logo;
       document.dispatchEvent(new CustomEvent('rack:reset', { detail: { key: 'srv' } }));

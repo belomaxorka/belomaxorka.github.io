@@ -5,11 +5,13 @@
 //   - ИБП на батарее пищит (пара коротких раз в 4 с), самотест — по сигналу rack:beep (power.js);
 //   - щелчки: вилки питания и RJ45 (rack:plug от power.js, rack:link от net.js), рубильник, выключатель света,
 //     кнопки ИБП, клавиши, RESET;
+//   - загрузка — как у настоящего железа: вентиляторы пару секунд ревут на полных оборотах и стихают, один короткий
+//     писк POST («всё в порядке»): сервер после RESET, вся стойка после кнопки ИБП или батареи;
 //   - вкладка в фоне — звук на паузе.
 (() => {
   const KEY = 'sound';
   let on = (() => { try { return localStorage.getItem(KEY) === 'on'; } catch { return false; } })();
-  let ctx = null, master = null, hum = null, humGain = null, timer = 0, lastBeep = 0;
+  let ctx = null, master = null, hum = null, humGain = null, timer = 0, lastBeep = 0, surgeUntil = 0, rebooting = false;
 
   function start() {
     if (ctx) { ctx.resume(); return; }
@@ -70,10 +72,18 @@
     src.start(t);
   }
   const beep = (n = 1) => { for (let i = 0; i < n; i++) tone(2350, 0.12, { vol: 0.035, at: i * 0.22 }); };
+  // Загрузка: вентиляторы на полные обороты, через пару секунд — к обычному гулу (poll); писк POST — через полсекунды.
+  function boot() {
+    if (!ctx || !on) return;
+    surgeUntil = Date.now() + 2200;
+    humGain.gain.cancelScheduledValues(ctx.currentTime);
+    humGain.gain.setTargetAtTime(0.13, ctx.currentTime, 0.25);
+    tone(1000, 0.16, { vol: 0.045, at: 0.5 });
+  }
 
   // ---------- гул и тревога ИБП по состоянию стойки ----------
   function poll() {
-    if (!ctx || !on) return;
+    if (!ctx || !on || Date.now() < surgeUntil) return;
     const rack = document.getElementById('rack');
     const n = rack && !rack.classList.contains('powered-off') ? document.querySelectorAll('#rack-body > .u.has-psu:not(.off)').length : 0;
     humGain.gain.setTargetAtTime(n ? 0.025 + n * 0.006 : 0, ctx.currentTime, n ? 0.8 : 0.5);
@@ -112,7 +122,7 @@
     if (t.closest('.breaker')) { click(240, { vol: 0.9, dur: 0.08, q: 2 }); click(900, { vol: 0.4, at: 0.05 }); }
     else if (t.closest('.lightsw')) click(2600, { vol: 0.3 });
     else if (t.closest('.ups .pwr')) { click(700, { vol: 0.5, dur: 0.05 }); tone(1500, 0.06, { vol: 0.03, at: 0.08 }); }
-    else if (t.closest('.ups .utest, .srv .uid, .bios button')) click(3200, { vol: 0.22, dur: 0.02 });
+    else if (t.closest('.ups .utest, .srv button.uid, .bios button')) click(3200, { vol: 0.22, dur: 0.02 });
     else if (t.closest('.srv .rst')) click(4200, { vol: 0.18, dur: 0.015, q: 8 });
     else if (t.closest('.key, .port, .bay, .pull')) click(2200, { vol: 0.18, dur: 0.02 });
   }, true);
@@ -126,6 +136,12 @@
     if (e.detail?.on) click(5200, { vol: 0.2, dur: 0.012, q: 8, at: 0.04 });
   });
   document.addEventListener('rack:beep', (e) => beep(e.detail?.n || 1));
+  // RESET сервера (toys.js): загрузится — POST; вся стойка включилась (power.js) — тоже.
+  document.addEventListener('rack:reset', () => { rebooting = true; });
+  document.addEventListener('rack:unit', (e) => {
+    if (rebooting && e.detail?.on) { rebooting = false; boot(); }
+  });
+  document.addEventListener('rack:power', (e) => { if (e.detail?.on) boot(); });
   document.addEventListener('visibilitychange', () => {
     if (!ctx) return;
     if (document.hidden) ctx.suspend(); else if (on) ctx.resume();
