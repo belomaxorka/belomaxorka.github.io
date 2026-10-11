@@ -86,8 +86,6 @@
   "lcd.web": "full-stack web",
   "lcd.web2": "laravel, vue, react",
   "lcd.mbti2": "mediator",
-  "lcd.go": "site in go",
-  "lcd.go2": "server-rendered",
   "lcd.colors": "fav colours",
   "lcd.pgp": "pgp key",
   "me.pgp": "key fingerprint",

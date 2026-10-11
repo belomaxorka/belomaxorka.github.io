@@ -41,7 +41,6 @@
           <li>{{t "lcd.web"}}<br><span class="d">{{t "lcd.web2"}}</span></li>
           <li>infp-t<br><span class="d">{{t "lcd.mbti2"}}</span></li>
           <li>{{t "lcd.lab"}}<br><span class="d">{{t "lcd.lab2"}}</span></li>
-          <li>{{t "lcd.go"}}<br><span class="d">{{t "lcd.go2"}}</span></li>
           {{with .Data.colors}}<li>{{t "lcd.colors"}}<br><span class="swatches">{{range .}}<i style="--c: {{.}}" title="{{.}}"></i>{{end}}</span></li>{{end}}
           {{with .Data.pgp}}<li>{{t "lcd.pgp"}}<br><span class="d">{{slice . (len (slice . 9))}}</span></li>{{end}}
         </ul>
