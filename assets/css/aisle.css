@@ -115,7 +115,7 @@
   html.hop .hall .nb { visibility: visible; animation: hop-nb var(--hop-t) var(--hop-ease) both; }
   html.hop .hall .nb.c { animation: hop-nb var(--hop-t) var(--hop-ease) both, hop-nb-out var(--hop-t) linear both; }
   html.hop-fwd .hall .nb.l, html.hop-back .hall .nb.r { animation: hop-nb var(--hop-t) var(--hop-ease) both, hop-nb-in var(--hop-t) linear both; }
-  html.hop .hall .ceiling::before { animation: hop-ceiling var(--hop-t) var(--hop-ease) both; }
+  html.hop .hall .ceiling .plane { animation: hop-ceiling var(--hop-t) var(--hop-ease) both; }
   html.hop .hall .floor::before { animation: hop-floor var(--hop-t) var(--hop-ease) both; }
   html.hop .hall .lamp { animation: hop-lamp var(--hop-t) var(--hop-ease) both; }
 

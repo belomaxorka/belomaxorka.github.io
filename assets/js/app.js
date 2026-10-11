@@ -312,12 +312,28 @@
     // органайзер, по нему через ввод в крыше вверх, к лоткам. Данные идут слева, питание — справа.
     const vmEl = rack.querySelector('#rack-body > .vm');
     const lowEl = tor.nextElementSibling?.classList.contains('brush') ? tor.nextElementSibling : null;
+    // Над стойкой — в жёлтый короб на потолке: точка ввода на его оси (метки .mark в зале, hall.css) на высоте
+    // ~40 px, над табличками прохода; к ней по потолку и в короб через ввод, повёрнутый вдоль короба. Потолка нет
+    // (светлая тема) или короб ниже крыши стойки — просто вверх.
     const fiber = (from, color, label) => {
       if (!vmEl || !vmEl.offsetParent) return;
       const v = box(vmEl), x = v.x + v.w - 4;
       const y = lowEl ? box(lowEl).cy + 6 : from.y - 14;
-      cable(svg, `M${from.cx} ${from.y + 2} C${from.cx} ${y + 8}, ${from.cx - 10} ${y}, ${from.cx - 24} ${y} L${x + 14} ${y} C${x + 4} ${y}, ${x} ${y - 6}, ${x} ${y - 18} L${x} ${cap.y + 4} C${x} ${cap.y - 16}, ${x} ${cap.y - 30}, ${x} -10`, color, 3);
+      const marks = [...document.querySelectorAll('.hall .mark')].filter(m => m.offsetParent).map(box);
+      const j = marks.reduce((a, m) => (!a || Math.abs(m.cy - 40) < Math.abs(a.cy - 40) ? m : a), null);
+      const r = 14, s = j && Math.sign(j.cx - x) || 1;
+      const top = j && j.cy < cap.y - 30
+        ? `L${x} ${j.cy + r} Q${x} ${j.cy}, ${x + s * r} ${j.cy} L${j.cx} ${j.cy}`
+        : `C${x} ${cap.y - 16}, ${x} ${cap.y - 30}, ${x} -10`;
+      cable(svg, `M${from.cx} ${from.y + 2} C${from.cx} ${y + 8}, ${from.cx - 10} ${y}, ${from.cx - 24} ${y} L${x + 14} ${y} C${x + 4} ${y}, ${x} ${y - 6}, ${x} ${y - 18} L${x} ${cap.y + 4} ${top}`, color, 3);
       seat(svg, from, color);
+      if (j && j.cy < cap.y - 30) {
+        const n = marks[Math.max(0, marks.indexOf(j) - 1)];
+        const len = Math.hypot(n.cx - j.cx, n.cy - j.cy) || 1;
+        const ux = (n.cx - j.cx) / len * 11, uy = (n.cy - j.cy) / len * 11, vx = -uy * .6, vy = ux * .6;
+        const p = (a, b) => `${(j.cx + a * ux + b * vx).toFixed(1)} ${(j.cy + a * uy + b * vy).toFixed(1)}`;
+        el('path', { d: `M${p(-1, -1)} L${p(1, -1)} L${p(1, 1)} L${p(-1, 1)} Z`, class: 'inlet' }, svg);
+      }
       if (label) el('text', { x: x + 10, y: cap.y - 5, class: 'lbl small' }, svg).textContent = label;
     };
 

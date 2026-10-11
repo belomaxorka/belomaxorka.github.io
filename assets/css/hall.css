@@ -128,11 +128,12 @@
 .hall .floor::before {
   inset: -60% -60% 0; transform: rotateX(64deg) translateX(var(--cam-x)); transform-origin: 50% 100%;
 }
-/* Потолок — плоскость в перспективе: лотки и короб уходят вглубь прохода. */
+/* Потолок — плоскость в перспективе: лотки и короб уходят вглубь прохода. Метки .mark — невидимые точки на оси
+   жёлтого короба: по ним app.js заводит в короб оптику из стойки (где бы ни стояла камера). */
 .hall .ceiling { perspective: 420px; height: 150px; overflow: hidden; }
 .hall .tray, .hall .duct { display: none; }
-.hall .ceiling::before {
-  content: ""; position: absolute; inset: 0 -60% -260%; transform: rotateX(-66deg) translateX(var(--cam-x)); transform-origin: 50% 0;
+.hall .ceiling .plane {
+  position: absolute; inset: 0 -60% -260%; transform: rotateX(-66deg) translateX(var(--cam-x)); transform-origin: 50% 0;
   background:
     linear-gradient(90deg, transparent calc(41% - 6px), var(--duct) 0 calc(41% + 6px), transparent 0),
     linear-gradient(90deg, transparent calc(30% - 22px), var(--tray) 0 calc(30% - 18px), transparent 0 calc(30% + 18px), var(--tray) 0 calc(30% + 22px), transparent 0),
@@ -144,11 +145,12 @@
           mask: linear-gradient(#000 40%, transparent);
   opacity: .9;
 }
+.hall .ceiling .mark { position: absolute; left: 41%; top: calc(var(--k) * 3%); width: 1px; height: 1px; }
 
 /* Светлая тема — кладовка: без потолка с лотками, пол дощатый. */
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .hall .ceiling::before { display: none; }
+  :root:not([data-theme="dark"]) .hall .ceiling .plane { display: none; }
   :root:not([data-theme="dark"]) .hall .floor::before { background: repeating-linear-gradient(90deg, var(--tile) 0 118px, var(--tile-line) 118px 120px); }
 }
-:root[data-theme="light"] .hall .ceiling::before { display: none; }
+:root[data-theme="light"] .hall .ceiling .plane { display: none; }
 :root[data-theme="light"] .hall .floor::before { background: repeating-linear-gradient(90deg, var(--tile) 0 118px, var(--tile-line) 118px 120px); }
