@@ -58,6 +58,7 @@
   let state = null, stateId = null; // питание той стойки, что сейчас в комнате (useRack)
 
   const ropes = new Map(); // ключ юнита → верёвка
+  let probing = null;      // ключ шнура под мышью (тестер кабеля)
   let room = null, svg = null, raf = 0, calm = 0, drag = null;
   let kick = 0; // стойка доехала: куда качнуть кабели при следующей раскладке (1, -1)
 
@@ -159,6 +160,9 @@
     if (!svg) {
       svg = el('svg', { id: 'power', class: 'cables power', 'aria-hidden': 'true' }, room);
       svg.addEventListener('pointerdown', grab);
+      // Тестер кабеля (как в net.js): навёл мышь на вилку — шнур светится целиком.
+      svg.addEventListener('pointerover', (e) => { if (e.pointerType === 'mouse' && !drag && e.target.dataset?.key) { probing = e.target.dataset.key; draw(); } });
+      svg.addEventListener('pointerout', (e) => { if (e.target.dataset?.key) { probing = null; draw(); } });
     }
     units().forEach((u) => {
       if (!u.querySelector(':scope > .psu')) {
@@ -173,8 +177,11 @@
     const rack = document.getElementById('rack');
     if (rack) rack.classList.toggle('powered-off', state.off || dead());
     wireButton();
+    wireTest();
     breaker();
+    switcher();
     neighbours();
+    if (fed(state) && state.charge === null && !testing) room.dataset.light = lamp();
     return true;
   }
 
@@ -185,6 +192,15 @@
   // ---------- ИБП на батарее ----------
   // Пока шнур в розетке и батарея полна, ЖК ИБП показывает настоящие данные (NUT). Иначе — своя симуляция.
   let lcdReal = null, lightReal = null, alarmReal = false, timer = 0, wasDead = null; // null: ещё не смотрели
+
+  // Выключатель у таблички «выход»: auto — свет по часам Барнаула (как его отдал сервер), или вручную день, вечер,
+  // ночь. Пока в розетках есть ток; без тока горит аварийка, настоящая (сервер сказал battery) — тоже.
+  const MODES = ['auto', 'day', 'evening', 'night'];
+  let mode = (() => { try { const m = localStorage.getItem('hall-light'); return MODES.includes(m) ? m : 'auto'; } catch { return 'auto'; } })();
+  function lamp() {
+    if (lightReal === null) lightReal = room.dataset.light;
+    return mode === 'auto' || lightReal === 'battery' ? lightReal : mode;
+  }
   const upsUnit = () => document.querySelector('#rack-body > .ups');
   const upsLcd = () => document.querySelector('#rack-body > .ups .lcd');
   const full = () => { const v = parseInt(upsLcd()?.dataset.charge, 10); return v > 0 ? v : 100; };
@@ -206,7 +222,7 @@
   // Стойка без ИБП (заглушки ряда) тоже живёт от него: свет в зале и юниты — как у всех, только ЖК нет.
   function battery() {
     const lcd = upsLcd();
-    if (!room) return;
+    if (!room || testing) return;
     // Настоящие ЖК и свет — пока их не подменила симуляция; на новой стойке (rack:swap) — заново.
     if (lightReal === null) lightReal = room.dataset.light;
     if (lcd && lcdReal === null) {
@@ -221,14 +237,14 @@
         lcd.replaceChildren(...lcdReal.map((n) => n.cloneNode(true)));
         lcd.classList.toggle('alarm', alarmReal);
       }
-      room.dataset.light = lightReal;
+      room.dataset.light = lamp();
       upsUnit()?.classList.remove('off');
       rack?.classList.toggle('powered-off', state.off);
       neighbours();
       return;
     }
     const isDead = dead();
-    room.dataset.light = fed(state) ? lightReal : 'battery';
+    room.dataset.light = fed(state) ? lamp() : 'battery';
     upsUnit()?.classList.toggle('off', isDead);
     rack?.classList.toggle('powered-off', state.off || isDead);
     if (lcd) screen(lcd, isDead);
@@ -301,6 +317,100 @@
       bootAll();
     });
   }
+
+  // ---------- выключатель света ----------
+  let sw = null;
+  function switcher() {
+    if (sw?.isConnected) return;
+    const d = document.getElementById('cables')?.dataset || {};
+    sw = document.createElement('button');
+    sw.type = 'button';
+    sw.className = 'lightsw';
+    sw.innerHTML = '<span class="plate"><i class="rocker"></i></span><span class="lbl"></span>';
+    sw.addEventListener('click', () => {
+      mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
+      try { localStorage.setItem('hall-light', mode); } catch {}
+      showSwitch();
+      if (fed(state) && !dead()) room.dataset.light = lamp();
+      document.dispatchEvent(new CustomEvent('rack:click', { detail: { what: 'switch' } }));
+    });
+    sw.dataset.labels = d.lightModes || 'auto,day,evening,night';
+    sw.dataset.aria = d.lightAria || 'hall lights';
+    room.appendChild(sw);
+    showSwitch();
+  }
+  function showSwitch() {
+    const names = sw.dataset.labels.split(','), name = names[MODES.indexOf(mode)] || mode;
+    sw.querySelector('.lbl').textContent = name;
+    sw.dataset.mode = mode;
+    sw.setAttribute('aria-label', sw.dataset.aria + ': ' + name);
+  }
+
+  // ---------- самотест ИБП ----------
+  // Кнопка test: ИБП пищит, ЖК гоняет батарею вниз и обратно, свет в зале трижды моргает — нагрузка на миг ушла на
+  // батарею. Стойка не гаснет. Без тока, выключенный или севший ИБП тест не делает: на ЖК — отказ.
+  let testing = false;
+  function wireTest() {
+    const b = document.querySelector('.ups .utest');
+    if (!b || b.dataset.wired) return;
+    b.dataset.wired = '1';
+    b.hidden = false;
+    b.addEventListener('click', selfTest);
+  }
+  function selfTest() {
+    const lcd = upsLcd();
+    if (!lcd || testing) return;
+    const beep = (n) => document.dispatchEvent(new CustomEvent('rack:beep', { detail: { n } }));
+    if (!fed(state) || state.off || dead() || state.charge !== null) {
+      beep(3);
+      const was = [...lcd.childNodes].map((n) => n.cloneNode(true));
+      lcd.replaceChildren(lcd.dataset.testNo || 'test: no', document.createElement('br'), Object.assign(document.createElement('span'), { className: 'd', textContent: lcd.dataset.testWhy || '' }));
+      setTimeout(() => { if (lcd.isConnected) lcd.replaceChildren(...was); runBattery(); }, 1800);
+      return;
+    }
+    testing = true;
+    if (lcdReal === null) { lcdReal = [...lcd.childNodes].map((n) => n.cloneNode(true)); alarmReal = lcd.classList.contains('alarm'); }
+    beep(1);
+    const steps = [100, 80, 60, 40, 60, 80, 100], tick = reduce.matches ? 0 : 420;
+    steps.forEach((pc, i) => setTimeout(() => {
+      if (!lcd.isConnected) return;
+      const bars = document.createElement('span');
+      bars.className = 'batt';
+      bars.setAttribute('aria-hidden', 'true');
+      for (let j = 0; j < 5; j++) { const c = document.createElement('i'); if (j >= Math.ceil(pc / 20)) c.className = 'e'; bars.appendChild(c); }
+      const text = document.createElement('span');
+      text.append(lcd.dataset.test || 'self test', document.createElement('br'), Object.assign(document.createElement('span'), { className: 'd', textContent: pc + '%' }));
+      lcd.replaceChildren(bars, text);
+    }, i * tick));
+    if (!reduce.matches) [0, 1, 2].forEach((i) => {
+      setTimeout(() => { room.dataset.light = 'battery'; }, 300 + i * 500);
+      setTimeout(() => { room.dataset.light = lamp(); }, 480 + i * 500);
+    });
+    setTimeout(() => {
+      testing = false;
+      beep(1);
+      if (lcd.isConnected) {
+        lcd.replaceChildren(...lcdReal.map((n) => n.cloneNode(true)));
+        lcd.classList.toggle('alarm', alarmReal);
+      }
+      room.dataset.light = lamp();
+      runBattery();
+    }, steps.length * tick + 300);
+  }
+
+  // ---------- перезагрузка юнита (RESET на сервере, assets/js/toys.js) ----------
+  // Юнит гаснет, как без питания, и через пару секунд загружается; остальная стойка работает.
+  document.addEventListener('rack:reset', (e) => {
+    const k = e.detail?.key, u = k && unitBy(k);
+    if (!u || !powered(k) || queued.has(k)) return;
+    queued.add(k);
+    paint(u, k, false);
+    setTimeout(() => {
+      queued.delete(k);
+      const cur = unitBy(k);
+      if (cur) paint(cur, k, true);
+    }, reduce.matches ? 300 : 1600);
+  });
 
   // ---------- щиток зала ----------
   // Рубильник на стене рядом с розеткой: ток во всех розетках ряда. Выключил — все ИБП на батарее (у каждой
@@ -517,9 +627,10 @@
     }
     d += ` L${p[p.length - 1].x} ${p[p.length - 1].y}`;
     const line = { d, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
-    el('path', { ...line, stroke: 'rgba(0,0,0,.35)', 'stroke-width': 9, transform: 'translate(0 2)' }, svg);
-    el('path', { ...line, stroke: MAINS, 'stroke-width': 6 }, svg);
-    el('path', { ...line, stroke: 'rgba(255,255,255,.28)', 'stroke-width': 1.6, transform: 'translate(-1.2 -1.2)' }, svg);
+    const cord = el('g', { class: r.key === probing ? 'probe' : '' }, svg);
+    el('path', { ...line, stroke: 'rgba(0,0,0,.35)', 'stroke-width': 9, transform: 'translate(0 2)' }, cord);
+    el('path', { ...line, stroke: MAINS, 'stroke-width': 6 }, cord);
+    el('path', { ...line, stroke: 'rgba(255,255,255,.28)', 'stroke-width': 1.6, transform: 'translate(-1.2 -1.2)' }, cord);
     // Вилка: в розетке — корпус поверх неё, кабель уходит вниз; выдернута — штыри наружу, вдоль кабеля.
     const a = r.plugged ? -Math.PI / 2 : Math.atan2(p[0].y - p[1].y, p[0].x - p[1].x);
     const g = el('g', { transform: `translate(${p[0].x} ${p[0].y}) rotate(${a * 180 / Math.PI})` }, svg);
@@ -545,9 +656,10 @@
       }
       d += ` L${p[p.length - 1].x} ${p[p.length - 1].y}`;
       const line = { d, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
-      el('path', { ...line, stroke: 'rgba(0,0,0,.35)', 'stroke-width': 7, transform: 'translate(0 2)' }, svg);
-      el('path', { ...line, stroke: COLOR, 'stroke-width': 4.5 }, svg);
-      el('path', { ...line, stroke: 'rgba(255,255,255,.22)', 'stroke-width': 1.2, transform: 'translate(-1 -1)' }, svg);
+      const cord = el('g', { class: r.key === probing ? 'probe' : '' }, svg);
+      el('path', { ...line, stroke: 'rgba(0,0,0,.35)', 'stroke-width': 7, transform: 'translate(0 2)' }, cord);
+      el('path', { ...line, stroke: COLOR, 'stroke-width': 4.5 }, cord);
+      el('path', { ...line, stroke: 'rgba(255,255,255,.22)', 'stroke-width': 1.2, transform: 'translate(-1 -1)' }, cord);
       // Вилка: повёрнута вдоль кабеля; когда воткнута — смотрит в разъём.
       const a = r.plugged ? Math.PI : Math.atan2(p[0].y - p[1].y, p[0].x - p[1].x);
       const g = el('g', { transform: `translate(${p[0].x} ${p[0].y}) rotate(${a * 180 / Math.PI})` }, svg);

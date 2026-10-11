@@ -35,7 +35,7 @@
       <p class="intro">{{th "me.intro"}}</p>
     </div>
     <div class="status-col">
-      <div class="lcd two" x-data="cycle(3200)">
+      <div class="lcd two" x-data="cycle(3200)" data-post="{{t "srv.post"}}">
         <ul class="msgs">
           <li class="on">{{t "lcd.hello"}}<br><span class="d">{{if eq .DaysToBirthday 0}}{{t "lcd.bday_today"}}{{else if gt .DaysToBirthday 0}}{{t "lcd.bday_in" .DaysToBirthday (tn "days" .DaysToBirthday)}}{{else}}{{t "lcd.web2"}}{{end}}</span></li>
           <li>{{t "lcd.web"}}<br><span class="d">{{t "lcd.web2"}}</span></li>
@@ -45,7 +45,7 @@
           {{with .Data.pgp}}<li>{{t "lcd.pgp"}}<br><span class="d">{{slice . (len (slice . 9))}}</span></li>{{end}}
         </ul>
       </div>
-      <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led blink"></i>hdd</span><span><i class="led blink s3 net"></i>net</span></div>
+      <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led blink"></i>hdd</span><span><i class="led blink s3 net"></i>net</span><span><i class="led uid"></i><button class="uid" type="button" hidden aria-pressed="false" title="{{t "srv.uid"}}">uid</button></span><button class="rst" type="button" hidden aria-label="{{t "srv.reset"}}" title="{{t "srv.reset"}}"></button></div>
       {{/* Наклейка инвентарного номера: полный отпечаток PGP, печатный — виден и без питания, выделяется. */}}
       {{with .Data.pgp}}<div class="asset-tag"><span class="silk">pgp · {{t "me.pgp"}}</span><code translate="no">{{.}}</code><i class="bars" aria-hidden="true"></i></div>{{end}}
     </div>

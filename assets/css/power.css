@@ -78,3 +78,35 @@
 .breaker:hover .box { filter: brightness(1.08); }
 .breaker:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 @media (prefers-reduced-motion: reduce) { .breaker .handle { transition: none; } }
+
+/* Кнопка test на ИБП (power.js, самотест): маленькая клавиша рядом с кнопкой питания. */
+.ups .utest {
+  flex: none; align-self: center; padding: 5px 8px; border-radius: 3px; cursor: pointer;
+  border: 1px solid var(--edge); background: var(--key); color: var(--key-ink);
+  font: 600 9px/1 var(--f-silk); letter-spacing: .14em; text-transform: uppercase;
+  box-shadow: inset 0 1px 0 var(--panel-hi), 0 2px 0 var(--edge);
+}
+.ups .utest:active { transform: translateY(1px); box-shadow: inset 0 1px 0 var(--panel-hi), 0 1px 0 var(--edge); }
+.ups .utest:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Выключатель света у таблички «выход» (power.js): клавиша на стене; подпись — режим: авто, день, вечер, ночь. */
+.lightsw {
+  position: absolute; z-index: 6; top: 40px; left: 22px; display: grid; justify-items: center; gap: 3px;
+  padding: 0; border: 0; background: none; cursor: pointer; color: var(--dim);
+  font: 600 9px/1 var(--f-silk); letter-spacing: .12em; text-transform: uppercase;
+}
+.lightsw .plate {
+  position: relative; width: 26px; height: 34px; border-radius: 4px;
+  background: linear-gradient(#e9e6df, #cfcbc2); box-shadow: inset 0 0 0 1px #0003, 0 2px 5px #0006;
+}
+.lightsw .rocker {
+  position: absolute; left: 7px; right: 7px; top: 6px; bottom: 6px; border-radius: 2px;
+  background: linear-gradient(#fbfaf7 50%, #d8d4cb 50%); box-shadow: inset 0 0 0 1px #0002;
+}
+.lightsw[data-mode="night"] .rocker, .lightsw[data-mode="evening"] .rocker { background: linear-gradient(#d8d4cb 50%, #fbfaf7 50%); }
+.lightsw[data-mode="auto"] .plate::after {
+  content: ""; position: absolute; right: 3px; top: 3px; width: 4px; height: 4px; border-radius: 50%;
+  background: var(--led-ok); box-shadow: 0 0 4px var(--led-ok);
+}
+.lightsw:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+@media (max-width: 760px) { .lightsw { top: 30px; left: 12px; } }

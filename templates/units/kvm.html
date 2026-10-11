@@ -3,6 +3,20 @@
      Данные: .Enabled, .Entries (ID, Name, Text, Reply, At, Drawing), .Status, .Stamp. */}}
 {{define "unit-kvm"}}
 <section class="u kvm" style="--h:5" aria-labelledby="gbh" id="unit-kvm">
+  {{/* Пасхалка (assets/js/toys.js): код Konami или пять тапов по надписи — BIOS Setup поверх консоли. */}}
+  <div class="bios" hidden role="dialog" aria-label="{{t "bios.title"}}">
+    <p class="b-title">{{t "bios.title"}}</p>
+    <p class="b-tabs"><b>main</b> advanced boot exit</p>
+    <dl class="b-rows">
+      <dt>{{t "bios.time"}}</dt><dd data-clock>[--:--:--]</dd>
+      <dt>{{t "bios.version"}}</dt><dd>r1 · 2026.10</dd>
+      <dt>{{t "bios.owner"}}</dt><dd>belomaxorka</dd>
+      <dt>{{t "bios.rainbow"}}</dt><dd><button type="button" data-opt="rainbow" data-yes="{{t "bios.enabled"}}" data-no="{{t "bios.disabled"}}"></button></dd>
+      <dt>{{t "bios.leds"}}</dt><dd><button type="button" data-opt="steady" data-yes="{{t "bios.steady"}}" data-no="{{t "bios.blinking"}}"></button></dd>
+      <dt>{{t "bios.logo"}}</dt><dd><button type="button" data-opt="logo" data-yes="{{t "bios.enabled"}}" data-no="{{t "bios.disabled"}}"></button></dd>
+    </dl>
+    <p class="b-help">{{t "bios.help"}} <button type="button" data-exit>[esc]</button></p>
+  </div>
   <div class="face">
     <div class="bar"><span class="silk" id="gbh">{{t "gb.title"}}</span><span class="silk">{{t "gb.moderated"}}</span></div>
     <div class="screen" id="guestbook" x-data="lightbox" data-nosignal="{{t "kvm.nosignal"}}">

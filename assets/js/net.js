@@ -146,6 +146,8 @@
     if (!svg) {
       svg = el('svg', { id: 'net', class: 'cables net', 'aria-hidden': 'true' }, room);
       svg.addEventListener('pointerdown', grab);
+      svg.addEventListener('pointerover', (e) => { if (e.pointerType === 'mouse' && !drag && e.target.classList?.contains('hit')) probe(e.target.dataset.key); });
+      svg.addEventListener('pointerout', (e) => { if (e.target.classList?.contains('hit')) probe(null); });
     }
     const R = room.getBoundingClientRect();
     svg.setAttribute('viewBox', `0 0 ${R.width} ${R.height}`);
@@ -164,6 +166,7 @@
     sync();
     draw();
     if (ropes.size) wake();
+    if (probed) probe(probed);
   }
 
   // Висит из органайзера прямо вниз (выдернут ещё до загрузки страницы).
@@ -239,6 +242,22 @@
       r.pts.forEach((p, i) => { if (!pinned(i)) keepIn(p); });
     }
     return motion;
+  }
+
+  // ---------- тестер кабеля ----------
+  // Навёл мышь на вилку — корд светится целиком, а лампы его порта на коммутаторе и сетевой карты юнита мигают часто,
+  // как от тестера на другом конце (только если линк есть). Пальцем наводить нечем — на телефоне тестера нет.
+  // app.js перерисовывает корды при каждой раскладке: подсветка ставится заново (relayout).
+  let probed = null;
+  function probe(key) {
+    document.querySelectorAll('#cables > g.probe, #rack .probe').forEach((n) => n.classList.remove('probe'));
+    probed = key;
+    const c = key && cords.find((x) => x.key === key);
+    if (!c || pulled(key)) return;
+    document.querySelectorAll('#cables > g')[c.wire]?.classList.add('probe');
+    c.port?.classList.add('probe');
+    const body = document.getElementById('rack-body');
+    if (c.type === 'nic' && body) unitOf(body, key)?.querySelector(':scope > .nic')?.classList.add('probe');
   }
 
   // ---------- рисование ----------

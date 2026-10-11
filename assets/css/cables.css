@@ -26,3 +26,11 @@
 @keyframes cable-draw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
 @keyframes cable-plug { from { opacity: 0; transform: scale(.3); } }
 .cables .lbl.small { font-size: 16px; }
+
+/* Тестер кабеля (net.js, power.js): навёл мышь на вилку — корд светится, лампы его порта и сетевой карты мигают
+   часто, как от тестера на другом конце. Без анимаций — только свечение. */
+.cables g.probe { filter: brightness(1.35) drop-shadow(0 0 4px rgba(255, 255, 255, .5)); }
+@media (prefers-reduced-motion: no-preference) {
+  .tp.link.probe .led, .nic.probe .led { animation: probe-blink .14s steps(2, jump-none) infinite !important; }
+}
+@keyframes probe-blink { 50% { opacity: .15; } }
