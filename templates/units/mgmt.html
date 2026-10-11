@@ -4,10 +4,10 @@
 <div class="u mgmt" style="--h:1">
   <div class="face">
     <nav class="ports" aria-label="{{t "nav.aria"}}">
-      <a class="key" href="https://blog.belomaxorka.dev" target="_blank" rel="noopener">{{t "nav.blog"}}</a>
+      <a class="key" href="https://blog.belomaxorka.dev"{{ext "https://blog.belomaxorka.dev"}}>{{t "nav.blog"}}</a>
       {{if .HasCV}}<a class="key" href="/cv.pdf">{{t "nav.cv"}}</a>{{else}}<span class="key off" title="{{t "soon"}}">{{t "nav.cv"}}</span>{{end}}
-      <a class="key" href="https://status.belomaxorka.dev" target="_blank" rel="noopener">{{t "nav.status"}}</a>
-      <a class="key" href="https://git.belomaxorka.dev/belomaxorka" target="_blank" rel="noopener">{{t "nav.git"}}</a>
+      <a class="key" href="https://status.belomaxorka.dev"{{ext "https://status.belomaxorka.dev"}}>{{t "nav.status"}}</a>
+      <a class="key" href="https://git.belomaxorka.dev/belomaxorka"{{ext "https://git.belomaxorka.dev/belomaxorka"}}>{{t "nav.git"}}</a>
     </nav>
     <div class="ports">
       <nav class="langs" aria-label="{{t "lang.aria"}}">
