@@ -21,6 +21,10 @@ jobs:
         with:
           path: site
 
+      # The light theme is written twice (system theme and the picked one); the twins must say the same.
+      - name: Light theme twins agree
+        run: node site/docs/tools/check-themes.mjs site/assets/css
+
       - name: Get site-api
         run: git clone --depth 1 "$GITHUB_SERVER_URL/belomaxorka/site-api.git" site-api
 

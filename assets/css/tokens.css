@@ -50,6 +50,7 @@
   color-scheme: dark;
 }
 @media (prefers-reduced-motion: reduce) { :root { transition: none; } }
+/* The light theme twice, for the system's and for the picked one: docs/tools/check-themes.mjs (CI) keeps them the same. */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --room: #d8d2c4; --void: #a49d8e; --rail: #bdb6a6; --rail-hi: #d0caba; --hole: #5d584e; --num: #5f5a50;
