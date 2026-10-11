@@ -30,6 +30,7 @@
 
   const ropes = new Map(); // ключ юнита → верёвка
   let room = null, svg = null, raf = 0, calm = 0, drag = null;
+  let kick = 0; // стойка доехала: куда качнуть кабели при следующей раскладке (1, -1)
 
   const keyOf = (u) => u.dataset.power || POWERED.find((k) => u.classList.contains(k));
   const units = () => [...document.querySelectorAll('#rack-body > .u')].filter(keyOf);
@@ -91,20 +92,24 @@
   const full = () => { const v = parseInt(upsLcd()?.dataset.charge, 10); return v > 0 ? v : 100; };
   function dead() { return !state.mains && state.charge !== null && state.charge <= 0; }
 
+  // Стойка без ИБП (заглушки ряда) тоже живёт от него: свет в зале и юниты — как у всех, только ЖК нет.
   function battery() {
     const lcd = upsLcd();
-    if (!lcd || !room) return;
-    if (lcdReal === null) {
+    if (!room) return;
+    // Настоящие ЖК и свет — пока их не подменила симуляция; на новой стойке (rack:swap) — заново.
+    if (lightReal === null) lightReal = room.dataset.light;
+    if (lcd && lcdReal === null) {
       lcdReal = [...lcd.childNodes].map((n) => n.cloneNode(true));
-      lightReal = room.dataset.light;
       alarmReal = lcd.classList.contains('alarm');
     }
     const rack = document.getElementById('rack');
     if (state.mains && (state.charge === null || state.charge >= full())) {
       if (state.charge !== null) { state.charge = null; save(); }
       clearInterval(timer); timer = 0;
-      lcd.replaceChildren(...lcdReal.map((n) => n.cloneNode(true)));
-      lcd.classList.toggle('alarm', alarmReal);
+      if (lcd) {
+        lcd.replaceChildren(...lcdReal.map((n) => n.cloneNode(true)));
+        lcd.classList.toggle('alarm', alarmReal);
+      }
       room.dataset.light = lightReal;
       upsUnit()?.classList.remove('off');
       rack?.classList.toggle('powered-off', state.off);
@@ -112,10 +117,21 @@
     }
     const isDead = dead();
     room.dataset.light = state.mains ? lightReal : 'battery';
-    lcd.classList.toggle('alarm', !state.mains && !isDead);
     upsUnit()?.classList.toggle('off', isDead);
     rack?.classList.toggle('powered-off', state.off || isDead);
-    // ЖК: батарейка, «на батарее · 73%» или «заряжается · 40%», сколько осталось.
+    if (lcd) screen(lcd, isDead);
+    // Батарея села — всё гаснет; вернулось питание — юниты загружаются сверху вниз. Сообщить только о смене
+    // на глазах у посетителя, не о состоянии, с которым страница открылась.
+    if (isDead !== wasDead) {
+      units().forEach((u, i) => setTimeout(() => paint(u, keyOf(u), true), isDead || reduce.matches ? 0 : 110 * i));
+      if (wasDead !== null && !state.off) dark(!isDead, 'battery');
+      wasDead = isDead;
+    }
+  }
+
+  // ЖК: батарейка, «на батарее · 73%» или «заряжается · 40%», сколько осталось.
+  function screen(lcd, isDead) {
+    lcd.classList.toggle('alarm', !state.mains && !isDead);
     const pc = Math.round(state.charge), d = lcd.dataset;
     const bars = document.createElement('span');
     bars.className = 'batt' + (pc <= 20 ? ' low' : '');
@@ -132,13 +148,6 @@
     sub.textContent = state.mains ? d.mains : (d.left || '%d').replace('%d', Math.ceil(state.charge / 100 * DRAIN));
     text.append(sub);
     lcd.replaceChildren(bars, text);
-    // Батарея села — всё гаснет; вернулось питание — юниты загружаются сверху вниз. Сообщить только о смене
-    // на глазах у посетителя, не о состоянии, с которым страница открылась.
-    if (isDead !== wasDead) {
-      units().forEach((u, i) => setTimeout(() => paint(u, keyOf(u), true), isDead || reduce.matches ? 0 : 110 * i));
-      if (wasDead !== null && !state.off) dark(!isDead, 'battery');
-      wasDead = isDead;
-    }
   }
 
   function runBattery() {
@@ -237,8 +246,8 @@
         else r.pts.forEach((p) => { p.x += dx; p.y += dy; p.px += dx; p.py += dy; });
       }
       r.wall = wall;
-      if (!state.mains || state.charge !== null) runBattery();
     }
+    if (!state.mains || state.charge !== null) runBattery();
     units().forEach((u) => {
       const k = keyOf(u);
       seen.add(k);
@@ -263,7 +272,24 @@
     for (const k of ropes.keys()) if (!seen.has(k)) ropes.delete(k);
     // Пол и стены комнаты: выдернутая вилка ложится на фальшпол, а не улетает за край страницы.
     for (const r of ropes.values()) { r.floor = R.height - 34; r.right = R.width - 8; }
+    if (kick) swing(kick);
+    kick = 0;
     wake();
+  }
+
+  // Стойка приехала из соседней (assets/js/aisle.js): кабели по инерции ещё едут в сторону хода и качаются.
+  function swing(dir) {
+    if (reduce.matches) return;
+    for (const r of ropes.values()) {
+      if (drag?.key === r.key) continue;
+      const n = r.pts.length - 1;
+      r.pts.forEach((p, i) => {
+        if (i === 0 || i === n) return;
+        const s = Math.sin(Math.PI * i / n);
+        p.px = p.x + dir * 6 * s;
+        p.py = p.y + 1.5 * s;
+      });
+    }
   }
 
   // ---------- физика ----------
@@ -461,4 +487,14 @@
 
   // Раскладку стойки считает app.js; провода — после неё.
   document.addEventListener('rack:laidout', () => requestAnimationFrame(relayout));
+
+  // Стойку подменили без перезагрузки (assets/js/aisle.js): у новой свой ИБП и свой свет в зале — их настоящие
+  // значения запомнить заново, юниты и кнопку сразу привести в состояние питания, пока стойку не показали.
+  document.addEventListener('rack:swap', () => {
+    lcdReal = lightReal = null;
+    if (!ensureDom()) return;
+    if (timer || !state.mains || state.charge !== null) runBattery();
+  });
+  // Доехала: следующая раскладка качнёт кабели (app.js раскладывает стойку на это же событие).
+  document.addEventListener('rack:landed', (e) => { kick = e.detail && !e.detail.quiet ? e.detail.dir || 0 : 0; });
 })();
