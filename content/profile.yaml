@@ -1,8 +1,15 @@
 # Профиль на юните-сервере. Тексты — ключи i18n (t), непереводимое — как есть (text).
 #   birthday — по нему site-api считает возраст и «день рождения через N дней» (по времени Барнаула);
 #   tapes    — ряды лент под именем: t — ключ i18n, text — надпись как есть, age — возраст,
-#              color — цвет ленты: пусто (серая), r (красная), b (синяя).
+#              color — цвет ленты: пусто (серая), r (красная), b (синяя);
+#   person   — кто я для поисковиков и превью ссылок (<head> главной: og profile, JSON-LD Person), на странице
+#              не видно. Ссылки на мои профили (sameAs) — порты свитча с me: true в contacts.yaml.
 birthday: "2006-05-25"
+person:
+  first: {en: Roman, ru: Роман}
+  last: {en: Kelesidis, ru: Келесидис}
+  username: belomaxorka
+  job: {en: web developer, ru: веб-разработчик}
 tapes:
   - - {t: me.pronouns}
     - {age: true}

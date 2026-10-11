@@ -1,0 +1,7 @@
+# belomaxorka.dev: everything is welcome except the htmx fragments (pieces of pages) and the health check.
+# Units pulled out (/u/...) and racks still being mounted say noindex themselves.
+User-agent: *
+Disallow: /fragments/
+Disallow: /healthz
+
+Sitemap: https://belomaxorka.dev/sitemap.xml

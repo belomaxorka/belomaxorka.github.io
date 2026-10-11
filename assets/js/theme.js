@@ -8,6 +8,23 @@
   } catch (e) {}
 })();
 
+// Цвет панели браузера (<meta name="theme-color">, по одному на тёмную и светлую тему системы): тема, выбранная
+// кнопкой (data-theme), важнее системной — тогда оба meta получают её цвет.
+(function () {
+  var r = document.documentElement, metas = document.querySelectorAll('meta[name="theme-color"][media]');
+  function paint() {
+    var t = r.dataset.theme, pick = '';
+    for (var i = 0; i < metas.length; i++) {
+      var m = metas[i];
+      if (!m.dataset.color) m.dataset.color = m.content;
+      if (t && m.media.indexOf(t) >= 0) pick = m.dataset.color;
+    }
+    for (var j = 0; j < metas.length; j++) metas[j].content = pick || metas[j].dataset.color;
+  }
+  paint();
+  new MutationObserver(paint).observe(r, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+
 // Переход между стойками ряда (View Transitions между страницами, assets/css/aisle.css): вперёд по ряду —
 // стойка уезжает влево, назад — вправо. Порядок стоек — <html data-racks>. Всё остальное (та же стойка,
 // выдвинутый юнит, админка) — без анимации. Здесь, а не в отложенном скрипте: pagereveal срабатывает

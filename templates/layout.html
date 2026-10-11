@@ -9,11 +9,54 @@
      Остальное (frame-ancestors, base-uri, form-action) site-api шлёт заголовком. */}}
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>belomaxorka's space</title>
-<meta name="description" content="{{t "meta.description"}}">
-<meta property="og:type" content="profile">
-<meta property="og:title" content="belomaxorka's space">
-<meta name="theme-color" content="#121315">
+{{- /* Для поисковиков и превью ссылок. У страницы один адрес на оба языка (язык — в cookie, ?lang=ru только
+     ставит её), краулеры приходят без cookie и видят английскую версию: canonical — адрес стойки без query,
+     hreflang нет (нет отдельных адресов). Выдвинутый юнит (/u/...) и стойка-заглушка — noindex.
+     Картинки превью — assets/og/<id стойки>.png, рисует docs/tools/og/make.mjs. */ -}}
+{{- $home := eq .Rack.Path "/"}}
+{{- $title := t "meta.title.home"}}{{if not $home}}{{$title = t "meta.title" (t (print "rack." .Rack.ID)) (t (print "rack." .Rack.ID ".sub"))}}{{end}}
+{{- $desc := t (print "meta.desc." .Rack.ID)}}
+{{- $url := print .URL .Rack.Path}}
+{{- $lcd := t "rack.cap"}}{{if not $home}}{{$lcd = print $lcd .Rack.Path}}{{end}}
+<title>{{$title}}</title>
+<meta name="description" content="{{$desc}}">
+{{if or .Open .Rack.Stub}}<meta name="robots" content="noindex">
+{{else}}<link rel="canonical" href="{{$url}}">
+{{end -}}
+<meta property="og:type" content="{{if $home}}profile{{else}}website{{end}}">
+<meta property="og:site_name" content="{{t "meta.site"}}">
+<meta property="og:title" content="{{$title}}">
+<meta property="og:description" content="{{$desc}}">
+<meta property="og:url" content="{{$url}}">
+<meta property="og:locale" content="{{t "meta.locale"}}">
+<meta property="og:locale:alternate" content="{{t "meta.locale_alt"}}">
+<meta property="og:image" content="{{.URL}}{{asset (print "og/" .Rack.ID ".png")}}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{t "meta.og_alt" $lcd}}">
+{{if $home}}{{with .Profile.Data.person -}}
+<meta property="profile:first_name" content="{{loc .first}}">
+<meta property="profile:last_name" content="{{loc .last}}">
+<meta property="profile:username" content="{{.username}}">
+{{end}}{{end -}}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image:alt" content="{{t "meta.og_alt" $lcd}}">
+{{- if and $home (not .Open)}}{{with .Profile.Data.person}}
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@graph": [
+  {"@type": "WebSite", "@id": {{print $.URL "/#website"}}, "url": {{print $.URL "/"}}, "name": {{t "meta.site"}}, "inLanguage": {{lang}}, "publisher": {"@id": {{print $.URL "/#me"}}}},
+  {"@type": "ProfilePage", "@id": {{print $.URL "/#page"}}, "url": {{print $.URL "/"}}, "name": {{$title}}, "description": {{$desc}}, "inLanguage": {{lang}},
+   "isPartOf": {"@id": {{print $.URL "/#website"}}}, "mainEntity": {"@id": {{print $.URL "/#me"}}}, "dateModified": {{$.Updated}}},
+  {"@type": "Person", "@id": {{print $.URL "/#me"}}, "name": {{print (loc .first) " " (loc .last)}}, "givenName": {{loc .first}}, "familyName": {{loc .last}},
+   "alternateName": {{.username}}, "jobTitle": {{loc .job}}, "url": {{print $.URL "/"}}{{with $.Profile.Avatars}}, "image": {{print $.URL (index . 0)}}{{end}},
+   "sameAs": [{{$first := true}}{{range $.Content.contacts}}{{if .me}}{{if not $first}}, {{end}}{{.link}}{{$first = false}}{{end}}{{end}}]}
+]}
+</script>
+{{- end}}{{end}}
+{{- /* Цвет панели браузера — фон зала в теме посетителя; выбранную вручную тему учитывает assets/js/theme.js. */}}
+<meta name="theme-color" content="#121315" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#d8d2c4" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="{{asset "icons/favicon.svg"}}" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{{asset "icons/apple-touch-icon.png"}}">

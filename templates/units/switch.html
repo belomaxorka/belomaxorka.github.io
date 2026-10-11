@@ -4,7 +4,7 @@
   <div class="face">
     <span class="silk">{{t "sw.title"}}</span>
     <div class="ports">
-      {{range .Content.contacts}}{{if and .link (or (not .needs) $.HasCV)}}<a class="port" href="{{.link}}"{{if not .needs}}{{with .title}} title="{{loc .}}"{{end}}{{end}}><i class="jack"></i><span class="tape{{with .tape}} {{.}}{{end}}">{{loc .name}}</span><i class="led{{with .led}} {{.}}{{end}}"></i></a>{{else}}<span class="port off"{{with .title}} title="{{loc .}}"{{end}}><i class="jack"></i><span class="tape{{with .tape}} {{.}}{{end}}">{{loc .name}}</span><i class="led off"></i></span>{{end}}
+      {{range .Content.contacts}}{{if and .link (or (not .needs) $.HasCV)}}<a class="port" href="{{.link}}"{{if .me}} rel="me"{{end}}{{if not .needs}}{{with .title}} title="{{loc .}}"{{end}}{{end}}><i class="jack"></i><span class="tape{{with .tape}} {{.}}{{end}}">{{loc .name}}</span><i class="led{{with .led}} {{.}}{{end}}"></i></a>{{else}}<span class="port off"{{with .title}} title="{{loc .}}"{{end}}><i class="jack"></i><span class="tape{{with .tape}} {{.}}{{end}}">{{loc .name}}</span><i class="led off"></i></span>{{end}}
       {{end}}
     </div>
   </div>
