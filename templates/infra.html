@@ -246,8 +246,7 @@
 </head>
 <body>
 <pre>
-<span class="sh">&gt; </span>fastfetch
-{{if .Lab.OK}}{{$n := .Lab.Node -}}
+<span class="sh">&gt; </span>fastfetch{{if .Lab.OK}}{{$n := .Lab.Node}}
          .://:`              `://:.            <b class="o">root</b>@<b class="o">{{$n.Name}}</b>
        `hMMMMMMd/          /dMMMMMMh`          ----------------
         `sMMMMMMMd:      :mMMMMMMMs`           <i>OS</i>: Proxmox VE{{with $n.PVE}} {{.}}{{end}} x86_64
@@ -269,7 +268,7 @@
        `hMMMMMMd/          /dMMMMMMh`
          `://:`              `://:`            {{template "ff-colors" 0}}
                                                {{template "ff-colors" 1}}
-{{else -}}
+{{else}}
 fastfetch: the host is not answering. probably on a smoke break, try again in a minute
 {{end}}
 <span class="sh">&gt; </span><a href="/">cd ..</a><span class="caret">&nbsp;</span>
