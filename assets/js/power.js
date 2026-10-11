@@ -6,7 +6,7 @@
 // заряжается и стойка загружается. У каждой стойки ряда своё питание: свой ИБП, кнопка, шнур, батарея, вилки.
 // Щиток на стене зала (рядом с розеткой) обесточивает розетки всего ряда разом: все ИБП уходят на батарею, каждая
 // стойка живёт, пока держит её батарея. Батарея считается по времени: ушёл к другой стойке — эта садится дальше.
-// Состояние только у посетителя (localStorage). Погасший юнит не нажимается (inert); событие rack:unit на юните
+// Состояние только у посетителя (localStorage, на полчаса: Rack.toyStore). Погасший юнит не нажимается (inert); событие rack:unit на юните
 // говорит тем, кто внутри, что он погас или загрузился.
 // Без JS всего этого нет: юниты просто горят и работают.
 (() => {
@@ -20,12 +20,8 @@
   const DRAIN = 90, CHARGE = 30; // секунд на разрядку и зарядку батареи (ускорено, чтобы было видно)
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
-  const store = {
-    get() { try { return JSON.parse(localStorage.getItem('rack-power') || '{}'); } catch { return {}; } },
-    set(v) { try { localStorage.setItem('rack-power', JSON.stringify(v)); } catch {} },
-  };
-  // { racks: { <id стойки>: { off, unplugged, mains, charge, at } }, breaker, breakerAt }. Старое общее на весь ряд
-  // питание ({ off, unplugged, mains, charge }) забывается: всё включено.
+  // { racks: { <rack id>: { off, unplugged, mains, charge, at } }, breaker, breakerAt }, for Rack.TOY_TTL (rack.js).
+  const store = Rack.toyStore('rack-power', () => ({}));
   const saved = store.get();
   const all = { racks: saved.racks || {}, breaker: saved.breaker !== false, breakerAt: saved.breakerAt || 0 };
   const save = () => store.set(all);

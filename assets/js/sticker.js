@@ -3,17 +3,15 @@
 //   - выдернули вилку юнита, на котором стикер (data-sticker = ключ питания юнита в power.js, srv — сервер);
 //   - погасла вся стойка: кнопка на ИБП или села батарея — тогда падают все стикеры, вразнобой.
 // Шнур ИБП из розетки стикеры не трогает: батарея ещё держит. Тап по упавшему — прилипает обратно.
-// Где лежат — только у посетителя (localStorage), у каждой стойки свои: стикер ИБП есть на каждой. Без JS стикеры
+// Где лежат — только у посетителя (localStorage, на полчаса), у каждой стойки свои: стикер ИБП есть на каждой. Без JS стикеры
 // просто наклеены.
 (() => {
-  const KEY = 'stickers-fallen';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-  const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
-  const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(all)); } catch {} };
-  // Стойка → ключ стикера → { fx: x центра как доля ширины комнаты, dy: разброс по высоте, rot }.
-  let all = load();
-  // Раньше упавшие были общими на весь ряд (ключ → место): это была главная стойка.
-  if (Object.values(all).some((v) => v && 'fx' in v)) { all = { home: all }; if (all.home.mains) { all.home.ups = all.home.mains; delete all.home.mains; } keep(); }
+  // Rack → sticker key → { fx: the centre's x as a share of the room's width, dy: height spread, rot }, for
+  // Rack.TOY_TTL (rack.js).
+  const store = Rack.toyStore('stickers-fallen', () => ({}));
+  const all = store.get();
+  const keep = () => store.set(all);
   const live = new Map();  // ключ → { el, w, h, x, y, rot, flying }
 
   const room = () => document.getElementById('room');

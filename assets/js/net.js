@@ -12,15 +12,12 @@
 //   - коммутатор или роутер обесточен (power.js; экраны и лампы тогда гасит CSS сам).
 // Корды кольца из патч-панели не выдёргиваются: их гнёзда — ссылки кольца, а оно работает всегда.
 // Разводку рисует app.js (cables): спрашивает здесь, какие корды выдернуты (rack:pulled), рисует их без хвоста и отдаёт
-// все корды с rack:laidout. Выдернутые — только у посетителя (localStorage), у каждой стойки свои. Корд, которого на
+// все корды с rack:laidout. Выдернутые — только у посетителя (localStorage, на полчаса), у каждой стойки свои. Корд, которого на
 // этой ширине не видно (телефон: нет сетевых карт), считается воткнутым. Без JS нет ни кордов, ни всего этого.
 (() => {
   const NS = 'http://www.w3.org/2000/svg';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-  const store = {
-    get() { try { return JSON.parse(localStorage.getItem('rack-net') || '{}'); } catch { return {}; } },
-    set(v) { try { localStorage.setItem('rack-net', JSON.stringify(v)); } catch {} },
-  };
+  const store = Rack.toyStore('rack-net', () => ({})); // for Rack.TOY_TTL (rack.js)
   const saved = store.get();
   const out = saved.out && typeof saved.out === 'object' ? saved.out : {}; // 'home/mgmt' → 1: корд выдернут
   const save = () => store.set({ out });
