@@ -6,6 +6,8 @@
   --hall-bg: #0e1012; --hall-wall: #15181b; --tile: #1c1f23; --tile-line: #0a0b0d; --hole-c: #07080a;
   --tray: #3a3e45; --duct: #d8b23a; --lamp: #eaf2ff; --lamp-on: 1; --cold: #3d7bd9; --cold-a: .22;
   --nb-dim: .55;
+  /* Соседние стойки: рельсы, корпус, юниты, заглушки, блик по кромке юнита. */
+  --nb-rail: #2b2e33; --nb-body: #0b0c0e; --nb-edge: #000; --nu-a: #24272c; --nu-b: #1b1d21; --nu-blank: #101113; --nu-hi: #ffffff10;
   position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
   background: linear-gradient(var(--hall-wall), var(--hall-bg) 70%);
   transition: filter .8s, background .8s;
@@ -49,13 +51,13 @@
 .hall .nbr {
   position: relative; height: 100%; border-radius: 6px;
   background:
-    linear-gradient(90deg, #2b2e33 0 34px, transparent 34px calc(100% - 34px), #2b2e33 0),
-    #0b0c0e;
-  box-shadow: inset 0 0 0 1px #000, 0 20px 40px -10px #000;
+    linear-gradient(90deg, var(--nb-rail) 0 34px, transparent 34px calc(100% - 34px), var(--nb-rail) 0),
+    var(--nb-body);
+  box-shadow: inset 0 0 0 1px var(--nb-edge), 0 20px 40px -10px #000;
   display: flex; flex-direction: column; gap: 6px; padding: 30px 40px;
 }
-.hall .nu { flex: 1; max-height: 88px; border-radius: 3px; background: linear-gradient(#24272c, #1b1d21); box-shadow: inset 0 1px 0 #ffffff10; }
-.hall .nu:nth-child(3n) { flex: 2; } .hall .nu:nth-child(5n) { background: #101113; }
+.hall .nu { flex: 1; max-height: 88px; border-radius: 3px; background: linear-gradient(var(--nu-a), var(--nu-b)); box-shadow: inset 0 1px 0 var(--nu-hi); }
+.hall .nu:nth-child(3n) { flex: 2; } .hall .nu:nth-child(5n) { background: var(--nu-blank); }
 .hall .leds {
   position: absolute; inset: 44px 60px; display: grid; grid-template-columns: repeat(2, 10px) 1fr repeat(2, 10px);
   grid-auto-rows: 66px; gap: 0 12px; align-content: start;
@@ -114,14 +116,21 @@
   .hall .floor { height: 110px; }
 }
 
-/* ---------- светлая тема: бежевая кладовка вместо зала ---------- */
+/* ---------- светлая тема: тот же машинный зал днём ----------
+   Ряд стоек, потолок с лотками и жёлтым коробом, фальшпол — как ночью, только светлые (2026-10-11; раньше днём
+   была «бежевая кладовка» без соседей и потолка). Меняются только цвета. */
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .hall { --hall-bg: #cfc6b2; --hall-wall: #e2dac8; --tile: #b98e5e; --tile-line: #8d6a43; --hole-c: transparent; --tray: #a39b8a; --duct: #c9b98f; --lamp: #fff6dc; --cold-a: 0; --nb-dim: 1; }
+  :root:not([data-theme="dark"]) .hall {
+    --hall-bg: #d3cec3; --hall-wall: #e8e4db; --tile: #d9d4c9; --tile-line: #b9b2a3; --hole-c: #b4ad9e;
+    --tray: #a8a191; --duct: #d9b73f; --lamp: #fffaf0; --cold-a: .12; --nb-dim: .97;
+    --nb-rail: #b8b1a1; --nb-body: #c9c2b2; --nb-edge: #9e9686; --nu-a: #efebe2; --nu-b: #e0d9cb; --nu-blank: #bdb6a6; --nu-hi: #fff9;
+  }
 }
-:root[data-theme="light"] .hall { --hall-bg: #cfc6b2; --hall-wall: #e2dac8; --tile: #b98e5e; --tile-line: #8d6a43; --hole-c: transparent; --tray: #a39b8a; --duct: #c9b98f; --lamp: #fff6dc; --cold-a: 0; --nb-dim: 1; }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .hall .nb { display: none; } :root:not([data-theme="dark"]) .hall { background: repeating-linear-gradient(90deg, #0000 0 38px, #00000008 38px 40px), linear-gradient(var(--hall-wall), var(--hall-bg)); } }
-:root[data-theme="light"] .hall .nb { display: none; }
-:root[data-theme="light"] .hall { background: repeating-linear-gradient(90deg, #0000 0 38px, #00000008 38px 40px), linear-gradient(var(--hall-wall), var(--hall-bg)); }
+:root[data-theme="light"] .hall {
+  --hall-bg: #d3cec3; --hall-wall: #e8e4db; --tile: #d9d4c9; --tile-line: #b9b2a3; --hole-c: #b4ad9e;
+  --tray: #a8a191; --duct: #d9b73f; --lamp: #fffaf0; --cold-a: .12; --nb-dim: .97;
+  --nb-rail: #b8b1a1; --nb-body: #c9c2b2; --nb-edge: #9e9686; --nu-a: #efebe2; --nu-b: #e0d9cb; --nu-blank: #bdb6a6; --nu-hi: #fff9;
+}
 
 /* ---------- проход в перспективе: пол и потолок уходят вглубь ---------- */
 .hall .floor { perspective: 420px; }
@@ -146,11 +155,3 @@
   opacity: .9;
 }
 .hall .ceiling .mark { position: absolute; left: 41%; top: calc(var(--k) * 3%); width: 1px; height: 1px; }
-
-/* Светлая тема — кладовка: без потолка с лотками, пол дощатый. */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .hall .ceiling .plane { display: none; }
-  :root:not([data-theme="dark"]) .hall .floor::before { background: repeating-linear-gradient(90deg, var(--tile) 0 118px, var(--tile-line) 118px 120px); }
-}
-:root[data-theme="light"] .hall .ceiling .plane { display: none; }
-:root[data-theme="light"] .hall .floor::before { background: repeating-linear-gradient(90deg, var(--tile) 0 118px, var(--tile-line) 118px 120px); }
