@@ -82,7 +82,7 @@
   //
   <a href="https://belomaxorka.dev"{{ext "https://belomaxorka.dev"}}>belomaxorka.dev</a>
   //
-  {{if eq lang "ru"}}<a href="?lang=en" hreflang="en" lang="en">en</a>{{else}}<a href="?lang=ru" hreflang="ru" lang="ru">ru</a>{{end}}
+  {{- range langs}}{{if ne . lang}} <a href="?lang={{.}}" hreflang="{{.}}" lang="{{.}}">{{.}}</a>{{end}}{{end}}
 </footer>
 {{- $code := `<a href="https://infra.belomaxorka.dev"><img src="https://belomaxorka.dev/88x31/infra.gif" width="88" height="31" alt="hosted on belomaxorka infrastructure"></a>`}}
 <div class="badge">
@@ -188,7 +188,7 @@
          .://:`              `://:.            <b class="o">root</b>@<b class="o">{{$n.Name}}</b>
        `hMMMMMMd/          /dMMMMMMh`          ----------------
         `sMMMMMMMd:      :mMMMMMMMs`           <i>OS</i>: Proxmox VE{{with $n.PVE}} {{.}}{{end}} x86_64
-`<b class="o">-/+oo+/:`</b>.yMMMMMMMh-  -hMMMMMMMy.`<b class="o">:/+oo+/-`</b>   <i>Host</i>: ASUS PRIME Z390-A
+`<b class="o">-/+oo+/:`</b>.yMMMMMMMh-  -hMMMMMMMy.`<b class="o">:/+oo+/-`</b>   <i>Host</i>: {{with $.Content.hardware}}{{or .host "unknown"}}{{else}}unknown{{end}}
 `<b class="o">:oooooooo/`</b>-hMMMMMMMyyMMMMMMMh-`<b class="o">/oooooooo:`</b>   <i>Kernel</i>: Linux{{with $n.Kernel}} {{.}}{{end}}
   `<b class="o">/oooooooo:`</b>:mMMMMMMMMMMMMm:`<b class="o">:oooooooo/</b>`     <i>Uptime</i>: {{uptime $n.Uptime}}
     <b class="o">./ooooooo+-</b> +NMMMMMMMMN+ <b class="o">-+ooooooo/.</b>       <i>Guests</i>: {{.Lab.Up}} running, {{.Lab.Total}} total (pct)
@@ -199,7 +199,7 @@
         <b class="o">-+ooooooo/.`</b>sMMs`<b class="o">./ooooooo+-</b>           <i>Swap</i>: {{if $n.MaxSwapGiB}}{{printf "%.2f" $n.SwapGiB}} GiB / {{printf "%.2f" $n.MaxSwapGiB}} GiB ({{template "ff-pct" $n.Swap}}){{else}}Disabled{{end}}
       <b class="o">.+ooooooo+-</b>`oNMMMMNo`<b class="o">-+ooooooo+.</b>         <i>Disk (/)</i>: {{if $n.MaxRootGiB}}{{printf "%.2f" $n.RootGiB}} GiB / {{printf "%.2f" $n.MaxRootGiB}} GiB ({{template "ff-pct" $n.Root}}){{else}}unknown{{end}}
     <b class="o">./ooooooo+-</b> +NMMMMMMMMN+ <b class="o">-+ooooooo/.</b>       <i>Load</i>: {{with index $n.Load 0}}{{.}}, {{index $n.Load 1}}, {{index $n.Load 2}}{{else}}unknown{{end}}
-  `<b class="o">/oooooooo:`</b>:mMMMMMMMMMMMMm:`<b class="o">:oooooooo/</b>`     <i>Battery (CBR ESN-1KT)</i>: {{with .UPS}}{{if .OK}}{{template "ff-batt" .Charge}} [{{if .OnBattery}}Discharging{{else if .Charging}}Charging{{else}}AC Connected{{end}}]{{else}}unknown{{end}}{{end}}
+  `<b class="o">/oooooooo:`</b>:mMMMMMMMMMMMMm:`<b class="o">:oooooooo/</b>`     <i>Battery{{with $.Content.hardware}}{{with .ups}}{{with .model}} ({{.}}){{end}}{{end}}{{end}}</i>: {{with .UPS}}{{if .OK}}{{template "ff-batt" .Charge}} [{{if .OnBattery}}Discharging{{else if .Charging}}Charging{{else}}AC Connected{{end}}]{{else}}unknown{{end}}{{end}}
 `<b class="o">:oooooooo/`</b>-hMMMMMMMyyMMMMMMMh-`<b class="o">/oooooooo:`</b>   <i>Monitoring</i>: {{with .Status}}{{if .OK}}<span class="{{if eq .Up .Total}}g{{else}}r{{end}}">{{.Up}}/{{.Total}}</span> checks up (Gatus){{else}}unknown{{end}}{{end}}
 `<b class="o">-/+oo+/:`</b>.yMMMMMMMh-  -hMMMMMMMy.`<b class="o">:/+oo+/-`</b>   <i>Smoke detector</i>: disabled
         `sMMMMMMMm:      :dMMMMMMMs`           <i>Locale</i>: ru_RU.UTF-8
