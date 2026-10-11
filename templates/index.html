@@ -8,7 +8,7 @@
   {{template "aisle" .}}
   <div class="rack{{if .Rack.Stub}} stub{{end}}" id="rack">
     <div class="cap"><span>{{t "rack.cap"}} · r{{.Rack.N}} · {{t (print "rack." .Rack.ID)}}</span></div>
-    <div class="body" id="rack-body">
+    <div class="body" id="rack-body" data-nolink="{{t "net.lost"}}" data-nonet="{{t "net.nointernet"}}">
       <div class="rail l" aria-hidden="true"></div>
       <div class="rail r" aria-hidden="true"></div>
       {{range .Rack.Units}}

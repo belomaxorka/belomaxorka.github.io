@@ -192,6 +192,8 @@
   "btn.people": "люди",
   "btn.sites": "сайты и всякое",
 
+  "net.lost": "связь потеряна",
+  "net.nointernet": "нет интернета",
   "net.router": "роутер · файрвол",
   "net.router_lcd": "wan в порядке · dns по tls",
   "cable.uplink_r1": "аплинк к r1 ↑",

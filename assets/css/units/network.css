@@ -79,3 +79,28 @@
   .tor .leds, .rtr .leds, .rtr-ports .silk, .tor-id .silk { display: none; }
   .tor .face, .rtr .face { gap: 10px; }
 }
+
+/* ---------- нет связи ----------
+   Обесточен роутер (на главной) — у подключённых юнитов «нет интернета»; обесточен коммутатор — «связь потеряна»
+   (правило ниже перекрывает). Данные на экранах никуда не деваются, их просто не видно; вернули питание — вернулись.
+   Юниты без сетевой карты (ИБП, заглушки) и обесточенные сами (у них «нет сигнала») не трогаются. */
+.rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet],
+.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nolink] { position: relative; }
+.rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet] *,
+.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nolink] * { visibility: hidden; }
+.rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) .lcd[data-nonet],
+.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) .lcd[data-nolink] { color: transparent; text-shadow: none; }
+.rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet]::after {
+  content: attr(data-nonet); position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+  font: 400 20px/1 var(--f-lcd); letter-spacing: .06em; color: var(--lcd); text-shadow: 0 0 6px color-mix(in srgb, var(--lcd) 45%, transparent);
+}
+.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nolink]::after { content: attr(data-nolink); }
+.rack:has(#rack-body > .u.tor.off) .u.has-nic:not(.off) .screen[data-nolink]::after,
+.rack:has(#rack-body > .u.rtr.off) .u.has-nic:not(.off) .screen[data-nonet]::after { color: #9fb09c; text-shadow: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.has-nic:not(.off) :is(.lcd, .screen)::after { animation: nolink 1.6s steps(2, jump-none) infinite; }
+}
+@keyframes nolink { 50% { opacity: .35; } }
+/* Без связи статусы неизвестны: лампы мониторинга и шкалы контейнеров гаснут. */
+.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.mon.has-nic:not(.off) .matrix .led,
+.rack:has(#rack-body > .u.tor.off) .u.ct.has-nic:not(.off) .meter i { background: var(--led-off); box-shadow: none; animation: none; }

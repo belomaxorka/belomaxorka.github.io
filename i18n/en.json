@@ -192,6 +192,8 @@
   "btn.people": "people",
   "btn.sites": "sites and things",
 
+  "net.lost": "connection lost",
+  "net.nointernet": "no internet",
   "net.router": "router · firewall",
   "net.router_lcd": "wan ok · dns over tls",
   "cable.uplink_r1": "uplink to r1 ↑",

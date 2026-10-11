@@ -241,6 +241,12 @@
       body.prepend(vm);
     }
     const units = [...body.querySelectorAll(':scope > .u')].filter(u => u.dataset.power || NETWORKED.some(k => u.classList.contains(k)));
+    // Экраны подключённых юнитов знают, что показать без связи (CSS: network.css, «нет связи»). После каждого
+    // обновления htmx юнит приходит заново, поэтому подписи ставятся при каждой раскладке.
+    units.forEach(u => u.querySelectorAll('.lcd, .screen').forEach(d => {
+      d.dataset.nolink = body.dataset.nolink || '';
+      d.dataset.nonet = body.dataset.nonet || '';
+    }));
     units.forEach((u, i) => {
       if (u.querySelector(':scope > .nic')) return;
       const n = document.createElement('span');
