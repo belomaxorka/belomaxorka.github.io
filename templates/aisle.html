@@ -20,9 +20,9 @@
 <div class="hall" aria-hidden="true">
   <div class="ceiling"><div class="plane">{{range seq 13}}<i class="mark" style="--k: {{.}}"></i>{{end}}</div><i class="tray"></i><i class="duct"></i><i class="lamp a"></i><i class="lamp b"></i><i class="lamp c"></i></div>
   <div class="nb ll">{{template "nb-rack" .Status.Lamps}}</div>
-  <div class="nb l">{{template "nb-rack" .Status.Lamps}}</div>
+  <div class="nb l"{{with .Rack.Prev}} data-rack="{{.ID}}"{{if .Stub}} data-noups{{end}}{{end}}>{{template "nb-rack" .Status.Lamps}}</div>
   <div class="nb c">{{template "nb-rack" .Status.Lamps}}</div>
-  <div class="nb r">{{template "nb-rack" .Status.Lamps}}</div>
+  <div class="nb r"{{with .Rack.Next}} data-rack="{{.ID}}"{{if .Stub}} data-noups{{end}}{{end}}>{{template "nb-rack" .Status.Lamps}}</div>
   <div class="nb rr">{{template "nb-rack" .Status.Lamps}}</div>
   <div class="floor"><i class="vent"></i></div>
   <div class="exit">{{t "hall.exit"}}</div>

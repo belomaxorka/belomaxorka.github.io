@@ -102,6 +102,8 @@
 }
 /* Без линка нет ни связи, ни интернета: две строки. */
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)[data-nolink]::after { content: attr(data-nolink) "\A" attr(data-nonet); }
+/* Экранам хоста Proxmox и контейнеров интернет не нужен (app.js не даёт им data-nonet): одна строка. */
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)[data-nolink]:not([data-nonet])::after { content: attr(data-nolink); }
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) .screen[data-nolink]::after,
 :is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) .screen[data-nonet]::after { color: #9fb09c; text-shadow: none; }
 @media (prefers-reduced-motion: no-preference) {

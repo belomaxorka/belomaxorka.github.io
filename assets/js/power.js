@@ -174,6 +174,7 @@
     if (rack) rack.classList.toggle('powered-off', state.off || dead());
     wireButton();
     breaker();
+    neighbours();
     return true;
   }
 
@@ -187,7 +188,20 @@
   const upsUnit = () => document.querySelector('#rack-body > .ups');
   const upsLcd = () => document.querySelector('#rack-body > .ups .lcd');
   const full = () => { const v = parseInt(upsLcd()?.dataset.charge, 10); return v > 0 ? v : 100; };
-  function dead() { return !fed(state) && state.charge !== null && state.charge <= 0; }
+  // Села батарея — или у стойки нет ИБП вовсе (заглушки ряда): тогда она живёт, только пока в розетке ток.
+  function dead() { return upsUnit() ? dying(state) : !fed(state); }
+  const dying = (r) => !fed(r) && r.charge !== null && r.charge <= 0;
+
+  // Соседние стойки в зале (data-rack у .nb в templates/aisle.html) — те же стойки ряда: их лампы гаснут, когда та
+  // стойка выключена кнопкой ИБП или села её батарея (заряд досчитан по часам), у стойки без ИБП — без тока.
+  function neighbours() {
+    const now = Date.now();
+    document.querySelectorAll('.hall .nb[data-rack]').forEach((nb) => {
+      const r = rackState(nb.dataset.rack);
+      settle(r, now);
+      nb.classList.toggle('dark', r.off || ('noups' in nb.dataset ? !fed(r) : dying(r)));
+    });
+  }
 
   // Стойка без ИБП (заглушки ряда) тоже живёт от него: свет в зале и юниты — как у всех, только ЖК нет.
   function battery() {
@@ -210,6 +224,7 @@
       room.dataset.light = lightReal;
       upsUnit()?.classList.remove('off');
       rack?.classList.toggle('powered-off', state.off);
+      neighbours();
       return;
     }
     const isDead = dead();
@@ -217,6 +232,7 @@
     upsUnit()?.classList.toggle('off', isDead);
     rack?.classList.toggle('powered-off', state.off || isDead);
     if (lcd) screen(lcd, isDead);
+    neighbours();
     // Батарея села — всё гаснет; вернулось питание — юниты загружаются сверху вниз. Сообщить только о смене
     // на глазах у посетителя, не о состоянии, с которым страница открылась.
     if (isDead !== wasDead) {

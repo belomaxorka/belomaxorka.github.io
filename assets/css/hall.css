@@ -72,6 +72,9 @@
   .hall .leds i:nth-child(7n+2) { animation: nb-blink 2.6s steps(2, jump-none) infinite 1.1s; }
 }
 @keyframes nb-blink { 50% { opacity: .25; } }
+/* Соседняя стойка погасла (power.js: кнопка её ИБП, села батарея, у стойки без ИБП — щиток): лампы не горят. */
+.hall .nb.dark .leds i { background: var(--led-off) !important; box-shadow: none !important; animation: none !important; }
+.hall .nb.dark .nbr { filter: brightness(.8); }
 
 /* Фальшпол под стойкой: плитки и перфорация холодного коридора. */
 .hall .floor { inset: auto 0 0; height: 150px; }

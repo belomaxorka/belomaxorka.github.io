@@ -68,8 +68,9 @@
     body.querySelectorAll(':scope > .u').forEach((u) => u.classList.toggle('unlinked', lost.has(u)));
     const cut = (k) => has(k) && down(k);
     if (rtr) {
+      // LAN роутера смотрит в коммутатор: обесточен коммутатор — линка на LAN нет, как и с выдернутым кордом.
       rtr.classList.toggle('nowan', cut('wan'));
-      rtr.classList.toggle('nolan', cut('lan'));
+      rtr.classList.toggle('nolan', cut('lan') || !!body.querySelector(':scope > .u.tor.off'));
     }
     rk.classList.toggle('nonet', cut('lan') || cut('wan') || cut('uplink'));
     // Связь вернулась — кто пропустил обновление, обновляется, пустые ящики загружаются.

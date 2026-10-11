@@ -262,11 +262,13 @@
     const units = [...body.querySelectorAll(':scope > .u')].filter(keyOf);
     // Экраны подключённых юнитов знают, что показать без связи (CSS: network.css, «нет связи»). После каждого
     // обновления htmx юнит приходит заново, поэтому подписи ставятся при каждой раскладке. Счётчик фото под
-    // аватарками (.gal-ctl) — не экран сети: фото свои, и надпись туда не влезет.
+    // аватарками (.gal-ctl) — не экран сети: фото свои, и надпись туда не влезет. Хост Proxmox и контейнеры (/lab)
+    // говорят только с локальной сетью: без линка — «связь потеряна», а без интернета им показывать нечего другого.
     units.forEach(u => u.querySelectorAll('.lcd, .screen').forEach(d => {
       if (d.closest('.gal-ctl')) return;
       d.dataset.nolink = body.dataset.nolink || '';
-      d.dataset.nonet = body.dataset.nonet || '';
+      if (u.matches('.pve, .ct')) delete d.dataset.nonet;
+      else d.dataset.nonet = body.dataset.nonet || '';
     }));
     units.forEach((u, i) => {
       // Класс — каждый раз: htmx, подменив юнит, на settle возвращает ему class из ответа, а карта уже вставлена.
