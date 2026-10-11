@@ -1,18 +1,20 @@
-{{/* Журнал: прослушивания Koito, новые сверху, до 20 строк, с треком, который играет сейчас. Проверки Gatus тут были
-     и забивали всё (по одной на лампу каждую минуту) — их показывает мониторинг. Список прокручивается, прокрутка
-     переживает обновление htmx раз в минуту (/fragments/syslog). Строка помечена data-kind (не data-src:
-     html/template считает *src* ссылкой и кодирует значение) — пригодится, когда появится второй источник. */}}
+{{/* Журнал: прослушивания Koito и редкие живые события вокруг них, новые сверху, до 45 строк (site-api решает, что
+     и сколько). Событие говорит i18n-ключ log.ev.<What>, ему передаются Subject, N и Dur (через uptime) как
+     %[1]s, %[2]d и %[3]s. Метки во второй колонке: ♪ музыка, net — сервис упал/поднялся, ups, pve — Proxmox,
+     gb — гостевая, code — Wakapi. Проверки Gatus по одной тут не показываются: забивали всё, их видно на мониторе.
+     Строка помечена data-kind (не data-src: html/template считает *src* ссылкой и кодирует значение).
+     Список прокручивается, прокрутка переживает обновление htmx раз в минуту (/fragments/syslog). */}}
 {{define "unit-syslog"}}
 <section class="u log" style="--h:5" aria-label="{{t "log.aria"}}" id="unit-syslog"
   hx-get="/fragments/syslog" hx-trigger="every 60s" hx-swap="outerHTML">
   <div class="face">
     <div class="bar">
-      <span class="silk">syslog · koito</span>
+      <span class="silk">syslog · koito, gatus, ups, proxmox, wakapi</span>
       <a class="key" href="https://blog.belomaxorka.dev">{{t "log.blog"}}</a>
     </div>
     <div class="lcd">
       {{if .}}<ol tabindex="0" aria-label="{{t "log.aria"}}">
-        {{range .}}<li data-kind="{{if eq .Src "♪"}}music{{else}}{{.Src}}{{end}}"{{with .State}} class="{{.}}"{{end}}><span class="d">{{stamp .At}}</span><span class="src">{{.Src}}</span><span>{{if .Now}}{{t "log.now"}} {{end}}{{if .URL}}<a href="{{.URL}}">{{.Text}}</a>{{else}}{{.Text}}{{end}}</span></li>
+        {{range .}}<li data-kind="{{if eq .Src "♪"}}music{{else}}{{.Src}}{{end}}" class="{{if .What}}ev {{end}}{{.State}}"><span class="d">{{stamp .At}}</span><span class="src">{{.Src}}</span><span>{{if .What}}{{if .URL}}<a href="{{.URL}}">{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}</a>{{else}}{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}{{end}}{{else}}{{if .Now}}{{t "log.now"}} {{end}}{{if .URL}}<a href="{{.URL}}">{{.Text}}</a>{{else}}{{.Text}}{{end}}{{end}}</span></li>
         {{end}}
       </ol>{{else}}<span class="d">{{t "log.quiet"}}</span>{{end}}
     </div>

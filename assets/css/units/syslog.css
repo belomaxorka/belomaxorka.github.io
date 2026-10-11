@@ -1,4 +1,4 @@
-/* Журнал: прослушивания из Koito, прокручивается внутри экрана. */
+/* Журнал: прослушивания из Koito и редкие события, прокручивается внутри экрана. События — тусклее музыки. */
 .log .face { align-items: stretch; flex-direction: column; padding-block: 12px; }
 .log .face > * { flex-shrink: 0; }
 .log .bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -11,6 +11,8 @@
 .log ol:focus-visible { outline: 1px dashed var(--lcd-dim); outline-offset: 2px; }
 .log li { display: grid; grid-template-columns: 10ch 5ch minmax(0, 1fr); gap: 10px; white-space: nowrap; }
 .log li span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.log li.ev { color: var(--lcd-dim); }
+.log li.ev a { color: inherit; }
 .log li.warn { color: var(--led-warn); }
 .log li.err { color: var(--led-err); }
 @media (max-width: 560px) {
