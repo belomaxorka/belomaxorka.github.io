@@ -12,12 +12,12 @@
 {{- /* Для поисковиков и превью ссылок. У страницы один адрес на оба языка (язык — в cookie, ?lang=ru только
      ставит её), краулеры приходят без cookie и видят английскую версию: canonical — адрес стойки без query,
      hreflang нет (нет отдельных адресов). Выдвинутый юнит (/u/...) и стойка-заглушка — noindex.
-     Картинки превью — assets/og/<id стойки>.png, рисует docs/tools/og/make.mjs. */ -}}
+     Картинка превью и описание — одни на весь сайт (assets/og/site.png, docs/tools/og/make.mjs; i18n meta.desc):
+     новая стойка ничего здесь не требует. Заголовок — свой у каждой стойки, из её же подписей rack.<id>. */ -}}
 {{- $home := eq .Rack.Path "/"}}
 {{- $title := t "meta.title.home"}}{{if not $home}}{{$title = t "meta.title" (t (print "rack." .Rack.ID)) (t (print "rack." .Rack.ID ".sub"))}}{{end}}
-{{- $desc := t (print "meta.desc." .Rack.ID)}}
+{{- $desc := t "meta.desc"}}
 {{- $url := print .URL .Rack.Path}}
-{{- $lcd := t "rack.cap"}}{{if not $home}}{{$lcd = print $lcd .Rack.Path}}{{end}}
 <title>{{$title}}</title>
 <meta name="description" content="{{$desc}}">
 {{if or .Open .Rack.Stub}}<meta name="robots" content="noindex">
@@ -30,11 +30,11 @@
 <meta property="og:url" content="{{$url}}">
 <meta property="og:locale" content="{{t "meta.locale"}}">
 <meta property="og:locale:alternate" content="{{t "meta.locale_alt"}}">
-<meta property="og:image" content="{{.URL}}{{asset (print "og/" .Rack.ID ".png")}}">
+<meta property="og:image" content="{{.URL}}{{asset "og/site.png"}}">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="{{t "meta.og_alt" $lcd}}">
+<meta property="og:image:alt" content="{{t "meta.og_alt"}}">
 {{if $home}}{{with .Profile.Data.person -}}
 <meta property="profile:first_name" content="{{loc .first}}">
 <meta property="profile:last_name" content="{{loc .last}}">

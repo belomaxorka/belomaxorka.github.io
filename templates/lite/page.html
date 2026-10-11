@@ -1,7 +1,9 @@
 {{/* Лёгкая версия: та же стойка для старых браузеров (Netscape, IE, Lynx, Dillo) — HTML 3.2, без CSS и скриптов.
      Рендерит site-api на lite.belomaxorka.dev (по http тоже: старые браузеры не умеют нынешний TLS) из той же
      страницы (web.Page), что и стойку: юниты те же и в том же порядке (content/racks.yaml), у каждого — шаблон
-     lite-<имя> ниже, нет его — юнита в лёгкой версии нет (органайзеры, коммутатор, заглушки). Цвета — атрибутами
+     lite-<имя> ниже. Данные и тексты общие (content/, i18n/, живые источники): правишь их — меняются обе версии.
+     Разметка своя: юнит без lite-<имя> не пропадёт молча — будет строка «пока только в полной стойке», пока ему не
+     напишут шаблон. Без шаблона нарочно только декор: органайзеры, коммутатор, заглушки. Цвета — атрибутами
      bgcolor/color, шрифт — <font> в каждой ячейке (в таблицы старые браузеры его не наследуют). Пакетов, ламп и
      живых обновлений нет: страница — снимок на момент запроса. */}}
 {{define "lite" -}}
@@ -10,7 +12,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>{{if eq .Rack.Path "/"}}{{t "meta.title.home"}}{{else}}{{t "meta.title" (t (print "rack." .Rack.ID)) (t (print "rack." .Rack.ID ".sub"))}}{{end}}</title>
-<meta name="description" content="{{t (print "meta.desc." .Rack.ID)}}">
+<meta name="description" content="{{t "meta.desc"}}">
 <meta name="robots" content="noindex">
 </head>
 <body bgcolor="#15171a" text="#d6d8dc" link="#8ab4ff" vlink="#c39bff" alink="#ffffff">
@@ -34,6 +36,9 @@
 {{- if and $.Rack.Stub (eq . "ups")}}{{template "lite-stub" $}}{{$stubbed = true}}{{end}}
 {{- with lite . $}}
 <tr><td bgcolor="#2b2e34"><font face="Verdana,Arial,Helvetica,sans-serif" size="2">{{.}}</font></td></tr>
+{{- else}}{{if not (or (eq . "brush") (eq . "tor") (eq . "blank") (has (print "lite-" .)))}}
+<tr><td bgcolor="#2b2e34"><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8">{{.}} · {{t "lite.only_full"}}</font></td></tr>
+{{- end}}
 {{- end}}
 {{- end}}
 {{- if and .Rack.Stub (not $stubbed)}}{{template "lite-stub" .}}{{end}}

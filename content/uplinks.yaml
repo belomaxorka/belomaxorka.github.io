@@ -13,7 +13,7 @@
   port: tor
   check: Site (Tor)
   name: tor
-  url: http://wpyf3efefcpshrs2cjuh6tlutvpmu6nwcaob6nouhjyajv4lbbswpvyd.onion
+  url: http://belomahi5ltqfhdrpqjlivzwycawvllixi3lksfnhpyzfsk2nngnydid.onion
   note: {en: "onion service, open in tor browser", ru: "onion-сервис, открывать в tor browser"}
 - id: ygg
   port: ygg

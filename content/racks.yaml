@@ -4,9 +4,9 @@
 #   units — юниты сверху вниз: имя = шаблон templates/units/*.html с {{define "unit-<имя>"}};
 #   router — не используется: роутер теперь юнит router (вариант B: patch, brush, tor, router сверху стойки);
 #   stub  — стойку ещё монтируют: вместо юнитов заглушки.
-# Новый юнит в стойке — строка здесь; новая стойка — блок здесь и подписи в i18n, без Go: rack.<id>, rack.<id>.sub
-# и meta.desc.<id> (описание для поисковиков и превью ссылок), плюс картинка превью assets/og/<id>.png —
-# node docs/tools/og/make.mjs. В /sitemap.xml стойка попадает сама, заглушка (stub) — нет, и у неё noindex.
+# Новый юнит в стойке — строка здесь (и шаблон lite-<имя> для лёгкой версии, templates/lite); новая стойка — блок
+# здесь и две подписи в i18n, без Go: rack.<id> и rack.<id>.sub. Описание и картинка превью у сайта одни на все
+# стойки (meta.desc, assets/og/site.png). В /sitemap.xml стойка попадает сама, заглушка (stub) — нет, и у неё noindex.
 - id: home
   path: /
   units: [patch, brush, tor, brush, router, mgmt, server, media, monitor, syslog, switch, donate, kvm, buttons, blank, ups]

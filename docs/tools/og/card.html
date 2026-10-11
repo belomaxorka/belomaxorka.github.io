@@ -1,7 +1,7 @@
 <!doctype html>
-<!-- Картинка для превью ссылок (og:image), 1200×630: стойка ряда в серверной. Рисует make.mjs:
-     card.html?rack=<id> → assets/og/<id>.png. Подписи — из i18n/en.json (превью видят краулеры, а им
-     достаётся английская версия), шрифты и цвета — сайта. Не деплоится (docs/). -->
+<!-- Картинка для превью ссылок (og:image), 1200×630: стойка в серверной. Одна на весь сайт (assets/og/site.png,
+     рисует make.mjs): ни номера стойки, ни табличек ряда — новая стойка её не трогает. Подписи — из i18n/en.json
+     (превью видят краулеры, а им достаётся английская версия), шрифты и цвета — сайта. Не деплоится (docs/). -->
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
@@ -32,15 +32,6 @@
   .exit { top: 12px; left: 20px; padding: 4px 12px; border-radius: 3px; font: 600 15px/1.2 var(--f-silk); letter-spacing: .14em; text-transform: uppercase;
     color: #eafff0; background: #1d8a45; box-shadow: 0 0 20px #2ccf6a88, inset 0 0 0 1px #ffffff40; }
 
-  /* Таблички ряда: висят на цепочках, текущая подсвечена. */
-  .signs { position: absolute; top: 34px; left: 0; right: 0; display: flex; justify-content: center; gap: 12px; margin: 0; padding: 0; list-style: none; }
-  .signs li { position: relative; display: flex; align-items: baseline; gap: 8px; padding: 8px 14px; border-radius: 4px;
-    font: 500 16px/1 var(--f-silk); letter-spacing: .12em; text-transform: uppercase; color: var(--dim);
-    background: var(--panel); box-shadow: inset 0 0 0 1px var(--edge), 0 8px 16px -8px #000; }
-  .signs li::before { content: ""; position: absolute; left: 20%; right: 20%; bottom: 100%; height: 40px; border-inline: 1px dashed #5a5f67; }
-  .signs b { font-weight: 700; color: var(--ink); }
-  .signs li.on { background: #f1efe8; color: #15171a; box-shadow: 0 0 26px -2px #f1efe8aa; }
-  .signs li.on b { color: #15171a; }
 
   /* Стойка: крышка, рейки с отверстиями и номерами, юниты с ушами и винтами (как assets/css/rack.css, крупнее). */
   .rack { position: absolute; left: 150px; right: 150px; top: 96px; bottom: -40px; }
@@ -113,7 +104,6 @@
     <div class="nb r"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     <div class="exit" id="exit"></div>
   </div>
-  <ol class="signs" id="signs"></ol>
   <div class="rack">
     <div class="cap"><span id="cap"></span><span>42u</span></div>
     <div class="body">
@@ -133,7 +123,7 @@
         <div class="face">
           <div class="lcd"><div class="big" id="big"></div><div class="line" id="line"></div><div class="d" id="d"></div></div>
           <div class="side">
-            <div class="leds"><span><i class="led pwr"></i>pwr</span><span><i class="led" id="hdd"></i>hdd</span><span><i class="led"></i>net</span></div>
+            <div class="leds"><span><i class="led pwr"></i>pwr</span><span><i class="led off" id="hdd"></i>hdd</span><span><i class="led"></i>net</span></div>
             <div class="vent"></div>
           </div>
         </div>
@@ -147,37 +137,25 @@
   </div>
 </div>
 <script>
-// card.html?rack=<id>: стойка из content/racks.yaml (make.mjs передаёт id, номер и адрес), подписи из i18n/en.json.
+// Подписи из i18n/en.json; ЖК — имя сайта и кто я, стикер — «не выключать».
 (async () => {
-  const q = new URLSearchParams(location.search);
-  const id = q.get('rack') || 'home', n = q.get('n') || '1', path = q.get('path') || '/';
-  const racks = (q.get('racks') || 'home').split(',');
-  const stub = q.get('stub') === '1';
   const t = await (await fetch('/i18n/en.json')).json();
   const $ = (s) => document.getElementById(s);
-  // Что пишет ЖК и стикер на каждой стойке; для новой стойки — подпись rack.<id>.sub.
-  const own = {
-    home: { line: t['lcd.hello'], d: t['me.sub'], note: t['note.dont'] },
-    lab: { line: t['rack.lab.sub'], d: 'proxmox · containers · ups', note: 'it\'s all real!' },
-  }[id] || { line: t['rack.' + id + '.sub'] || t['rack.' + id], d: stub ? t['rack.stub'] : '', note: stub ? 'soon~' : '' };
-
   $('exit').textContent = t['hall.exit'];
-  $('signs').innerHTML = racks.map((r, i) => `<li${r === id ? ' class="on"' : ''}><b>r${i + 1}</b>${t['rack.' + r] || r}</li>`).join('');
-  $('cap').textContent = `${t['rack.cap']} · r${n} · ${t['rack.' + id] || id}`;
+  $('cap').textContent = t['rack.cap'];
   $('ring').textContent = t['ring.panel'];
   $('prev').textContent = '← ' + t['ring.prev'];
   $('next').textContent = t['ring.next'] + ' →';
-  $('big').innerHTML = 'belomaxorka.dev' + (path === '/' ? '' : `<span>${path}</span>`);
-  $('line').textContent = own.line;
-  $('d').textContent = own.d;
+  $('big').textContent = 'belomaxorka.dev';
+  $('line').textContent = t['lcd.hello'];
+  $('d').textContent = t['me.sub'];
   $('status').textContent = t['nav.status'];
-  if (own.note) $('note').innerHTML = own.note; else $('note').remove();
-  if (stub) $('hdd').classList.add('warn');
-  $('lamps').innerHTML = Array.from({ length: 14 }, (_, i) => `<i class="led${stub && i % 5 === 3 ? ' warn' : ''}"></i>`).join('');
+  $('note').innerHTML = t['note.dont'];
+  $('lamps').innerHTML = Array.from({ length: 14 }, () => '<i class="led"></i>').join('');
   for (const side of ['l', 'r']) {
     $('rail-' + side).innerHTML = Array.from({ length: 8 }, (_, i) => `<span class="n" style="top:calc(var(--U) * ${i + .5})">${42 - i}</span>`).join('');
   }
-  // Длинный адрес не должен вылезать из ЖК.
+  // Длинная строка не должна вылезать из ЖК.
   await document.fonts.ready;
   for (const el of [$('big'), $('line'), $('d')]) {
     for (let s = parseFloat(getComputedStyle(el).fontSize); el.scrollWidth > el.clientWidth && s > 24; s -= 2) el.style.fontSize = s + 'px';
