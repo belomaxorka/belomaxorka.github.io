@@ -30,4 +30,6 @@
 {{end}}
 
 {{/* Соседняя стойка: юниты-заглушки и диоды. Диоды — настоящие лампы мониторинга (зелёные, жёлтые, красные). */}}
-{{define "nb-rack"}}<div class="nbr">{{range seq 16}}<span class="nu"></span>{{end}}<div class="leds">{{range .}}<i class="{{.State}}" data-check="{{.Name}}"></i>{{end}}{{range .}}<i class="{{.State}}" data-check="{{.Name}}"></i>{{end}}</div></div>{{end}}
+{{define "nb-rack"}}<div class="nbr"><div class="stack"><div class="hw patch"></div><div class="hw tor"></div>
+{{- range .}}<div class="hw"><i class="{{.State}}" data-check="{{.Name}}"></i></div>{{else}}{{range seq 24}}<div class="hw"><i class="off"></i></div>{{end}}{{end}}
+{{- range .}}<div class="hw"><i class="{{.State}}" data-check="{{.Name}}"></i></div>{{end}}</div><div class="hw ups"></div></div>{{end}}

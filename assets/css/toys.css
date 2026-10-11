@@ -58,4 +58,4 @@
 }
 @keyframes rainbow { to { filter: hue-rotate(360deg); } }
 /* Ровный свет: диоды не мигают — ни при включении, ни от трафика (.tx ставит live.js, он же его и не ставит). */
-:root.steady .led, :root.steady .hall .leds i { animation: none !important; }
+:root.steady .led, :root.steady .hall .hw > i { animation: none !important; }

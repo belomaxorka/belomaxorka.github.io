@@ -39,8 +39,8 @@
   opacity: var(--lamp-on);
 }
 
-/* Соседние стойки: юниты-заглушки и диоды (настоящие лампы Gatus). */
-.hall .nb { top: 70px; bottom: 150px; width: 1000px; filter: brightness(var(--nb-dim)) blur(1.2px); }
+/* Neighbour racks: hardware whose status lamps are the real Gatus checks (data-check, blinking when a check runs). */
+.hall .nb { top: 70px; bottom: 150px; width: 1000px; filter: brightness(var(--nb-dim)) blur(.6px); }
 .hall .nb.l { right: calc(50% + 500px + 28px); }
 .hall .nb.r { left: calc(50% + 500px + 28px); }
 /* Соседи через одного и «будущая» стойка на месте текущей: нужны, только пока ряд едет (aisle.css, .hop). */
@@ -49,26 +49,91 @@
 .hall .nb.c { left: calc(50% - 500px); }
 .hall .nb.ll, .hall .nb.c, .hall .nb.rr { visibility: hidden; }
 .hall .nbr {
+  --slot: color-mix(in srgb, var(--nu-b) 45%, #000);      /* the dark of a bay, a port, a vent */
+  --metal: color-mix(in srgb, var(--nu-a) 80%, #fff 6%);  /* drive trays, handles */
   position: relative; height: 100%; border-radius: 6px;
+  /* Rails with their square holes, the PDU's strip on the right rail. */
   background:
+    repeating-linear-gradient(transparent 0 8px, var(--nb-edge) 8px 13px, transparent 13px 15px) 12px 0 / 10px 100% no-repeat,
+    repeating-linear-gradient(transparent 0 8px, var(--nb-edge) 8px 13px, transparent 13px 15px) calc(100% - 12px) 0 / 10px 100% no-repeat,
     linear-gradient(90deg, var(--nb-rail) 0 34px, transparent 34px calc(100% - 34px), var(--nb-rail) 0),
     var(--nb-body);
   box-shadow: inset 0 0 0 1px var(--nb-edge), 0 20px 40px -10px #000;
-  display: flex; flex-direction: column; gap: 6px; padding: 30px 40px;
+  display: flex; flex-direction: column; gap: 10px; padding: 26px 34px;
 }
-.hall .nu { flex: 1; max-height: 88px; border-radius: 3px; background: linear-gradient(var(--nu-a), var(--nu-b)); box-shadow: inset 0 1px 0 var(--nu-hi); }
-.hall .nu:nth-child(3n) { flex: 2; } .hall .nu:nth-child(5n) { background: var(--nu-blank); }
-.hall .leds {
-  position: absolute; inset: 44px 60px; display: grid; grid-template-columns: repeat(2, 10px) 1fr repeat(2, 10px);
-  grid-auto-rows: 66px; gap: 0 12px; align-content: start;
+.hall .stack { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 2px; }
+/* One unit: a 1U server by default — two ears with screws, four drive trays, a vent grille, its status lamp. */
+.hall .hw {
+  position: relative; flex: none; height: 42px; border-radius: 2px;
+  background:
+    repeating-linear-gradient(90deg, var(--slot) 0 2px, transparent 2px 5px) right 70px center / 180px 16px no-repeat,
+    repeating-linear-gradient(90deg, transparent 0 8px, var(--slot) 8px 44px, transparent 44px 90px) 64px calc(50% + 8px) / 360px 3px no-repeat,
+    repeating-linear-gradient(90deg, var(--metal) 0 86px, var(--slot) 86px 90px) 64px center / 360px 26px no-repeat,
+    linear-gradient(var(--nu-a), var(--nu-b));
+  box-shadow: inset 0 1px 0 var(--nu-hi), inset 0 -1px 0 #0006;
 }
-.hall .leds i { width: 7px; height: 7px; border-radius: 50%; background: var(--led-ok); box-shadow: 0 0 8px var(--led-ok); }
-.hall .leds i:nth-child(5n+3) { grid-column: 5; }
-.hall .leds i.warn { background: var(--led-warn); box-shadow: 0 0 8px var(--led-warn); }
-.hall .leds i.err { background: var(--led-err); box-shadow: 0 0 10px var(--led-err); }
+.hall .hw::before, .hall .hw::after { /* the ears */
+  content: ""; position: absolute; top: 0; bottom: 0; width: 18px;
+  background: radial-gradient(circle at 50% 30%, var(--nb-edge) 0 2.5px, transparent 3px), radial-gradient(circle at 50% 72%, var(--nb-edge) 0 2.5px, transparent 3px), var(--nb-rail);
+}
+.hall .hw::before { left: 0; } .hall .hw::after { right: 0; }
+.hall .hw > i {
+  position: absolute; left: 34px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%;
+  background: var(--led-ok); box-shadow: 0 0 8px var(--led-ok), 12px 0 0 -1px var(--slot);
+}
+/* The racks on the left show the viewer their right side: their lamps sit there. */
+.hall .nb:is(.l, .ll) .hw > i { left: auto; right: 34px; }
+.hall .hw > i.warn { background: var(--led-warn); box-shadow: 0 0 8px var(--led-warn), 12px 0 0 -1px var(--slot); }
+.hall .hw > i.err { background: var(--led-err); box-shadow: 0 0 10px var(--led-err), 12px 0 0 -1px var(--slot); }
+.hall .hw > i.off { background: var(--led-off); box-shadow: none; }
+/* 2U servers: twelve trays in two rows. */
+.hall .stack > .hw:nth-child(5n+1) {
+  height: 86px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 6px, var(--slot) 6px 30px, transparent 30px 62px) 64px 34px / 372px 3px no-repeat,
+    repeating-linear-gradient(90deg, transparent 0 6px, var(--slot) 6px 30px, transparent 30px 62px) 64px 68px / 372px 3px no-repeat,
+    repeating-linear-gradient(90deg, var(--metal) 0 58px, var(--slot) 58px 62px) 64px 12px / 372px 28px no-repeat,
+    repeating-linear-gradient(90deg, var(--metal) 0 58px, var(--slot) 58px 62px) 64px 46px / 372px 28px no-repeat,
+    repeating-linear-gradient(var(--slot) 0 2px, transparent 2px 6px) right 60px center / 200px 60px no-repeat,
+    linear-gradient(var(--nu-a), var(--nu-b));
+}
+/* Storage, 2U: twenty-four small bays. */
+.hall .stack > .hw:nth-child(7n+4) {
+  height: 86px;
+  background:
+    radial-gradient(circle, var(--slot) 2px, transparent 2.5px) 64px 30px / 32px 36px repeat-x,
+    repeating-linear-gradient(90deg, var(--metal) 0 28px, var(--slot) 28px 32px) 64px 10px / 768px 30px no-repeat,
+    repeating-linear-gradient(90deg, var(--metal) 0 28px, var(--slot) 28px 32px) 64px 46px / 768px 30px no-repeat,
+    linear-gradient(var(--nu-a), var(--nu-b));
+}
+/* Switches, 1U: two rows of ports. */
+.hall .stack > .hw:nth-child(6n+3), .hall .hw.tor {
+  background:
+    repeating-linear-gradient(90deg, var(--slot) 0 12px, transparent 12px 16px) 120px 7px / 384px 11px no-repeat,
+    repeating-linear-gradient(90deg, var(--slot) 0 12px, transparent 12px 16px) 120px 24px / 384px 11px no-repeat,
+    linear-gradient(90deg, var(--slot) 0 22px, transparent 22px 30px, var(--slot) 30px 52px) right 60px center / 52px 14px no-repeat,
+    linear-gradient(var(--nu-a), var(--nu-b));
+}
+/* Blanks with a perforated vent, here and there. */
+.hall .stack > .hw:nth-child(9n+7) {
+  background: radial-gradient(circle, var(--slot) 1.6px, transparent 2px) 0 0 / 7px 7px, var(--nu-blank);
+  background-clip: content-box; padding: 6px 28px;
+}
+/* The patch panel on top: a row of jacks. */
+.hall .hw.patch {
+  background: repeating-linear-gradient(90deg, var(--slot) 0 14px, transparent 14px 22px) 60px center / 704px 12px no-repeat, linear-gradient(var(--nu-a), var(--nu-b));
+}
+/* The UPS at the bottom, 2U: its little screen and a vent. */
+.hall .hw.ups {
+  height: 86px;
+  background:
+    linear-gradient(color-mix(in srgb, var(--lcd-bg-d) 70%, #000), var(--lcd-bg-d)) 70px center / 120px 38px no-repeat,
+    repeating-linear-gradient(90deg, var(--slot) 0 3px, transparent 3px 7px) right 70px center / 260px 46px no-repeat,
+    linear-gradient(var(--nu-a), var(--nu-b));
+}
 /* Соседняя стойка погасла (power.js: кнопка её ИБП, села батарея, у стойки без ИБП — щиток): лампы не горят. */
-.hall .leds i.tx { opacity: .15; box-shadow: none; } /* a check ran on that service (live.js) */
-.hall .nb.dark .leds i { background: var(--led-off) !important; box-shadow: none !important; animation: none !important; }
+.hall .hw > i.tx { opacity: .15; box-shadow: none; } /* a check ran on that service (live.js) */
+.hall .nb.dark .hw > i { background: var(--led-off) !important; box-shadow: none !important; animation: none !important; }
 .hall .nb.dark .nbr { filter: brightness(.8); }
 
 /* Фальшпол под стойкой: плитки и перфорация холодного коридора. */
