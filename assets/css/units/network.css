@@ -116,10 +116,13 @@
 /* И играть нечему: VU-метр гаснет. */
 :is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) .u.media.has-nic .vu i,
 .u.media.unlinked .vu i { background: var(--led-off); box-shadow: none; }
-/* Без связи статусы неизвестны: лампы мониторинга и шкалы контейнеров гаснут (контейнерам интернет не нужен). */
+/* Без связи статусы неизвестны: лампы мониторинга гаснут, у хоста Proxmox и контейнеров — шкалы, а цифры и аптайм
+   пропадают (их неоткуда взять). Хосту и контейнерам интернет не нужен: без одного интернета (роутер, WAN, аплинк)
+   они в локальной сети и показывают всё. */
 :is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) .u.mon.has-nic:not(.off) .matrix .led,
 .u.mon.unlinked:not(.off) .matrix .led,
-:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked).ct:not(.off) .meter i { background: var(--led-off); box-shadow: none; animation: none; }
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):is(.ct, .pve):not(.off) .meter i { background: var(--led-off); box-shadow: none; animation: none; }
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):is(.ct, .pve):not(.off) :is(.meter b, .up) { color: transparent; text-shadow: none; }
 /* Без линка гаснет и своя лампа сети у юнита (net на сервере). */
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked) .led.net { background: var(--led-off); box-shadow: none; animation: none; }
 
