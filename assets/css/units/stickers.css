@@ -9,6 +9,40 @@
 a.b88:hover, a.b88:focus-visible { transform: translateY(-2px); }
 @media (prefers-reduced-motion: reduce) { .b88 { transition: none; } }
 
+/* Узкая стена (телефон): видно первые три ряда, остальные кнопки — по клавише «показать все» под ними.
+   Колонок на стене floor((ширина + 4) / 92): кнопка 88 и зазор 4. Клавиша — <details> без содержимого:
+   работает без JS, CSS читает [open] через :has(). Где :has() нет — клавишу прячем, видно всё. На стене
+   в 6 колонок и шире клавиши нет и видно всё. Высота юнита меняется — app.js раскладывает стойку
+   и перерисовывает провода в том же кадре (следит за [open] у .more). */
+.wall { container: wall / inline-size; width: 100%; }
+.more { display: none; flex: 1 0 100%; margin-top: 4px; }
+.more > summary { list-style: none; width: max-content; }
+.more > summary::-webkit-details-marker { display: none; }
+.more > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.more[open] .m-all, .more:not([open]) .m-less { display: none; }
+.more[open] .ic { transform: rotate(180deg); }
+@container wall (width < 548px) { .more { display: block; } }
+@container wall (width < 272px) {
+  .wall:has(> .more:not([open])) > .b88:nth-child(n+7) { display: none; }
+  .wall:has(> .more[open]) > .b88:nth-child(n+7) { animation: b88-in .25s ease-out backwards; }
+}
+@container wall (272px <= width < 364px) {
+  .wall:has(> .more:not([open])) > .b88:nth-child(n+10) { display: none; }
+  .wall:has(> .more[open]) > .b88:nth-child(n+10) { animation: b88-in .25s ease-out backwards; }
+}
+@container wall (364px <= width < 456px) {
+  .wall:has(> .more:not([open])) > .b88:nth-child(n+13) { display: none; }
+  .wall:has(> .more[open]) > .b88:nth-child(n+13) { animation: b88-in .25s ease-out backwards; }
+}
+@container wall (456px <= width < 548px) {
+  .wall:has(> .more:not([open])) > .b88:nth-child(n+16) { display: none; }
+  .wall:has(> .more[open]) > .b88:nth-child(n+16) { animation: b88-in .25s ease-out backwards; }
+}
+@keyframes b88-in { from { opacity: 0; transform: translateY(-3px); } }
+@supports not selector(:has(*)) { .more { display: none !important; } }
+@media (prefers-reduced-motion: no-preference) { .more .ic { transition: transform .15s; } }
+@media (prefers-reduced-motion: reduce) { .wall > .b88 { animation: none !important; } }
+
 /* Мои кнопки: один ряд, у каждой кнопки код для копирования. */
 .mine-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
 .mine .items { display: flex; flex-wrap: wrap; gap: 10px 14px; }

@@ -17,16 +17,21 @@
 <section class="u stick" style="--h:2" aria-labelledby="btn-people">
   <div class="face">
     <span class="tape b" id="btn-people">{{t "btn.people"}}</span>
-    <div class="wall">{{range .Content.buttons.people}}{{template "b88" .}}{{end}}</div>
+    <div class="wall">{{range .Content.buttons.people}}{{template "b88" .}}{{end}}{{template "b88-more" (len .Content.buttons.people)}}</div>
   </div>
 </section>
 <section class="u stick" style="--h:3" aria-labelledby="btn-sites">
   <div class="face">
     <span class="tape" id="btn-sites">{{t "btn.sites"}}</span>
-    <div class="wall">{{range .Content.buttons.sites}}{{template "b88" .}}{{end}}</div>
+    <div class="wall">{{range .Content.buttons.sites}}{{template "b88" .}}{{end}}{{template "b88-more" (len .Content.buttons.sites)}}</div>
   </div>
 </section>
 {{end}}
+
+{{/* «Показать все» для узкого экрана: стена показывает первые три ряда, остальное — по этой клавише
+     (assets/css/units/stickers.css). Без JS: <details> без содержимого — просто переключатель, CSS читает [open].
+     На широкой стене клавиши нет. */}}
+{{define "b88-more"}}<details class="more"><summary class="key"><span class="m-all">{{t "btn.show_all" .}}</span><span class="m-less">{{t "btn.show_less"}}</span>{{template "icon" "more"}}</summary></details>{{end}}
 
 {{define "b88"}}{{if .link}}<a class="b88" href="{{.link}}"{{ext .link}} title="{{.title}}">{{else}}<span class="b88" title="{{.title}}">{{end}}<img src="{{asset (printf "88x31/%s" .image)}}" width="88" height="31" alt="{{.title}}" loading="lazy" decoding="async">{{if .link}}</a>{{else}}</span>{{end}}
 {{end}}

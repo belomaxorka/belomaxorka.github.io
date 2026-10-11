@@ -459,6 +459,12 @@
   });
   // Явная просьба (холст открыли, ящик выехал): сразу, до отрисовки этого кадра.
   document.addEventListener('rack:layout', layout);
+  // Стена кнопок раскрылась или свернулась («показать все», <details class="more">, stickers.html). Свернулась —
+  // стойка не меняет высоту (snap держит прежний min-height юнита), наблюдатель молчит: разложить самим.
+  // MutationObserver срабатывает до отрисовки, событие toggle — позже, юнит кадр простоял бы пустым.
+  new MutationObserver((recs) => {
+    if (recs.some((r) => r.target.classList?.contains('more'))) layout();
+  }).observe(document, { subtree: true, attributeFilter: ['open'] });
 
   // Стойку подменили без перезагрузки (assets/js/aisle.js): разложить сразу, пока её не показали.
   document.addEventListener('rack:swap', layout);

@@ -199,6 +199,8 @@
   "btn.code": "code",
   "btn.people": "people",
   "btn.sites": "sites and things",
+  "btn.show_all": "show all · %d",
+  "btn.show_less": "show less",
 
   "net.lost": "connection lost",
   "net.nointernet": "no internet",

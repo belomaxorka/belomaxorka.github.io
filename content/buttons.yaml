@@ -204,6 +204,12 @@ sites:
   - title: Powered by NixOS
     image: nixos.png
     link: https://nixos.org/
+  - title: Fedora
+    image: fedora.png
+    link: https://fedoraproject.org/
+  - title: Powered by Void Linux
+    image: void-linux.gif
+    link: https://voidlinux.org/
   - title: Powered by FreeBSD
     image: freebsd.gif
     link: https://www.freebsd.org/
@@ -233,6 +239,12 @@ sites:
   - title: Thunderbird
     image: thunderbird.gif
     link: https://www.thunderbird.net/
+  - title: Matrix
+    image: matrix.webp
+    link: https://matrix.org/
+  - title: Join the Fediverse
+    image: fediverse.png
+    link: https://jointhefediverse.net/
   - title: uBlock Origin
     image: ublock.png
     link: https://ublockorigin.com/
@@ -242,15 +254,27 @@ sites:
   - title: Helium
     image: helium.gif
     link: https://helium.computer/
+  - title: Use Kagi
+    image: kagi.gif
+    link: https://kagi.com/
   - title: VLC
     image: vlc.png
     link: https://www.videolan.org/
   - title: foobar2000
     image: foobar2000.png
     link: https://www.foobar2000.org/
+  - title: Last.fm
+    image: lastfm.gif
+    link: https://www.last.fm/
   - title: FFmpeg
     image: ffmpeg.gif
     link: https://ffmpeg.org/
+  - title: Made with Blender
+    image: blender.gif
+    link: https://www.blender.org/
+  - title: Krita
+    image: krita.png
+    link: https://krita.org/
   - title: Bun
     image: bun.gif
     link: https://bun.com/
@@ -263,6 +287,9 @@ sites:
   - title: Made with Neovim
     image: neovim.png
     link: https://neovim.io/
+  - title: Godot Engine
+    image: godot.png
+    link: https://godotengine.org/
   - title: Prism Launcher
     image: prism.gif
     link: https://prismlauncher.org/
@@ -312,6 +339,10 @@ sites:
   - title: Web 1.0 Hosting
     image: web1-hosting.gif
     link: https://web1.0hosting.net/
+  # Tinelix в стиле Web 1.0 нарочно по http: у https сертификат просрочен, а их собственный код кнопки ведёт на http.
+  - title: "Tinelix (Web 1.0)"
+    image: tinelix.gif
+    link: http://web1.tinelix.ru/
   - title: MAKE A NEOCITIES
     image: neocities.gif
     link: https://neocities.org/

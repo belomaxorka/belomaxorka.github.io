@@ -199,6 +199,8 @@
   "btn.code": "код",
   "btn.people": "люди",
   "btn.sites": "сайты и всякое",
+  "btn.show_all": "показать все · %d",
+  "btn.show_less": "свернуть",
 
   "net.lost": "связь потеряна",
   "net.nointernet": "нет интернета",
