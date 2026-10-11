@@ -3,7 +3,8 @@
 // юнит погаснет. Поднести вилку к разъёму (или тапнуть по ней) — воткнётся, юнит загорится.
 // Кнопка на ИБП гасит всю стойку и загружает её обратно. Шнур самого ИБП тоже выдёргивается из розетки:
 // ИБП уходит на батарею (красный свет в зале, ЖК мигает, заряд тает), батарея села — гаснет всё; воткнул —
-// заряжается и стойка загружается. Состояние только у посетителя (localStorage).
+// заряжается и стойка загружается. Состояние только у посетителя (localStorage). Погасший юнит не нажимается
+// (inert); событие rack:unit на юните говорит тем, кто внутри, что он погас или загрузился.
 // Без JS всего этого нет: юниты просто горят и работают.
 (() => {
   // Юниты с питанием; патч-панель и заглушки с наклейками пассивные, как в жизни. Несколько одинаковых юнитов
@@ -47,13 +48,62 @@
   // ---------- юниты: разъёмы и свет ----------
   function powered(k) { return !state.off && !state.unplugged[k] && !dead(); }
 
+  // Погасший юнит ещё и не нажимается: inert на нём и на его выдвинутом ящике — ни клика, ни наведения, ни фокуса
+  // (Tab его пропускает), скринридеру его нет. Одно место на все причины: вилка, кнопка ИБП, села батарея.
+  // Набранный текст, рисунок и данные остаются на месте: включили — всё как было.
   function paint(u, k, boot) {
-    const on = powered(k);
+    const on = powered(k) && !queued.has(k);
+    const box = u.nextElementSibling?.classList.contains('drawer') ? u.nextElementSibling : null;
+    const was = !u.hasAttribute('inert');
     if (on && u.classList.contains('off') && boot) {
       u.classList.add('booting');
       setTimeout(() => u.classList.remove('booting'), 700);
     }
+    if (was && !on) shutdown(u, k, box);
     u.classList.toggle('off', !on);
+    u.toggleAttribute('inert', !on);
+    if (box) {
+      box.classList.toggle('off', !on);
+      box.toggleAttribute('inert', !on);
+    }
+    if (!was && on) u.dispatchEvent(new CustomEvent('rack:unit', { bubbles: true, detail: { key: k, on } }));
+  }
+
+  // Перед тем как юнит станет inert: сказать тем, кто внутри (рисовалка дописывает штрих и выходит из полного
+  // экрана), закрыть его диалоги (лайтбокс гостевой модальный: внутри inert он запер бы всю страницу) и увести
+  // фокус, если он был внутри.
+  function shutdown(u, k, box) {
+    u.dispatchEvent(new CustomEvent('rack:unit', { bubbles: true, detail: { key: k, on: false } }));
+    [u, box].forEach((n) => n?.querySelectorAll('dialog[open]').forEach((d) => d.close()));
+    const f = document.activeElement;
+    if (f && f !== document.body && (u.contains(f) || box?.contains(f))) park();
+  }
+
+  // Куда фокус из погасшего юнита: не на кнопку (пробел, набранный по инерции, нажал бы её), а на сам ИБП — на нём
+  // видно, что с питанием, следующий Tab попадёт на его кнопку. Нет ИБП — на стойку. tabindex только на это время.
+  function park() {
+    const t = upsUnit() || document.getElementById('rack');
+    if (!t) { document.activeElement.blur(); return; }
+    if (!t.hasAttribute('tabindex')) {
+      t.tabIndex = -1;
+      t.addEventListener('blur', () => t.removeAttribute('tabindex'), { once: true });
+    }
+    t.focus({ preventScroll: true });
+  }
+
+  // Загрузка сверху вниз, юнит за юнитом. Пока очередь юнита не дошла, он тёмный и не нажимается, даже если его
+  // перерисует кто-то ещё (раскладка, ответ htmx). Подменил его htmx — загружается новый.
+  const queued = new Set();
+  function bootAll() {
+    units().forEach((u, i) => {
+      const k = keyOf(u);
+      if (u.classList.contains('off')) queued.add(k);
+      setTimeout(() => {
+        queued.delete(k);
+        const cur = u.isConnected ? u : unitBy(k);
+        if (cur) paint(cur, k, true);
+      }, reduce.matches ? 0 : 110 * i);
+    });
   }
 
   function ensureDom() {
@@ -68,10 +118,10 @@
       if (!u.querySelector(':scope > .psu')) {
         const s = document.createElement('span');
         s.className = 'psu';
-        u.classList.add('has-psu');
         s.setAttribute('aria-hidden', 'true');
         u.appendChild(s);
       }
+      u.classList.add('has-psu'); // и после htmx: на settle он возвращает юниту class из ответа
       paint(u, keyOf(u), false);
     });
     const rack = document.getElementById('rack');
@@ -123,7 +173,8 @@
     // Батарея села — всё гаснет; вернулось питание — юниты загружаются сверху вниз. Сообщить только о смене
     // на глазах у посетителя, не о состоянии, с которым страница открылась.
     if (isDead !== wasDead) {
-      units().forEach((u, i) => setTimeout(() => paint(u, keyOf(u), true), isDead || reduce.matches ? 0 : 110 * i));
+      if (isDead) units().forEach((u) => paint(u, keyOf(u), false));
+      else bootAll();
       if (wasDead !== null && !state.off) dark(!isDead, 'battery');
       wasDead = isDead;
     }
@@ -182,8 +233,7 @@
         units().forEach((u) => paint(u, keyOf(u), false));
         return;
       }
-      // Загрузка сверху вниз, юнит за юнитом.
-      units().forEach((u, i) => setTimeout(() => paint(u, keyOf(u), true), reduce.matches ? 0 : 110 * i));
+      bootAll();
     });
   }
 
@@ -487,6 +537,14 @@
 
   // Раскладку стойки считает app.js; провода — после неё.
   document.addEventListener('rack:laidout', () => requestAnimationFrame(relayout));
+
+  // htmx подменил юнит (опрос раз в 30–60 с, отправка гостевой) или выдвинул ящик: новый элемент сразу в состоянии
+  // питания — в той же задаче, что и вставка, так что между ними не пройдёт ни один клик и юнит не мигнёт светом.
+  // На settle htmx возвращает новому элементу его class из ответа (до того держит старый) — ещё раз. Опрос у
+  // погасших юнитов идёт как шёл: включили — на экране сразу свежие данные.
+  const again = () => { if (svg) ensureDom(); };
+  document.addEventListener('htmx:afterSwap', again);
+  document.addEventListener('htmx:afterSettle', again);
 
   // Стойку подменили без перезагрузки (assets/js/aisle.js): у новой свой ИБП и свой свет в зале — их настоящие
   // значения запомнить заново, юниты и кнопку сразу привести в состояние питания, пока стойку не показали.

@@ -9,11 +9,17 @@
 .cables.power .hit { fill: transparent; pointer-events: auto; cursor: grab; touch-action: none; }
 .cables.power .hit:active { cursor: grabbing; }
 
-/* Юнит без питания: тусклый, экраны пустые, лампы погасли. Текст остаётся в разметке. */
-.u.off .face { filter: saturate(.2) brightness(.6); }
-.u.off .lcd, .u.off .lcd * { color: transparent !important; text-shadow: none !important; }
-.u.off .led, .u.off .vu i { background: var(--led-off) !important; box-shadow: inset 0 1px 1px #0006 !important; animation: none !important; }
-.u.off img { filter: grayscale(1) brightness(.4); }
+/* Юнит без питания: тусклый, экраны пустые, лампы погасли. Текст остаётся в разметке. Его выдвинутый ящик и ручка
+   ящика — так же. */
+.u.off .face, .u.off > .pull, .drawer.off .slide { filter: saturate(.2) brightness(.6); }
+.u.off .lcd, .u.off .lcd *, .drawer.off .lcd, .drawer.off .lcd * { color: transparent !important; text-shadow: none !important; }
+.u.off .led, .u.off .vu i, .drawer.off .led { background: var(--led-off) !important; box-shadow: inset 0 1px 1px #0006 !important; animation: none !important; }
+.u.off img, .drawer.off img { filter: grayscale(1) brightness(.4); }
+/* И не нажимается: power.js ставит ему inert — ни клика, ни наведения, ни фокуса, курсор обычный. pointer-events —
+   ещё и для браузера без inert. ИБП (у него .off, когда села батарея) inert не бывает: его кнопка включает стойку. */
+.u[inert], .drawer[inert] { pointer-events: none; user-select: none; cursor: default; }
+/* Фокус из погасшего юнита уходит на ИБП (или на стойку). */
+.u.ups:focus-visible, .rack:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .u.off .screen { position: relative; }
 .u.off .screen > * { visibility: hidden; }
 .u.off .screen::after {
@@ -21,7 +27,7 @@
   font: 500 12px/1 var(--f-silk); letter-spacing: .2em; text-transform: uppercase; color: #3d4a3f;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .u .face { transition: filter .25s; }
+  .u .face, .u > .pull, .drawer .slide { transition: filter .25s; }
   .u.booting .face { animation: boot .7s steps(5); }
 }
 @keyframes boot { 0% { filter: brightness(1.9); } 30% { filter: brightness(.5); } 60% { filter: brightness(1.4); } 100% { filter: none; } }

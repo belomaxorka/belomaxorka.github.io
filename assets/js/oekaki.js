@@ -40,10 +40,28 @@ document.addEventListener('alpine:init', () => {
       c.addEventListener('contextmenu', (e) => e.preventDefault());
       this.onKey = (e) => this.key(e);
       addEventListener('keydown', this.onKey);
+      // KVM обесточили (assets/js/power.js, юнит становится inert): штрих дописать, из полного экрана выйти.
+      // Набранное и нарисованное остаётся; включили — рисуй дальше.
+      this.unit = this.$root.closest('.u');
+      this.onPower = (e) => { if (!e.detail.on) this.dark(); };
+      this.unit?.addEventListener('rack:unit', this.onPower);
       // Открытый холст меняет высоту юнита: пересчитать стойку и провода.
       this.$watch('open', () => this.$nextTick(() => document.dispatchEvent(new Event('rack:layout'))));
     },
-    destroy() { removeEventListener('keydown', this.onKey); document.documentElement.classList.remove('pad-full'); },
+    destroy() {
+      removeEventListener('keydown', this.onKey);
+      this.unit?.removeEventListener('rack:unit', this.onPower);
+      document.documentElement.classList.remove('pad-full');
+    },
+    dark() {
+      const s = this.stroke;
+      if (s) {
+        try { this.$refs.pad.releasePointerCapture(s.id); } catch { /* захвата уже нет */ }
+        this.stroke = null;
+        this.commit();
+      }
+      this.setFull(false);
+    },
 
     // ---------- кнопки ----------
     toggle() { this.open = !this.open; if (!this.open) this.setFull(false); },
@@ -103,6 +121,7 @@ document.addEventListener('alpine:init', () => {
 
     key(e) {
       if (!this.open || !(e.ctrlKey || e.metaKey) || e.altKey) return;
+      if (this.$root.closest('[inert]')) return; // без питания холст не слушается
       if (e.target instanceof Element && e.target.closest('input:not([type="range"]):not([type="color"]), textarea')) return; // там своя отмена
       const k = e.key.toLowerCase();
       if (k === 'z' && !e.shiftKey) { e.preventDefault(); this.undo(); }
