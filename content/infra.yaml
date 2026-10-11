@@ -1,0 +1,25 @@
+# Стена мемов на infra.belomaxorka.dev (templates/infra.html): «хостинг, который мы знаем».
+# Добавить мем: положить картинку в assets/infra/ (jpg, длинная сторона до ~1000 px, без EXIF) и дописать запись.
+# Порядок здесь — порядок на стене. alt — что на картинке, для тех, кто её не видит: строкой или {en, ru}.
+# Изменения подхватываются сами после push: site-api перечитывает content/ без перезапуска.
+memes:
+  - file: summoned.jpg
+    alt:
+      en: "a router hangs out of a wall box on its own cables, LEDs blinking; caption: «why have you summoned me, human?»"
+      ru: "роутер свисает из щитка на собственных проводах и мигает лампочками; подпись: «Зачем ты призвал меня, человек?»"
+  - file: oven.jpg
+    alt:
+      en: a Ruckus SmartZone controller rack-mounted inside a kitchen oven
+      ru: контроллер Ruckus SmartZone смонтирован в стойку прямо внутри духовки
+  - file: cabinet.jpg
+    alt:
+      en: a wall cabinet stuffed with a tangle of grey patch cords
+      ru: настенный шкаф, набитый клубком серых патч-кордов
+  - file: lego-closet.jpg
+    alt:
+      en: "a LEGO box «disorganized network closet», ages 12+: a minifigure among burning racks and cable spaghetti"
+      ru: "коробка LEGO «Disorganized network closet», 12+: человечек посреди горящих стоек и кабельной лапши"
+  - file: lego-it.jpg
+    alt:
+      en: "a LEGO IT set: a sysadmin minifigure, a server rack, patch cords and a keyboard"
+      ru: "набор LEGO IT: сисадмин, серверная стойка, патч-корды и клавиатура"

@@ -1,8 +1,8 @@
 {{/* infra.belomaxorka.dev: «hosted on belomaxorka infrastructure» с сайта ведёт сюда. Мем в духе stupid.fish technologies
-     (teidesu): «видео» в рамке, заголовок Times, ссылка на fastfetch, status // source. belomaxorka ≈ беломор + махорка,
-     поэтому сервер курит папиросу под табличкой «не курить», иногда кашляет, а внизу — плашка «минздрав предупреждает».
-     site-api рендерит "/" шаблоном infra, "/fetch" — infra-fetch (живые данные хоста из Proxmox, ИБП из NUT, Gatus).
-     Без скриптов: сцена — SVG с CSS-анимацией. Кнопка 88x31 — /88x31/infra.gif (docs/tools/make_88x31.py, infra). */}}
+     (teidesu): вместо их видео — коллаж мемов про «хостинг, который мы знаем» (список — content/infra.yaml, файлы —
+     assets/infra/), заголовок Times, ссылка на fastfetch, status // source, внизу плашка «минздрав предупреждает»
+     (belomaxorka ≈ беломор + махорка). site-api рендерит "/" шаблоном infra, "/fetch" — infra-fetch (живые данные
+     хоста из Proxmox, ИБП из NUT, Gatus). Без скриптов. Кнопка 88x31 — /88x31/infra.gif (docs/tools/make_88x31.py). */}}
 {{define "infra" -}}
 <!doctype html>
 <html lang="{{lang}}">
@@ -20,7 +20,7 @@
 <meta property="og:image" content="https://infra.belomaxorka.dev{{asset "og/infra.png"}}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="{{t "infra.scene"}}">
+<meta property="og:image:alt" content="{{t "infra.og_alt"}}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#000000">
 <style>
@@ -32,7 +32,6 @@
     font-family: 'Times New Roman', Times, serif; text-align: center; overflow-x: hidden;
   }
   a { color: #fff; }
-  .video { display: block; width: 440px; max-width: 100%; height: auto; border: 4px #000 solid; outline: 2px #fff solid; background: #0c0d10; }
   h1 { font-size: 2.5rem; font-weight: 400; margin: 8px 0 32px; line-height: 1.1; }
   footer { margin-top: 4px; }
   .badge { margin-top: 24px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: .85rem; color: #bbb; }
@@ -47,144 +46,27 @@
   }
   .warn b { display: block; font-size: 12px; margin-bottom: 2px; }
 
-  /* the scene */
-  .rig { animation: shake 9s infinite; }
-  .smoke circle { fill: #c9ced6; opacity: 0; transform-box: fill-box; transform-origin: center; animation: puff 4.9s linear infinite; }
-  .smoke circle:nth-child(2) { animation-delay: -.7s; }
-  .smoke circle:nth-child(3) { animation-delay: -1.4s; }
-  .smoke circle:nth-child(4) { animation-delay: -2.1s; }
-  .smoke circle:nth-child(5) { animation-delay: -2.8s; }
-  .smoke circle:nth-child(6) { animation-delay: -3.5s; }
-  .smoke circle:nth-child(7) { animation-delay: -4.2s; }
-  .smoke .burst { animation: burst 9s infinite; }
-  .ember { animation: ember 2.4s ease-in-out infinite; }
-  .glow { animation: glow 2.4s ease-in-out infinite; }
-  .cough { opacity: 0; animation: cough 9s infinite; }
-  .led { animation: blink 1.3s steps(1) infinite; }
-  .led.b { animation-duration: .9s; animation-delay: -.3s; }
-  .led.c { animation-duration: 1.7s; animation-delay: -.8s; }
-  .led.d { animation-duration: .7s; animation-delay: -.1s; }
-  .pwr { animation: breathe 3s ease-in-out infinite; }
-  @keyframes puff {
-    0% { transform: translate(0, 0) scale(.35); opacity: 0; }
-    8% { opacity: .55; }
-    45% { transform: translate(-9px, -42px) scale(1.5); opacity: .38; }
-    100% { transform: translate(10px, -96px) scale(3.2); opacity: 0; }
-  }
-  @keyframes burst {
-    0%, 86% { transform: translate(0, 0) scale(.3); opacity: 0; }
-    88% { transform: translate(-4px, -4px) scale(1.4); opacity: .75; }
-    100% { transform: translate(-26px, -70px) scale(4.5); opacity: 0; }
-  }
-  @keyframes shake {
-    0%, 86%, 92%, 100% { transform: translate(0, 0); }
-    87% { transform: translate(-2px, 1px); }
-    88% { transform: translate(2px, -1px); }
-    89% { transform: translate(-2px, 0); }
-    90% { transform: translate(1px, 1px); }
-    91% { transform: translate(-1px, 0); }
-  }
-  @keyframes cough { 0%, 86% { opacity: 0; } 88%, 97% { opacity: 1; } 100% { opacity: 0; } }
-  @keyframes ember { 0%, 100% { fill: #ff6a1a; } 50% { fill: #ffb347; } }
-  @keyframes glow { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
-  @keyframes blink { 0% { opacity: 1; } 50% { opacity: .2; } }
-  @keyframes breathe { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+  /* the wall: memes in frames, a little crooked, straightened under the cursor */
+  .wall { width: 900px; max-width: 100%; display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+    gap: 20px 18px; padding: 8px; box-sizing: border-box; }
+  .pic { display: block; border: 4px solid #000; outline: 2px solid #fff; background: #111;
+    transform: rotate(var(--r, 0deg)); transition: transform .15s ease-out; }
+  .pic:nth-child(4n+1) { --r: -1.6deg; } .pic:nth-child(4n+2) { --r: 1.2deg; }
+  .pic:nth-child(4n+3) { --r: -.7deg; } .pic:nth-child(4n) { --r: 1.8deg; }
+  .pic:hover, .pic:focus-visible { transform: rotate(0) scale(1.03); position: relative; z-index: 1; }
+  .pic img { display: block; height: 200px; width: auto; max-width: calc(100vw - 60px); object-fit: contain; }
+  @media (max-width: 540px) { .wall { gap: 16px 12px; } .pic img { height: 120px; } }
   @media (max-width: 540px) { h1 { font-size: 2rem; } }
-  @media (prefers-reduced-motion: reduce) {
-    *, .smoke circle { animation: none !important; }
-    .smoke circle { opacity: .25; }
-    .smoke circle:nth-child(2) { transform: translate(-6px, -24px) scale(1.2); }
-    .smoke circle:nth-child(3) { transform: translate(-8px, -48px) scale(1.8); opacity: .18; }
-    .smoke .burst, .cough { opacity: 0; }
-  }
+  @media (prefers-reduced-motion: reduce) { .pic { transition: none; } }
 </style>
 </head>
 <!-- 0LvRjtCx0L7Qv9GL0YLQvdC+0Lkg0LLQsNGA0LLQsNGA0LUg0L3QsCDQsdCw0LfQsNGA0LUg0L3QvtGBINC+0YLQvtGA0LLQsNC70Lg= -->
 <body>
-<svg class="video" viewBox="0 0 320 180" width="440" height="248" role="img" aria-label="{{t "infra.scene"}}">
-  <defs>
-    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c1f24"/><stop offset="1" stop-color="#0d0e11"/></linearGradient>
-    <radialGradient id="hot"><stop offset="0" stop-color="#ffb347" stop-opacity=".9"/><stop offset="1" stop-color="#ff6a1a" stop-opacity="0"/></radialGradient>
-    <pattern id="holes" width="10" height="8" patternUnits="userSpaceOnUse"><rect width="10" height="8" fill="#2a2d33"/><rect x="3.5" y="2.5" width="3" height="3" fill="#121316"/></pattern>
-    <filter id="soft" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="2.2"/></filter>
-  </defs>
-  <rect width="320" height="180" fill="url(#wall)"/>
-  <rect y="156" width="320" height="24" fill="#08090b"/>
-  <!-- не курить -->
-  <g transform="translate(46 50)">
-    <circle r="19" fill="#f2f2f2"/>
-    <rect x="-12" y="-2.5" width="15" height="5" fill="#1b1b1b"/><rect x="4" y="-2.5" width="5" height="5" fill="#1b1b1b"/>
-    <path d="M7 -4.5 q2.5 -2.5 0 -5" fill="none" stroke="#1b1b1b" stroke-width="1.6"/>
-    <circle r="16" fill="none" stroke="#d3262e" stroke-width="4.5"/>
-    <line x1="-11.3" y1="-11.3" x2="11.3" y2="11.3" stroke="#d3262e" stroke-width="4.5"/>
-  </g>
-  <!-- the rack -->
-  <rect x="88" y="10" width="148" height="8" fill="#1d1f23"/>
-  <rect x="92" y="18" width="10" height="138" fill="url(#holes)"/>
-  <rect x="222" y="18" width="10" height="138" fill="url(#holes)"/>
-  <rect x="92" y="18" width="1" height="138" fill="#454951"/><rect x="222" y="18" width="1" height="138" fill="#454951"/>
-  <!-- switch, 1U -->
-  <g>
-    <rect x="96" y="40" width="132" height="16" rx="1.5" fill="#26292e" stroke="#0b0c0e"/>
-    <g fill="#0f1012"><rect x="112" y="45" width="8" height="7"/><rect x="123" y="45" width="8" height="7"/><rect x="134" y="45" width="8" height="7"/><rect x="145" y="45" width="8" height="7"/><rect x="156" y="45" width="8" height="7"/><rect x="167" y="45" width="8" height="7"/><rect x="178" y="45" width="8" height="7"/><rect x="189" y="45" width="8" height="7"/></g>
-    <circle class="led" cx="116" cy="44" r=".9" fill="#4ee483"/><circle class="led b" cx="127" cy="44" r=".9" fill="#4ee483"/>
-    <circle class="led c" cx="138" cy="44" r=".9" fill="#4ee483"/><circle class="led d" cx="149" cy="44" r=".9" fill="#ffb547"/>
-    <circle class="led b" cx="160" cy="44" r=".9" fill="#4ee483"/><circle class="led" cx="182" cy="44" r=".9" fill="#4ee483"/>
-    <rect x="112" y="48" width="2" height="9" fill="#3a7bd5"/><rect x="123" y="48" width="2" height="9" fill="#e0b93a"/>
-    <rect x="134" y="48" width="2" height="9" fill="#d9534f"/><rect x="156" y="48" width="2" height="9" fill="#3daa63"/>
-    <rect x="178" y="48" width="2" height="9" fill="#9b6bd6"/>
-  </g>
-  <!-- the server, 2U: it smokes -->
-  <g class="rig">
-    <rect x="96" y="62" width="132" height="36" rx="1.5" fill="#2b2e33" stroke="#0b0c0e"/>
-    <rect x="97" y="63" width="130" height="1" fill="#4b5058"/>
-    <circle cx="98.5" cy="68" r="1.2" fill="#8a9099"/><circle cx="98.5" cy="92" r="1.2" fill="#8a9099"/>
-    <circle cx="225.5" cy="68" r="1.2" fill="#8a9099"/><circle cx="225.5" cy="92" r="1.2" fill="#8a9099"/>
-    <g fill="#1a1c1f" stroke="#3a3e45" stroke-width=".6">
-      <rect x="106" y="67" width="16" height="11"/><rect x="124" y="67" width="16" height="11"/>
-      <rect x="142" y="67" width="16" height="11"/><rect x="160" y="67" width="16" height="11"/>
-    </g>
-    <circle class="led" cx="119.5" cy="69.5" r=".9" fill="#4ee483"/><circle class="led c" cx="137.5" cy="69.5" r=".9" fill="#4ee483"/>
-    <circle class="led b" cx="155.5" cy="69.5" r=".9" fill="#4ee483"/><circle class="led d" cx="173.5" cy="69.5" r=".9" fill="#ffb547"/>
-    <text x="107" y="91" fill="#8a9099" font-family="ui-monospace, Consolas, monospace" font-size="6.5" letter-spacing=".5">belomaxorka</text>
-    <g fill="#141518"><rect x="182" y="80" width="30" height="1.6" rx=".8"/><rect x="182" y="83" width="30" height="1.6" rx=".8"/><rect x="182" y="86" width="30" height="1.6" rx=".8"/><rect x="182" y="89" width="30" height="1.6" rx=".8"/><rect x="182" y="92" width="30" height="1.6" rx=".8"/></g>
-    <circle cx="214" cy="70" r="3.2" fill="#1a1c1f" stroke="#4ee483" stroke-width="1" class="pwr"/>
-    <!-- the papirosa: a pinched cardboard tube, paper with makhorka, ash, the ember -->
-    <g transform="translate(194 87) rotate(-9)">
-      <path d="M0 -2.8 L5 -2.8 Q8 -1.4 11 -2.8 L40 -2.8 L40 2.8 L11 2.8 Q8 1.4 5 2.8 L0 2.8 Z" fill="#f4f1e8" stroke="#9c988c" stroke-width=".5"/>
-      <path d="M8 -1.6 v3.2 M16 -2.8 l2 2.8 l-2 2.8" fill="none" stroke="#b4ae9e" stroke-width=".7"/>
-      <rect x="40" y="-3.1" width="21" height="6.2" fill="#ece5d3" stroke="#9c988c" stroke-width=".5"/>
-      <rect x="61" y="-3.1" width="3" height="6.2" fill="#8d8d8d"/>
-      <circle class="glow" cx="66" cy="0" r="7" fill="url(#hot)"/>
-      <rect class="ember" x="64" y="-3.1" width="3" height="6.2" rx="1" fill="#ff6a1a"/>
-    </g>
-  </g>
-  <g class="smoke" filter="url(#soft)">
-    <circle cx="259" cy="76" r="5"/><circle cx="259" cy="76" r="5"/><circle cx="259" cy="76" r="5"/><circle cx="259" cy="76" r="5"/>
-    <circle cx="259" cy="76" r="5"/><circle cx="259" cy="76" r="5"/><circle cx="259" cy="76" r="5"/>
-    <circle class="burst" cx="200" cy="84" r="6"/>
-  </g>
-  <text class="cough" x="268" y="104" fill="#e9e9e9" font-family="'Times New Roman', Times, serif" font-style="italic" font-size="12" text-anchor="middle">{{t "infra.cough"}}</text>
-  <!-- the router, 1U -->
-  <g>
-    <rect x="96" y="104" width="132" height="16" rx="1.5" fill="#26292e" stroke="#0b0c0e"/>
-    <g fill="#0f1012"><rect x="160" y="108" width="8" height="7"/><rect x="171" y="108" width="8" height="7"/><rect x="182" y="108" width="8" height="7"/><rect x="193" y="108" width="8" height="7"/></g>
-    <circle class="led d" cx="164" cy="107" r=".9" fill="#4ee483"/><circle class="led b" cx="175" cy="107" r=".9" fill="#4ee483"/>
-    <circle class="led c" cx="186" cy="107" r=".9" fill="#ffb547"/>
-    <rect x="163" y="111" width="2" height="9" fill="#3a7bd5"/><rect x="174" y="111" width="2" height="9" fill="#e0b93a"/>
-    <text x="107" y="115" fill="#8a9099" font-family="ui-monospace, Consolas, monospace" font-size="6">opnsense</text>
-  </g>
-  <!-- the ups, 2U at the bottom, with its real charge -->
-  <g>
-    <rect x="96" y="126" width="132" height="28" rx="1.5" fill="#2b2e33" stroke="#0b0c0e"/>
-    <rect x="97" y="127" width="130" height="1" fill="#4b5058"/>
-    <rect x="108" y="132" width="36" height="14" fill="#1b1306" stroke="#0b0c0e"/>
-    <text x="126" y="142" fill="#ffb547" font-family="ui-monospace, Consolas, monospace" font-size="8" text-anchor="middle">{{with .UPS}}{{if .OK}}{{.Charge}}%{{else}}ups{{end}}{{end}}</text>
-    <circle class="pwr" cx="153" cy="139" r="1.6" fill="{{if .UPS.OnBattery}}#ffb547{{else}}#4ee483{{end}}"/>
-    <g fill="#141518"><rect x="170" y="132" width="40" height="1.6" rx=".8"/><rect x="170" y="136" width="40" height="1.6" rx=".8"/><rect x="170" y="140" width="40" height="1.6" rx=".8"/><rect x="170" y="144" width="40" height="1.6" rx=".8"/></g>
-    <text x="214" y="151" fill="#8a9099" font-family="ui-monospace, Consolas, monospace" font-size="5.5" text-anchor="end">ups · cbr 1000 va</text>
-  </g>
-</svg>
+<div class="wall" role="list" aria-label="{{t "infra.wall"}}">
+  {{- range .Content.infra.memes}}
+  <a class="pic" role="listitem" href="{{asset (print "infra/" .file)}}"><img src="{{asset (print "infra/" .file)}}" alt="{{loc .alt}}"></a>
+  {{- end}}
+</div>
 <h1>belomaxorka infrastructure</h1>
 <div><small>{{th "infra.now"}}</small></div>
 <footer>
