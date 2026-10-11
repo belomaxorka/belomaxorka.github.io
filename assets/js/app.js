@@ -283,14 +283,13 @@
       if (u.matches('.pve, .ct')) delete d.dataset.nonet;
       else d.dataset.nonet = body.dataset.nonet || '';
     }));
-    units.forEach((u, i) => {
+    units.forEach((u) => {
       // Класс — каждый раз: htmx, подменив юнит, на settle возвращает ему class из ответа, а карта уже вставлена.
       u.classList.add('has-nic');
       if (u.querySelector(':scope > .nic')) return;
       const n = document.createElement('span');
       n.className = 'nic';
       n.setAttribute('aria-hidden', 'true');
-      n.style.setProperty('--d', (i * 0.37 % 1.3).toFixed(2) + 's');
       n.innerHTML = '<i class="led"></i><i class="jack"></i>';
       u.appendChild(n);
     });

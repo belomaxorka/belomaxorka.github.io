@@ -19,13 +19,12 @@
 .led.off { background: var(--led-off); box-shadow: inset 0 1px 1px #0006; }
 .leds { display: flex; gap: 12px; flex-wrap: wrap; }
 .leds span { display: inline-flex; align-items: center; gap: 5px; }
-.blink { animation: none; }
-@media (prefers-reduced-motion: no-preference) {
-  .blink { animation: hdd 1.7s infinite steps(1); }
-  .blink.s2 { animation-duration: 2.3s; animation-delay: .4s; }
-  .blink.s3 { animation-duration: 1.1s; animation-delay: .8s; }
-}
-@keyframes hdd { 0%, 60% { opacity: 1; } 62%, 66% { opacity: .2; } 68%, 72% { opacity: 1; } 74%, 78% { opacity: .2; } }
+/* Лампы активности (порты коммутатора, сетевые карты, wan роутера, net и hdd сервера) по таймеру не мигают: мигают,
+   только когда через них правда что-то прошло, — live.js ставит .tx на миг. Пока ничего не идёт, лампа линка горит
+   ровно, а hdd не горит. */
+.led.hdd { background: var(--led-off); box-shadow: inset 0 1px 1px #0006; }
+.led.tx { opacity: .15; }
+.led.hdd.tx { opacity: 1; background: var(--led-ok); box-shadow: 0 0 6px var(--led-ok); }
 
 .lcd {
   background: var(--lcd-bg); color: var(--lcd);

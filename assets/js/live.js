@@ -1,16 +1,21 @@
 // Живые гости (site-api /events, Server-Sent Events): кто ещё смотрит стойку и что на ней происходит прямо сейчас.
 //   - online: сколько страниц открыто. Каждый другой гость — патч-корд из свободного гнезда патч-панели в свободный
 //     порт коммутатора (рисует app.js по data-guests на <html>); пришёл — корд протягивается, ушёл — исчезает;
-//   - visit: кто-то открыл страницу — пакет бежит с потолка по оптике в роутер (на других стойках — по аплинку
-//     в коммутатор), оттуда в коммутатор и к серверу;
-//   - gb: новая запись в гостевой — пакет тем же путём к KVM;
+//   - visit: кто-то открыл страницу — пакет бежит с потолка по оптике в роутер, оттуда в коммутатор и к серверу
+//     (сайт отдаёт он; на стойке без сервера пакета нет: запрос не к ней);
+//   - gb: новая запись в гостевой — пакет тем же путём к KVM (только на стойке с KVM);
 //   - новые данные юнита (опрос htmx: новый трек на медиасервере, строка журнала, лампы мониторинга) — сначала пакет
-//     бежит к этому юниту, и только когда он добежал, юнит меняется;
+//     бежит к этому юниту (на других стойках — по аплинку в коммутатор), и только когда он добежал, юнит меняется;
+//   - лампы активности (WAN роутера, порты коммутатора, сетевые карты, net и hdd сервера) мигают, только когда через
+//     них правда что-то прошло: пакет пробегает мимо, пришёл ответ на запрос этой страницы (опрос htmx без новых
+//     данных, ящик, форма) — к его юниту, событие из /events или свой фонарь — к серверу, рассылка всем — порты
+//     гостей; hdd — когда сервер записал визит. Ничего не идёт — горят ровно;
 //   - фонарики: на стене зала у выключателя висит фонарик. Взял (это и есть согласие) — за курсором пятно света, и
 //     куда он светит (доли ширины и высоты стойки, без всего остального), видят другие гости этой стойки; повесил —
 //     погас. Чужие фонарики — такие же пятна; пропал гость или 15 с от него ничего — гаснут.
 // Пакетов нет без интернета у стойки, без коммутатора или роутера; до юнита без связи пакет не доходит. Без
-// анимаций (prefers-reduced-motion) и во вкладке в фоне пакетов нет, корды гостей есть. Без JS — ничего.
+// анимаций (prefers-reduced-motion) и во вкладке в фоне пакетов и миганий нет (и с «ровным светом» в BIOS), корды
+// гостей есть. Без JS — ничего.
 (() => {
   if (!window.EventSource) return;
   const NS = 'http://www.w3.org/2000/svg';
@@ -22,19 +27,24 @@
 
   function connect() {
     const es = new EventSource('/events');
-    es.addEventListener('hello', (e) => { try { token = JSON.parse(e.data).token || ''; } catch {} });
-    es.addEventListener('beam', (e) => { try { spot(JSON.parse(e.data)); } catch {} });
-    es.addEventListener('beam-off', (e) => { try { gone(JSON.parse(e.data).id); } catch {} });
+    // Каждое событие пришло от сервера по этому потоку — мигают лампы на пути к нему. Рассылку всем (гость пришёл или
+    // ушёл, визит, запись в гостевой) получили и гости — мигают их порты.
+    es.addEventListener('hello', (e) => { try { token = JSON.parse(e.data).token || ''; } catch {} pulse('srv', NET); });
+    es.addEventListener('beam', (e) => { try { spot(JSON.parse(e.data)); } catch {} pulse('srv', NET); });
+    es.addEventListener('beam-off', (e) => { try { gone(JSON.parse(e.data).id); } catch {} pulse('srv', NET); });
     es.addEventListener('online', (e) => {
       let n = 0;
       try { n = JSON.parse(e.data).n || 0; } catch {}
       const g = String(Math.max(0, n - 1));
-      if (root.dataset.guests === g) return;
-      root.dataset.guests = g;
-      document.dispatchEvent(new Event('rack:layout'));
+      if (root.dataset.guests !== g) {
+        root.dataset.guests = g;
+        document.dispatchEvent(new Event('rack:layout'));
+      }
+      pulse('srv', NET);
+      guests();
     });
-    es.addEventListener('visit', () => run(document.querySelector('#rack-body > .u.srv') ? 'srv' : null));
-    es.addEventListener('gb', () => run('kvm'));
+    es.addEventListener('visit', () => { run('srv', [...NET, '.led.hdd']); guests(); });
+    es.addEventListener('gb', () => { run('kvm'); guests(); });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', connect);
   else connect();
@@ -83,6 +93,7 @@
   }
   function post(b) {
     if (!b.t) return;
+    pulse('srv', NET);
     fetch('/events/beam', { method: 'POST', body: JSON.stringify(b), headers: { 'Content-Type': 'application/json' }, keepalive: true }).catch(() => {});
   }
   // Свой фонарь: пятно за курсором, позиция — долями стойки, не чаще раза в 100 мс (последняя — всегда).
@@ -129,34 +140,63 @@
     spots.delete(id);
   }
 
-  // ---------- пакеты ----------
+  // ---------- лампы активности и пакеты ----------
   const cord = (k) => cords.find((c) => c.key === k);
   // Путь корда в SVG app.js: группа номер wire, в ней цветной контур — второй.
   const path = (c) => document.querySelectorAll('#cables > g')[c.wire]?.children[1] || null;
+  const NET = ['.led.net']; // своя лампа сети у сервера — рядом с сетевой картой мигает и она
+  const unitOf = (body, k) => body.querySelector(`:scope > .u[data-power="${CSS.escape(k)}"]`) || body.querySelector(`:scope > .u.${CSS.escape(k)}`);
+  // Лампа порта коммутатора — если в нём линк (её зажигает net.js).
+  const port = (c) => (c?.port?.classList.contains('link') ? c.port.querySelector('.led') : null);
 
-  // Маршрут к юниту: снаружи по оптике (WAN роутера или аплинк коммутатора; оба нарисованы от гнезда к потолку —
-  // значит, против хода), по LAN роутера в коммутатор (по ходу), от коммутатора по корду юнита (против хода: корд
-  // идёт от его сетевой карты). Юнита нет — до первого юнита с кордом.
-  function route(target) {
+  // Мигнуть: через лампу прошли данные. Не чаще, чем она успевает погаснуть и загореться.
+  function flash(led) {
+    if (!led || reduce.matches || document.hidden || root.classList.contains('steady') || led.classList.contains('tx')) return;
+    led.classList.add('tx');
+    setTimeout(() => led.classList.remove('tx'), 90);
+  }
+
+  // Стойка в сети: есть интернет, коммутатор и роутер включены.
+  function up() {
     const rack = document.getElementById('rack'), body = document.getElementById('rack-body');
-    if (!rack || !body || rack.classList.contains('nonet') || rack.classList.contains('powered-off')) return null;
-    if (body.querySelector(':scope > .u.tor.off, :scope > .u.rtr.off')) return null;
-    const legs = [];
-    const up = cord('wan') || cord('uplink');
-    if (!up || !path(up)) return null;
-    legs.push([path(up), -1]);
+    return !!rack && !!body && !rack.classList.contains('nonet') && !rack.classList.contains('powered-off') &&
+      !body.querySelector(':scope > .u.tor.off, :scope > .u.rtr.off');
+  }
+
+  // Маршрут к юниту target: снаружи по оптике (WAN роутера или аплинк коммутатора; оба нарисованы от гнезда к
+  // потолку — значит, против хода), по LAN роутера в коммутатор (по ходу), от коммутатора по корду юнита (против
+  // хода: корд идёт от его сетевой карты). Ноги — [путь, направление, лампы, которые мигают, когда пакет добежал до
+  // конца ноги]: WAN роутера; порт LAN и порт юнита в коммутаторе; сетевая карта юнита и extra (селекторы его ламп).
+  // Юнита на этой стойке нет — маршрута нет: данные шли не к ней.
+  function route(target, extra = []) {
+    if (!up()) return null;
+    const body = document.getElementById('rack-body');
+    const fiber = cord('wan') || cord('uplink'), nic = cord(target), unit = nic && unitOf(body, target);
+    if (!fiber || !path(fiber) || !unit) return null;
+    const legs = [[path(fiber), -1, [body.querySelector(':scope > .u.rtr:not(.nowan) .led.wan')]]];
     const lan = cord('lan');
-    if (lan && path(lan)) legs.push([path(lan), 1]);
-    const nic = (target && cord(target)) || cords.find((c) => c.type === 'nic' && c.key !== 'mgmt');
-    const unit = nic && (body.querySelector(`:scope > .u[data-power="${CSS.escape(nic.key)}"]`) || body.querySelector(`:scope > .u.${CSS.escape(nic.key)}`));
-    if (nic && path(nic) && unit && !unit.classList.contains('off') && !unit.classList.contains('unlinked')) legs.push([path(nic), -1]);
+    if (lan && path(lan)) legs.push([path(lan), 1, [port(lan)]]);
+    legs[legs.length - 1][2].push(port(nic));
+    // До юнита без связи пакет не доходит.
+    if (path(nic) && !unit.classList.contains('off') && !unit.classList.contains('unlinked')) {
+      legs.push([path(nic), -1, [unit.querySelector(':scope > .nic .led'), ...extra.map((s) => unit.querySelector(s))]]);
+    }
     return legs;
   }
 
+  // Данные прошли без пакета (ответ без новых данных, событие потока): лампы на пути к юниту мигают разом.
+  function pulse(target, extra) {
+    route(target, extra)?.forEach(([, , leds]) => leds.forEach(flash));
+  }
+  // Рассылку всем получили и гости: мигают их порты.
+  function guests() {
+    if (up()) cords.filter((c) => c.type === 'guest').forEach((c) => flash(port(c)));
+  }
+
   // Пускает пакет; возвращает, сколько он будет бежать (мс), или 0, если не побежал.
-  function run(target) {
+  function run(target, extra) {
     if (reduce.matches || document.hidden) return 0;
-    const legs = route(target);
+    const legs = route(target, extra);
     if (!legs || !legs.length) return 0;
     const room = document.getElementById('room'), cab = document.getElementById('cables');
     if (!room || !cab) return;
@@ -176,13 +216,14 @@
     svg.appendChild(dot);
     let leg = 0, t0 = performance.now();
     const step = (now) => {
-      const [p, dir] = legs[leg];
+      const [p, dir, leds] = legs[leg];
       if (!p.isConnected) { dot.remove(); return; }
       const len = p.getTotalLength(), dur = Math.max(260, len * 1.1);
       const k = Math.min(1, (now - t0) / dur), at = p.getPointAtLength(dir > 0 ? k * len : (1 - k) * len);
       dot.setAttribute('cx', at.x.toFixed(1));
       dot.setAttribute('cy', at.y.toFixed(1));
       if (k < 1) { requestAnimationFrame(step); return; }
+      leds.forEach(flash);
       if (++leg < legs.length) { t0 = now; requestAnimationFrame(step); return; }
       dot.classList.add('done');
       setTimeout(() => dot.remove(), 300);
@@ -191,19 +232,27 @@
     return total;
   }
 
-  // Опрос htmx принёс юниту новое: пакет к нему, обмен — когда пакет добежал (swap:…ms). Что считать новым — по юниту:
-  // у медиасервера текст ЖК (трек), у журнала первая строка, у мониторинга состояние ламп.
+  // Пришёл ответ на запрос юнита (опрос htmx, ящик, форма в ящике). Опрос принёс новое — пакет к юниту, обмен — когда
+  // пакет добежал (swap:…ms). Что считать новым — по юниту: у медиасервера текст ЖК (трек), у журнала первая строка,
+  // у мониторинга состояние ламп. Нового нет или это не опрос — просто мигают лампы на пути к юниту.
   const SIG = { media: '.lcd', log: 'ol li', mon: '.matrix' };
+  const keyOf = (u) => u && (u.dataset.power || cords.find((c) => c.type === 'nic' && u.classList.contains(c.key))?.key);
   document.addEventListener('htmx:beforeSwap', (e) => {
-    const t = e.detail.target;
-    if (!(t instanceof Element) || t.parentElement?.id !== 'rack-body' || !t.hasAttribute('hx-get')) return;
-    const key = Object.keys(SIG).find((k) => t.classList.contains(k));
-    if (!key || !e.detail.shouldSwap) return;
-    const sel = SIG[key];
-    const now = t.querySelector(sel), next = new DOMParser().parseFromString(e.detail.serverResponse, 'text/html').querySelector(sel);
-    const sig = (n) => (key === 'mon' ? n?.innerHTML : n?.textContent)?.replace(/\s+/g, ' ').trim() || '';
-    if (sig(now) === sig(next)) return;
-    const ms = run(key);
-    if (ms) e.detail.swapOverride = `outerHTML swap:${Math.round(ms)}ms`;
+    const t = e.detail.target, elt = e.detail.requestConfig?.elt || e.detail.elt;
+    if (!(elt instanceof Element)) return;
+    const unit = elt.closest('#rack-body > .u') || elt.closest('#rack-body > .drawer')?.previousElementSibling;
+    const target = keyOf(unit);
+    if (!target) return;
+    const key = t === unit && t.hasAttribute('hx-get') && e.detail.shouldSwap && Object.keys(SIG).find((k) => t.classList.contains(k));
+    if (key) {
+      const sel = SIG[key];
+      const now = t.querySelector(sel), next = new DOMParser().parseFromString(e.detail.serverResponse, 'text/html').querySelector(sel);
+      const sig = (n) => (key === 'mon' ? n?.innerHTML : n?.textContent)?.replace(/\s+/g, ' ').trim() || '';
+      if (sig(now) !== sig(next)) {
+        const ms = run(target);
+        if (ms) { e.detail.swapOverride = `outerHTML swap:${Math.round(ms)}ms`; return; }
+      }
+    }
+    pulse(target, target === 'srv' ? NET : []);
   });
 })();

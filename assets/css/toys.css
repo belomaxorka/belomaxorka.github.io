@@ -57,5 +57,5 @@
   :root.rainbow .led:not(.off, .warn, .err, .pwr, .uid), :root.rainbow .tp.link .led { animation: rainbow 2.4s linear infinite !important; }
 }
 @keyframes rainbow { to { filter: hue-rotate(360deg); } }
-/* Ровный свет: диоды не мигают. */
-:root.steady .led, :root.steady .blink, :root.steady .tp .led, :root.steady .nic .led, :root.steady .hall .leds i { animation: none !important; }
+/* Ровный свет: диоды не мигают — ни при включении, ни от трафика (.tx ставит live.js, он же его и не ставит). */
+:root.steady .led, :root.steady .hall .leds i { animation: none !important; }
