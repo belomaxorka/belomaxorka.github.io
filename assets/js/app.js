@@ -484,11 +484,11 @@
   });
   // Явная просьба (холст открыли, ящик выехал): сразу, до отрисовки этого кадра.
   document.addEventListener('rack:layout', layout);
-  // Стена кнопок раскрылась или свернулась («показать все», <details class="more">, stickers.html). Свернулась —
-  // стойка не меняет высоту (snap держит прежний min-height юнита), наблюдатель молчит: разложить самим.
-  // MutationObserver срабатывает до отрисовки, событие toggle — позже, юнит кадр простоял бы пустым.
+  // A <details> that changes the unit's height opened or closed (the wall's "show all", a button's code; stickers.html).
+  // On close the rack keeps its height (snap holds the unit's min-height) and the resize observer stays quiet, so lay
+  // out here. A MutationObserver runs before the paint; the toggle event comes a frame later, with the unit empty.
   new MutationObserver((recs) => {
-    if (recs.some((r) => r.target.classList?.contains('more'))) layout();
+    if (recs.some((r) => r.target.classList?.contains('more') || r.target.getAttribute?.('name') === 'b88-code')) layout();
   }).observe(document, { subtree: true, attributeFilter: ['open'] });
 
   // Стойку подменили без перезагрузки (assets/js/aisle.js): разложить сразу, пока её не показали.
