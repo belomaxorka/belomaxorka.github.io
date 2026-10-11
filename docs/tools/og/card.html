@@ -1,0 +1,189 @@
+<!doctype html>
+<!-- Картинка для превью ссылок (og:image), 1200×630: стойка ряда в серверной. Рисует make.mjs:
+     card.html?rack=<id> → assets/og/<id>.png. Подписи — из i18n/en.json (превью видят краулеры, а им
+     достаётся английская версия), шрифты и цвета — сайта. Не деплоится (docs/). -->
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="/assets/css/fonts.css">
+<link rel="stylesheet" href="/assets/css/tokens.css">
+<style>
+  :root { --U: 62px; --rail-w: 46px; --ear: 26px; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: var(--room); }
+  .card { position: relative; width: 1200px; height: 630px; overflow: hidden; color: var(--ink); font-family: var(--f-text); }
+
+  /* Зал: потолок с лотком и жёлтым коробом, свет, соседние стойки, фальшпол. */
+  .hall { position: absolute; inset: 0; background: linear-gradient(#15181b, #0e1012 75%); }
+  .hall > * { position: absolute; }
+  .tray { left: 0; right: 0; top: 14px; height: 18px; opacity: .7;
+    background: linear-gradient(#3a3e45 0 3px, transparent 3px 15px, #3a3e45 0), repeating-linear-gradient(90deg, #3a3e45 0 3px, transparent 3px 28px); }
+  .duct { left: 0; right: 0; top: 40px; height: 10px; border-radius: 5px; background: #d8b23a; opacity: .5; }
+  .glow { left: 0; right: 0; top: 50px; height: 420px; background: radial-gradient(55% 380px at 50% 0, #eaf2ff1c, transparent); }
+  .nb { top: 92px; bottom: -20px; width: 300px; border-radius: 6px; background: linear-gradient(90deg, #2b2e33 0 30px, #0b0c0e 30px calc(100% - 30px), #2b2e33 0);
+    filter: brightness(.5); box-shadow: inset 0 0 0 1px #000; padding: 26px 40px; display: grid; gap: 8px; grid-auto-rows: 56px; }
+  .nb.l { right: calc(100% - 118px); }
+  .nb.r { left: calc(100% - 118px); }
+  .nb i { display: block; border-radius: 3px; background: linear-gradient(#24272c, #1b1d21); position: relative; }
+  .nb i::after { content: ""; position: absolute; top: 24px; width: 8px; height: 8px; border-radius: 50%; background: var(--led-ok); box-shadow: 0 0 10px var(--led-ok); }
+  .nb.l i::after { right: 18px; } .nb.r i::after { left: 18px; }
+  .nb i:nth-child(3n)::after { background: var(--led-warn); box-shadow: 0 0 10px var(--led-warn); }
+  .nb i:nth-child(4n+2)::after { opacity: .3; }
+  .exit { top: 12px; left: 20px; padding: 4px 12px; border-radius: 3px; font: 600 15px/1.2 var(--f-silk); letter-spacing: .14em; text-transform: uppercase;
+    color: #eafff0; background: #1d8a45; box-shadow: 0 0 20px #2ccf6a88, inset 0 0 0 1px #ffffff40; }
+
+  /* Таблички ряда: висят на цепочках, текущая подсвечена. */
+  .signs { position: absolute; top: 34px; left: 0; right: 0; display: flex; justify-content: center; gap: 12px; margin: 0; padding: 0; list-style: none; }
+  .signs li { position: relative; display: flex; align-items: baseline; gap: 8px; padding: 8px 14px; border-radius: 4px;
+    font: 500 16px/1 var(--f-silk); letter-spacing: .12em; text-transform: uppercase; color: var(--dim);
+    background: var(--panel); box-shadow: inset 0 0 0 1px var(--edge), 0 8px 16px -8px #000; }
+  .signs li::before { content: ""; position: absolute; left: 20%; right: 20%; bottom: 100%; height: 40px; border-inline: 1px dashed #5a5f67; }
+  .signs b { font-weight: 700; color: var(--ink); }
+  .signs li.on { background: #f1efe8; color: #15171a; box-shadow: 0 0 26px -2px #f1efe8aa; }
+  .signs li.on b { color: #15171a; }
+
+  /* Стойка: крышка, рейки с отверстиями и номерами, юниты с ушами и винтами (как assets/css/rack.css, крупнее). */
+  .rack { position: absolute; left: 150px; right: 150px; top: 96px; bottom: -40px; }
+  .cap { height: 36px; border-radius: 7px 7px 0 0; background: linear-gradient(var(--rail-hi), var(--rail)); box-shadow: inset 0 -1px 0 var(--edge);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 18px;
+    font: 500 14px/1 var(--f-silk); letter-spacing: .16em; text-transform: uppercase; color: var(--num); }
+  .body { position: absolute; top: 36px; left: 0; right: 0; bottom: 0; padding: 0 var(--rail-w);
+    background: linear-gradient(90deg, var(--void), color-mix(in srgb, var(--void) 70%, var(--rail)) 50%, var(--void)); }
+  .rail { position: absolute; top: 0; bottom: 0; width: var(--rail-w); background: var(--rail); box-shadow: inset 1px 0 0 var(--rail-hi), inset -1px 0 0 var(--edge); }
+  .rail.l { left: 0; } .rail.r { right: 0; }
+  .rail::after { content: ""; position: absolute; top: 0; bottom: 0; width: 10px;
+    background: linear-gradient(to bottom, var(--hole) 0 10px, transparent 10px) 0 calc(var(--U) / 6 - 5px) / 10px calc(var(--U) / 3) repeat-y; }
+  .rail.l::after { right: calc(var(--ear) / 2 - 5px); } .rail.r::after { left: calc(var(--ear) / 2 - 5px); }
+  .rail .n { position: absolute; width: calc(var(--rail-w) - var(--ear)); text-align: center; font: 500 12px/1 var(--f-silk); color: var(--num); transform: translateY(-50%); }
+  .rail.l .n { left: 0; } .rail.r .n { right: 0; }
+
+  .u { --h: 1; position: relative; display: grid; grid-template-columns: var(--ear) minmax(0, 1fr) var(--ear); height: calc(var(--U) * var(--h)); margin-inline: calc(var(--ear) * -1); }
+  .u::before, .u::after { content: ""; grid-row: 1;
+    background:
+      radial-gradient(circle 8px at 50% calc(var(--U) / 6), var(--screw-hi) 0 2px, var(--screw) 2.6px 5.6px, var(--edge) 6.2px 7.2px, transparent 7.8px),
+      radial-gradient(circle 8px at 50% calc(100% - var(--U) / 6), var(--screw-hi) 0 2px, var(--screw) 2.6px 5.6px, var(--edge) 6.2px 7.2px, transparent 7.8px),
+      var(--panel);
+    box-shadow: inset 0 1px 0 var(--panel-hi), inset 0 -1px 0 var(--edge); }
+  .u::before { grid-column: 1; border-radius: 4px 0 0 4px; } .u::after { grid-column: 3; border-radius: 0 4px 4px 0; }
+  .face { grid-column: 2; grid-row: 1; min-width: 0; display: flex; align-items: center; gap: 18px; padding: 0 22px;
+    background: linear-gradient(var(--panel-hi), var(--panel) 18%, var(--panel)); box-shadow: inset 0 1px 0 var(--panel-hi), inset 0 -1px 0 var(--edge); }
+  .silk { font: 500 14px/1.2 var(--f-silk); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+
+  /* Патч-панель: гнёзда и ленты, как кольцо otoring на сайте. */
+  .patch .ports { margin-left: auto; display: flex; gap: 22px; }
+  .port { display: flex; align-items: center; gap: 10px; }
+  .jack { width: 30px; height: 24px; background: var(--hole); border-radius: 2px; position: relative;
+    clip-path: polygon(0 0, 100% 0, 100% 72%, 76% 72%, 76% 100%, 24% 100%, 24% 72%, 0 72%); box-shadow: inset 0 0 0 3px #000; }
+  .jack::after { content: ""; position: absolute; left: 6px; right: 6px; top: 4px; height: 3px; background: repeating-linear-gradient(90deg, #c9a640 0 1.5px, transparent 1.5px 4px); }
+  .tape { display: inline-block; padding: 5px 10px 4px; border-radius: 2px; background: var(--tape-k); color: var(--tape-ink);
+    font: 700 15px/1.2 var(--f-silk); letter-spacing: .1em; text-transform: uppercase; transform: rotate(-.7deg); box-shadow: 0 1px 1px #0007; }
+  .tape.b { background: var(--tape-b); } .tape.r { background: var(--tape-r); }
+
+  /* Главный юнит: большой янтарный ЖК и диоды. */
+  .main .face { align-items: stretch; padding: 22px 24px; gap: 26px; }
+  .lcd { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 16px 28px;
+    background: var(--lcd-bg); color: var(--lcd); border-radius: 5px; font-family: var(--f-lcd); letter-spacing: .03em;
+    box-shadow: inset 0 0 0 3px var(--edge), inset 0 4px 16px #0008; text-shadow: 0 0 10px color-mix(in srgb, var(--lcd) 45%, transparent); }
+  .lcd .big { font-weight: 600; font-size: 132px; line-height: .9; white-space: nowrap; }
+  .lcd .big span { color: var(--lcd-dim); }
+  .lcd .line { font-weight: 600; font-size: 48px; line-height: 1; white-space: nowrap; }
+  .lcd .d { font-weight: 400; font-size: 34px; line-height: 1; color: var(--lcd-dim); white-space: nowrap; }
+  .side { width: 128px; flex: none; display: flex; flex-direction: column; justify-content: space-between; padding: 6px 0; }
+  .leds { display: grid; gap: 14px; }
+  .leds span { display: flex; align-items: center; gap: 10px; font: 500 14px/1 var(--f-silk); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+  .led { width: 13px; height: 13px; border-radius: 50%; flex: none; background: var(--led-ok); box-shadow: 0 0 10px var(--led-ok), inset 0 -1px 1px #0005; }
+  .led.warn { background: var(--led-warn); box-shadow: 0 0 10px var(--led-warn); }
+  .led.pwr { background: var(--accent); box-shadow: 0 0 11px var(--accent); }
+  .led.off { background: var(--led-off); box-shadow: inset 0 1px 1px #0006; }
+  .vent { height: 74px; border-radius: 3px; background: repeating-linear-gradient(90deg, var(--void) 0 5px, transparent 5px 11px); opacity: .7; }
+
+  /* Ряд ламп мониторинга. */
+  .lamps .row { margin-left: auto; display: flex; gap: 17px; }
+  .lamps .led { width: 11px; height: 11px; }
+
+  .note { position: absolute; z-index: 5; right: 34px; top: 300px; max-width: 220px; transform: rotate(4deg);
+    font: 600 31px/1.05 var(--f-hand); color: var(--note-fg); background: var(--note-bg); padding: 12px 16px 14px; box-shadow: 0 10px 18px -8px #000c; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="hall">
+    <i class="tray"></i><i class="duct"></i><i class="glow"></i>
+    <div class="nb l"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="nb r"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="exit" id="exit"></div>
+  </div>
+  <ol class="signs" id="signs"></ol>
+  <div class="rack">
+    <div class="cap"><span id="cap"></span><span>42u</span></div>
+    <div class="body">
+      <div class="rail l" id="rail-l"></div>
+      <div class="rail r" id="rail-r"></div>
+      <div class="u patch">
+        <div class="face">
+          <span class="silk" id="ring"></span>
+          <div class="ports">
+            <span class="port"><i class="jack"></i><span class="tape" id="prev"></span></span>
+            <span class="port"><i class="jack"></i><span class="tape b">otoring</span></span>
+            <span class="port"><i class="jack"></i><span class="tape" id="next"></span></span>
+          </div>
+        </div>
+      </div>
+      <div class="u main" style="--h:4">
+        <div class="face">
+          <div class="lcd"><div class="big" id="big"></div><div class="line" id="line"></div><div class="d" id="d"></div></div>
+          <div class="side">
+            <div class="leds"><span><i class="led pwr"></i>pwr</span><span><i class="led" id="hdd"></i>hdd</span><span><i class="led"></i>net</span></div>
+            <div class="vent"></div>
+          </div>
+        </div>
+      </div>
+      <div class="u lamps">
+        <div class="face"><span class="silk" id="status"></span><div class="row" id="lamps"></div></div>
+      </div>
+      <div class="u" style="--h:2"><div class="face"><div class="vent" style="flex:1;height:60%"></div></div></div>
+    </div>
+    <div class="note" id="note"></div>
+  </div>
+</div>
+<script>
+// card.html?rack=<id>: стойка из content/racks.yaml (make.mjs передаёт id, номер и адрес), подписи из i18n/en.json.
+(async () => {
+  const q = new URLSearchParams(location.search);
+  const id = q.get('rack') || 'home', n = q.get('n') || '1', path = q.get('path') || '/';
+  const racks = (q.get('racks') || 'home').split(',');
+  const stub = q.get('stub') === '1';
+  const t = await (await fetch('/i18n/en.json')).json();
+  const $ = (s) => document.getElementById(s);
+  // Что пишет ЖК и стикер на каждой стойке; для новой стойки — подпись rack.<id>.sub.
+  const own = {
+    home: { line: t['lcd.hello'], d: t['me.sub'], note: t['note.dont'] },
+    lab: { line: t['rack.lab.sub'], d: 'proxmox · containers · ups', note: 'it\'s all real!' },
+  }[id] || { line: t['rack.' + id + '.sub'] || t['rack.' + id], d: stub ? t['rack.stub'] : '', note: stub ? 'soon~' : '' };
+
+  $('exit').textContent = t['hall.exit'];
+  $('signs').innerHTML = racks.map((r, i) => `<li${r === id ? ' class="on"' : ''}><b>r${i + 1}</b>${t['rack.' + r] || r}</li>`).join('');
+  $('cap').textContent = `${t['rack.cap']} · r${n} · ${t['rack.' + id] || id}`;
+  $('ring').textContent = t['ring.panel'];
+  $('prev').textContent = '← ' + t['ring.prev'];
+  $('next').textContent = t['ring.next'] + ' →';
+  $('big').innerHTML = 'belomaxorka.dev' + (path === '/' ? '' : `<span>${path}</span>`);
+  $('line').textContent = own.line;
+  $('d').textContent = own.d;
+  $('status').textContent = t['nav.status'];
+  if (own.note) $('note').innerHTML = own.note; else $('note').remove();
+  if (stub) $('hdd').classList.add('warn');
+  $('lamps').innerHTML = Array.from({ length: 14 }, (_, i) => `<i class="led${stub && i % 5 === 3 ? ' warn' : ''}"></i>`).join('');
+  for (const side of ['l', 'r']) {
+    $('rail-' + side).innerHTML = Array.from({ length: 8 }, (_, i) => `<span class="n" style="top:calc(var(--U) * ${i + .5})">${42 - i}</span>`).join('');
+  }
+  // Длинный адрес не должен вылезать из ЖК.
+  await document.fonts.ready;
+  for (const el of [$('big'), $('line'), $('d')]) {
+    for (let s = parseFloat(getComputedStyle(el).fontSize); el.scrollWidth > el.clientWidth && s > 24; s -= 2) el.style.fontSize = s + 'px';
+  }
+  document.documentElement.dataset.ready = '1';
+})();
+</script>
+</body>
+</html>
