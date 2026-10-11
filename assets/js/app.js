@@ -103,6 +103,19 @@
       },
     }));
 
+    // A contact with no link, only a name (Discord): a click shows the name on the tape for a while and copies it.
+    Alpine.data('copyName', () => ({
+      shown: false,
+      copied: false,
+      timer: 0,
+      copy() {
+        clearTimeout(this.timer);
+        this.shown = true;
+        this.timer = setTimeout(() => { this.shown = this.copied = false; }, 2500);
+        navigator.clipboard?.writeText(this.$root.dataset.name).then(() => { this.copied = true; }, () => {});
+      },
+    }));
+
     // Аватарки: листаются и без JS (scroll-snap); здесь стрелки, счётчик и прокрутка по кругу.
     Alpine.data('gallery', () => ({
       i: 0,

@@ -166,6 +166,7 @@
 
   "sw.aria": "contacts",
   "sw.title": "contact",
+  "sw.copy": "click to copy",
 
   "gb.title": "kvm · guestbook",
   "gb.message": "message",

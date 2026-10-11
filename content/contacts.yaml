@@ -1,26 +1,19 @@
-# Порты свитча = контакты. Порядок здесь — порядок на сайте.
-#   name — надпись (строка или {en, ru}), link — адрес (без него порт выключен),
-#   tape — цвет ленты: пусто, r, b; led — лампа: пусто (зелёная), warn, off;
-#   title — подсказка при наведении; needs: cv — порт живой, только когда в корне сайта лежит cv.pdf;
-#   me: true — это мой профиль: ссылка с rel="me" и в sameAs для поисковиков (JSON-LD Person в <head>).
+# The contacts switch, port by port, in the order shown.
+#   name: the label (a string or {en, ru}); link: where the port leads; copy: a name the port copies instead (an
+#   account with no public link, like Discord's); without either the port is dark.
+#   tape: empty, r, b; led: empty (green), warn, off; title: the hint on hover;
+#   needs: cv: live only when cv.pdf is at the site's root; me: true: my own profile, rel="me" and in the JSON-LD sameAs.
 - name: telegram
   link: https://t.me/belomaxorka
   tape: b
   me: true
-- name: forgejo
-  link: https://git.belomaxorka.dev/belomaxorka
-  me: true
-- name: github
-  link: https://github.com/belomaxorka
-  led: warn
-  me: true
-  title: {en: mirror, ru: зеркало}
-- name: koito · fm
-  link: https://fm.belomaxorka.dev
+- name: discord
+  copy: belomaxorka
+- name: {en: mail, ru: почта}
+  link: mailto:ascouted@gmail.com
   tape: r
+  title: ascouted@gmail.com
 - name: {en: cv.pdf, ru: резюме.pdf}
   link: /cv.pdf
   needs: cv
-  title: {en: soon, ru: скоро}
-- name: matrix
   title: {en: soon, ru: скоро}

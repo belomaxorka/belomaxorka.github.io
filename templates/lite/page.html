@@ -126,9 +126,9 @@ best viewed with any browser</font></td></tr>
 {{template "lite-lcd-open"}}{{with .Syslog}}{{range .}}<font color="#a07a2a">{{stamp .At}} {{.Src}}</font> {{if .What}}{{if .URL}}<a href="{{.URL}}"><font color="#ffd27a">{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}</font></a>{{else}}{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}{{end}}{{else}}{{if .Now}}{{t "log.now"}} {{end}}{{if .URL}}<a href="{{.URL}}"><font color="#ffd27a">{{.Text}}</font></a>{{else}}{{.Text}}{{end}}{{end}}<br>
 {{end}}{{else}}{{t "log.quiet"}}{{end}}{{template "lite-lcd-close"}}{{end}}
 
-{{/* Свитч = контакты. */}}
+{{/* The contacts switch. */}}
 {{define "lite-switch"}}{{template "lite-silk" (t "sw.title")}}
-{{template "f"}}{{range .Content.contacts}}{{if and .link (or (not .needs) $.HasCV)}}{{template "lite-led" (or .led "")}}&nbsp;<a href="{{.link}}">{{loc .name}}</a>{{else}}{{template "lite-led" "off"}}&nbsp;<font color="#9aa0a8">{{loc .name}}</font>{{end}} &nbsp; {{end}}{{template "f-end"}}{{end}}
+{{template "f"}}{{range .Content.contacts}}{{if and .link (or (not .needs) $.HasCV)}}{{template "lite-led" (or .led "")}}&nbsp;<a href="{{.link}}">{{loc .name}}</a>{{else if .copy}}{{template "lite-led" (or .led "")}}&nbsp;{{loc .name}} <tt>{{.copy}}</tt>{{else}}{{template "lite-led" "off"}}&nbsp;<font color="#9aa0a8">{{loc .name}}</font>{{end}} &nbsp; {{end}}{{template "f-end"}}{{end}}
 
 {{/* Донаты: адреса кошельков. */}}
 {{define "lite-donate"}}{{template "lite-silk" (print (t "donate.title") " · " (t "donate.hint"))}}

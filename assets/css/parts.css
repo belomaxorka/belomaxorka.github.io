@@ -63,6 +63,14 @@
 .port:hover .tape { filter: brightness(1.25); }
 .port .led { width: 6px; height: 6px; }
 .port.off .tape { opacity: .55; }
+/* A port that copies a name (switch.html): a click shows the name on the tape, ✓ once it is copied; the tape is as
+   wide as the longer of the two, so nothing next to it moves. */
+button.port { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+.tape.swap { display: inline-grid; text-align: center; }
+.tape.swap > span { grid-area: 1 / 1; }
+.tape.swap > .alt, .tape.swap .alt > i, .port.shown .tape.swap > :first-child { visibility: hidden; }
+.port.shown .tape.swap > .alt, .port.copied .tape.swap .alt > i { visibility: visible; }
+.tape.swap .alt > i { font-style: normal; }
 
 /* Значки (templates/icons.html): линии цветом текста, 1em. */
 .ic { width: 1em; height: 1em; flex: none; vertical-align: -.14em; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
