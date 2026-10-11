@@ -111,12 +111,8 @@
 
   "log.aria": "log",
   "log.blog": "blog →",
-  "log.filter": "show in the log",
-  "log.all": "all",
-  "log.music": "music",
-  "log.checks": "checks",
   "log.now": "now:",
-  "log.quiet": "quiet: no music, no checks",
+  "log.quiet": "quiet: no music yet",
 
   "sw.aria": "contacts",
   "sw.title": "contact",

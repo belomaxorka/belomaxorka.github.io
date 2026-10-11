@@ -1,25 +1,18 @@
-{{/* Журнал: прослушивания Koito и проверки Gatus (задержка каждой, медленные и упавшие), новые сверху, до 60 строк.
-     Атрибут строки — data-kind, не data-src: html/template считает *src* ссылкой и кодирует значение.
-     Список прокручивается; с JS — фильтр «всё · музыка · проверки» (запоминается) и прокрутка не сбрасывается,
-     когда htmx раз в минуту обновляет юнит (/fragments/syslog). */}}
+{{/* Журнал: прослушивания Koito, новые сверху, до 20 строк, с треком, который играет сейчас. Проверки Gatus тут были
+     и забивали всё (по одной на лампу каждую минуту) — их показывает мониторинг. Список прокручивается, прокрутка
+     переживает обновление htmx раз в минуту (/fragments/syslog). Строка помечена data-kind (не data-src:
+     html/template считает *src* ссылкой и кодирует значение) — пригодится, когда появится второй источник. */}}
 {{define "unit-syslog"}}
 <section class="u log" style="--h:5" aria-label="{{t "log.aria"}}" id="unit-syslog"
-  hx-get="/fragments/syslog" hx-trigger="every 60s" hx-swap="outerHTML" x-data="logView">
+  hx-get="/fragments/syslog" hx-trigger="every 60s" hx-swap="outerHTML">
   <div class="face">
     <div class="bar">
-      <span class="silk">syslog · koito, gatus</span>
-      <div class="ports">
-        <div class="tabs" role="group" aria-label="{{t "log.filter"}}" hidden :hidden="false">
-          <button class="key" type="button" @click="show('')" :aria-pressed="is('')">{{t "log.all"}}</button>
-          <button class="key" type="button" @click="show('music')" :aria-pressed="is('music')">{{t "log.music"}}</button>
-          <button class="key" type="button" @click="show('gatus')" :aria-pressed="is('gatus')">{{t "log.checks"}}</button>
-        </div>
-        <a class="key" href="https://blog.belomaxorka.dev">{{t "log.blog"}}</a>
-      </div>
+      <span class="silk">syslog · koito</span>
+      <a class="key" href="https://blog.belomaxorka.dev">{{t "log.blog"}}</a>
     </div>
     <div class="lcd">
-      {{if .}}<ol tabindex="0" aria-label="{{t "log.aria"}}" :data-filter="f">
-        {{range .}}<li data-kind="{{if eq .Src "gatus"}}gatus{{else}}music{{end}}"{{with .State}} class="{{.}}"{{end}}><span class="d">{{stamp .At}}</span><span class="src">{{.Src}}</span><span>{{if eq .Src "gatus"}}{{.Check}} · {{if eq .State "err"}}{{t "mon.notresponding"}}{{else}}{{.Ms}} {{t "ms"}}{{end}}{{else}}{{if .Now}}{{t "log.now"}} {{end}}{{if .URL}}<a href="{{.URL}}">{{.Text}}</a>{{else}}{{.Text}}{{end}}{{end}}</span></li>
+      {{if .}}<ol tabindex="0" aria-label="{{t "log.aria"}}">
+        {{range .}}<li data-kind="{{if eq .Src "♪"}}music{{else}}{{.Src}}{{end}}"{{with .State}} class="{{.}}"{{end}}><span class="d">{{stamp .At}}</span><span class="src">{{.Src}}</span><span>{{if .Now}}{{t "log.now"}} {{end}}{{if .URL}}<a href="{{.URL}}">{{.Text}}</a>{{else}}{{.Text}}{{end}}</span></li>
         {{end}}
       </ol>{{else}}<span class="d">{{t "log.quiet"}}</span>{{end}}
     </div>

@@ -120,14 +120,6 @@
       close() { this.$refs.dlg.close(); },
     }));
 
-    // Журнал: фильтр по источнику, у посетителя запоминается.
-    Alpine.data('logView', () => ({
-      f: '',
-      init() { this.f = store.get('log-filter') || ''; },
-      show(f) { this.f = f; store.set('log-filter', f); },
-      is(f) { return this.f === f; },
-    }));
-
     // Выдвижной юнит: ручка на левом ухе. Без JS это ссылка на /u/<имя> (страница с выдвинутым юнитом), с JS
     // htmx подгружает ящик под юнит (/fragments/unit/<имя>), повторное нажатие задвигает.
     Alpine.data('pull', () => ({
