@@ -254,12 +254,12 @@
 `<b class="o">:oooooooo/`</b>-hMMMMMMMyyMMMMMMMh-`<b class="o">/oooooooo:`</b>   <i>Kernel</i>: Linux{{with $n.Kernel}} {{.}}{{end}}
   `<b class="o">/oooooooo:`</b>:mMMMMMMMMMMMMm:`<b class="o">:oooooooo/</b>`     <i>Uptime</i>: {{uptime $n.Uptime}}
     <b class="o">./ooooooo+-</b> +NMMMMMMMMN+ <b class="o">-+ooooooo/.</b>       <i>Guests</i>: {{.Lab.Up}} running, {{.Lab.Total}} total (pct)
-      <b class="o">.+ooooooo+-`oNMMMMNo`-+ooooooo+.</b>         <i>Shell</i>: bash 5.2.37
+      <b class="o">.+ooooooo+-</b>`oNMMMMNo`<b class="o">-+ooooooo+.</b>         <i>Shell</i>: bash 5.2.37
         <b class="o">-+ooooooo/.`</b>sMMs`<b class="o">./ooooooo+-</b>           <i>CPU</i>: {{or $n.CPUModel "unknown"}} ({{$n.Cores}}){{with $n.GHz}} @ {{.}} GHz{{end}}
           <b class="o">:oooooooo/`</b>..`<b class="o">/oooooooo:</b>             <i>GPU</i>: none (it's a server)
           <b class="o">:oooooooo/`</b>..`<b class="o">/oooooooo:</b>             <i>Memory</i>: {{printf "%.2f" $n.MemGiB}} GiB / {{printf "%.2f" $n.MaxGiB}} GiB ({{template "ff-pct" $n.Mem}})
         <b class="o">-+ooooooo/.`</b>sMMs`<b class="o">./ooooooo+-</b>           <i>Swap</i>: {{if $n.MaxSwapGiB}}{{printf "%.2f" $n.SwapGiB}} GiB / {{printf "%.2f" $n.MaxSwapGiB}} GiB ({{template "ff-pct" $n.Swap}}){{else}}Disabled{{end}}
-      <b class="o">.+ooooooo+-`oNMMMMNo`-+ooooooo+.</b>         <i>Disk (/)</i>: {{if $n.MaxRootGiB}}{{printf "%.2f" $n.RootGiB}} GiB / {{printf "%.2f" $n.MaxRootGiB}} GiB ({{template "ff-pct" $n.Root}}){{else}}unknown{{end}}
+      <b class="o">.+ooooooo+-</b>`oNMMMMNo`<b class="o">-+ooooooo+.</b>         <i>Disk (/)</i>: {{if $n.MaxRootGiB}}{{printf "%.2f" $n.RootGiB}} GiB / {{printf "%.2f" $n.MaxRootGiB}} GiB ({{template "ff-pct" $n.Root}}){{else}}unknown{{end}}
     <b class="o">./ooooooo+-</b> +NMMMMMMMMN+ <b class="o">-+ooooooo/.</b>       <i>Load</i>: {{with index $n.Load 0}}{{.}}, {{index $n.Load 1}}, {{index $n.Load 2}}{{else}}unknown{{end}}
   `<b class="o">/oooooooo:`</b>:mMMMMMMMMMMMMm:`<b class="o">:oooooooo/</b>`     <i>Battery (CBR ESN-1KT)</i>: {{with .UPS}}{{if .OK}}{{template "ff-batt" .Charge}} [{{if .OnBattery}}Discharging{{else if .Charging}}Charging{{else}}AC Connected{{end}}]{{else}}unknown{{end}}{{end}}
 `<b class="o">:oooooooo/`</b>-hMMMMMMMyyMMMMMMMh-`<b class="o">/oooooooo:`</b>   <i>Monitoring</i>: {{with .Status}}{{if .OK}}<span class="{{if eq .Up .Total}}g{{else}}r{{end}}">{{.Up}}/{{.Total}}</span> checks up (Gatus){{else}}unknown{{end}}{{end}}
