@@ -1,8 +1,9 @@
 {{/* Проход между стойками: таблички R1…Rn (обычные ссылки, работают без JS), стрелки к соседям.
-     С JS ещё ←/→ и свайп (assets/js/aisle.js), переход — View Transitions (assets/css/aisle.css).
+     С JS (assets/js/aisle.js) стойка меняется без перезагрузки: ссылки, ←/→ и свайп; камера едет вдоль ряда
+     (assets/css/aisle.css). data-now — что прочитать скринридеру, когда стойка сменилась.
      rel="prev/next" здесь нет специально: им помечено кольцо otoring на патч-панели. */}}
 {{define "aisle"}}
-<nav class="aisle" id="aisle" aria-label="{{t "aisle.aria"}}">
+<nav class="aisle" id="aisle" aria-label="{{t "aisle.aria"}}" data-now="{{t "aisle.now"}}">
   {{with .Rack.Prev}}<a class="step prev" href="{{.Path}}" data-step="prev"><i aria-hidden="true">‹</i><span>r{{.N}} · {{t (print "rack." .ID)}}</span></a>{{else}}<span class="step prev end" aria-hidden="true"></span>{{end}}
   <ol class="signs">
     {{range .Racks}}<li><a href="{{.Path}}"{{if .Current}} aria-current="page"{{end}}{{if .Stub}} class="stub"{{end}}><b>r{{.N}}</b><span>{{t (print "rack." .ID)}}</span></a></li>
@@ -13,12 +14,16 @@
 {{end}}
 
 {{/* Серверная вокруг стойки: потолок с лотками, соседние стойки (их диоды — настоящие лампы Gatus),
-     фальшпол, табличка «выход». Только декор: aria-hidden, без JS, свет — .room[data-light]. */}}
+     фальшпол, табличка «выход». Только декор: aria-hidden, без JS, свет — .room[data-light].
+     Соседи ll, c и rr видны только на ходу между стойками: ряд едет мимо камеры (assets/css/aisle.css). */}}
 {{define "hall"}}
 <div class="hall" aria-hidden="true">
   <div class="ceiling"><i class="tray"></i><i class="duct"></i><i class="lamp a"></i><i class="lamp b"></i><i class="lamp c"></i></div>
+  <div class="nb ll">{{template "nb-rack" .Status.Lamps}}</div>
   <div class="nb l">{{template "nb-rack" .Status.Lamps}}</div>
+  <div class="nb c">{{template "nb-rack" .Status.Lamps}}</div>
   <div class="nb r">{{template "nb-rack" .Status.Lamps}}</div>
+  <div class="nb rr">{{template "nb-rack" .Status.Lamps}}</div>
   <div class="floor"><i class="vent"></i></div>
   <div class="exit">{{t "hall.exit"}}</div>
 </div>

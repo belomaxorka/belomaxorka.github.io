@@ -3,3 +3,18 @@
 .cables .lbl { font: 600 18px var(--f-hand); fill: var(--dim); }
 .cables .outlet { fill: var(--panel-hi); stroke: var(--edge); }
 .cables .outlet-hole { fill: var(--hole); }
+
+/* Стойка приехала (assets/js/aisle.js → app.js, .draw): корды протягиваются по очереди от гнезда, вилки встают
+   в порты, когда провод дотянулся. --i — номер провода, --k — его вилка (0 у начала, 1 у конца). */
+@media (prefers-reduced-motion: no-preference) {
+  .cables.draw > g path[pathLength] {
+    stroke-dasharray: 100 100;
+    animation: cable-draw .55s cubic-bezier(.45, 0, .2, 1) calc(var(--i, 0) * 70ms) both;
+  }
+  .cables.draw > rect, .cables.draw > text {
+    transform-box: fill-box; transform-origin: center;
+    animation: cable-plug .3s cubic-bezier(.3, 1.6, .5, 1) calc(var(--i, 0) * 70ms + var(--k, 0) * 480ms) both;
+  }
+}
+@keyframes cable-draw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+@keyframes cable-plug { from { opacity: 0; transform: scale(.3); } }

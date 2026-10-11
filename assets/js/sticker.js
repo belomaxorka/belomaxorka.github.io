@@ -166,4 +166,19 @@
   document.addEventListener('rack:plug', (e) => { if (!e.detail.on) fall(e.detail.key); });
   document.addEventListener('rack:power', (e) => { if (!e.detail.on) fallAll(); });
   document.addEventListener('rack:laidout', () => requestAnimationFrame(restore));
+
+  // Стойку подменили без перезагрузки (assets/js/aisle.js): упавшие стикеры остались в старой комнате. Кто ещё
+  // летел — ляжет на пол там, где был: вернёшься к той стойке — найдёшь его на полу.
+  document.addEventListener('rack:swap', () => {
+    const w = room()?.offsetWidth || 1;
+    for (const [key, s] of live) {
+      if (s.flying) {
+        s.flying = false;
+        fallen[key] = { fx: s.x / w, dy: s.dy, rot: Math.max(-24, Math.min(24, s.rot % 360)) };
+      }
+      s.el.remove();
+    }
+    live.clear();
+    keep();
+  });
 })();

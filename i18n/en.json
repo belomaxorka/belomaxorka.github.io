@@ -29,6 +29,7 @@
   "lab.silent2": "no answer from the api",
   "lab.others": "+ %d more containers on this host (%d running)",
   "aisle.aria": "racks in the row",
+  "aisle.now": "rack %s",
   "hall.exit": "exit",
   "drawer.pull": "pull out",
   "drawer.shut": "push back",

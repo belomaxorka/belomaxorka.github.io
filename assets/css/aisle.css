@@ -1,6 +1,7 @@
-/* Проход: таблички стоек и стрелки к соседям (templates/aisle.html). Переход между стойками — View Transitions
-   между страницами: стойка уезжает вбок, как камера вдоль ряда. Направление ставит assets/js/theme.js
-   (pagereveal/pageswap), без JS и в старых браузерах — обычный переход по ссылке. */
+/* Проход: таблички стоек и стрелки к соседям (templates/aisle.html). Стойка меняется без перезагрузки
+   (assets/js/aisle.js): камера едет вдоль ряда — стойка уезжает к соседям, следующая приезжает, зал и таблички
+   отзываются. Без JS — обычные ссылки, а между страницами — View Transitions (направление ставит
+   assets/js/theme.js). */
 .aisle {
   position: relative; z-index: 5; max-width: 1000px; margin: 0 auto 12px;
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
@@ -41,7 +42,7 @@
 }
 .aisle .signs a[aria-current] b { color: #15171a; }
 
-/* ---------- переход между стойками ---------- */
+/* ---------- переход между страницами: без JS и при обычной загрузке ---------- */
 @media (prefers-reduced-motion: no-preference) {
   @view-transition { navigation: auto; }
   .rack { view-transition-name: rack; }
@@ -56,3 +57,124 @@
 @keyframes rack-in { from { transform: translateX(70vw) scale(.94); opacity: 0; } }
 @keyframes rack-out-back { to { transform: translateX(70vw) scale(.94); opacity: 0; } }
 @keyframes rack-in-back { from { transform: translateX(-70vw) scale(.94); opacity: 0; } }
+
+/* ---------- переход без перезагрузки: камера едет вдоль ряда (assets/js/aisle.js) ----------
+   Стойки в ряду через 1028px (стойка и проход между ними), соседи в зале стоят там же. Вперёд по ряду весь мир
+   едет влево на --hop-d (назад — вправо, тогда --hop-d < 0): старая стойка темнеет и растворяется в соседе
+   слева, сосед справа светлеет и становится новой стойкой, потолок, лампы и пол сдвигаются меньше (параллакс).
+   Пружина в конце: камера чуть проезжает и возвращается. Классы на <html>:
+     hop        — едем; hop-vt — через View Transitions, иначе старая стойка — копия (.hop-ghost);
+     hop-fwd, hop-back — куда; hop-signs — таблички качаются, новая загорается; hop-land — приехали.
+   Переменные на <html> ставит aisle.js: --hop-d (px), --hop-s (1 или -1), --hop-oy (середина экрана от верха
+   стойки), --hop-ox и --hop-ry (центр стойки и середина экрана от угла комнаты), --hop-dim и --hop-blur (насколько
+   стойка у соседей темнеет и размывается: как соседи; их не видно — не темнеет), --cam0 (откуда едем). */
+:root {
+  --hop-t: .72s;
+  --hop-ease: cubic-bezier(.3, .75, .25, 1);
+}
+@supports (transition-timing-function: linear(0, 1)) {
+  :root { --hop-ease: linear(0, .024, .086, .17, .267, .368, .466, .559, .644, .719, .784, .839, .885, .922, .951, .973, .99, 1.002, 1.01, 1.015, 1.018, 1.018, 1.018, 1.016, 1.014, 1.012, 1.01, 1.007, 1.005, 1.003, 1.002, 1.001, 1); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* View Transitions: старая стойка и её провода — снимки, остальная страница живая и сразу новая. */
+  html.hop::view-transition { pointer-events: none; } /* клик посреди перехода доходит до страницы */
+  html.hop::view-transition-old(root), html.hop::view-transition-old(aisle) { animation: none; opacity: 0; }
+  html.hop::view-transition-new(root), html.hop::view-transition-new(aisle) { animation: none; }
+  html.hop::view-transition-group(rack), html.hop::view-transition-group(hop-cables),
+  html.hop::view-transition-group(hop-power) { animation: none; }
+  html.hop::view-transition-old(rack) {
+    transform-origin: 50% var(--hop-oy);
+    animation: hop-out var(--hop-t) var(--hop-ease) both, hop-dim-out var(--hop-t) linear both;
+  }
+  html.hop::view-transition-new(rack) {
+    transform-origin: 50% var(--hop-oy);
+    animation: hop-in var(--hop-t) var(--hop-ease) both, hop-dim-in var(--hop-t) linear both;
+  }
+  html.hop::view-transition-old(hop-cables), html.hop::view-transition-old(hop-power) {
+    transform-origin: var(--hop-ox) var(--hop-ry);
+    animation: hop-out var(--hop-t) var(--hop-ease) both, hop-dim-out var(--hop-t) linear both;
+  }
+
+  /* Без View Transitions: копия старой стойки с проводами уезжает, сама новая стойка приезжает. */
+  html.hop:not(.hop-vt) .room { overflow: clip; }
+  html.hop:not(.hop-vt) .room > .rack {
+    transform-origin: 50% var(--hop-oy);
+    animation: hop-in var(--hop-t) var(--hop-ease) both, hop-dim-in var(--hop-t) linear both;
+  }
+  .hop-ghost {
+    position: absolute; inset: 0; z-index: 3; pointer-events: none;
+    transform-origin: var(--hop-ox) var(--hop-ry);
+    animation: hop-out var(--hop-t) var(--hop-ease) both, hop-dim-out var(--hop-t) linear both;
+  }
+
+  /* Провода новой стойки появятся, когда она встанет на место (app.js и power.js, событие rack:landed). */
+  html.hop #cables, html.hop #power { opacity: 0; }
+  html.hop-land #power { animation: hop-fade .45s ease-out both; }
+
+  /* Зал: соседи едут вместе со стойками; потолок, лампы и пол — от прошлой стойки к этой. */
+  html.hop .hall .nb { visibility: visible; animation: hop-nb var(--hop-t) var(--hop-ease) both; }
+  html.hop .hall .nb.c { animation: hop-nb var(--hop-t) var(--hop-ease) both, hop-nb-out var(--hop-t) linear both; }
+  html.hop-fwd .hall .nb.l, html.hop-back .hall .nb.r { animation: hop-nb var(--hop-t) var(--hop-ease) both, hop-nb-in var(--hop-t) linear both; }
+  html.hop .hall .ceiling::before { animation: hop-ceiling var(--hop-t) var(--hop-ease) both; }
+  html.hop .hall .floor::before { animation: hop-floor var(--hop-t) var(--hop-ease) both; }
+  html.hop .hall .lamp { animation: hop-lamp var(--hop-t) var(--hop-ease) both; }
+
+  /* Таблички качаются на цепочках, новая текущая загорается, как лампа дневного света, старая гаснет. */
+  html.hop-signs .aisle .signs a { transform-origin: 50% -60px; animation: sign-swing 1.15s ease-in-out both; }
+  html.hop-signs .aisle .signs li:nth-child(2) a { animation-delay: .04s; }
+  html.hop-signs .aisle .signs li:nth-child(3) a { animation-delay: .08s; }
+  html.hop-signs .aisle .signs li:nth-child(4) a { animation-delay: .12s; }
+  html.hop-signs .aisle .signs li:nth-child(n+5) a { animation-delay: .16s; }
+  html.hop-signs .aisle .signs a[aria-current] { animation-name: sign-swing, sign-on; animation-duration: 1.15s, .7s; animation-timing-function: ease-in-out, linear; }
+  html.hop-signs .aisle .signs a.was { animation-name: sign-swing, sign-off; animation-duration: 1.15s, .6s; animation-timing-function: ease-in-out, ease-out; }
+  html.hop-signs .aisle .step > * { animation: step-in .5s cubic-bezier(.2, .8, .3, 1) both; }
+
+  /* Ждём ответа сервера: табличка, к которой едем, мигает, стрелка подталкивает. */
+  .aisle .signs a.pending { animation: sign-wait .5s steps(2, jump-none) infinite; }
+  .aisle a.step.pending i { animation: step-nudge .45s ease-in-out infinite alternate; }
+  .aisle a.step.prev.pending i { animation-name: step-nudge-back; }
+
+  /* Приехали: роутер поднимает линки. */
+  html.hop-land .router .led { animation: link-up .5s steps(5, jump-none) both; }
+}
+html.hop-wait, html.hop-wait a { cursor: progress; }
+
+@keyframes hop-out { to { transform: translateX(calc(var(--hop-d) * -1)) scale(.97); } }
+@keyframes hop-in { from { transform: translateX(var(--hop-d)) scale(.97); } }
+@keyframes hop-dim-out {
+  35% { opacity: 1; filter: none; }
+  to { opacity: 0; filter: brightness(var(--hop-dim, 1)) blur(var(--hop-blur, 0px)); }
+}
+@keyframes hop-dim-in {
+  from { opacity: 0; filter: brightness(var(--hop-dim, 1)) blur(var(--hop-blur, 0px)); }
+  55% { opacity: 1; filter: none; }
+}
+@keyframes hop-fade { from { opacity: 0; } }
+@keyframes hop-nb { from { transform: translateX(var(--hop-d)); } }
+@keyframes hop-nb-out { 30% { opacity: 1; } to { opacity: 0; } }
+@keyframes hop-nb-in { from { opacity: 0; } 70% { opacity: 0; } }
+@keyframes hop-ceiling { from { transform: rotateX(-66deg) translateX(calc((var(--cam0, 1) - 1) * -6vw)); } }
+@keyframes hop-floor { from { transform: rotateX(64deg) translateX(calc((var(--cam0, 1) - 1) * -6vw)); } }
+@keyframes hop-lamp { from { translate: calc((var(--cam0, 1) - 1) * -6vw) 0; } }
+@keyframes sign-swing {
+  0% { transform: none; }
+  16% { transform: rotate(calc(var(--hop-s, 1) * -6deg)); }
+  40% { transform: rotate(calc(var(--hop-s, 1) * 3.5deg)); }
+  62% { transform: rotate(calc(var(--hop-s, 1) * -1.8deg)); }
+  82% { transform: rotate(calc(var(--hop-s, 1) * .7deg)); }
+  100% { transform: none; }
+}
+@keyframes sign-on {
+  0% { filter: brightness(.35); }
+  12% { filter: brightness(1.2); }
+  20% { filter: brightness(.4); }
+  32% { filter: brightness(1.1); }
+  38% { filter: brightness(.6); }
+  55%, 100% { filter: none; }
+}
+@keyframes sign-off { from { background: #f1efe8; color: #15171a; box-shadow: 0 0 22px -2px #f1efe8aa; } }
+@keyframes sign-wait { 50% { box-shadow: inset 0 0 0 1px var(--accent), 0 0 16px -4px var(--accent); color: var(--ink); } }
+@keyframes step-in { from { opacity: 0; transform: translateX(calc(var(--hop-s, 1) * 18px)); } }
+@keyframes step-nudge { to { transform: translateX(4px); } }
+@keyframes step-nudge-back { to { transform: translateX(-4px); } }
+@keyframes link-up { 0% { opacity: .2; } 40% { opacity: 1; } 60% { opacity: .3; } 100% { opacity: 1; } }

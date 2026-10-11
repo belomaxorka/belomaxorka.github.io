@@ -27,6 +27,10 @@
   opacity: calc(.9 * var(--lamp-on)); box-shadow: 0 0 24px 6px color-mix(in srgb, var(--lamp) 50%, transparent);
 }
 .hall .lamp.a { left: 6%; } .hall .lamp.b { left: calc(50% - 90px); } .hall .lamp.c { right: 6%; }
+/* Камера в ряду (--cam: номер стойки на .room): у каждой стойки потолок, лампы и пол чуть сдвинуты — свой
+   кусок прохода. Переход между стойками двигает их отсюда туда (aisle.css). */
+.hall { --cam-x: calc((var(--cam, 1) - 1) * -6vw); }
+.hall .lamp { translate: var(--cam-x) 0; }
 .hall .ceiling::after { /* свет ламп на стенах */
   content: ""; position: absolute; inset: 60px 0 -500px;
   background: radial-gradient(60% 420px at 50% 0, color-mix(in srgb, var(--lamp) 14%, transparent), transparent);
@@ -37,6 +41,11 @@
 .hall .nb { top: 70px; bottom: 150px; width: 1000px; filter: brightness(var(--nb-dim)) blur(1.2px); }
 .hall .nb.l { right: calc(50% + 500px + 28px); }
 .hall .nb.r { left: calc(50% + 500px + 28px); }
+/* Соседи через одного и «будущая» стойка на месте текущей: нужны, только пока ряд едет (aisle.css, .hop). */
+.hall .nb.ll { right: calc(50% + 500px + 28px + 1028px); }
+.hall .nb.rr { left: calc(50% + 500px + 28px + 1028px); }
+.hall .nb.c { left: calc(50% - 500px); }
+.hall .nb.ll, .hall .nb.c, .hall .nb.rr { visibility: hidden; }
 .hall .nbr {
   position: relative; height: 100%; border-radius: 6px;
   background:
@@ -117,13 +126,13 @@
 /* ---------- проход в перспективе: пол и потолок уходят вглубь ---------- */
 .hall .floor { perspective: 420px; }
 .hall .floor::before {
-  inset: -60% -60% 0; transform: rotateX(64deg); transform-origin: 50% 100%;
+  inset: -60% -60% 0; transform: rotateX(64deg) translateX(var(--cam-x)); transform-origin: 50% 100%;
 }
 /* Потолок — плоскость в перспективе: лотки и короб уходят вглубь прохода. */
 .hall .ceiling { perspective: 420px; height: 150px; overflow: hidden; }
 .hall .tray, .hall .duct { display: none; }
 .hall .ceiling::before {
-  content: ""; position: absolute; inset: 0 -60% -260%; transform: rotateX(-66deg); transform-origin: 50% 0;
+  content: ""; position: absolute; inset: 0 -60% -260%; transform: rotateX(-66deg) translateX(var(--cam-x)); transform-origin: 50% 0;
   background:
     linear-gradient(90deg, transparent calc(41% - 6px), var(--duct) 0 calc(41% + 6px), transparent 0),
     linear-gradient(90deg, transparent calc(30% - 22px), var(--tray) 0 calc(30% - 18px), transparent 0 calc(30% + 18px), var(--tray) 0 calc(30% + 22px), transparent 0),

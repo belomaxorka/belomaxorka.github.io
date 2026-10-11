@@ -29,6 +29,7 @@
   "lab.silent2": "api не отвечает",
   "lab.others": "+ ещё %d контейнеров на этом хосте (работает %d)",
   "aisle.aria": "стойки в ряду",
+  "aisle.now": "стойка %s",
   "hall.exit": "выход",
   "drawer.pull": "выдвинуть",
   "drawer.shut": "задвинуть",

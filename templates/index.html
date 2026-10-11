@@ -1,8 +1,9 @@
 {{/* Страница = одна стойка из ряда (content/racks.yaml): проход с табличками сверху, зал вокруг, юниты сверху
      вниз. Юнит рисует {{unit "имя" $}}: шаблон templates/units/<имя>.html. Юнит с шаблоном detail-<имя>
-     выдвигается: под ним ящик, который наполняет htmx (/fragments/unit/<имя>) или, без JS, страница /u/<имя>. */}}
+     выдвигается: под ним ящик, который наполняет htmx (/fragments/unit/<имя>) или, без JS, страница /u/<имя>.
+     --cam — где в ряду стоит камера (номер стойки): от него сдвинуты потолок и пол зала (assets/css/hall.css). */}}
 {{define "page"}}
-<div class="room" id="room" data-rack="{{.Rack.ID}}" data-light="{{template "light" .}}">
+<div class="room" id="room" data-rack="{{.Rack.ID}}" data-light="{{template "light" .}}" style="--cam:{{.Rack.N}}">
   {{template "hall" .}}
   {{template "aisle" .}}
   <div class="rack{{if .Rack.Stub}} stub{{end}}" id="rack">

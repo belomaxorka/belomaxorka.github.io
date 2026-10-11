@@ -296,4 +296,26 @@
     if (ol && logScroll) ol.scrollTop = logScroll;
   });
   document.addEventListener('rack:layout', later);
+
+  // Стойку подменили без перезагрузки (assets/js/aisle.js): разложить сразу, пока её не показали.
+  document.addEventListener('rack:swap', layout);
+  // Доехала: провода по местам и протягиваются от гнезда к роутеру, вилки встают в порты (cables.css, .draw).
+  let drawn = 0;
+  document.addEventListener('rack:landed', (e) => {
+    layout();
+    const svg = document.getElementById('cables');
+    if (!svg || e.detail?.quiet || !motion()) return;
+    let i = -1, k = 0;
+    for (const n of svg.children) {
+      if (n.tagName === 'g') {
+        i++; k = 0;
+        n.querySelectorAll('path').forEach(p => p.setAttribute('pathLength', '100'));
+      }
+      n.style.setProperty('--i', Math.max(0, i));
+      if (n.tagName !== 'g') n.style.setProperty('--k', k++);
+    }
+    svg.classList.add('draw');
+    clearTimeout(drawn);
+    drawn = setTimeout(() => svg.classList.remove('draw'), 1600);
+  });
 })();
