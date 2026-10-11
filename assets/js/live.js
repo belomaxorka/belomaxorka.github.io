@@ -3,7 +3,9 @@
 //     порт коммутатора (рисует app.js по data-guests на <html>); пришёл — корд протягивается, ушёл — исчезает;
 //   - visit: кто-то открыл страницу — пакет бежит с потолка по оптике в роутер (на других стойках — по аплинку
 //     в коммутатор), оттуда в коммутатор и к серверу;
-//   - gb: новая запись в гостевой — пакет тем же путём к KVM.
+//   - gb: новая запись в гостевой — пакет тем же путём к KVM;
+//   - новые данные юнита (опрос htmx: новый трек на медиасервере, строка журнала, лампы мониторинга) — сначала пакет
+//     бежит к этому юниту, и только когда он добежал, юнит меняется.
 // Пакетов нет без интернета у стойки, без коммутатора или роутера; до юнита без связи пакет не доходит. Без
 // анимаций (prefers-reduced-motion) и во вкладке в фоне пакетов нет, корды гостей есть. Без JS — ничего.
 (() => {
@@ -55,10 +57,11 @@
     return legs;
   }
 
+  // Пускает пакет; возвращает, сколько он будет бежать (мс), или 0, если не побежал.
   function run(target) {
-    if (reduce.matches || document.hidden) return;
+    if (reduce.matches || document.hidden) return 0;
     const legs = route(target);
-    if (!legs || !legs.length) return;
+    if (!legs || !legs.length) return 0;
     const room = document.getElementById('room'), cab = document.getElementById('cables');
     if (!room || !cab) return;
     let svg = document.getElementById('packets');
@@ -70,6 +73,7 @@
       room.appendChild(svg);
     }
     svg.setAttribute('viewBox', cab.getAttribute('viewBox') || '');
+    const total = legs.reduce((s, [p]) => s + Math.max(260, p.getTotalLength() * 1.1), 0);
     const dot = document.createElementNS(NS, 'circle');
     dot.setAttribute('r', '3.6');
     dot.setAttribute('class', 'packet');
@@ -88,5 +92,22 @@
       setTimeout(() => dot.remove(), 300);
     };
     requestAnimationFrame(step);
+    return total;
   }
+
+  // Опрос htmx принёс юниту новое: пакет к нему, обмен — когда пакет добежал (swap:…ms). Что считать новым — по юниту:
+  // у медиасервера текст ЖК (трек), у журнала первая строка, у мониторинга состояние ламп.
+  const SIG = { media: '.lcd', log: 'ol li', mon: '.matrix' };
+  document.addEventListener('htmx:beforeSwap', (e) => {
+    const t = e.detail.target;
+    if (!(t instanceof Element) || t.parentElement?.id !== 'rack-body' || !t.hasAttribute('hx-get')) return;
+    const key = Object.keys(SIG).find((k) => t.classList.contains(k));
+    if (!key || !e.detail.shouldSwap) return;
+    const sel = SIG[key];
+    const now = t.querySelector(sel), next = new DOMParser().parseFromString(e.detail.serverResponse, 'text/html').querySelector(sel);
+    const sig = (n) => (key === 'mon' ? n?.innerHTML : n?.textContent)?.replace(/\s+/g, ' ').trim() || '';
+    if (sig(now) === sig(next)) return;
+    const ms = run(key);
+    if (ms) e.detail.swapOverride = `outerHTML swap:${Math.round(ms)}ms`;
+  });
 })();

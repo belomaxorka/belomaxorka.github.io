@@ -11,11 +11,14 @@
     <div class="body" id="rack-body" data-nolink="{{t "net.lost"}}" data-nonet="{{t "net.nointernet"}}">
       <div class="rail l" aria-hidden="true"></div>
       <div class="rail r" aria-hidden="true"></div>
+      {{/* Заглушка «монтируется» встаёт над ИБП (он внизу у каждой стойки), а без ИБП — в конце. */}}
+      {{$stubbed := false}}
       {{range .Rack.Units}}
+      {{if and $.Rack.Stub (eq . "ups")}}{{template "stub" $}}{{$stubbed = true}}{{end}}
       {{unit . $}}
       {{if has (print "detail-" .)}}{{if eq . $.Open}}{{template "drawer" $}}{{else}}<div class="drawer" id="drawer-{{.}}"></div>{{end}}{{end}}
       {{end}}
-      {{if .Rack.Stub}}{{template "stub" .}}{{end}}
+      {{if and .Rack.Stub (not $stubbed)}}{{template "stub" .}}{{end}}
     </div>
     <div class="foot"></div>
   </div>

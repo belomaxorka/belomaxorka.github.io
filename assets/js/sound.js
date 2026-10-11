@@ -1,7 +1,8 @@
 // Звук серверной (WebAudio, всё синтезируется, файлов нет). По умолчанию выключен: тумблер «звук» на mgmt, выбор
 // помнится (localStorage). Браузер даёт звук только после нажатия — тумблер и есть это нажатие.
 //   - гул вентиляторов: шум через фильтр, громче, чем больше юнитов работает; стойка погасла — стихает,
-//     загружается — раскручивается;
+//     загружается — раскручивается. Соседние стойки в зале гудят тоже (тише, издали), пока живы — и когда своя
+//     погасла, зал не замолкает;
 //   - ИБП на батарее пищит (пара коротких раз в 4 с), самотест — по сигналу rack:beep (power.js);
 //   - щелчки: вилки питания и RJ45 (rack:plug от power.js, rack:link от net.js), рубильник, выключатель света,
 //     кнопки ИБП, клавиши, RESET;
@@ -72,21 +73,29 @@
     src.start(t);
   }
   const beep = (n = 1) => { for (let i = 0; i < n; i++) tone(2350, 0.12, { vol: 0.035, at: i * 0.22 }); };
-  // Загрузка: вентиляторы на полные обороты, через пару секунд — к обычному гулу (poll); писк POST — через полсекунды.
+  // Загрузка: вентиляторы на полные обороты (сколько юнитов — столько и рёва), через пару секунд — к обычному гулу
+  // (poll). Писк POST — только где есть сервер с BIOS (сервер, хост Proxmox): коммутатор и mgmt не пищат.
   function boot() {
     if (!ctx || !on) return;
     surgeUntil = Date.now() + 2200;
     humGain.gain.cancelScheduledValues(ctx.currentTime);
-    humGain.gain.setTargetAtTime(0.13, ctx.currentTime, 0.25);
-    tone(1000, 0.16, { vol: 0.045, at: 0.5 });
+    humGain.gain.setTargetAtTime(0.03 + units() * 0.012 + far() * 0.014, ctx.currentTime, 0.25);
+    if (document.querySelector('#rack-body > .u:is(.srv, .pve)')) tone(1000, 0.16, { vol: 0.045, at: 0.5 });
   }
 
   // ---------- гул и тревога ИБП по состоянию стойки ----------
-  function poll() {
-    if (!ctx || !on || Date.now() < surgeUntil) return;
+  // Сколько юнитов своей стойки работает; сколько соседних стоек в зале живы (power.js гасит их .dark).
+  function units() {
     const rack = document.getElementById('rack');
-    const n = rack && !rack.classList.contains('powered-off') ? document.querySelectorAll('#rack-body > .u.has-psu:not(.off)').length : 0;
-    humGain.gain.setTargetAtTime(n ? 0.025 + n * 0.006 : 0, ctx.currentTime, n ? 0.8 : 0.5);
+    return rack && !rack.classList.contains('powered-off') ? document.querySelectorAll('#rack-body > .u.has-psu:not(.off)').length : 0;
+  }
+  const far = () => document.querySelectorAll('.hall .nb[data-rack]:not(.dark)').length;
+
+  function poll() {
+    const n = units();
+    if (!ctx || !on || Date.now() < surgeUntil) return;
+    const level = (n ? 0.025 + n * 0.006 : 0) + far() * 0.014;
+    humGain.gain.setTargetAtTime(level, ctx.currentTime, n ? 0.8 : 0.5);
     if (document.querySelector('#rack-body > .ups .lcd.alarm') && Date.now() - lastBeep > 4000) { lastBeep = Date.now(); beep(2); }
   }
 

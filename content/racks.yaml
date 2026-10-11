@@ -18,9 +18,9 @@
 - id: fun
   path: /fun
   stub: true
-  units: [patch, brush, tor, brush, mgmt]
+  units: [patch, brush, tor, brush, mgmt, ups]
 
 - id: archive
   path: /archive
   stub: true
-  units: [patch, brush, tor, brush, mgmt]
+  units: [patch, brush, tor, brush, mgmt, ups]
