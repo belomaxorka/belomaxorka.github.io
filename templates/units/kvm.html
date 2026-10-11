@@ -1,5 +1,6 @@
 {{/* KVM-консоль = гостевая книга. Форма работает и без JS (обычный POST и редирект назад),
-     с JS уходит через htmx и умеет рисунок (assets/js/oekaki.js). Записи появляются после модерации.
+     с JS уходит через htmx и умеет рисунок (assets/js/oekaki.js); без связи у KVM не уходит вовсе, над ней —
+     data-nolink или data-nonet (assets/js/net.js). Записи появляются после модерации.
      Данные: .Enabled, .Entries (ID, Name, Text, Reply, At, Drawing), .Status, .Stamp. */}}
 {{define "unit-kvm"}}
 <section class="u kvm" style="--h:5" aria-labelledby="gbh" id="unit-kvm">
@@ -42,7 +43,7 @@
     </div>
     {{if .Enabled}}
     {{with .Status}}<p class="gb-status {{if eq . "sent"}}ok{{else}}err{{end}}" role="status">{{t (printf "gb.%s" .)}}</p>{{end}}
-    <form class="kb" method="post" action="/guestbook" hx-post="/guestbook" hx-target="#unit-kvm" hx-swap="outerHTML" x-data="oekaki">
+    <form class="kb" method="post" action="/guestbook" hx-post="/guestbook" hx-target="#unit-kvm" hx-swap="outerHTML" x-data="oekaki" data-nolink="{{t "gb.err.nolink"}}" data-nonet="{{t "gb.err.nonet"}}">
       <input type="hidden" name="stamp" value="{{.Stamp}}">
       <input type="hidden" name="drawing" x-ref="drawing">
       <label class="hp" aria-hidden="true">website <input name="website" tabindex="-1" autocomplete="off"></label>

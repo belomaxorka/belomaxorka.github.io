@@ -82,6 +82,9 @@
       const u = d.previousElementSibling;
       if (u && !offline(u)) fill(d);
     });
+    body.querySelectorAll(':scope > .u .gb-status[data-net]').forEach((p) => {
+      if (!offline(p.closest('.u'))) p.remove();
+    });
   }
 
   // Офлайн: нет своего линка, обесточен коммутатор или роутер, нет интернета у стойки (то же, что видно на экранах).
@@ -94,8 +97,8 @@
 
   // Офлайн-юнит не обновляется: его опрос htmx (медиа, монитор, журнал) отменяется — ни нового трека за надписью, ни
   // новой палитры ЖК (она приходит вместе с медиа). Его ящик (запрос от ручки, app.js) не загружается: выдвигается
-  // пустым, с той же ошибкой, что на экранах (network.css), и загружается, когда связь вернётся. Форма гостевой идёт:
-  // её отправляет сам посетитель.
+  // пустым, с той же ошибкой, что на экранах (network.css), и загружается, когда связь вернётся. Форма гостевой не
+  // уходит — ниже.
   const missed = new Set();
   document.addEventListener('htmx:beforeRequest', (e) => {
     const t = e.target;
@@ -105,6 +108,27 @@
     e.preventDefault();
     if (handle) empty(handle); else missed.add(u);
   });
+  // Без связи гостевая не отправляет: форма офлайн-юнита (KVM) не уходит — ни через htmx, ни обычным POST (перехват
+  // раньше всех, на фазе захвата). Над формой — почему, как на экранах: у KVM нет линка или коммутатор обесточен —
+  // «связь потеряна», нет интернета у стойки или роутер обесточен — «нет интернета». Написанное и нарисованное
+  // остаётся; вернулась связь — надпись уходит (sync), можно отправить снова.
+  document.addEventListener('submit', (e) => {
+    const f = e.target, u = f instanceof HTMLFormElement ? f.closest('#rack-body > .u') : null;
+    if (!u || !offline(u)) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    const cut = u.classList.contains('unlinked') || !!u.closest('.rack')?.querySelector('#rack-body > .u.tor.off');
+    let p = f.previousElementSibling;
+    if (!p?.classList.contains('gb-status')) {
+      p = document.createElement('p');
+      p.setAttribute('role', 'status');
+      f.before(p);
+    }
+    p.className = 'gb-status err';
+    p.dataset.net = '';
+    p.textContent = (cut ? f.dataset.nolink : f.dataset.nonet) || '';
+  }, true);
+
   function refresh(u) {
     const url = u.getAttribute('hx-get');
     if (url && window.htmx) htmx.ajax('GET', url, { source: u, target: u, swap: 'outerHTML' });
