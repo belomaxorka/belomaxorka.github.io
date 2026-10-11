@@ -46,6 +46,12 @@ cd ../site-api && go run ./cmd/site-api -site ../belomaxorka.dev -addr 127.0.0.1
 Open http://127.0.0.1:8090, edit a template or a stylesheet and reload: site-api picks up changes
 within two seconds.
 
+## Deploy
+
+Push to `main` → CI (`.forgejo/workflows/deploy.yml`): first `site-api -check` with site-api's `main` renders every
+page of the commit (each rack in each language, pulled-out units, the light and infrastructure pages, the htmx
+fragments); only then the site is shipped to the server, where site-api picks the new release up by itself.
+
 ## Hosting
 
 Served from my home lab: Proxmox LXC containers behind Caddy, proxied through Cloudflare.

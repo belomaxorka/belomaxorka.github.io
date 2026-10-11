@@ -10,7 +10,34 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # The contract with site-api: every page of this commit must render with site-api's main (site-api -check: each
+  # rack in each language, pulled-out units, the light version, the infrastructure pages, the htmx fragments), or
+  # the deploy would leave visitors on the old templates (site-api refuses ones that do not render) or, at a
+  # restart, on the fallback page.
+  check:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: site
+
+      - name: Get site-api
+        run: git clone --depth 1 "$GITHUB_SERVER_URL/belomaxorka/site-api.git" site-api
+
+      # The Go of site-api's toolchain line: it sits in the runner's tool cache, so setup-go does not download it.
+      - id: go
+        run: echo "version=$(sed -n 's/^toolchain go//p' site-api/go.mod)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ steps.go.outputs.version }}
+
+      - name: Every page renders
+        working-directory: site-api
+        run: go run ./cmd/site-api -check -site "$GITHUB_WORKSPACE/site"
+
   deploy:
+    needs: check
     runs-on: docker
     steps:
       - uses: actions/checkout@v4
