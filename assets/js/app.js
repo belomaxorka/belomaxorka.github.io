@@ -1,5 +1,5 @@
-// Поведение стойки. Разметку и данные рендерит site-api, htmx обновляет живые юниты,
-// здесь только то, что нужно браузеру: Alpine-компоненты, высота юнитов, номера на рейках и провода.
+// The rack's behaviour. site-api renders the markup and the data, htmx refreshes the live units; here only what needs
+// the browser: the Alpine components, the units' heights, the rail numbers and the network cables.
 (() => {
   const root = document.documentElement;
   const store = {
@@ -15,8 +15,8 @@
   document.addEventListener('alpine:init', () => {
     const Alpine = window.Alpine;
 
-    // Цвет ЖК: из обложки (палитру присылает site-api) или обычный янтарь. Подписи кнопок — в data-атрибутах
-    // на языке страницы.
+    // The LCD colour: from the cover (site-api sends the palette) or plain amber. The buttons' captions are in data
+    // attributes, in the page's language.
     Alpine.store('lcd', {
       cover: root.dataset.lcd !== 'amber',
       toggle() {
@@ -43,7 +43,7 @@
       },
     }));
 
-    // Бегущие строки на ЖК: первая видна и без JS, дальше по кругу.
+    // Lines that take turns on an LCD: the first one shows without JS too, the rest go round.
     Alpine.data('cycle', (ms) => ({
       init() {
         const items = [...this.$el.querySelectorAll('li')];
@@ -58,7 +58,7 @@
       destroy() { clearInterval(this.timer); },
     }));
 
-    // VU-метр: живёт, только пока что-то играет.
+    // The VU meter: alive only while something plays.
     Alpine.data('vu', (playing) => ({
       init() {
         const rows = [...this.$el.querySelectorAll('.row')];
@@ -80,13 +80,13 @@
       destroy() { clearInterval(this.timer); },
     }));
 
-    // Код моей кнопки 88x31 в буфер обмена; подписи на языке страницы в data-атрибутах.
+    // A 88x31 button's code to the clipboard; the captions are in data attributes, in the page's language.
     Alpine.data('copyCode', () => ({
       label: '',
       init() { this.label = this.$root.querySelector('[data-copy]').dataset.copy; },
       copy(btn) {
         const done = () => { this.label = btn.dataset.done; setTimeout(() => { this.label = btn.dataset.copy; }, 1600); };
-        // Буфера обмена нет (http, старый браузер): код открыть и выделить, адрес кошелька — выделить.
+        // No clipboard (plain http, an old browser): open the code and select it, or select the wallet's address.
         const fallback = () => {
           const d = this.$root.querySelector('details'), code = this.$root.querySelector('input.code');
           if (d) d.open = true;
@@ -116,7 +116,7 @@
       },
     }));
 
-    // Аватарки: листаются и без JS (scroll-snap); здесь стрелки, счётчик и прокрутка по кругу.
+    // Avatars: they scroll without JS too (scroll-snap); here the arrows, the counter and the wrap-around.
     Alpine.data('gallery', () => ({
       i: 0,
       n: 1,
@@ -128,11 +128,11 @@
         s.scrollTo({ left: this.i * s.clientWidth, behavior: motion() ? 'smooth' : 'auto' });
         this.light();
       },
-      // Лампы под фото: горит та, чьё фото на экране.
+      // The lamps under the photo: the one of the photo on screen is lit.
       light() { [...(this.$refs.leds?.children || [])].forEach((l, k) => l.classList.toggle('off', k !== this.i)); },
     }));
 
-    // Рисунки гостевой открываются крупно в <dialog>, листаются стрелками и клавишами.
+    // The guestbook's drawings open large in a <dialog>, turned with the arrows and the keys.
     Alpine.data('lightbox', () => ({
       i: 0,
       n: 0,
@@ -149,9 +149,9 @@
       close() { this.$refs.dlg.close(); },
     }));
 
-    // Выдвижной юнит: ручка на левом ухе. Без JS это ссылка на /u/<имя> (страница с выдвинутым юнитом), с JS
-    // htmx подгружает ящик под юнит (/fragments/unit/<имя>), повторное нажатие задвигает. Запрос идёт от ручки:
-    // так net.js знает, чей это ящик, и у юнита без сети вместо загрузки выдвигает ящик с ошибкой.
+    // A unit that pulls out: the handle on its left ear. Without JS it is a link to ?open=<unit> (the page with the
+    // unit pulled out); with JS htmx loads the drawer under the unit (/fragments/unit/<unit>) and a second press pushes
+    // it back. The request comes from the handle, so net.js knows whose drawer it is (offline: the drawer shows the error).
     Alpine.data('pull', () => ({
       toggle() {
         const el = this.$el, name = el.dataset.unit, box = document.getElementById('drawer-' + name);
@@ -163,23 +163,23 @@
       },
     }));
 
-    // Ящик выдвинутого юнита: выезжает, ручке ставит aria-expanded, задвигается кнопкой, Esc или ручкой.
+    // The pulled-out drawer: slides out, sets aria-expanded on the handle, goes back with its button, Esc or the handle.
     Alpine.data('drawer', () => ({
       init() {
-        // Сам ящик — корень компонента. В методах this.$el — элемент, на котором сработало событие (кнопка
-        // «задвинуть»), поэтому ящик запоминаем здесь.
+        // The drawer is the component's root. In the methods this.$el is the element of the event (the "push back"
+        // button), so keep the drawer here.
         const el = this.box = this.$root, name = el.id.replace('drawer-', '');
         this.handle = document.querySelector(`.pull[data-unit="${name}"]`);
         if (this.handle) this.handle.setAttribute('aria-expanded', 'true');
         el.addEventListener('drawer:shut', () => this.shut());
-        // Выезжает сам (CSS @starting-style); стойку пересчитать сразу и когда доедет.
+        // It slides out by itself (CSS @starting-style); lay the rack out now and once it is out.
         const layout = () => document.dispatchEvent(new Event('rack:layout'));
         layout();
         el.addEventListener('transitionend', layout, { once: true });
       },
       shut() {
         const el = this.box;
-        // Открыт со страницы /u/<имя> (без JS-ящика): адрес возвращается к стойке, без перезагрузки.
+        // Opened by ?open=<unit> (no JS drawer at first): the address goes back to the rack's, without a reload.
         const back = el.querySelector('.shut')?.getAttribute('href')?.split('#')[0];
         const done = () => {
           if (!el.isConnected) return;
@@ -203,8 +203,8 @@
     }));
   });
 
-  // ---------- высота юнитов кратна U, номера на рейках ----------
-  // Выдвинутый ящик тоже занимает место в стойке: считается, как юнит.
+  // ---------- unit heights in whole U, the rail numbers ----------
+  // A pulled-out drawer takes space in the rack too: it counts as a unit.
   function snap() {
     const body = document.getElementById('rack-body');
     if (!body) return;
@@ -229,15 +229,15 @@
     });
   }
 
-  // ---------- провода ----------
-  // Структурированная разводка (вариант B): короткие патч-корды из гнёзд кольца на патч-панели через щёточный
-  // органайзер в верхний ряд коммутатора; сетевая карта каждого юнита — в левый вертикальный органайзер и по нему
-  // вверх, к нижнему ряду коммутатора; роутер (на главной) — в коммутатор, его WAN жёлтой оптикой через крышу
-  // «в интернет»; на остальных стойках из SFP коммутатора оптика уходит к R1. Всё в одном SVG поверх комнаты,
-  // клики проходят насквозь. Силовые кабели рисует power.js.
+  // ---------- network cables ----------
+  // Structured cabling: short patch cords from the ring's jacks on the patch panel through the brush organiser into
+  // the switch's top row; each unit's network card into the left vertical organiser, up along it to the switch's
+  // bottom row; the router (on the home rack) into the switch, its WAN as yellow fibre up through the roof; on the
+  // other racks fibre runs from the switch's SFP towards R1. One SVG over the room that clicks pass through. The power
+  // cables are power.js's.
   const RING = ['#e0b93a', '#3a7bd5', '#e0b93a', '#e0b93a'];
-  const GUEST = '#c9ccd2';  // корды гостей онлайн (assets/js/live.js)
-  let drawnGuests = 0;      // сколько их уже нарисовано: новый корд протягивается, остальные просто на месте
+  const GUEST = '#c9ccd2';  // the cords of the guests online (assets/js/live.js)
+  let drawnGuests = 0;      // how many are drawn already: a new cord is pulled in, the others just stay
   const DATA = '#3a7bd5', MGMT = '#9b6bd6', LAN = '#3daa63', FIBER = '#e8c21a', UPFIBER = '#2bb3c0';
   const keyOf = (u) => Rack.keyOf(u, Rack.WIRED); // units with a network card (rack.js)
   const el = Rack.svg;
@@ -250,13 +250,13 @@
     el('rect', { x: x - w / 2, y: y - h / 2, width: w, height: h, rx: 2, fill: color, stroke: 'rgba(0,0,0,.45)' }, svg);
   }
 
-  // Штекер, вставленный в гнездо: по его центру и почти во всё гнездо, по краю видна только рамка.
+  // A plug in a jack: centred on it and filling nearly all of it, only the frame shows.
   function seat(svg, b, color) {
     plug(svg, b.cx, b.cy, color, Math.max(6, b.w - 5), Math.max(6, b.h - 4));
     el('rect', { x: b.cx - b.w * .18, y: b.cy - b.h * .16, width: b.w * .36, height: b.h * .32, rx: 1, fill: 'rgba(0,0,0,.22)', class: 'boot' }, svg);
   }
 
-  // Кубическая кривая [a, b, c, d] делится в точке t на две (де Кастельжо).
+  // Splits the cubic curve [a, b, c, d] at t in two (de Casteljau).
   function split([a, b, c, d], t) {
     const m = (p, q) => ({ x: p.x + (q.x - p.x) * t, y: p.y + (q.y - p.y) * t });
     const ab = m(a, b), bc = m(b, c), cd = m(c, d), abc = m(ab, bc), bcd = m(bc, cd), x = m(abc, bcd);
@@ -264,7 +264,7 @@
   }
   const xy = (p) => `${p.x} ${p.y}`;
 
-  // Сетевые карты юнитов и вертикальный органайзер: декор, который есть только с JS (как разъёмы питания).
+  // The units' network cards and the vertical organiser: decoration that exists only with JS (like the power inlets).
   function wire() {
     const body = document.getElementById('rack-body');
     if (!body || !body.querySelector(':scope > .tor')) return [];
@@ -275,10 +275,10 @@
       body.prepend(vm);
     }
     const units = [...body.querySelectorAll(':scope > .u')].filter(keyOf);
-    // Экраны подключённых юнитов знают, что показать без связи (CSS: network.css, «нет связи»). После каждого
-    // обновления htmx юнит приходит заново, поэтому подписи ставятся при каждой раскладке. Счётчик фото под
-    // аватарками (.gal-ctl) — не экран сети: фото свои, и надпись туда не влезет. Хост Proxmox и контейнеры (/lab)
-    // говорят только с локальной сетью: без линка — «связь потеряна», а без интернета им показывать нечего другого.
+    // The screens of connected units know what to show without a link (CSS: network.css, "no link"). Every htmx update
+    // brings the unit anew, so the captions are set on every layout. The photo counter under the avatars (.gal-ctl) is
+    // not a network screen: the photos are local, and the text would not fit. The Proxmox host and the containers
+    // (/lab) talk to the LAN only: without a link "link lost", and they have nothing to show for "no internet".
     units.forEach(u => u.querySelectorAll('.lcd, .screen').forEach(d => {
       if (d.closest('.gal-ctl')) return;
       d.dataset.nolink = body.dataset.nolink || '';
@@ -286,7 +286,7 @@
       else d.dataset.nonet = body.dataset.nonet || '';
     }));
     units.forEach((u) => {
-      // Класс — каждый раз: htmx, подменив юнит, на settle возвращает ему class из ответа, а карта уже вставлена.
+      // The class every time: htmx, swapping the unit, restores its class from the response on settle.
       u.classList.add('has-nic');
       if (u.querySelector(':scope > .nic')) return;
       const n = document.createElement('span');
@@ -298,7 +298,7 @@
     return units;
   }
 
-  // Где кубическая кривая (монотонная по высоте) проходит высоту y: t от 0 до 1.
+  // Where a cubic curve (monotonic in height) crosses the height y: t from 0 to 1.
   function cross(c, y) {
     const at = (t) => (1 - t) ** 3 * c[0].y + 3 * (1 - t) ** 2 * t * c[1].y + 3 * (1 - t) * t * t * c[2].y + t ** 3 * c[3].y;
     const up = at(1) < at(0);
@@ -307,10 +307,10 @@
     return Math.min(.85, Math.max(.15, (lo + hi) / 2));
   }
 
-  // Возвращает корды стойки для assets/js/net.js (получает их с rack:laidout): у каждого ключ, порт коммутатора (его
-  // лампу net.js зажигает, когда линк есть), номер провода в SVG (по нему — когда вилка встаёт в порт при протяжке).
-  // У тех, что можно выдернуть, ещё гнездо, хвост — кривая от вилки до места, где корд держит органайзер (оттуда
-  // выдернутый и свисает), и куда хватать.
+  // The rack's cords for assets/js/net.js (it gets them with rack:laidout): each with its key, its switch port (net.js
+  // lights its lamp while there is a link) and its wire's number in the SVG (to know when the plug reaches the port as
+  // the cable is drawn). The ones that can be pulled also have their jack, their tail (the curve from the plug to where
+  // the organiser holds the cord, where a pulled one hangs from) and where to grab them.
   function cables() {
     const svg = document.getElementById('cables');
     const room = document.getElementById('room');
@@ -330,14 +330,14 @@
     const port = (n) => tor.querySelector(`.tp[data-port="${n - 1}"]`);
     const used = new Set();
     const wireNo = () => svg.querySelectorAll(':scope > g').length - 1;
-    // Лампы портов зажигает net.js — у кого линк есть.
+    // The ports' lamps are net.js's: lit for the cords with a link.
     tor.querySelectorAll('.tp.link').forEach(t => t.classList.remove('link'));
 
-    // Какие корды этой стойки выдернуты, знает net.js: хвост и вилку такого корда рисует он, здесь — остальной путь
-    // до коммутатора (или до лотков).
+    // net.js knows which cords of this rack are pulled: it draws their tail and plug; here the rest of the way to the
+    // switch (or to the trays).
     const pulled = Rack.pulled();
-    // Корд с хвостом tail ([от вилки, …, до органайзера]) и путём дальше rest (продолжение: «L…», «C…»). Вилку в гнезде
-    // at ставит сам, на дальнем конце — тот, кто позвал. hit — куда хватать (по умолчанию само гнездо).
+    // A cord with the tail tail ([from the plug, ..., to the organiser]) and the way on, rest (a continuation: "L...",
+    // "C..."). It seats the plug in the jack at itself; the far end is the caller's. hit: where to grab (the jack by default).
     const pullable = (key, type, port, at, color, w, tail, rest, hit) => {
       const out = pulled.has(key);
       cable(svg, out ? `M${xy(tail[3])} ${rest}` : `M${xy(tail[0])} C${xy(tail[1])}, ${xy(tail[2])}, ${xy(tail[3])} ${rest}`, color, w);
@@ -346,8 +346,8 @@
       return out;
     };
 
-    // Кольцо: гнёзда 1–4 патч-панели → порты 1, 3, 5, 7 (верхний ряд), сверху вниз через щётку. Если гнёзда
-    // переносятся в два ряда (телефон), корды только из нижнего: из верхнего они легли бы поверх подписей.
+    // The ring: patch panel jacks 1-4 -> ports 1, 3, 5, 7 (top row), down through the brush. When the jacks wrap to two
+    // rows (phone), cords from the lower row only: from the upper one they would cross the labels.
     const jacks = [...rack.querySelectorAll('.patch .ring .jack')].map(box);
     const lowest = Math.max(...jacks.map(j => j.y));
     jacks.forEach((j, i) => {
@@ -358,13 +358,13 @@
       seat(svg, j, RING[i]);
       seat(svg, p, RING[i]);
       used.add(n);
-      // Корды кольца не выдёргиваются: их гнёзда — ссылки кольца, а оно работает всегда.
+      // The ring's cords cannot be pulled: their jacks are the ring's links, and the ring always works.
       cords.push({ key: 'ring' + (i + 1), type: 'ring', port: t, wire: wireNo() });
     });
 
-    // Гости онлайн (assets/js/live.js ставит data-guests на <html>): по корду на каждого другого гостя — из свободного
-    // гнезда патч-панели (5, 6, …) в свободный порт верхнего ряда коммутатора (9, 11, …), сколько влезет на этой ширине
-    // (на телефоне свободных гнёзд не видно — и гостей нет). Пришёл новый — его корд протягивается (.fresh).
+    // Guests online (assets/js/live.js sets data-guests on <html>): a cord for each other guest, from a free patch panel
+    // jack (5, 6, ...) to a free port of the switch's top row (9, 11, ...), as many as fit at this width (on a phone the
+    // free jacks are hidden, so no guests). A new one's cord is pulled in (.fresh).
     const guests = +document.documentElement.dataset.guests || 0;
     const spare = [...rack.querySelectorAll('.patch .pp-free .jack')].filter(j => j.offsetParent).map(box);
     let g = 0;
@@ -385,13 +385,14 @@
     }
     drawnGuests = g;
 
-    // Оптика (WAN роутера или аплинк коммутатора): вверх в щётку под коммутатором, по ней влево в вертикальный
-    // органайзер, по нему через ввод в крыше вверх, к лоткам. Данные идут слева, питание — справа.
+    // Fibre (the router's WAN or the switch's uplink): up into the brush under the switch, left along it into the
+    // vertical organiser, up along it through the roof entry to the trays. Data runs on the left, power on the right.
     const vmEl = rack.querySelector('#rack-body > .vm');
     const lowEl = tor.nextElementSibling?.classList.contains('brush') ? tor.nextElementSibling : null;
-    // Над стойкой — в жёлтый короб на потолке: точка ввода на его оси (метки .mark в зале, hall.css) на высоте
-    // ~40 px, над табличками прохода; к ней по потолку и в короб через ввод, повёрнутый вдоль короба. Потолка нет
-    // (светлая тема) или короб ниже крыши стойки — просто вверх. Хвост — от гнезда до щётки: выдернутая свисает из неё.
+    // Above the rack, into the yellow duct on the ceiling: the entry point on its axis (the .mark lines in the hall,
+    // hall.css) ~40 px high, above the aisle signs; along the ceiling to it and into the duct through an entry turned
+    // along the duct. No ceiling (light theme) or the duct below the rack's roof: straight up. The tail runs from the
+    // jack to the brush: a pulled fibre hangs from it.
     const fiber = (key, from, color, label) => {
       if (!vmEl || !vmEl.offsetParent) return;
       const v = box(vmEl), x = v.x + v.w - 4;
@@ -414,9 +415,9 @@
       if (label) el('text', { x: x + 10, y: cap.y - 5, class: 'lbl small' }, svg).textContent = label;
     };
 
-    // Роутер: LAN → последний порт нижнего ряда, WAN — оптикой к лоткам.
+    // The router: LAN -> the last port of the bottom row, WAN as fibre to the trays.
     const rtr = rack.querySelector('#rack-body > .rtr');
-    let next = 2; // нижний ряд: чётные порты по порядку
+    let next = 2; // bottom row: even ports in order
     const bottom = () => { while (next <= 24 && (used.has(next) || !port(next)?.offsetParent)) next += 2; return next <= 24 ? next : 0; };
     if (rtr) {
       const lan = box(rtr.querySelector('[data-port="lan"]'));
@@ -424,7 +425,7 @@
       if (last) {
         const p = box(last.querySelector('.jack')), n = Number(last.dataset.port) + 1;
         const c = [{ x: lan.cx, y: lan.y + 2 }, { x: lan.cx, y: lan.y - 22 }, { x: p.cx, y: p.b + 22 }, { x: p.cx, y: p.b - 3 }];
-        // Хвост — от роутера до щётки между ним и коммутатором: выдернутый корд свисает из неё.
+        // The tail runs from the router to the brush between it and the switch: a pulled cord hangs from it.
         const [tail, rest] = split(c, lowEl ? cross(c, box(lowEl).cy) : .5);
         pullable('lan', 'lan', last, lan, LAN, 3.5, tail, `C${xy(rest[1])}, ${xy(rest[2])}, ${xy(rest[3])}`);
         seat(svg, p, LAN);
@@ -432,17 +433,17 @@
       }
       fiber('wan', box(rtr.querySelector('[data-port="wan"]')), FIBER, svg.dataset.uplink);
     } else {
-      // Остальные стойки: оптика из SFP коммутатора к R1.
+      // The other racks: fibre from the switch's SFP towards R1.
       const sfp = tor.querySelector('.sfp');
       if (sfp && sfp.offsetParent) fiber('uplink', box(sfp), UPFIBER, svg.dataset.uplinkR1);
     }
 
-    // Сетевые карты: влево в вертикальный органайзер, по нему вверх до коммутатора, под ним вправо к порту.
+    // Network cards: left into the vertical organiser, up along it to the switch, under it right to the port.
     const vm = rack.querySelector('#rack-body > .vm');
     if (!vm || !vm.offsetParent) return cords;
     const lane = box(vm);
     const nics = [...rack.querySelectorAll('#rack-body > .u > .nic')];
-    // Поперёк — через щёточный органайзер под коммутатором (если он есть), иначе прямо под коммутатором.
+    // Across through the brush organiser under the switch (if there is one), otherwise right under the switch.
     const low = tor.nextElementSibling?.classList.contains('brush') ? box(tor.nextElementSibling) : null;
     const yBase = low ? low.cy - 6 : box(tor).b + 6;
     nics.forEach((nic, i) => {
@@ -450,10 +451,10 @@
       if (!n) return;
       used.add(n);
       const u = nic.parentElement, j = box(nic.querySelector('.jack')), p = box(port(n).querySelector('.jack'));
-      const x = lane.x + 4 + (i % 6) * 2.2;              // жилы в органайзере рядом, не одна поверх другой
-      const y = yBase + (i % 6) * 2.4;                   // и поперёк — своими полосками
+      const x = lane.x + 4 + (i % 6) * 2.2;              // the cords side by side in the organiser, not on top of each other
+      const y = yBase + (i % 6) * 2.4;                   // and across, each in its own lane
       const color = u.classList.contains('mgmt') ? MGMT : DATA;
-      // Хвост — от сетевой карты до органайзера. Хватать — чуть правее гнезда: слева на ухе ручка ящика.
+      // The tail runs from the network card to the organiser. Grab slightly right of the jack: the drawer's handle is on the ear.
       const tail = [{ x: j.x + 2, y: j.cy }, { x: j.x - 14, y: j.cy }, { x: x + 10, y: j.cy }, { x, y: j.cy - 12 }];
       pullable(keyOf(u), 'nic', port(n), j, color, 2.4, tail, `L${x} ${y + 10} C${x} ${y}, ${x + 6} ${y}, ${x + 14} ${y} L${p.cx - 12} ${y} C${p.cx - 3} ${y}, ${p.cx} ${y - 4}, ${p.cx} ${p.b - 3}`, { x: j.cx + 6, y: j.cy, r: 13 });
       seat(svg, p, color);
@@ -461,13 +462,13 @@
     return cords;
   }
 
-  // Стойка поменяла высоту (юнит погас и что-то в нём сдвинулось, пришло обновление htmx, открылся холст,
-  // выезжает ящик): провода перерисовать, иначе они останутся на старых местах. Наблюдатель срабатывает после
-  // раскладки и до отрисовки — провода (свои и силовые, power.js) встают на место в том же кадре, что и юниты,
-  // а не кадром позже: иначе при каждом изменении они дёргаются. Сами юниты (snap меняет высоты) — кадром позже,
-  // чтобы наблюдатель не зациклился. Новая стойка после перехода — свой наблюдатель.
+  // The rack changed height (a unit went dark and something in it moved, an htmx update came, the canvas opened, a
+  // drawer slides out): redraw the cables, or they stay where they were. The observer runs after layout and before
+  // paint, so the cables (these and power.js's) move in the same frame as the units, not a frame later, which would
+  // make them jerk on every change. The units themselves (snap changes heights) a frame later, so the observer does
+  // not loop. A new rack after a swap gets its own observer.
   let watched = null;
-  // Разложили: провода на местах. Корды — net.js, силовые кабели перерисует power.js.
+  // Laid out: the cables are in place. The cords go to net.js; power.js redraws the power cables.
   const laidout = (cords) => document.dispatchEvent(new CustomEvent('rack:laidout', { detail: { cords } }));
   const ro = window.ResizeObserver ? new ResizeObserver(() => {
     laidout(cables()); later();
@@ -486,7 +487,7 @@
   let resizeTimer;
   addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(layout, 120); });
   document.addEventListener('htmx:afterSettle', later);
-  // Журнал раз в минуту приходит целиком: прокрутку списка сохранить.
+  // The log comes whole every minute: keep the list's scroll position.
   let logScroll = 0;
   document.addEventListener('htmx:beforeSwap', (e) => {
     if (e.detail.target?.id === 'unit-syslog') logScroll = e.detail.target.querySelector('ol')?.scrollTop || 0;
@@ -495,7 +496,7 @@
     const ol = document.querySelector('#unit-syslog ol');
     if (ol && logScroll) ol.scrollTop = logScroll;
   });
-  // Явная просьба (холст открыли, ящик выехал): сразу, до отрисовки этого кадра.
+  // An explicit request (the canvas opened, a drawer came out): now, before this frame is painted.
   document.addEventListener('rack:layout', layout);
   // A <details> that changes the unit's height opened or closed (the wall's "show all", a button's code; stickers.html).
   // On close the rack keeps its height (snap holds the unit's min-height) and the resize observer stays quiet, so lay
@@ -504,9 +505,9 @@
     if (recs.some((r) => r.target.classList?.contains('more') || r.target.getAttribute?.('name') === 'b88-code')) layout();
   }).observe(document, { subtree: true, attributeFilter: ['open'] });
 
-  // Стойку подменили без перезагрузки (assets/js/aisle.js): разложить сразу, пока её не показали.
+  // The rack was swapped without a reload (assets/js/aisle.js): lay it out at once, before it is shown.
   document.addEventListener('rack:swap', layout);
-  // Доехала: провода по местам и протягиваются от гнезда к роутеру, вилки встают в порты (cables.css, .draw).
+  // It has arrived: the cables in place, drawn from the jack to the router, plugs seated in the ports (cables.css, .draw).
   let drawn = 0;
   document.addEventListener('rack:landed', (e) => {
     layout();
@@ -526,8 +527,8 @@
       clearTimeout(drawn);
       drawn = setTimeout(() => svg.classList.remove('draw'), 1600);
     }
-    // Стойка выходит в сеть (net.js): юнит — когда вилка его корда встала в порт, провод i — через lag + i·step мс
-    // (cables.css: провод .55 с, вилка через 480 мс на .3 с, у каждого провода сдвиг 70 мс). Без протяжки — все сразу.
+    // The rack comes online (net.js): a unit when its cord's plug reaches the port, wire i after lag + i*step ms
+    // (cables.css: a wire .55 s, its plug after 480 ms for .3 s, each wire 70 ms after the previous). No drawing: all at once.
     document.dispatchEvent(new CustomEvent('rack:drawing', { detail: draw ? { lag: 700, step: 70 } : null }));
   });
 })();

@@ -1,14 +1,14 @@
-// Звук серверной (WebAudio, всё синтезируется, файлов нет). По умолчанию выключен: тумблер «звук» на mgmt, выбор
-// помнится (localStorage). Браузер даёт звук только после нажатия — тумблер и есть это нажатие.
-//   - гул вентиляторов: шум через фильтр, громче, чем больше юнитов работает; стойка погасла — стихает,
-//     загружается — раскручивается. Соседние стойки в зале гудят тоже (тише, издали), пока живы — и когда своя
-//     погасла, зал не замолкает;
-//   - ИБП на батарее пищит (пара коротких раз в 4 с), самотест — по сигналу rack:beep (power.js);
-//   - щелчки: вилки питания и RJ45 (rack:plug от power.js, rack:link от net.js), рубильник, выключатель света,
-//     кнопки ИБП, клавиши, RESET;
-//   - загрузка — как у настоящего железа: вентиляторы пару секунд ревут на полных оборотах и стихают, один короткий
-//     писк POST («всё в порядке»): сервер после RESET, вся стойка после кнопки ИБП или батареи;
-//   - вкладка в фоне — звук на паузе.
+// The server room's sound (WebAudio, all synthesised, no files). Off by default: the "sound" toggle on mgmt, the
+// choice remembered (localStorage). Browsers allow sound only after a press, and the toggle is that press.
+//   - the fans' hum: filtered noise, the louder the more units run; the rack goes dark, it fades; it boots, they spin
+//     up. The neighbour racks in the hall hum too (quieter, far off) while alive, so the hall is not silent when this
+//     rack is dark;
+//   - the UPS on battery beeps (a couple of short beeps every 4 s), the self-test on rack:beep (power.js);
+//   - clicks: power plugs and RJ45 (rack:plug from power.js, rack:link from net.js), the breaker, the light switch,
+//     the UPS's buttons, keys, RESET;
+//   - a boot as on real hardware: the fans roar at full speed for a couple of seconds and calm down, one short POST
+//     beep ("all fine"): the server after RESET, the whole rack after the UPS's button or the battery;
+//   - a background tab pauses the sound.
 (() => {
   const KEY = 'sound';
   let on = (() => { try { return localStorage.getItem(KEY) === 'on'; } catch { return false; } })();
@@ -22,7 +22,7 @@
     master = ctx.createGain();
     master.gain.value = 0.9;
     master.connect(ctx.destination);
-    // Гул: коричневый шум (интеграл белого) через низкочастотный фильтр и лёгкую «лопасть» на 120 Гц.
+    // The hum: brown noise (integrated white) through a low-pass filter and a slight "blade" at 120 Hz.
     const len = ctx.sampleRate * 2, buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
     let last = 0;
     for (let i = 0; i < len; i++) { last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02; d[i] = last * 3.5; }
@@ -44,7 +44,7 @@
     blade.start();
   }
 
-  // ---------- голоса ----------
+  // ---------- voices ----------
   function tone(freq, dur, { type = 'square', vol = 0.06, at = 0 } = {}) {
     if (!ctx || !on) return;
     const t = ctx.currentTime + at, o = ctx.createOscillator(), g = ctx.createGain();
@@ -58,7 +58,7 @@
     o.start(t);
     o.stop(t + dur + 0.02);
   }
-  // Щелчок: короткий всплеск шума через полосовой фильтр — частота задаёт «материал» (пластик RJ45, вилка, рубильник).
+  // A click: a short burst of noise through a band-pass filter; the frequency gives the "material" (RJ45 plastic, a plug, the breaker).
   function click(freq, { vol = 0.35, dur = 0.03, q = 4, at = 0 } = {}) {
     if (!ctx || !on) return;
     const t = ctx.currentTime + at, n = Math.ceil(ctx.sampleRate * dur), buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
@@ -73,8 +73,8 @@
     src.start(t);
   }
   const beep = (n = 1) => { for (let i = 0; i < n; i++) tone(2350, 0.12, { vol: 0.035, at: i * 0.22 }); };
-  // Загрузка: вентиляторы на полные обороты (сколько юнитов — столько и рёва), через пару секунд — к обычному гулу
-  // (poll). Писк POST — только где есть сервер с BIOS (сервер, хост Proxmox): коммутатор и mgmt не пищат.
+  // A boot: the fans at full speed (the more units, the more roar), back to the usual hum after a couple of seconds
+  // (poll). The POST beep only where there is a server with a BIOS (the server, the Proxmox host): the switch and mgmt do not beep.
   function boot() {
     if (!ctx || !on) return;
     surgeUntil = Date.now() + 2200;
@@ -83,8 +83,8 @@
     if (document.querySelector('#rack-body > .u:is(.srv, .pve)')) tone(1000, 0.16, { vol: 0.045, at: 0.5 });
   }
 
-  // ---------- гул и тревога ИБП по состоянию стойки ----------
-  // Сколько юнитов своей стойки работает; сколько соседних стоек в зале живы (power.js гасит их .dark).
+  // ---------- the hum and the UPS's alarm by the rack's state ----------
+  // How many units of this rack run; how many neighbour racks in the hall are alive (power.js darkens them, .dark).
   function units() {
     const rack = document.getElementById('rack');
     return rack && !rack.classList.contains('powered-off') ? document.querySelectorAll('#rack-body > .u.has-psu:not(.off)').length : 0;
@@ -107,7 +107,7 @@
     show();
   }
 
-  // ---------- тумблер на mgmt ----------
+  // ---------- the toggle on mgmt ----------
   function show() {
     document.querySelectorAll('.snd').forEach((b) => {
       b.hidden = false;
@@ -119,10 +119,10 @@
   document.addEventListener('DOMContentLoaded', show);
   document.addEventListener('rack:laidout', show);
 
-  // Включить можно только нажатием: сохранённое «вкл» ждёт первого клика по странице.
+  // Only a press can turn it on: a saved "on" waits for the first click on the page.
   document.addEventListener('pointerdown', () => { if (on && !ctx) set(true); }, { capture: true, once: true });
 
-  // ---------- события ----------
+  // ---------- events ----------
   document.addEventListener('click', (e) => {
     const t = e.target instanceof Element ? e.target : null;
     if (!t) return;
@@ -135,7 +135,7 @@
     else if (t.closest('.srv .rst')) click(4200, { vol: 0.18, dur: 0.015, q: 8 });
     else if (t.closest('.key, .port, .bay, .pull')) click(2200, { vol: 0.18, dur: 0.02 });
   }, true);
-  // Вилки питания: тяжёлый щелчок; шнур ИБП — ещё тяжелее; RJ45 — звонкий пластик с защёлкой.
+  // Power plugs: a heavy click; the UPS's cord, heavier still; RJ45, ringing plastic with a latch.
   document.addEventListener('rack:plug', (e) => {
     const big = e.detail?.key === 'mains';
     click(big ? 300 : 520, { vol: big ? 0.8 : 0.55, dur: big ? 0.07 : 0.05, q: 2.5 });
@@ -145,7 +145,7 @@
     if (e.detail?.on) click(5200, { vol: 0.2, dur: 0.012, q: 8, at: 0.04 });
   });
   document.addEventListener('rack:beep', (e) => beep(e.detail?.n || 1));
-  // RESET сервера (toys.js): загрузится — POST; вся стойка включилась (power.js) — тоже.
+  // The server's RESET (toys.js): once it boots, POST; the whole rack turned on (power.js), the same.
   document.addEventListener('rack:reset', () => { rebooting = true; });
   document.addEventListener('rack:unit', (e) => {
     if (rebooting && e.detail?.on) { rebooting = false; boot(); }

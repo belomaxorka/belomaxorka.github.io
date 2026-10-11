@@ -1,4 +1,4 @@
-/* Медиасервер = Koito: обложка в лотке, трек на ЖК, VU-метр. */
+/* The media server is Koito: the cover in the tray, the track on the LCD, the VU meter. */
 .media .face { gap: 12px 18px; }
 .tray {
   width: 84px; height: 84px; max-width: 100%; flex: none; display: block; object-fit: cover;

@@ -1,4 +1,4 @@
-/* ИБП = подвал сайта. Стикер наклеен на угол экрана. */
+/* The UPS is the site's footer. A sticker on the screen's corner. */
 .ups .face { justify-content: space-between; gap: 10px 16px; padding-block: 12px; }
 .ups .lcd { font-size: 20px; display: flex; gap: 12px; align-items: center; padding-right: 40px; }
 .batt { display: inline-grid; grid-template-columns: repeat(5, 7px); gap: 2px; padding: 2px; border: 2px solid var(--lcd); position: relative; }
@@ -6,7 +6,7 @@
 .batt i { height: 10px; background: var(--lcd); }
 .batt i.e { background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lcd) 35%, transparent); }
 .batt.low i:not(.e) { background: var(--led-err); }
-/* От батареи: экран мигает, как настоящий ИБП, который пищит. */
+/* On battery: the screen blinks, like a real UPS beeping. */
 @media (prefers-reduced-motion: no-preference) {
   .ups .lcd.alarm { animation: ups-alarm 1s steps(1) infinite; }
 }

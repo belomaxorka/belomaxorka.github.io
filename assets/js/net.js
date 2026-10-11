@@ -1,32 +1,33 @@
-// Сеть стойки: линки юнитов и патч-корды, которые выдёргиваются, как вилки питания (assets/js/power.js).
+// The rack's network: the units' links and the patch cords that pull out like the power plugs (assets/js/power.js).
 //
-// Юнит в сети, когда его корд в порту, а коммутатор и роутер работают. Нет — юнит офлайн: на экранах «связь потеряна /
-// нет интернета», гаснут диоды сетевой карты и порта, обложка, VU-метр, лампы мониторинга (assets/css/units/
-// network.css), его ящик — без деталей, с той же ошибкой, и он не обновляется: опрос htmx и загрузка ящика
-// отменяются, а вернулась связь — один раз обновляется, если что-то пропустил. Причины:
-//   - корд выдернут: тянешь вилку из сетевой карты юнита — корд выходит из гнезда, вытягивается из органайзера и
-//     повисает; связи нет только у этого юнита. LAN или WAN роутера (на остальных стойках — аплинк к R1) — нет
-//     интернета у всей стойки. Поднести вилку к гнезду (или тапнуть по ней) — воткнётся;
-//   - стойка приехала из соседней (assets/js/aisle.js): пока провода протягиваются, юниты офлайн, каждый выходит
-//     в сеть, когда вилка его корда встала в порт. Без анимации — все сразу;
-//   - коммутатор или роутер обесточен (power.js; экраны и лампы тогда гасит CSS сам).
-// Корды кольца из патч-панели не выдёргиваются: их гнёзда — ссылки кольца, а оно работает всегда.
-// Разводку рисует app.js (cables): спрашивает здесь, какие корды выдернуты (Rack.pulled), рисует их без хвоста и отдаёт
-// все корды с rack:laidout. Выдернутые — только у посетителя (localStorage, на полчаса), у каждой стойки свои. Корд, которого на
-// этой ширине не видно (телефон: нет сетевых карт), считается воткнутым. Без JS нет ни кордов, ни всего этого.
+// A unit is online while its cord is in its port and the switch and the router run. Otherwise it is offline: "link
+// lost / no internet" on its screens, the lamps of its network card and port dark, and the cover, the VU meter and the
+// monitoring lamps too (assets/css/units/network.css); its drawer shows the same error instead of the details, and it
+// is not refreshed: its htmx polls and the drawer's load are cancelled, and once the link is back it refreshes once if
+// it missed something. The causes:
+//   - a pulled cord: drag the plug out of a unit's network card and the cord leaves the jack, comes out of the
+//     organiser and hangs; only that unit loses its link. The router's LAN or WAN (on the other racks the uplink to
+//     R1): the whole rack loses the internet. Bring the plug to the jack (or tap it) and it goes back in;
+//   - the rack arrived from the next one (assets/js/aisle.js): while the cables are drawn the units are offline, each
+//     comes online when its cord's plug reaches the port. Without animation, all at once;
+//   - the switch or the router without power (power.js; CSS then darkens the screens and lamps by itself).
+// The ring's cords from the patch panel do not pull out: their jacks are the ring's links, and the ring always works.
+// app.js draws the cabling (cables): it asks here which cords are pulled (Rack.pulled), draws those without their tail
+// and hands all the cords over with rack:laidout. The pulled ones are the visitor's only (localStorage, for half an
+// hour), per rack. A cord hidden at this width (phone: no network cards) counts as plugged in. Without JS none of this.
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const store = Rack.toyStore('rack-net', () => ({})); // for Rack.TOY_TTL (rack.js)
   const saved = store.get();
-  const out = saved.out && typeof saved.out === 'object' ? saved.out : {}; // 'home/mgmt' → 1: корд выдернут
+  const out = saved.out && typeof saved.out === 'object' ? saved.out : {}; // 'home/mgmt' -> 1: the cord is pulled
   const save = () => store.set({ out });
 
-  // Сколько корда свисает, когда его отпустили, и сколько можно вытянуть из органайзера, пока тянешь (px). Корд
-  // сетевой карты висит над вертикальным органайзером — там ничего не нажимается; LAN и WAN — на роутер (декор);
-  // аплинк коротко: под щёткой уже кнопки mgmt.
+  // How much of a cord hangs once let go, and how much can come out of the organiser while it is pulled (px). A
+  // network card's cord hangs over the vertical organiser, where nothing is pressed; LAN and WAN over the router
+  // (decoration); the uplink short: the mgmt buttons are right under the brush.
   const HANG = { nic: 100, lan: 46, wan: 44, uplink: 26 };
   const REACH = { nic: 170, lan: 150, wan: 130, uplink: 130 };
-  const N = 10; // звеньев в верёвке
+  const N = 10; // links in the rope
 
   let rack = '', cords = [], room = null, svg = null, hand = null;
   const ropes = new Map(); // a pulled cord's key → its rope (rack.js): points[0] the plug, the last where the organizer holds it
@@ -39,15 +40,15 @@
   const el = Rack.svg;
   const held = (r) => (hand?.held?.key === r.key ? hand.held : null);
 
-  // ---------- линки ----------
-  // Стойка приехала: boot — провода ещё не начали протягиваться, все без связи; дальше waiting — чья вилка не встала.
+  // ---------- links ----------
+  // The rack has arrived: boot, the cables have not started drawing yet and nothing has a link; then waiting, whose plug is not in yet.
   let boot = false, timers = [];
   const waiting = new Set();
   const down = (k) => pulled(k) || boot || waiting.has(k);
   const unitOf = Rack.unitOf;
 
-  // Лампы портов, юниты без связи (.unlinked), роутер без WAN или LAN, стойка без интернета (.nonet) — одно место на
-  // все причины. Лампа порта горит, если корд в нём, линк есть и юнит на том конце включён.
+  // The port lamps, units without a link (.unlinked), the router without WAN or LAN, the rack without internet (.nonet):
+  // one place for every cause. A port's lamp is lit when its cord is in, there is a link and the unit at its end is on.
   function sync() {
     const body = document.getElementById('rack-body'), rk = document.getElementById('rack');
     if (!body || !rk) return;
@@ -61,12 +62,12 @@
     body.querySelectorAll(':scope > .u').forEach((u) => u.classList.toggle('unlinked', lost.has(u)));
     const cut = (k) => has(k) && down(k);
     if (rtr) {
-      // LAN роутера смотрит в коммутатор: обесточен коммутатор — линка на LAN нет, как и с выдернутым кордом.
+      // The router's LAN goes to the switch: the switch without power means no link on LAN, as with a pulled cord.
       rtr.classList.toggle('nowan', cut('wan'));
       rtr.classList.toggle('nolan', cut('lan') || !!body.querySelector(':scope > .u.tor.off'));
     }
     rk.classList.toggle('nonet', cut('lan') || cut('wan') || cut('uplink'));
-    // Связь вернулась — кто пропустил обновление, обновляется, пустые ящики загружаются.
+    // The link is back: who missed an update refreshes, the empty drawers load.
     for (const u of missed) {
       if (!u.isConnected) missed.delete(u);
       else if (!offline(u) && !document.hidden) { missed.delete(u); refresh(u); }
@@ -80,7 +81,7 @@
     });
   }
 
-  // Офлайн: нет своего линка, обесточен коммутатор или роутер, нет интернета у стойки (то же, что видно на экранах).
+  // Offline: no link of its own, the switch or the router without power, no internet for the rack (as the screens say).
   function offline(u) {
     if (!u.classList.contains('has-nic')) return false;
     const rk = u.closest('.rack');
@@ -88,10 +89,10 @@
       !!rk && (rk.classList.contains('nonet') || !!rk.querySelector('#rack-body > .u.tor.off, #rack-body > .u.rtr.off'));
   }
 
-  // Офлайн-юнит не обновляется: его опрос htmx (медиа, монитор, журнал) отменяется — ни нового трека за надписью, ни
-  // новой палитры ЖК (она приходит вместе с медиа). Его ящик (запрос от ручки, app.js) не загружается: выдвигается
-  // пустым, с той же ошибкой, что на экранах (network.css), и загружается, когда связь вернётся. Форма гостевой не
-  // уходит — ниже.
+  // An offline unit is not refreshed: its htmx poll (media, monitor, log) is cancelled, so no new track behind the
+  // caption and no new LCD palette (it comes with the media). Its drawer (the request comes from the handle, app.js)
+  // does not load: it comes out empty with the same error as the screens (network.css) and loads when the link is
+  // back. The guestbook's form does not go either: below.
   const missed = new Set();
   document.addEventListener('htmx:beforeRequest', (e) => {
     const t = e.target;
@@ -110,10 +111,10 @@
     if (handle) empty(handle); else missed.add(u);
   });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); });
-  // Без связи гостевая не отправляет: форма офлайн-юнита (KVM) не уходит — ни через htmx, ни обычным POST (перехват
-  // раньше всех, на фазе захвата). Над формой — почему, как на экранах: у KVM нет линка или коммутатор обесточен —
-  // «связь потеряна», нет интернета у стойки или роутер обесточен — «нет интернета». Написанное и нарисованное
-  // остаётся; вернулась связь — надпись уходит (sync), можно отправить снова.
+  // Without a link the guestbook does not post: the form of an offline unit (KVM) does not go, neither through htmx nor
+  // as a plain POST (caught first, in the capture phase). Above the form, why, as on the screens: the KVM has no link
+  // or the switch has no power, "link lost"; the rack has no internet or the router no power, "no internet". What was
+  // written and drawn stays; once the link is back the notice goes (sync) and it can be sent again.
   document.addEventListener('submit', (e) => {
     const f = e.target, u = f instanceof HTMLFormElement ? f.closest('#rack-body > .u') : null;
     if (!u || !offline(u)) return;
@@ -136,7 +137,7 @@
     if (url && window.htmx) htmx.ajax('GET', url, { source: u, target: u, swap: 'outerHTML' });
   }
 
-  // Ящик без деталей (data-later): тот же компонент drawer (app.js) — задвигается ручкой, — в нём только ошибка.
+  // A drawer without the details (data-later): the same drawer component (app.js), pushed back by its handle, with only the error.
   function empty(handle) {
     const box = document.getElementById('drawer-' + handle.dataset.unit), body = document.getElementById('rack-body');
     if (!box || box.classList.contains('open') || !body) return;
@@ -152,7 +153,7 @@
     box.replaceWith(d);
   }
 
-  // Связь вернулась: в пустой ящик — детали (только его содержимое: сам ящик уже выдвинут и не выезжает заново).
+  // The link is back: the details into the empty drawer (its content only: the drawer is out already and does not slide again).
   function fill(d) {
     const handle = d.previousElementSibling?.querySelector(':scope > .pull[data-unit]');
     if (!handle || !window.htmx) return;
@@ -161,8 +162,8 @@
     htmx.ajax('GET', '/fragments/unit/' + encodeURIComponent(handle.dataset.unit) + '?rack=' + encodeURIComponent(rack), { source: handle, target: d.querySelector(':scope > .slide'), swap: 'outerHTML', select: '.slide' });
   }
 
-  // ---------- корды ----------
-  // Раскладка (app.js): корды этой стойки и где они. Выдернутые висят из органайзера; стойка сдвинулась — висят там же.
+  // ---------- cords ----------
+  // The layout (app.js): this rack's cords and where they are. Pulled ones hang from the organiser; the rack moved, they hang there still.
   function relayout(e) {
     const id = here();
     if (id !== rack) { ropes.clear(); forget(); rack = id; }
@@ -202,14 +203,14 @@
     if (probed) probe(probed);
   }
 
-  // Висит из органайзера прямо вниз (выдернут ещё до загрузки страницы).
+  // Hangs straight down from the organiser (pulled before the page loaded).
   function hanging(c) {
     const a = c.tail[3], seg = HANG[c.type] / N, pts = [];
     for (let i = 0; i <= N; i++) pts.push({ x: a.x, y: a.y + (N - i) * seg, px: a.x, py: a.y + (N - i) * seg });
     return { key: c.key, type: c.type, cord: c, anchor: a, pts, seg };
   }
 
-  // Только что выдернут: лежит, как в разводке, — от гнезда до органайзера; дальше его вытягивают (step).
+  // Just pulled: lies as in the cabling, from the jack to the organiser; then it is drawn out (step).
   function fresh(c) {
     const [a, b, d, e] = c.tail, pts = [];
     for (let i = 0; i <= N; i++) {
@@ -235,12 +236,12 @@
     return Math.abs(ds) * N + Rack.stepRope(r, { end: r.anchor, hold: h, reach: r.seg * N * 0.97, damp: reduce.matches ? 0.8 : 0.985 });
   }
 
-  // ---------- тестер кабеля ----------
-  // Навёл мышь на вилку — корд светится целиком, а лампы его порта на коммутаторе и сетевой карты юнита мигают часто,
-  // как от тестера на другом конце (только если линк есть). Пальцем наводить нечем — на телефоне тестера нет.
-  // app.js перерисовывает корды при каждой раскладке: подсветка ставится заново (relayout).
-  // Цель смотрится на каждом движении мыши, не по pointerover/pointerout: draw() пересоздаёт зоны захвата, и «ушёл»
-  // исчезнувшей зоне не приходит — подсветка залипала (как и в power.js).
+  // ---------- the cable tester ----------
+  // The mouse over a plug: the whole cord glows and the lamps of its switch port and of the unit's network card blink
+  // fast, as with a tester at the other end (only with a link). A finger cannot hover, so phones have no tester.
+  // app.js redraws the cords on every layout: the glow is set again (relayout).
+  // The target is looked up on every mouse move, not by pointerover/pointerout: a grab zone can be replaced under the
+  // pointer (a cord pulled or put back, another rack), and the zone that is gone gets no pointerout (power.js does the same).
   addEventListener('pointermove', (e) => {
     if (e.pointerType !== 'mouse' || hand?.held) return;
     const k = (e.target instanceof Element && e.target.closest('#net .hit')?.dataset.key) || null;
@@ -327,10 +328,10 @@
     if (svg) anim.wake();
   }
 
-  // Кто ещё следит за кордами: событие на каждый выдернутый и воткнутый (detail.key — ключ корда, detail.on).
+  // Who else follows the cords: an event for each one pulled and plugged in (detail.key, the cord's key; detail.on).
   const told = (key, on) => document.dispatchEvent(new CustomEvent('rack:link', { detail: { key, on } }));
 
-  // Выдернул или воткнул — app.js сразу перерисует разводку (без хвоста или с ним), отсюда — свет и экраны.
+  // Pulled or plugged in: app.js redraws the cabling at once (with the tail or without); here the light and the screens.
   function pull(k) {
     const c = cords.find((x) => x.key === k);
     if (!c) return;
@@ -349,22 +350,22 @@
     document.dispatchEvent(new Event('rack:layout'));
   }
 
-  // ---------- события ----------
+  // ---------- events ----------
   // app.js draws the cords: which of this rack's are out.
   Rack.pulled = () => {
     const pre = here() + '/';
     return new Set(Object.keys(out).filter((k) => k.startsWith(pre)).map((k) => k.slice(pre.length)));
   };
-  // Раскладку стойки считает app.js; корды — сразу после неё и в том же кадре.
+  // app.js lays the rack out; the cords right after it and in the same frame.
   document.addEventListener('rack:laidout', relayout);
-  // htmx подменил юнит (опрос, гостевая): новый сразу без связи, если её нет; на settle htmx возвращает новому элементу
-  // class из ответа — ещё раз.
+  // htmx swapped a unit (a poll, the guestbook): the new one is without a link at once if there is none; on settle htmx
+  // gives the new element its class from the response, so again.
   document.addEventListener('htmx:afterSwap', sync);
   document.addEventListener('htmx:afterSettle', sync);
-  // Юнит погас или загрузился (power.js): лампа его порта; вернулись коммутатор или роутер — пропущенные обновления.
-  // Гаснущий юнит говорит об этом до того, как станет .off, поэтому — когда power.js закончит (до отрисовки).
+  // A unit went dark or booted (power.js): its port's lamp; the switch or the router back, the missed updates.
+  // A unit going dark says so before it is .off, so after power.js is done (before the paint).
   document.addEventListener('rack:unit', () => queueMicrotask(sync));
-  // Новая стойка (aisle.js): едет — значит, провода ещё протянут, и до тех пор все без связи.
+  // A new rack (aisle.js): it is moving, so the cables will be drawn, and until then nothing has a link.
   document.addEventListener('rack:swap', (e) => {
     timers.forEach(clearTimeout);
     timers = [];
@@ -372,8 +373,8 @@
     boot = !!e.detail && !e.detail.quiet && !reduce.matches;
     sync();
   });
-  // Провода протягиваются (app.js): каждый юнит выходит в сеть, когда вилка его корда встала в порт. Без протяжки
-  // (переход прервали, анимации выключены) — все сразу.
+  // The cables are being drawn (app.js): each unit comes online when its cord's plug reaches the port. Not drawn (the
+  // swap was cut short, animations off): all at once.
   document.addEventListener('rack:drawing', (e) => {
     timers.forEach(clearTimeout);
     timers = [];

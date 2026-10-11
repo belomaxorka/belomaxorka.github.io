@@ -1,7 +1,7 @@
-/* Сетевой отсек (templates/units/patch.html, network.html): патч-панель на 24 гнезда, щёточный органайзер,
-   коммутатор, роутер; сетевые карты юнитов и вертикальный органайзер слева (их добавляет assets/js/app.js). */
+/* The network bay (templates/units/patch.html, network.html): a 24-jack patch panel, the brush organiser, the
+   switch, the router; the units' network cards and the vertical organiser on the left (assets/js/app.js adds them). */
 
-/* ---------- патч-панель ---------- */
+/* ---------- patch panel ---------- */
 .patch .face { gap: 14px; }
 .pp-id { display: grid; gap: 3px; flex: none; }
 .brand { font: 700 12px/1 var(--f-silk); letter-spacing: .1em; color: var(--ink); white-space: nowrap; }
@@ -11,12 +11,12 @@
 .pp-ports .pn::before { counter-increment: port; content: counter(port); }
 .pp-free { display: contents; }
 .pp-free .port { gap: 0; }
-/* Свободные гнёзда — тесной гребёнкой, как на настоящей панели; лишние уходят, когда места нет. */
+/* The free jacks, packed tight as on a real panel; the extra ones go when there is no room. */
 .pp-free .port + .port { margin-left: -8px; }
 @media (max-width: 1100px) { .pp-free .port:nth-child(n + 9) { display: none; } }
 @media (max-width: 860px) { .pp-free { display: none; } }
 
-/* ---------- щёточный органайзер ---------- */
+/* ---------- brush organiser ---------- */
 .brush .face { gap: 14px; padding-block: 6px; }
 .brush .slot {
   flex: 1; height: 18px; border-radius: 9px; background: var(--hole); position: relative; overflow: hidden;
@@ -25,7 +25,7 @@
 .brush .slot::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #2a2d32 0 1px, transparent 1px 3px); }
 .brush .slot::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #000; }
 
-/* ---------- коммутатор ---------- */
+/* ---------- switch ---------- */
 .tor .face, .rtr .face { gap: 16px; }
 .tor-id { display: grid; gap: 3px; flex: none; }
 .tor-ports { display: grid; grid-auto-flow: column; grid-template-rows: repeat(2, auto); grid-auto-columns: 22px; gap: 3px 5px; }
@@ -42,19 +42,19 @@
 @media (max-width: 1100px) { .tp:nth-child(n + 17) { display: none; } }
 @media (max-width: 760px) { .tp:nth-child(n + 9) { display: none; } .tor-sfp { display: none; } }
 
-/* ---------- роутер ---------- */
+/* ---------- router ---------- */
 .rtr-ports { display: flex; align-items: center; gap: 6px; }
 .rtr-ports .jack.wan { box-shadow: inset 0 0 0 2px #000, 0 0 0 1.5px var(--tape-b); margin-right: 8px; }
 .rtr .lcd { margin-left: auto; font-size: 17px; padding: 4px 10px; white-space: nowrap; }
-/* Запасные входы на сайт: гнёзда-ссылки за LAN, отделены чертой. Лампа — проверка Gatus; без WAN или LAN роутера
-   (и обесточенный роутер, power.css) — погасшая. */
+/* The site's other ways in: jacks that are links, after LAN, set apart by a line. The lamp is a Gatus check; dark
+   without the router's WAN or LAN (and with the router off, power.css). */
 .rtr .uplinks { display: flex; align-items: center; gap: 10px; margin-left: 6px; padding-left: 12px; border-left: 1px solid var(--edge); }
 .rtr .port.up { gap: 5px; min-height: 26px; }
 .rtr .port.up .tape { padding: 2px 5px 1px; font-size: 10px; }
 .rtr .port.up .led.off, .rtr:is(.nowan, .nolan) .port.up .led { background: var(--led-off); box-shadow: none; }
 @media (max-width: 760px) { .rtr .lcd { display: none; } .rtr .leds { margin-left: auto; } }
 
-/* ---------- сетевые карты и вертикальный органайзер (app.js) ---------- */
+/* ---------- network cards and the vertical organiser (app.js) ---------- */
 .nic {
   position: absolute; z-index: 2; left: calc(var(--ear) + 4px); top: 50%; transform: translateY(-50%);
   display: grid; justify-items: center; gap: 2px;
@@ -63,8 +63,8 @@
 .nic .jack::after { left: 3px; right: 3px; top: 2px; }
 .nic .led { width: 4px; height: 4px; }
 .u.has-nic .face { padding-left: 38px; }
-/* Обесточен юнит или коммутатор, выдернут его корд или ещё не встал в порт (.unlinked, assets/js/net.js) — линка нет.
-   Лампы портов коммутатора зажигает net.js. */
+/* The unit or the switch without power, its cord pulled or not in its port yet (.unlinked, assets/js/net.js): no link.
+   net.js lights the switch ports' lamps. */
 .u.off .nic .led, .u.unlinked .nic .led, .rack:has(.u.tor.off) .nic .led { background: var(--led-off); box-shadow: none; animation: none; }
 .rack:has(.u.tor.off) .tp .led { background: var(--led-off); box-shadow: none; animation: none; }
 .vm {
@@ -73,38 +73,38 @@
   box-shadow: inset 0 0 0 1px #000, inset 3px 0 0 #222529;
 }
 @media (max-width: 760px) { .vm, .nic { display: none; } .u.has-nic .face { padding-left: 14px; } }
-/* Телефон: коммутатор и роутер в один юнит — без ламп и лишних подписей. */
+/* Phone: the switch and the router in one unit each, without lamps and spare captions. */
 @media (max-width: 560px) {
   .tor .leds, .rtr .leds, .rtr-ports .silk, .tor-id .silk { display: none; }
   .tor .face, .rtr .face { gap: 10px; }
-  /* Входы — без гнёзд, лента с лампой: иначе роутер не влезает в один юнит. */
+  /* The ways in without jacks, a tape with a lamp: otherwise the router does not fit in one unit. */
   .rtr .uplinks { gap: 7px; margin-left: 0; padding-left: 8px; }
   .rtr .port.up .jack { display: none; }
   .rtr .port.up { gap: 4px; }
 }
 
-/* ---------- нет связи ----------
-   Связи нет — обесточен коммутатор или у юнита выдернут корд (.unlinked; пока стойка приезжает и провода тянутся —
-   тоже; ставит assets/js/net.js): «связь потеряна» и «нет интернета». Интернета нет — обесточен роутер, выдернут его LAN
-   или WAN, на других стойках — аплинк (.nonet на стойке, net.js): «нет интернета». Данные на экранах никуда не деваются,
-   их просто не видно (а сам юнит без сети не обновляется, net.js); вернули — вернулись. Юниты без сетевой карты (ИБП,
-   заглушки) и обесточенные сами (у них «нет сигнала») не трогаются. */
+/* ---------- no link ----------
+   No link: the switch without power or the unit's cord pulled (.unlinked; also while the rack arrives and the cables
+   are drawn; set by assets/js/net.js): "link lost" and "no internet". No internet: the router without power, its LAN
+   or WAN pulled, on other racks the uplink (.nonet on the rack, net.js): "no internet". The data on the screens stays,
+   it is only hidden (and an offline unit is not refreshed, net.js); plugged back, it shows. Units without a network
+   card (the UPS, blanks) and units without power of their own (they say "no signal") are left alone. */
 :is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet],
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)[data-nolink] { position: relative; }
 :is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet] *,
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)[data-nolink] * { visibility: hidden; }
 :is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) .lcd[data-nonet],
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) .lcd[data-nolink] { color: transparent; text-shadow: none; }
-/* Надпись — поверх экрана, а не в потоке: иначе экран вырастает, юниты ниже съезжают, а провода остаются. */
+/* The notice over the screen, not in the flow: otherwise the screen grows, the units below move and the cables stay. */
 :is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) :is(.lcd, .screen)[data-nonet]::after,
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)[data-nolink]::after {
   content: attr(data-nonet); position: absolute; inset: 0; display: grid; place-content: center; text-align: center;
   white-space: pre-line; font: 400 20px/1.05 var(--f-lcd); letter-spacing: .06em;
   color: var(--lcd); text-shadow: 0 0 6px color-mix(in srgb, var(--lcd) 45%, transparent);
 }
-/* Без линка нет ни связи, ни интернета: две строки. */
+/* Without a link there is neither a link nor internet: two lines. */
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)[data-nolink]::after { content: attr(data-nolink) "\A" attr(data-nonet); }
-/* Экранам хоста Proxmox и контейнеров интернет не нужен (app.js не даёт им data-nonet): одна строка. */
+/* The Proxmox host's and the containers' screens need no internet (app.js gives them no data-nonet): one line. */
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)[data-nolink]:not([data-nonet])::after { content: attr(data-nolink); }
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) .screen[data-nolink]::after,
 :is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) .screen[data-nonet]::after { color: #9fb09c; text-shadow: none; }
@@ -112,27 +112,27 @@
   :is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.has-nic, .rack.nonet .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)::after { animation: nolink 1.6s steps(2, jump-none) infinite; }
 }
 @keyframes nolink { 50% { opacity: .35; } }
-/* Без связи обложки не загрузить: лоток пустой (как без питания, power.css). */
+/* Without a link no cover can load: the tray is empty (as without power, power.css). */
 :is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) .u.media.has-nic img.tray,
 .u.media.unlinked img.tray { object-position: 200px 0; }
 :is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) .u.media.has-nic img.tray,
 .u.media.unlinked img.tray { background: repeating-linear-gradient(135deg, var(--void) 0 6px, var(--panel) 6px 12px); }
-/* И играть нечему: VU-метр гаснет. */
+/* And nothing to play: the VU meter goes dark. */
 :is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) .u.media.has-nic .vu i,
 .u.media.unlinked .vu i { background: var(--led-off); box-shadow: none; }
-/* Без связи статусы неизвестны: лампы мониторинга гаснут, у хоста Proxmox и контейнеров — шкалы, а цифры и аптайм
-   пропадают (их неоткуда взять). Хосту и контейнерам интернет не нужен: без одного интернета (роутер, WAN, аплинк)
-   они в локальной сети и показывают всё. */
+/* Without a link the states are unknown: the monitoring lamps go dark; on the Proxmox host and the containers the bars
+   stay but the numbers and the uptime go (there is nowhere to get them). The host and the containers need no
+   internet: with only the internet gone (router, WAN, uplink) they are on the LAN and show everything. */
 :is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) .u.mon.has-nic:not(.off) .matrix .led,
 .u.mon.unlinked:not(.off) .matrix .led,
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):is(.ct, .pve):not(.off) .meter i { background: var(--led-off); box-shadow: none; animation: none; }
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):is(.ct, .pve):not(.off) :is(.meter b, .up) { color: transparent; text-shadow: none; }
-/* Без линка гаснет и своя лампа сети у юнита (net на сервере). */
+/* Without a link the unit's own network lamp goes dark too (net on the server). */
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked) .led.net { background: var(--led-off); box-shadow: none; animation: none; }
 
-/* Ящик юнита без сети: никаких деталей, только та же ошибка, что на его экранах (надписи — data-* у .slide, шаблон
-   drawer). Детали в разметке остаются, их просто не видно; выдвинутый без сети ящик net.js не загружает, а показывает
-   пустым (data-later) и загружает, когда связь вернётся. */
+/* The drawer of an offline unit: no details, only the same error as on its screens (the texts are data-* on .slide,
+   the drawer template). The details stay in the markup, only hidden; a drawer pulled out offline is not loaded by
+   net.js but shown empty (data-later), and loaded once the link is back. */
 :is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) + .drawer.open .slide,
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) + .drawer.open .slide { position: relative; }
 :is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) + .drawer.open .slide > *,
@@ -151,7 +151,7 @@
 }
 .drawer[data-later] .slide { min-height: calc(var(--U) * 2); }
 
-/* Роутер без WAN или без LAN (net.js): на его ЖК «нет линка», лампа WAN гаснет. */
+/* The router without WAN or LAN (net.js): "no link" on its LCD, the WAN lamp dark. */
 .rtr:is(.nowan, .nolan):not(.off) .lcd { position: relative; color: transparent; text-shadow: none; }
 .rtr:is(.nowan, .nolan):not(.off) .lcd::after {
   content: attr(data-nolan); position: absolute; inset: 0; display: grid; place-content: center; font: inherit;

@@ -1,5 +1,5 @@
-/* Точка входа стилей. site-api склеивает эти @import в один файл (/assets/css/site.css?v=...),
-   а статическая заглушка index.html грузит их как есть. Порядок важен. */
+/* The stylesheets' entry point. site-api joins these @imports into one file (/assets/css/site.css?v=...), and the
+   static fallback, index.html, loads them as they are. The order matters. */
 @import "fonts.css";
 @import "tokens.css";
 @import "base.css";

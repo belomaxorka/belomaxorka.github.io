@@ -536,7 +536,7 @@ def lcd():
 
 
 # =============================================================================
-# 6. infra: the badge of infra.belomaxorka.dev (Roman picked it of four, 2026-10-12)
+# 6. infra: the badge of infra.belomaxorka.dev
 # =============================================================================
 F_SUB = None
 

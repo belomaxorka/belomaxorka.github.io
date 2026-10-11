@@ -1,7 +1,8 @@
-{{/* Страница = одна стойка из ряда (content/racks.yaml): проход с табличками сверху, зал вокруг, юниты сверху
-     вниз. Юнит рисует {{unit "имя" $}}: шаблон templates/units/<имя>.html. Юнит с шаблоном detail-<имя>
-     выдвигается: под ним ящик, который наполняет htmx (/fragments/unit/<имя>) или, без JS, страница /u/<имя>.
-     --cam — где в ряду стоит камера (номер стойки): от него сдвинуты потолок и пол зала (assets/css/hall.css). */}}
+{{/* The page is one rack of the row (content/racks.yaml): the aisle with its signs above, the hall around, the units
+     from top to bottom. {{unit "name" $}} draws a unit: the template templates/units/<name>.html. A unit with a
+     detail-<name> template pulls out: under it a drawer that htmx fills (/fragments/unit/<name>) or, without JS, the
+     page ?open=<name>. --cam is where in the row the camera stands (the rack's number): the hall's ceiling and floor
+     are shifted by it (assets/css/hall.css). */}}
 {{define "page"}}
 <div class="room" id="room" data-rack="{{.Rack.ID}}" data-light="{{template "light" .}}" style="--cam:{{.Rack.N}}">
   {{template "hall" .}}
@@ -11,7 +12,7 @@
     <div class="body" id="rack-body" data-nolink="{{t "net.lost"}}" data-nonet="{{t "net.nointernet"}}">
       <div class="rail l" aria-hidden="true"></div>
       <div class="rail r" aria-hidden="true"></div>
-      {{/* Заглушка «монтируется» встаёт над ИБП (он внизу у каждой стойки), а без ИБП — в конце. */}}
+      {{/* The "being mounted" blank goes above the UPS (it is at the bottom of every rack), and at the end without a UPS. */}}
       {{$stubbed := false}}
       {{range .Rack.Units}}
       {{if and $.Rack.Stub (eq . "ups")}}{{template "stub" $}}{{$stubbed = true}}{{end}}
@@ -26,10 +27,10 @@
 </div>
 {{end}}
 
-{{/* Свет в зале: ночь и день по времени Барнаула, на батарее ИБП — аварийный. */}}
+{{/* The hall's light: night and day by the site's time zone, on the UPS's battery the emergency light. */}}
 {{define "light"}}{{if .UPS.OnBattery}}battery{{else if or (lt .Now.Hour 7) (ge .Now.Hour 23)}}night{{else if ge .Now.Hour 19}}evening{{else}}day{{end}}{{end}}
 
-{{/* Стойку ещё монтируют: заглушки и табличка. */}}
+{{/* A rack still being mounted: blanks and a sign. */}}
 {{define "stub"}}
 <div class="u blank stub-note" style="--h:3">
   <div class="face"><p class="lcd two">{{t "rack.stub"}}<br><span class="d">{{t (print "rack." .Rack.ID ".sub")}}</span></p></div>
@@ -37,8 +38,9 @@
 <div class="u blank free" style="--h:4" aria-hidden="true"><div class="face"></div></div>
 {{end}}
 
-{{/* Выдвинутый юнит: детали из detail-<имя> и ручка «задвинуть». Данные: вся страница, .Open — имя юнита.
-     data-nolink и data-nonet — что ящик показывает вместо деталей, когда у юнита нет сети (assets/js/net.js). */}}
+{{/* A pulled-out unit: the details from detail-<name> and the "push back" handle. Data: the whole page, .Open is the
+     unit's name. data-nolink and data-nonet: what the drawer shows instead of the details when the unit is offline
+     (assets/js/net.js). */}}
 {{define "drawer"}}
 <div class="drawer open" id="drawer-{{.Open}}" x-data="drawer" @keydown.escape="shut()">
   <div class="slide" data-nolink="{{t "net.lost"}}" data-nonet="{{t "net.nointernet"}}">

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Мини-стойка: три юнита, янтарный ЖК, лампы. Те же цвета, что на сайте. -->
+  <!-- A mini rack: three units, an amber LCD, lamps. The same colours as on the site. -->
   <rect x="3" y="1" width="26" height="30" rx="4" fill="#2b2e33"/>
   <rect x="4" y="2" width="24" height="1.5" rx=".75" fill="#3b3f46"/>
   <rect x="6" y="4.5" width="20" height="7" rx="1.5" fill="#15171a"/>

@@ -1,12 +1,12 @@
-/* Серверная вокруг стойки (templates/aisle.html → hall). Только декор позади стойки.
-   Свет — .room[data-light]: day, evening, night (по Барнаулу), battery (ИБП на батарее); выключенная кнопкой
-   стойка гасит и зал. Выбран вариант A «проход в перспективе» (2026-10-11) из трёх, B и C остались только скриншотами. */
+/* The server room around the rack (templates/aisle.html -> hall). Only decoration behind the rack.
+   The light is .room[data-light]: day, evening, night (by the site's time zone), battery (the UPS on battery); a
+   rack turned off by its button darkens the hall too. */
 .room > .rack { z-index: 1; }
 .hall {
   --hall-bg: #0e1012; --hall-wall: #15181b; --tile: #1c1f23; --tile-line: #0a0b0d; --hole-c: #07080a;
   --tray: #3a3e45; --duct: #d8b23a; --lamp: #eaf2ff; --lamp-on: 1; --cold: #3d7bd9; --cold-a: .22;
   --nb-dim: .55;
-  /* Соседние стойки: рельсы, корпус, юниты, заглушки, блик по кромке юнита. */
+  /* The neighbour racks: rails, body, units, blanks, the highlight on a unit's edge. */
   --nb-rail: #2b2e33; --nb-body: #0b0c0e; --nb-edge: #000; --nu-a: #24272c; --nu-b: #1b1d21; --nu-blank: #101113; --nu-hi: #ffffff10;
   position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
   background: linear-gradient(var(--hall-wall), var(--hall-bg) 70%);
@@ -14,7 +14,7 @@
 }
 .hall > * { position: absolute; }
 
-/* Потолок: кабельный лоток-лесенка, жёлтый оптический короб, светильники. */
+/* The ceiling: a ladder cable tray, the yellow fibre duct, the lights. */
 .hall .ceiling { inset: 0 0 auto; height: 110px; }
 .hall .tray {
   left: -5%; right: -5%; top: 18px; height: 16px;
@@ -29,11 +29,11 @@
   opacity: calc(.9 * var(--lamp-on)); box-shadow: 0 0 24px 6px color-mix(in srgb, var(--lamp) 50%, transparent);
 }
 .hall .lamp.a { left: 6%; } .hall .lamp.b { left: calc(50% - 90px); } .hall .lamp.c { right: 6%; }
-/* Камера в ряду (--cam: номер стойки на .room): у каждой стойки потолок, лампы и пол чуть сдвинуты — свой
-   кусок прохода. Переход между стойками двигает их отсюда туда (aisle.css). */
+/* The camera along the row (--cam: the rack's number on .room): each rack has its ceiling, lamps and floor slightly
+   shifted, its own stretch of the aisle. A move between racks takes them from there to here (aisle.css). */
 .hall { --cam-x: calc((var(--cam, 1) - 1) * -6vw); }
 .hall .lamp { translate: var(--cam-x) 0; }
-.hall .ceiling::after { /* свет ламп на стенах */
+.hall .ceiling::after { /* the lamps' light on the walls */
   content: ""; position: absolute; inset: 60px 0 -500px;
   background: radial-gradient(60% 420px at 50% 0, color-mix(in srgb, var(--lamp) 14%, transparent), transparent);
   opacity: var(--lamp-on);
@@ -43,7 +43,7 @@
 .hall .nb { top: 70px; bottom: 150px; width: 1000px; filter: brightness(var(--nb-dim)) blur(.6px); }
 .hall .nb.l { right: calc(50% + 500px + 28px); }
 .hall .nb.r { left: calc(50% + 500px + 28px); }
-/* Соседи через одного и «будущая» стойка на месте текущей: нужны, только пока ряд едет (aisle.css, .hop). */
+/* The neighbours one further out, and the "future" rack in the current one's place: needed only while the row moves (aisle.css, .hop). */
 .hall .nb.ll { right: calc(50% + 500px + 28px + 1028px); }
 .hall .nb.rr { left: calc(50% + 500px + 28px + 1028px); }
 .hall .nb.c { left: calc(50% - 500px); }
@@ -131,12 +131,13 @@
     repeating-linear-gradient(90deg, var(--slot) 0 3px, transparent 3px 7px) right 70px center / 260px 46px no-repeat,
     linear-gradient(var(--nu-a), var(--nu-b));
 }
-/* Соседняя стойка погасла (power.js: кнопка её ИБП, села батарея, у стойки без ИБП — щиток): лампы не горят. */
+/* A check ran (live.js): its lamp blinks off. A neighbour rack went dark (power.js: its UPS's button, an empty battery,
+   the breaker for a rack without a UPS): its lamps are off. */
 .hall .hw > i.tx { opacity: .15; box-shadow: none; } /* a check ran on that service (live.js) */
 .hall .nb.dark .hw > i { background: var(--led-off) !important; box-shadow: none !important; animation: none !important; }
 .hall .nb.dark .nbr { filter: brightness(.8); }
 
-/* Фальшпол под стойкой: плитки и перфорация холодного коридора. */
+/* The raised floor under the rack: tiles and the cold aisle's perforation. */
 .hall .floor { inset: auto 0 0; height: 150px; }
 .hall .floor::before {
   content: ""; position: absolute; inset: 0;
@@ -148,15 +149,15 @@
 }
 .hall .vent { inset: 0; background: radial-gradient(50% 100% at 50% 100%, color-mix(in srgb, var(--cold) calc(var(--cold-a) * 100%), transparent), transparent); }
 
-/* «Выход»: под потолком над проходом, выше табличек — стойка его не закроет, есть у неё роутер или нет.
-   Горит всегда, даже без света. */
+/* "Exit": under the ceiling above the aisle, higher than the signs, so the rack does not hide it, router or not.
+   Always lit, even without light. */
 .hall .exit {
   top: 10px; left: 18px; padding: 3px 10px; border-radius: 3px;
   font: 600 12px/1.2 var(--f-silk); letter-spacing: .14em; text-transform: uppercase;
   color: #eafff0; background: #1d8a45; box-shadow: 0 0 18px #2ccf6a88, inset 0 0 0 1px #ffffff40;
 }
 
-/* ---------- свет ---------- */
+/* ---------- light ---------- */
 .room[data-light="evening"] .hall { --lamp: #ffd9a8; --lamp-on: .7; filter: brightness(.85); }
 .room[data-light="night"] .hall { --lamp-on: 0; --cold-a: .35; --nb-dim: .45; filter: brightness(.75); }
 .room[data-light="battery"] .hall { --lamp-on: 0; --cold-a: .1; }
@@ -168,10 +169,10 @@
   .room[data-light="battery"] .hall::after { animation: alarm 2.4s ease-in-out infinite; }
 }
 @keyframes alarm { 50% { opacity: .35; } }
-/* Кнопка на ИБП погасила стойку: в зале темно, светится только «выход». */
+/* The UPS's button turned the rack off: the hall is dark, only "exit" glows. */
 .room:has(.rack.powered-off) .hall > :not(.exit) { opacity: .06; transition: opacity .6s; }
 
-/* ---------- узко: соседей не видно ---------- */
+/* ---------- narrow: no neighbours in sight ---------- */
 @media (max-width: 1100px) { .hall .nb { filter: brightness(calc(var(--nb-dim) * .8)) blur(1.6px); } }
 @media (max-width: 760px) {
   .hall .nb, .hall .lamp.a, .hall .lamp.c { display: none; }
@@ -179,9 +180,9 @@
   .hall .floor { height: 110px; }
 }
 
-/* ---------- светлая тема: тот же машинный зал днём ----------
-   Ряд стоек, потолок с лотками и жёлтым коробом, фальшпол — как ночью, только светлые (2026-10-11; раньше днём
-   была «бежевая кладовка» без соседей и потолка). Меняются только цвета. */
+/* ---------- light theme: the same machine hall by day ----------
+   The row of racks, the ceiling with its trays and the yellow duct, the raised floor: as at night, only light.
+   Only the colours change. */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .hall {
     --hall-bg: #d3cec3; --hall-wall: #e8e4db; --tile: #d9d4c9; --tile-line: #b9b2a3; --hole-c: #b4ad9e;
@@ -195,13 +196,13 @@
   --nb-rail: #b8b1a1; --nb-body: #c9c2b2; --nb-edge: #9e9686; --nu-a: #efebe2; --nu-b: #e0d9cb; --nu-blank: #bdb6a6; --nu-hi: #fff9;
 }
 
-/* ---------- проход в перспективе: пол и потолок уходят вглубь ---------- */
+/* ---------- the aisle in perspective: the floor and the ceiling go into the distance ---------- */
 .hall .floor { perspective: 420px; }
 .hall .floor::before {
   inset: -60% -60% 0; transform: rotateX(64deg) translateX(var(--cam-x)); transform-origin: 50% 100%;
 }
-/* Потолок — плоскость в перспективе: лотки и короб уходят вглубь прохода. Метки .mark — невидимые точки на оси
-   жёлтого короба: по ним app.js заводит в короб оптику из стойки (где бы ни стояла камера). */
+/* The ceiling is a plane in perspective: the trays and the duct go deep into the aisle. The .mark lines are invisible
+   points on the yellow duct's axis: app.js leads the rack's fibre into the duct by them (wherever the camera is). */
 .hall .ceiling { perspective: 420px; height: 150px; overflow: hidden; }
 .hall .tray, .hall .duct { display: none; }
 .hall .ceiling .plane {

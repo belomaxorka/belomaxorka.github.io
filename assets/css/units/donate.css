@@ -1,4 +1,4 @@
-/* Донаты (templates/units/donate.html): ленты сетей и адреса, отпечатанные на белой ленте этикеточника. */
+/* Donations (templates/units/donate.html): the networks' tapes and the addresses, printed on white label tape. */
 .donate .face { flex-direction: column; align-items: stretch; gap: 10px; padding-block: 12px; }
 .donate .d-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
 .wallets { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }

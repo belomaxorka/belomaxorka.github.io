@@ -1,11 +1,11 @@
-# Кнопки 88x31: две полосы на сайте, порядок здесь — порядок на сайте.
-# Добавить кнопку: положить картинку в assets/88x31/ и дописать три строки.
-#   title — подсказка и alt, image — файл в assets/88x31/, link — куда ведёт (без link кнопка не кликается).
-# Изменения подхватываются сами после push: site-api перечитывает content/ без перезапуска.
+# 88x31 buttons: two strips on the site, in the order given here.
+# To add a button: put the picture into assets/88x31/ and add three lines.
+#   title: the hint and the alt; image: the file in assets/88x31/; link: where it leads (without link it is not a link).
+# Changes are picked up by themselves after a push: site-api reads content/ again without a restart.
 
-# Мои кнопки: файлы лежат в /88x31/ (стабильный адрес, чтобы другие могли вставить к себе),
-# у каждой на сайте есть код для копирования. Подписей нет: кнопка сама себя показывает.
-# В коде кнопка ведёт на https://belomaxorka.dev с alt «belomaxorka»; link и alt это меняют.
+# My buttons: the files are in /88x31/ (a stable address, so others can embed them), each with its code to copy on
+# the site. No captions: a button shows itself. In the code a button leads to https://belomaxorka.dev with the alt
+# "belomaxorka"; link and alt change that.
 mine:
   - title: belomaxorka · rack
     image: rack.gif
@@ -17,7 +17,7 @@ mine:
     image: terminal.gif
   - title: belomaxorka · 20% cooler
     image: rainbow-bolt.gif
-  # для сайтов, которые живут на моём железе: ведёт на мемную страницу инфраструктуры
+  # for sites that live on my hardware: leads to the infrastructure's meme page
   - title: hosted on belomaxorka infrastructure
     image: infra.gif
     link: https://infra.belomaxorka.dev
@@ -75,7 +75,7 @@ people:
   - title: inteko
     image: inteko.gif
     link: https://boylifein.eu
-  # Дальше — кнопки участников otoring (webring.otomir23.me) в порядке списка кольца.
+  # Next, the buttons of otoring's members (webring.otomir23.me) in the ring's order.
   - title: senkodev
     image: senkodev.gif
     link: https://senko.dev/
@@ -425,7 +425,7 @@ sites:
   - title: Web 1.0 Hosting
     image: web1-hosting.gif
     link: https://web1.0hosting.net/
-  # Tinelix в стиле Web 1.0 нарочно по http: у https сертификат просрочен, а их собственный код кнопки ведёт на http.
+  # Tinelix in the Web 1.0 style over http on purpose: its https certificate has expired, and their own button code links to http.
   - title: "Tinelix (Web 1.0)"
     image: tinelix.gif
     link: http://web1.tinelix.ru/

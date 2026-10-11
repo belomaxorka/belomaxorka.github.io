@@ -1,11 +1,11 @@
-// Скриншоты и проверка страницы в headless Chrome через CDP, без зависимостей (Node 22+: WebSocket встроен).
-// Окно headless Chrome не сужается меньше ~500px, поэтому ширину задаёт Emulation.setDeviceMetricsOverride.
+// Screenshots and checks of a page in headless Chrome over CDP, without dependencies (Node 22+: WebSocket built in).
+// Headless Chrome's window does not get narrower than ~500px, so Emulation.setDeviceMetricsOverride sets the width.
 //
 //   node docs/tools/shot.mjs http://127.0.0.1:8099/ [--sizes 390x844,1366x768] [--out shots] [--full]
-//        [--dark] [--light] [--reduced] [--nojs] [--wait 1500] [--eval "js-выражение"] [--chrome путь]
-//        [--clip x,y,w,h[,scale]]   — только этот кусок страницы (координаты от верха документа), увеличенный
+//        [--dark] [--light] [--reduced] [--nojs] [--wait 1500] [--eval "js expression"] [--chrome path]
+//        [--clip x,y,w,h[,scale]]   - only this piece of the page (coordinates from the document's top), enlarged
 //
-// Печатает ошибки консоли, исключения, нарушения CSP и горизонтальную прокрутку; PNG кладёт в --out.
+// Prints console errors, exceptions, CSP violations and horizontal scrolling; writes the PNG to --out.
 import { spawn } from 'node:child_process';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';

@@ -1,7 +1,7 @@
-/* Токены. По умолчанию тёмная тема (чёрная стойка), светлая — бежевое железо из 90-х.
-   Цвета ЖК заданы парами -d/-l: site-api подставляет пару из обложки трека в <style id="cover-palette">.
-   Пара из обложки не обязана следовать теме: чёрная обложка даёт чёрный экран с белым текстом и в светлой теме,
-   белая — бумажный экран и в тёмной. Поэтому --lcd ставится только на фон --lcd-bg, не на панель. */
+/* Tokens. The dark theme by default (a black rack), the light one beige hardware from the 90s.
+   The LCD colours come in -d/-l pairs: site-api puts the pair from the track's cover into <style id="cover-palette">.
+   The cover's pair does not have to follow the theme: a black cover gives a black screen with white text in the light
+   theme too, a white one a paper screen in the dark. So --lcd goes only on the background, --lcd-bg, not the panel. */
 @property --lcd { syntax: "<color>"; inherits: true; initial-value: #ffb547; }
 @property --lcd-bg { syntax: "<color>"; inherits: true; initial-value: #1b1306; }
 @property --lcd-dim { syntax: "<color>"; inherits: true; initial-value: #a87a35; }

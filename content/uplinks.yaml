@@ -1,9 +1,11 @@
-# Входы на сайт: основной и запасные аплинки (роутер на R1, лёгкая версия). Все ведут в тот же site-api.
-#   id   — имя: web, lite, tor, ygg. По id: tor site-api шлёт url в заголовке Onion-Location (Tor Browser
-#          предлагает onion-адрес), lite — «вы здесь» в лёгкой версии;
-#   port — лента на гнезде роутера (без port — гнезда нет: это сам https), name — подпись, url — адрес, note — для чего (строка или {en, ru}), check — проверка в Gatus (infra
-#          gatus/config.yaml): по ней горит лампа входа.
-# Откуда они: CT120 uplinks (Tor и Yggdrasil) и lite.belomaxorka.dev (Caddy, http без редиректа) — infra/uplinks.
+# The ways into the site: the main one and the spare uplinks (the router on R1, the light version). All lead to the
+# same site-api.
+#   id   - the name: web, lite, tor, ygg. By id: for tor site-api sends url in the Onion-Location header (Tor Browser
+#          offers the onion address), lite is "you are here" in the light version;
+#   port - the tape on the router's jack (no port, no jack: that is https itself); name the caption; url the address;
+#          note what it is for (a string or {en, ru}); check the Gatus check (infra gatus/config.yaml) that lights
+#          the way's lamp.
+# Where they come from: CT120 uplinks (Tor and Yggdrasil) and lite.belomaxorka.dev (Caddy, http without a redirect), infra/uplinks.
 - id: web
   check: belomaxorka.dev
   name: https

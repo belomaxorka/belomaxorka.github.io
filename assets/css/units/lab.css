@@ -1,5 +1,5 @@
-/* Стойка /lab: хост Proxmox и контейнеры по юниту (templates/units/lab.html).
-   Шкалы — сегменты, как светодиодные индикаторы: --p — процент заполнения. */
+/* The /lab rack: the Proxmox host and the containers, a unit each (templates/units/lab.html).
+   The bars are segments like LED bar graphs: --p is the percentage filled. */
 .meter { display: inline-grid; grid-template-columns: auto minmax(60px, 1fr) auto; align-items: center; gap: 8px; min-width: 0; }
 .meter i {
   height: 10px; min-width: 60px;
@@ -34,6 +34,6 @@
   .ct .up.off { grid-column: 4; }
 }
 
-/* Без питания (assets/js/power.js) шкалы гаснут вместе с юнитом. */
+/* Without power (assets/js/power.js) the bars go dark with the unit. */
 .u.off .meter i { background: var(--led-off); }
 .u.off .meter b, .u.off .ct .up { color: transparent; }

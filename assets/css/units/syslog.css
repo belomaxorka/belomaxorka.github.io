@@ -1,4 +1,4 @@
-/* Журнал: прослушивания из Koito и редкие события, прокручивается внутри экрана. События — тусклее музыки. */
+/* The log: listens from Koito and rare events, scrolling inside the screen. Events dimmer than the music. */
 .log .face { align-items: stretch; flex-direction: column; padding-block: 12px; }
 .log .face > * { flex-shrink: 0; }
 .log .bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }

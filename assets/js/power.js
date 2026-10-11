@@ -1,19 +1,19 @@
-// Питание стойки. У каждого активного юнита свой кабель от вертикального PDU на правой рейке.
-// Вилку можно вытащить мышкой или пальцем: кабель повиснет и закачается (верёвка на Verlet),
-// юнит погаснет. Поднести вилку к разъёму (или тапнуть по ней) — воткнётся, юнит загорится.
-// Кнопка на ИБП гасит всю стойку и загружает её обратно. Шнур самого ИБП тоже выдёргивается из розетки:
-// ИБП уходит на батарею (красный свет в зале, ЖК мигает, заряд тает), батарея села — гаснет всё; воткнул —
-// заряжается и стойка загружается. У каждой стойки ряда своё питание: свой ИБП, кнопка, шнур, батарея, вилки.
-// Щиток на стене зала (рядом с розеткой) обесточивает розетки всего ряда разом: все ИБП уходят на батарею, каждая
-// стойка живёт, пока держит её батарея. Батарея считается по времени: ушёл к другой стойке — эта садится дальше.
-// Состояние только у посетителя (localStorage, на полчаса: Rack.toyStore). Погасший юнит не нажимается (inert); событие rack:unit на юните
-// говорит тем, кто внутри, что он погас или загрузился.
-// Без JS всего этого нет: юниты просто горят и работают.
+// The rack's power. Every active unit has its own cable from the vertical PDU on the right rail. A plug can be pulled
+// out with a mouse or a finger: the cable hangs and swings (a Verlet rope) and the unit goes dark. Bring the plug to
+// its inlet (or tap it) and it goes back in, the unit lights up. The UPS's button turns the whole rack off and boots it
+// again. The UPS's own cord comes out of the wall socket too: the UPS goes on battery (red light in the hall, the LCD
+// blinks, the charge melts); the battery empty, everything goes dark; plugged back, it charges and the rack boots.
+// Each rack of the row has its own power: UPS, button, cord, battery, plugs. The breaker on the hall's wall (by the
+// socket) cuts the sockets of the whole row: every UPS goes on battery and each rack lives as long as its battery
+// does. The battery is counted by the clock: walk to another rack and this one keeps draining.
+// The state is the visitor's only (localStorage, for half an hour: Rack.toyStore). A dark unit cannot be pressed
+// (inert); the rack:unit event on the unit tells what is inside that it went dark or booted.
+// Without JS there is none of this: the units are simply on and working.
 (() => {
   const COLOR = '#4a4f57';
   const PLUG = '#1b1d20';
-  const MAINS = '#26292e';       // шнур ИБП
-  const DRAIN = 90, CHARGE = 30; // секунд на разрядку и зарядку батареи (ускорено, чтобы было видно)
+  const MAINS = '#26292e';       // the UPS's cord
+  const DRAIN = 90, CHARGE = 30; // seconds to drain and to charge the battery (fast, so it shows)
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
   // { racks: { <rack id>: { off, unplugged, mains, charge, at } }, breaker, breakerAt }, for Rack.TOY_TTL (rack.js).
@@ -21,8 +21,8 @@
   const saved = store.get();
   const all = { racks: saved.racks || {}, breaker: saved.breaker !== false, breakerAt: saved.breakerAt || 0 };
   const save = () => store.set(all);
-  // Питание стойки: off — кнопка ИБП; unplugged — выдернутые вилки юнитов; mains — шнур ИБП в розетке; charge — %
-  // батареи, пока идёт своя симуляция (null — полная и на сети); at — когда charge посчитан.
+  // A rack's power: off, the UPS's button; unplugged, the units' pulled plugs; mains, the UPS's cord in the socket;
+  // charge, the battery's % while the simulation runs (null: full and on mains); at, when charge was counted.
   function rackState(id) {
     const r = (all.racks[id] ||= {});
     r.off = !!r.off;
@@ -31,10 +31,10 @@
     if (typeof r.charge !== 'number') r.charge = null;
     return r;
   }
-  // Есть ли ток в розетке у ИБП этой стойки: шнур воткнут и щиток включён.
+  // Whether this rack's UPS has current at its socket: the cord in and the breaker on.
   const fed = (r) => r.mains && all.breaker;
-  // Заряд к моменту now: пока стойку не видно, батарея садится (или заряжается) так же, как на глазах. ИБП ушёл на
-  // батарею, когда пропал ток: выдернули шнур (тогда charge уже есть) или выключили щиток (breakerAt).
+  // The charge at now: while the rack is out of sight its battery drains (or charges) as it would in view. The UPS went
+  // on battery when the current went: its cord pulled (then charge is set already) or the breaker off (breakerAt).
   function settle(r, now) {
     if (r.charge === null) {
       if (fed(r)) return;
@@ -47,7 +47,7 @@
     r.at = now;
   }
   const here = () => document.getElementById('room')?.dataset.rack || '';
-  let state = null, stateId = null; // питание той стойки, что сейчас в комнате (useRack)
+  let state = null, stateId = null; // the power of the rack in the room now (useRack)
   // The UPS's real LCD and hall light (from site-api) before the battery simulation replaces them; the battery's
   // timer; whether the rack was dead at the last look (null: not looked yet). Reset by useRack for each rack.
   let lcdReal = null, lightReal = null, alarmReal = false, timer = 0, wasDead = null;
@@ -65,15 +65,15 @@
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
   const held = (r) => (hand?.held?.key === r.key ? hand.held : null);
 
-  // Стойка в комнате сменилась (или страница только открылась): её питание, досчитанное до этой минуты. Батарея
-  // прошлой стойки досчитана и сохранена, её таймер остановлен; верёвки строятся заново из нового состояния.
+  // Another rack in the room (or the page just opened): its power, counted up to now. The previous rack's battery is
+  // counted and saved, its timer stopped; the ropes are built anew from the new state.
   function useRack() {
     const id = here();
     if (state && id === stateId) return;
     const now = Date.now();
     if (state) settle(state, now);
     clearInterval(timer); timer = 0; wasDead = null;
-    // Настоящие ЖК ИБП и свет в зале у новой стойки — свои; запомнить их до того, как их подменит симуляция.
+    // The new rack's real UPS LCD and hall light are its own; keep them before the simulation replaces them.
     lcdReal = lightReal = null;
     for (const r of ropes.values()) r.view?.g.remove();
     ropes.clear();
@@ -83,12 +83,12 @@
     save();
   }
 
-  // ---------- юниты: разъёмы и свет ----------
+  // ---------- units: inlets and light ----------
   function powered(k) { return !state.off && !state.unplugged[k] && !dead(); }
 
-  // Погасший юнит ещё и не нажимается: inert на нём и на его выдвинутом ящике — ни клика, ни наведения, ни фокуса
-  // (Tab его пропускает), скринридеру его нет. Одно место на все причины: вилка, кнопка ИБП, села батарея.
-  // Набранный текст, рисунок и данные остаются на месте: включили — всё как было.
+  // A dark unit cannot be pressed either: inert on it and on its pulled-out drawer, so no click, hover or focus (Tab
+  // skips it) and screen readers do not see it. One place for every cause: a plug, the UPS's button, the battery.
+  // Typed text, a drawing and the data stay: turned on, everything is as it was.
   function paint(u, k, boot) {
     const on = powered(k) && !queued.has(k);
     const box = u.nextElementSibling?.classList.contains('drawer') ? u.nextElementSibling : null;
@@ -107,9 +107,9 @@
     if (!was && on) u.dispatchEvent(new CustomEvent('rack:unit', { bubbles: true, detail: { key: k, on } }));
   }
 
-  // Перед тем как юнит станет inert: сказать тем, кто внутри (рисовалка дописывает штрих и выходит из полного
-  // экрана), закрыть его диалоги (лайтбокс гостевой модальный: внутри inert он запер бы всю страницу) и увести
-  // фокус, если он был внутри.
+  // Before a unit turns inert: tell what is inside (the drawing pad finishes its stroke and leaves full screen), close
+  // its dialogs (the guestbook's lightbox is modal: inside an inert unit it would lock the whole page) and move the
+  // focus out if it was inside.
   function shutdown(u, k, box) {
     u.dispatchEvent(new CustomEvent('rack:unit', { bubbles: true, detail: { key: k, on: false } }));
     [u, box].forEach((n) => n?.querySelectorAll('dialog[open]').forEach((d) => d.close()));
@@ -117,8 +117,8 @@
     if (f && f !== document.body && (u.contains(f) || box?.contains(f))) park();
   }
 
-  // Куда фокус из погасшего юнита: не на кнопку (пробел, набранный по инерции, нажал бы её), а на сам ИБП — на нём
-  // видно, что с питанием, следующий Tab попадёт на его кнопку. Нет ИБП — на стойку. tabindex только на это время.
+  // Where the focus goes from a dark unit: not to a button (a space typed on would press it) but to the UPS itself,
+  // which shows what is up with the power, the next Tab reaching its button. No UPS: the rack. tabindex only for now.
   function park() {
     const t = upsUnit() || document.getElementById('rack');
     if (!t) { document.activeElement.blur(); return; }
@@ -129,8 +129,8 @@
     t.focus({ preventScroll: true });
   }
 
-  // Загрузка сверху вниз, юнит за юнитом. Пока очередь юнита не дошла, он тёмный и не нажимается, даже если его
-  // перерисует кто-то ещё (раскладка, ответ htmx). Подменил его htmx — загружается новый.
+  // Boot from top to bottom, unit after unit. Until its turn a unit stays dark and cannot be pressed, even if someone
+  // else redraws it (the layout, an htmx response). Swapped by htmx: the new element boots.
   const queued = new Set();
   function bootAll() {
     units().forEach((u, i) => {
@@ -168,7 +168,7 @@
         s.setAttribute('aria-hidden', 'true');
         u.appendChild(s);
       }
-      u.classList.add('has-psu'); // и после htmx: на settle он возвращает юниту class из ответа
+      u.classList.add('has-psu'); // after htmx too: on settle it restores the unit's class from the response
       paint(u, keyOf(u), false);
     });
     const rack = document.getElementById('rack');
@@ -182,15 +182,16 @@
     return true;
   }
 
-  // Вся стойка погасла или загорелась: кнопкой на ИБП или села батарея (why: button, battery).
-  // Шнур ИБП из розетки сам ничего не гасит — батарея ещё держит.
+  // The whole rack went dark or came on: the UPS's button or the battery (why: button, battery). The UPS's cord out of
+  // the socket turns nothing off by itself: the battery still holds.
   function dark(on, why) { document.dispatchEvent(new CustomEvent('rack:power', { detail: { on, why } })); }
 
-  // ---------- ИБП на батарее ----------
-  // Пока шнур в розетке и батарея полна, ЖК ИБП показывает настоящие данные (NUT). Иначе — своя симуляция.
+  // ---------- the UPS on battery ----------
+  // While the cord is in and the battery full, the UPS's LCD shows the real data (NUT). Otherwise the simulation.
 
-  // Выключатель у таблички «выход»: auto — свет по часам Барнаула (как его отдал сервер), или вручную день, вечер,
-  // ночь. Пока в розетках есть ток; без тока горит аварийка, настоящая (сервер сказал battery) — тоже.
+  // The light switch by the exit sign: auto, the light by the site's clock (as the server sent it), or day, evening,
+  // night by hand. While the sockets have current; without it the emergency light is on, and so with a real one (the
+  // server said battery).
   const MODES = ['auto', 'day', 'evening', 'night'];
   let mode = (() => { try { const m = localStorage.getItem('hall-light'); return MODES.includes(m) ? m : 'auto'; } catch { return 'auto'; } })();
   function lamp() {
@@ -200,12 +201,13 @@
   const upsUnit = () => document.querySelector('#rack-body > .ups');
   const upsLcd = () => document.querySelector('#rack-body > .ups .lcd');
   const full = () => { const v = parseInt(upsLcd()?.dataset.charge, 10); return v > 0 ? v : 100; };
-  // Села батарея — или у стойки нет ИБП вовсе (заглушки ряда): тогда она живёт, только пока в розетке ток.
+  // The battery is empty, or the rack has no UPS at all (the row's blank racks): then it lives only while the socket has current.
   function dead() { return upsUnit() ? dying(state) : !fed(state); }
   const dying = (r) => !fed(r) && r.charge !== null && r.charge <= 0;
 
-  // Соседние стойки в зале (data-rack у .nb в templates/aisle.html) — те же стойки ряда: их лампы гаснут, когда та
-  // стойка выключена кнопкой ИБП или села её батарея (заряд досчитан по часам), у стойки без ИБП — без тока.
+  // The neighbour racks in the hall (data-rack on .nb in templates/aisle.html) are the row's racks: their lamps go dark
+  // when that rack is off by its UPS's button or its battery is empty (the charge counted by the clock), or, for a
+  // rack without a UPS, without current.
   function neighbours() {
     const now = Date.now();
     document.querySelectorAll('.hall .nb[data-rack]').forEach((nb) => {
@@ -215,11 +217,11 @@
     });
   }
 
-  // Стойка без ИБП (заглушки ряда) тоже живёт от него: свет в зале и юниты — как у всех, только ЖК нет.
+  // A rack without a UPS (the row's blank racks) lives off one too: hall light and units as everywhere, only no LCD.
   function battery() {
     const lcd = upsLcd();
     if (!room || testing) return;
-    // Настоящие ЖК и свет — пока их не подменила симуляция; на новой стойке (rack:swap) — заново.
+    // The real LCD and light, until the simulation replaces them; on a new rack (rack:swap) again.
     if (lightReal === null) lightReal = room.dataset.light;
     if (lcd && lcdReal === null) {
       lcdReal = [...lcd.childNodes].map((n) => n.cloneNode(true));
@@ -245,8 +247,8 @@
     rack?.classList.toggle('powered-off', state.off || isDead);
     if (lcd) screen(lcd, isDead);
     neighbours();
-    // Батарея села — всё гаснет; вернулось питание — юниты загружаются сверху вниз. Сообщить только о смене
-    // на глазах у посетителя, не о состоянии, с которым страница открылась.
+    // The battery is empty: everything goes dark; power is back: the units boot from top to bottom. Report only a
+    // change the visitor sees, not the state the page opened with.
     if (isDead !== wasDead) {
       if (isDead) units().forEach((u) => paint(u, keyOf(u), false));
       else bootAll();
@@ -255,7 +257,7 @@
     }
   }
 
-  // ЖК: батарейка, «на батарее · 73%» или «заряжается · 40%», сколько осталось.
+  // The LCD: the battery, "on battery · 73%" or "charging · 40%", and the time left.
   function screen(lcd, isDead) {
     lcd.classList.toggle('alarm', !fed(state) && !isDead);
     const pc = Math.round(state.charge), d = lcd.dataset;
@@ -292,7 +294,7 @@
     battery();
   }
 
-  // ---------- кнопка на ИБП ----------
+  // ---------- the UPS's button ----------
   function wireButton() {
     const b = document.querySelector('.ups .pwr');
     if (!b || b.dataset.wired) return;
@@ -314,7 +316,7 @@
     });
   }
 
-  // ---------- выключатель света ----------
+  // ---------- the light switch ----------
   let sw = null;
   function switcher() {
     if (sw?.isConnected) return;
@@ -341,9 +343,10 @@
     sw.setAttribute('aria-label', sw.dataset.aria + ': ' + name);
   }
 
-  // ---------- самотест ИБП ----------
-  // Кнопка test: ИБП пищит, ЖК гоняет батарею вниз и обратно, свет в зале трижды моргает — нагрузка на миг ушла на
-  // батарею. Стойка не гаснет. Без тока, выключенный или севший ИБП тест не делает: на ЖК — отказ.
+  // ---------- the UPS's self-test ----------
+  // The test button: the UPS beeps, the LCD runs the battery down and back, the hall light blinks three times (the
+  // load went to the battery for a moment). The rack stays on. Without current, off or with an empty battery the UPS
+  // refuses on its LCD.
   function wireTest() {
     const b = document.querySelector('.ups .utest');
     if (!b || b.dataset.wired) return;
@@ -392,8 +395,8 @@
     }, steps.length * tick + 300);
   }
 
-  // ---------- перезагрузка юнита (RESET на сервере, assets/js/toys.js) ----------
-  // Юнит гаснет, как без питания, и через пару секунд загружается; остальная стойка работает.
+  // ---------- a unit's restart (RESET on the server, assets/js/toys.js) ----------
+  // The unit goes dark as without power and boots after a couple of seconds; the rest of the rack runs on.
   document.addEventListener('rack:reset', (e) => {
     const k = e.detail?.key, u = k && unitBy(k);
     if (!u || !powered(k) || queued.has(k)) return;
@@ -406,9 +409,9 @@
     }, reduce.matches ? 300 : 1600);
   });
 
-  // ---------- щиток зала ----------
-  // Рубильник на стене рядом с розеткой: ток во всех розетках ряда. Выключил — все ИБП на батарее (у каждой
-  // стойки свой заряд, досчитанный до этой минуты), включил — заряжаются. Подписи — data-* на #cables (i18n).
+  // ---------- the hall's breaker ----------
+  // The switch on the wall by the socket: the current in all the row's sockets. Off: every UPS on battery (each rack
+  // with its own charge, counted up to now); on: they charge. The captions are data-* on #cables (i18n).
   let lever = null;
   function breaker() {
     if (lever?.isConnected) return;
@@ -436,7 +439,7 @@
     lever.setAttribute('aria-pressed', String(all.breaker));
     lever.classList.toggle('down', !all.breaker);
   }
-  // Место — на стене слева от розетки ИБП; если стены не видно (узко) — на полу правее розетки.
+  // Its place: on the wall left of the UPS's socket; when the wall is out of sight (narrow), on the floor right of the socket.
   function placeBreaker() {
     if (!lever) return;
     const { wall, s } = mainsAnchors(upsUnit());
@@ -445,19 +448,19 @@
     lever.style.top = (wall ? s.y - 46 : s.y - 22) + 'px';
   }
 
-  // ---------- геометрия ----------
+  // ---------- geometry ----------
   function anchors(u) {
     const R = room.getBoundingClientRect();
     const rack = document.getElementById('rack').getBoundingClientRect();
     const sock = u.querySelector(':scope > .psu').getBoundingClientRect();
     const railW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rail-w')) || 34;
     const s = { x: sock.left - R.left + sock.width / 2, y: sock.top - R.top + sock.height / 2 };
-    // Розетка PDU на правой рейке, чуть ниже разъёма юнита.
+    // The PDU's outlet on the right rail, slightly below the unit's inlet.
     const o = { x: rack.right - R.left - railW / 2, y: s.y + 8 };
     return { s, o };
   }
 
-  // Верёвка из точек: концы — вилка (points[0]) и розетка PDU (последняя точка, всегда закреплена).
+  // A rope of points: its ends are the plug (points[0]) and the PDU's outlet (the last point, always fixed).
   function rest(a, b, len, n) {
     const pts = [];
     for (let i = 0; i <= n; i++) {
@@ -469,8 +472,8 @@
     return pts;
   }
 
-  // Шнур ИБП: закреплён внизу ИБП (outlet — тут неподвижный конец), вилка — в розетке на стене слева от стойки
-  // или, если места нет, на полу (socket). Розетка и подпись «220 В» рисуются вместе с ним.
+  // The UPS's cord: fixed at the bottom of the UPS (outlet: the fixed end here), the plug in the wall socket left of
+  // the rack or, without room, on the floor (socket). The socket and its "220 V" label are drawn with it.
   function mainsAnchors(ups) {
     const R = room.getBoundingClientRect();
     const rk = document.getElementById('rack').getBoundingClientRect();
@@ -479,7 +482,7 @@
     const x0 = rk.left - R.left, b0 = rk.bottom - R.top;
     const wall = x0 > 110;
     const ox = wall ? x0 - 62 : x0 + railW + 120, oy = wall ? b0 - 40 : b0 + 34 + 26;
-    // s — точка, где вилка в розетке: её центр приходится на отверстия (drawMains рисует розетку вокруг неё).
+    // s: where the plug sits in the socket, its centre on the holes (drawMains draws the socket around it).
     return { wall, s: { x: ox, y: oy - 6 }, o: { x: x0 + railW + 46, y: u.bottom - R.top - 6 } };
   }
 
@@ -530,7 +533,7 @@
       }
     });
     for (const [k, r] of ropes) if (!seen.has(k)) { r.view?.g.remove(); ropes.delete(k); }
-    // Пол и стены комнаты: выдернутая вилка ложится на фальшпол, а не улетает за край страницы.
+    // The room's floor and walls: a pulled plug lands on the raised floor instead of flying off the page.
     for (const r of ropes.values()) { r.floor = R.height - 34; r.right = R.width - 8; }
     if (kick) swing(kick);
     kick = 0;
@@ -538,7 +541,7 @@
     wake();
   }
 
-  // Стойка приехала из соседней (assets/js/aisle.js): кабели по инерции ещё едут в сторону хода и качаются.
+  // The rack arrived from the next one (assets/js/aisle.js): the cables keep moving the way it came and swing.
   function swing(dir) {
     if (reduce.matches) return;
     for (const r of ropes.values()) {
@@ -640,7 +643,7 @@
     svg.querySelectorAll('g[data-cord]').forEach((g) => g.classList.toggle('probe', g.dataset.cord === k));
   }, { passive: true });
 
-  // Кто ещё следит за вилками (assets/js/sticker.js): событие на каждую выдернутую и воткнутую.
+  // Who else follows the plugs (assets/js/sticker.js): an event for each pulled and plugged one.
   const told = (key, on) => document.dispatchEvent(new CustomEvent('rack:plug', { detail: { key, on } }));
 
   function unplug(r) {
@@ -663,24 +666,24 @@
     if (u) paint(u, r.key, true);
   }
 
-  // Раскладку стойки считает app.js; провода — сразу после неё и в том же кадре (draw в relayout), иначе они
-  // догоняют юниты кадр-два спустя и дёргаются.
+  // app.js lays the rack out; the cables right after it and in the same frame (draw in relayout), or they catch up
+  // with the units a frame or two later and jerk.
   document.addEventListener('rack:laidout', relayout);
 
-  // htmx подменил юнит (опрос раз в 30–60 с, отправка гостевой) или выдвинул ящик: новый элемент сразу в состоянии
-  // питания — в той же задаче, что и вставка, так что между ними не пройдёт ни один клик и юнит не мигнёт светом.
-  // На settle htmx возвращает новому элементу его class из ответа (до того держит старый) — ещё раз. Опрос у
-  // погасших юнитов идёт как шёл: включили — на экране сразу свежие данные.
+  // htmx swapped a unit (a poll every 30-60 s, a guestbook post) or brought out a drawer: the new element takes the
+  // power state at once, in the same task as the insertion, so no click falls between them and the unit does not
+  // flash. On settle htmx gives the new element its class from the response (it keeps the old one until then):
+  // again. Dark units keep polling: turned on, the screen has fresh data at once.
   const again = () => { if (svg) ensureDom(); };
   document.addEventListener('htmx:afterSwap', again);
   document.addEventListener('htmx:afterSettle', again);
 
-  // Стойку подменили без перезагрузки (assets/js/aisle.js): у новой своё питание (useRack), свой ИБП и свой свет в
-  // зале; юниты и кнопку сразу привести в состояние питания, пока стойку не показали.
+  // The rack was swapped without a reload (assets/js/aisle.js): the new one has its own power (useRack), UPS and hall
+  // light; put the units and the button into the power state at once, before the rack is shown.
   document.addEventListener('rack:swap', () => {
     if (!ensureDom()) return;
     if (!fed(state) || state.charge !== null) runBattery();
   });
-  // Доехала: следующая раскладка качнёт кабели (app.js раскладывает стойку на это же событие).
+  // It has arrived: the next layout swings the cables (app.js lays the rack out on the same event).
   document.addEventListener('rack:landed', (e) => { kick = e.detail && !e.detail.quiet ? e.detail.dir || 0 : 0; });
 })();

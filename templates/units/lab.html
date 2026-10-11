@@ -1,7 +1,7 @@
-{{/* Стойка /lab: настоящий хост Proxmox. Данные: .Lab (site-api читает API Proxmox read-only токеном раз в 30 с).
-     По имени — только контейнеры из content/lab.yaml (тег и номера), чужие проекты на том же хосте — одной цифрой. */}}
+{{/* The /lab rack: the real Proxmox host. Data: .Lab (site-api reads Proxmox's API with a read-only token every 30 s).
+     By name only the containers of content/lab.yaml (the tag and the IDs); other projects on the same host as one number. */}}
 
-{{/* Хост: процессор, память, аптайм, сколько гостей работает. */}}
+{{/* The host: CPU, memory, uptime, how many guests run. */}}
 {{define "unit-pve"}}
 <section class="u pve" style="--h:3" aria-labelledby="pve-h">
   <div class="face">
@@ -22,8 +22,8 @@
 </section>
 {{end}}
 
-{{/* Контейнеры: по юниту на каждый, лампа, номер, имя, процессор и память; в конце — сколько чужих.
-     CPU — доля собственных ядер контейнера (как в Proxmox: «0.4% of 2 CPUs»), .CPUText — с десятыми и сотыми. */}}
+{{/* The containers: a unit each, a lamp, the ID, the name, CPU and memory; at the end how many others.
+     CPU is the share of the container's own cores (as Proxmox shows "0.4% of 2 CPUs"), .CPUText with two decimals. */}}
 {{define "unit-guests"}}
 {{with .Lab}}{{if .OK}}
 {{range .Guests}}

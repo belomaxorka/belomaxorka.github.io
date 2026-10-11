@@ -1,18 +1,18 @@
-/* Провода рисует assets/js/app.js в SVG поверх комнаты. Без JS их просто нет. */
+/* assets/js/app.js draws the cables in an SVG over the room. Without JS there are none. */
 .cables { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; overflow: visible; }
 .cables .lbl { font: 600 18px var(--f-hand); fill: var(--dim); }
 .cables .outlet { fill: var(--panel-hi); stroke: var(--edge); }
 .cables .outlet-hole { fill: var(--hole); }
-/* Ввод оптики в жёлтый короб на потолке (app.js, fiber). */
+/* The fibre's entry into the yellow duct on the ceiling (app.js, fiber). */
 .cables .inlet { fill: #202328; stroke: #000b; stroke-width: 1.5; stroke-linejoin: round; }
-/* Патч-корды, которые выдёргиваются (assets/js/net.js): выдернутые висят над разводкой, под силовыми кабелями; у вилок
-   невидимые зоны, за которые хватать. */
+/* The patch cords that pull out (assets/js/net.js): pulled ones hang over the cabling, under the power cables; the
+   plugs have invisible zones to grab them by. */
 .cables.net { z-index: 5; }
 .cables.net .hit { fill: transparent; pointer-events: auto; cursor: grab; touch-action: none; }
 .cables.net .hit:active { cursor: grabbing; }
 
-/* Стойка приехала (assets/js/aisle.js → app.js, .draw): корды протягиваются по очереди от гнезда, вилки встают
-   в порты, когда провод дотянулся. --i — номер провода, --k — его вилка (0 у начала, 1 у конца). */
+/* The rack has arrived (assets/js/aisle.js -> app.js, .draw): the cords are drawn one by one from their jacks, the
+   plugs seat in the ports once the cord reaches them. --i is the wire's number, --k its plug (0 at the start, 1 at the end). */
 @media (prefers-reduced-motion: no-preference) {
   .cables.draw > g path[pathLength] {
     stroke-dasharray: 100 100;
@@ -27,16 +27,16 @@
 @keyframes cable-plug { from { opacity: 0; transform: scale(.3); } }
 .cables .lbl.small { font-size: 16px; }
 
-/* Тестер кабеля (net.js, power.js): навёл мышь на вилку — корд светится, лампы его порта и сетевой карты мигают
-   часто, как от тестера на другом конце. Без анимаций — только свечение. */
+/* The cable tester (net.js, power.js): the mouse over a plug, the cord glows and the lamps of its port and network
+   card blink fast, as with a tester at the other end. Without animation, only the glow. */
 .cables g.probe { filter: brightness(1.35) drop-shadow(0 0 4px rgba(255, 255, 255, .5)); }
 @media (prefers-reduced-motion: no-preference) {
   .tp.link.probe .led, .nic.probe .led { animation: probe-blink .14s steps(2, jump-none) infinite !important; }
 }
 @keyframes probe-blink { 50% { opacity: .15; } }
 
-/* Живые гости (live.js): корд нового гостя протягивается от патч-панели к коммутатору; пакет — светлая точка,
-   бегущая по кордам (визит, запись в гостевой). */
+/* Live guests (live.js): a new guest's cord is drawn from the patch panel to the switch; a packet is a light dot
+   running along the cords (a visit, a guestbook entry). */
 @media (prefers-reduced-motion: no-preference) {
   .cables > g.fresh path { stroke-dasharray: 100 100; animation: cable-draw .7s cubic-bezier(.45, 0, .2, 1) both; }
 }

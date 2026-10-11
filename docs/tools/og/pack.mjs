@@ -1,5 +1,5 @@
-// PNG без зависимостей: читает снимок Chrome (8 бит, RGB или RGBA, без interlace) и пишет его палитрой на 256
-// цветов (median cut по всем цветам снимка, без дизеринга), deflate 9. Для превью 1200×630: ~4 раза меньше.
+// A PNG without dependencies: reads Chrome's shot (8 bits, RGB or RGBA, no interlace) and writes it with a 256-colour
+// palette (median cut over all the shot's colours, no dithering), deflate 9. For a 1200x630 preview: about 4 times smaller.
 import { inflateSync, deflateSync, crc32 } from 'node:zlib';
 
 export function pack(png, colors = 256) {
@@ -38,7 +38,7 @@ function decode(buf) {
   return { width, height, rgb };
 }
 
-// Median cut: делит коробку цветов с наибольшим «весом × разбросом» пополам по самой длинной оси.
+// Median cut: splits the colour box with the largest "weight x spread" in two along its longest axis.
 function quantize(rgb, colors) {
   const count = new Map();
   for (let i = 0; i < rgb.length; i += 3) {

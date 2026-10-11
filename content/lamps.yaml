@@ -1,6 +1,6 @@
-# Короткие подписи лампочек мониторинга: имя проверки в Gatus (infra gatus/config.yaml) → надпись под лампой.
-# Новая проверка без строки здесь подписывается сама: имя в нижнем регистре без скобок
-# («Proxmox» → proxmox, «Notes (Memos)» → notes).
+# Short captions of the monitoring lamps: the check's name in Gatus (infra gatus/config.yaml) -> the text under the lamp.
+# A new check without a line here captions itself: the name in lower case without the brackets
+# ("Proxmox" -> proxmox, "Notes (Memos)" -> notes).
 labels:
   belomaxorka.dev: site
   Site (light, http): lite

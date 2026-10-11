@@ -1,7 +1,7 @@
-/* Проход: таблички стоек и стрелки к соседям (templates/aisle.html). Стойка меняется без перезагрузки
-   (assets/js/aisle.js): камера едет вдоль ряда — стойка уезжает к соседям, следующая приезжает, зал и таблички
-   отзываются. Без JS — обычные ссылки, а между страницами — View Transitions (направление ставит
-   assets/js/theme.js). */
+/* The aisle: the racks' signs and the arrows to the neighbours (templates/aisle.html). The rack changes without a
+   reload (assets/js/aisle.js): the camera moves along the row, the rack leaves towards its neighbours, the next one
+   arrives, the hall and the signs respond. Without JS plain links, and View Transitions between pages (assets/js/theme.js
+   sets the direction). */
 .aisle {
   position: relative; z-index: 5; max-width: 1000px; margin: 0 auto 12px;
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
@@ -31,7 +31,7 @@
   .aisle .step { padding: 0 6px; }
 }
 
-/* Таблички висят с потолка на цепочках, текущая подсвечена. */
+/* The signs hang from the ceiling on chains, the current one lit. */
 .aisle .signs a::before {
   content: ""; position: absolute; left: 18%; right: 18%; bottom: 100%; height: 60px;
   border-inline: 1px dashed #5a5f67; pointer-events: none;
@@ -42,7 +42,7 @@
 }
 .aisle .signs a[aria-current] b { color: #15171a; }
 
-/* ---------- переход между страницами: без JS и при обычной загрузке ---------- */
+/* ---------- the move between pages: without JS and on a plain load ---------- */
 @media (prefers-reduced-motion: no-preference) {
   @view-transition { navigation: auto; }
   .rack { view-transition-name: rack; }
@@ -58,16 +58,18 @@
 @keyframes rack-out-back { to { transform: translateX(70vw) scale(.94); opacity: 0; } }
 @keyframes rack-in-back { from { transform: translateX(-70vw) scale(.94); opacity: 0; } }
 
-/* ---------- переход без перезагрузки: камера едет вдоль ряда (assets/js/aisle.js) ----------
-   Стойки в ряду через 1028px (стойка и проход между ними), соседи в зале стоят там же. Вперёд по ряду весь мир
-   едет влево на --hop-d (назад — вправо, тогда --hop-d < 0): старая стойка темнеет и растворяется в соседе
-   слева, сосед справа светлеет и становится новой стойкой, потолок, лампы и пол сдвигаются меньше (параллакс).
-   Пружина в конце: камера чуть проезжает и возвращается. Классы на <html>:
-     hop        — едем; hop-vt — через View Transitions, иначе старая стойка — копия (.hop-ghost);
-     hop-fwd, hop-back — куда; hop-signs — таблички качаются, новая загорается; hop-land — приехали.
-   Переменные на <html> ставит aisle.js: --hop-d (px), --hop-s (1 или -1), --hop-oy (середина экрана от верха
-   стойки), --hop-ox и --hop-ry (центр стойки и середина экрана от угла комнаты), --hop-dim и --hop-blur (насколько
-   стойка у соседей темнеет и размывается: как соседи; их не видно — не темнеет), --cam0 (откуда едем). */
+/* ---------- the move without a reload: the camera along the row (assets/js/aisle.js) ----------
+   The racks of the row are 1028px apart (a rack and the aisle between them), and the neighbours in the hall stand
+   there too. Forward along the row the whole world moves left by --hop-d (back: right, --hop-d < 0): the old rack
+   darkens and melts into the left neighbour, the right neighbour brightens and becomes the new rack, the ceiling, the
+   lamps and the floor move less (parallax). A spring at the end: the camera overshoots a little and comes back.
+   Classes on <html>:
+     hop        - moving; hop-vt - with View Transitions, otherwise the old rack is a copy (.hop-ghost);
+     hop-fwd, hop-back - where to; hop-signs - the signs swing, the new one lights up; hop-land - arrived.
+   aisle.js sets the variables on <html>: --hop-d (px), --hop-s (1 or -1), --hop-oy (the middle of the screen from the
+   rack's top), --hop-ox and --hop-ry (the rack's centre and the middle of the screen from the room's corner), --hop-dim
+   and --hop-blur (how much the rack darkens and blurs among the neighbours: as they do; none in sight, no darkening),
+   --cam0 (where from). */
 :root {
   --hop-t: .72s;
   --hop-ease: cubic-bezier(.3, .75, .25, 1);
@@ -76,8 +78,8 @@
   :root { --hop-ease: linear(0, .024, .086, .17, .267, .368, .466, .559, .644, .719, .784, .839, .885, .922, .951, .973, .99, 1.002, 1.01, 1.015, 1.018, 1.018, 1.018, 1.016, 1.014, 1.012, 1.01, 1.007, 1.005, 1.003, 1.002, 1.001, 1); }
 }
 @media (prefers-reduced-motion: no-preference) {
-  /* View Transitions: старая стойка и её провода — снимки, остальная страница живая и сразу новая. */
-  html.hop::view-transition { pointer-events: none; } /* клик посреди перехода доходит до страницы */
+  /* View Transitions: the old rack and its cables are snapshots, the rest of the page is live and new at once. */
+  html.hop::view-transition { pointer-events: none; } /* a click in the middle of the move reaches the page */
   html.hop::view-transition-old(root), html.hop::view-transition-old(aisle) { animation: none; opacity: 0; }
   html.hop::view-transition-new(root), html.hop::view-transition-new(aisle) { animation: none; }
   html.hop::view-transition-group(rack), html.hop::view-transition-group(hop-cables),
@@ -95,7 +97,7 @@
     animation: hop-out var(--hop-t) var(--hop-ease) both, hop-dim-out var(--hop-t) linear both;
   }
 
-  /* Без View Transitions: копия старой стойки с проводами уезжает, сама новая стойка приезжает. */
+  /* Without View Transitions: a copy of the old rack with its cables leaves, the new rack itself arrives. */
   html.hop:not(.hop-vt) .room { overflow: clip; }
   html.hop:not(.hop-vt) .room > .rack {
     transform-origin: 50% var(--hop-oy);
@@ -107,11 +109,11 @@
     animation: hop-out var(--hop-t) var(--hop-ease) both, hop-dim-out var(--hop-t) linear both;
   }
 
-  /* Провода новой стойки появятся, когда она встанет на место (app.js и power.js, событие rack:landed). */
+  /* The new rack's cables show once it stands in place (app.js and power.js, the rack:landed event). */
   html.hop #cables, html.hop #power, html.hop #net { opacity: 0; }
   html.hop-land :is(#power, #net) { animation: hop-fade .45s ease-out both; }
 
-  /* Зал: соседи едут вместе со стойками; потолок, лампы и пол — от прошлой стойки к этой. */
+  /* The hall: the neighbours move with the racks; the ceiling, the lamps and the floor from the last rack to this one. */
   html.hop .hall .nb { visibility: visible; animation: hop-nb var(--hop-t) var(--hop-ease) both; }
   html.hop .hall .nb.c { animation: hop-nb var(--hop-t) var(--hop-ease) both, hop-nb-out var(--hop-t) linear both; }
   html.hop-fwd .hall .nb.l, html.hop-back .hall .nb.r { animation: hop-nb var(--hop-t) var(--hop-ease) both, hop-nb-in var(--hop-t) linear both; }
@@ -119,7 +121,7 @@
   html.hop .hall .floor::before { animation: hop-floor var(--hop-t) var(--hop-ease) both; }
   html.hop .hall .lamp { animation: hop-lamp var(--hop-t) var(--hop-ease) both; }
 
-  /* Таблички качаются на цепочках, новая текущая загорается, как лампа дневного света, старая гаснет. */
+  /* The signs swing on their chains, the new current one lights up like a fluorescent lamp, the old one goes dark. */
   html.hop-signs .aisle .signs a { transform-origin: 50% -60px; animation: sign-swing 1.15s ease-in-out both; }
   html.hop-signs .aisle .signs li:nth-child(2) a { animation-delay: .04s; }
   html.hop-signs .aisle .signs li:nth-child(3) a { animation-delay: .08s; }
@@ -129,12 +131,12 @@
   html.hop-signs .aisle .signs a.was { animation-name: sign-swing, sign-off; animation-duration: 1.15s, .6s; animation-timing-function: ease-in-out, ease-out; }
   html.hop-signs .aisle .step > * { animation: step-in .5s cubic-bezier(.2, .8, .3, 1) both; }
 
-  /* Ждём ответа сервера: табличка, к которой едем, мигает, стрелка подталкивает. */
+  /* Waiting for the server: the sign we are going to blinks, the arrow nudges. */
   .aisle .signs a.pending { animation: sign-wait .5s steps(2, jump-none) infinite; }
   .aisle a.step.pending i { animation: step-nudge .45s ease-in-out infinite alternate; }
   .aisle a.step.prev.pending i { animation-name: step-nudge-back; }
 
-  /* Приехали: роутер поднимает линки. */
+  /* Arrived: the router brings the links up. */
   html.hop-land :is(.tor .tp.link, .rtr, .nic) .led { animation: link-up .5s steps(5, jump-none) both; }
 }
 html.hop-wait, html.hop-wait a { cursor: progress; }

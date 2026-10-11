@@ -1,21 +1,25 @@
-// Живые гости (site-api /events, Server-Sent Events): кто ещё смотрит стойку и что на ней происходит прямо сейчас.
-//   - online: сколько страниц открыто. Каждый другой гость — патч-корд из свободного гнезда патч-панели в свободный
-//     порт коммутатора (рисует app.js по data-guests на <html>); пришёл — корд протягивается, ушёл — исчезает;
-//   - visit: кто-то открыл страницу — пакет бежит с потолка по оптике в роутер, оттуда в коммутатор и к серверу
-//     (сайт отдаёт он; на стойке без сервера пакета нет: запрос не к ней);
-//   - gb: новая запись в гостевой — пакет тем же путём к KVM (только на стойке с KVM);
-//   - новые данные юнита (опрос htmx: новый трек на медиасервере, строка журнала, лампы мониторинга) — сначала пакет
-//     бежит к этому юниту (на других стойках — по аплинку в коммутатор), и только когда он добежал, юнит меняется;
-//   - лампы активности (WAN роутера, порты коммутатора, сетевые карты, net и hdd сервера) мигают, только когда через
-//     них правда что-то прошло: пакет пробегает мимо, пришёл ответ на запрос этой страницы (опрос htmx без новых
-//     данных, ящик, форма) — к его юниту, событие из /events или свой фонарь — к серверу, рассылка всем — порты
-//     гостей; hdd — когда сервер записал визит. Ничего не идёт — горят ровно;
-//   - фонарики: на стене зала у выключателя висит фонарик. Взял (это и есть согласие) — за курсором пятно света, и
-//     куда он светит (доли ширины и высоты стойки, без всего остального), видят другие гости этой стойки; повесил —
-//     погас. Чужие фонарики — такие же пятна; пропал гость или 15 с от него ничего — гаснут.
-// Пакетов нет без интернета у стойки, без коммутатора или роутера; до юнита без связи пакет не доходит. Без
-// анимаций (prefers-reduced-motion) и во вкладке в фоне пакетов и миганий нет (и с «ровным светом» в BIOS), корды
-// гостей есть. Без JS — ничего.
+// Live guests (site-api's /events, Server-Sent Events): who else is looking at the rack and what happens on it now.
+//   - online: how many pages are open. Every other guest is a patch cord from a free patch panel jack to a free switch
+//     port (app.js draws them by data-guests on <html>); a guest comes, the cord is pulled in; leaves, it is gone;
+//   - visit: someone opened a page: a packet runs from the ceiling along the fibre into the router, the switch and the
+//     server (it serves the site; a rack without the server gets no packet: the request is not to it);
+//   - gb: a new guestbook entry: a packet the same way to the KVM (only on the rack with the KVM);
+//   - act, once a second, the server's real work: requests served (the lamps on the way to the server), sources
+//     fetched (a packet from the server to the unit that shows the source and back), state files written (the
+//     server's hdd lamp), Gatus checks run (their lamps here and on the neighbour racks);
+//   - fresh: units whose source brought new data refresh at once;
+//   - a unit's new data (its htmx response: a new track on the media server, a log line, the monitoring lamps): first
+//     a packet runs to that unit (on other racks through the uplink into the switch), and the unit changes only when
+//     it has arrived;
+//   - the activity lamps (the router's WAN, the switch ports, the network cards, the server's net and hdd) blink only
+//     when something really went through them; with nothing going on they are steady;
+//   - torches: one hangs on the hall's wall by the light switch. Take it (that is the consent) and a spot of light
+//     follows the cursor, and where it shines (as fractions of the rack's width and height, nothing else) the other
+//     guests of this rack see; hang it back and it is off. Others' torches are such spots too; a guest gone or 15 s
+//     without news, they go out.
+// No packets without the rack's internet, the switch or the router; a packet does not reach a unit without a link.
+// Without animation (prefers-reduced-motion), in a background tab and with "steady light" in the BIOS there are no
+// packets or blinks; the guests' cords stay. Without JS, nothing.
 (() => {
   if (!window.EventSource) return;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
@@ -26,8 +30,8 @@
 
   function connect() {
     const es = new EventSource('/events');
-    // Каждое событие пришло от сервера по этому потоку — мигают лампы на пути к нему. Рассылку всем (гость пришёл или
-    // ушёл, визит, запись в гостевой) получили и гости — мигают их порты.
+    // Every event came from the server along this stream: the lamps on the way to it blink. A broadcast (a guest came
+    // or left, a visit, a guestbook entry) reached the guests too: their ports blink.
     es.addEventListener('hello', (e) => { try { token = JSON.parse(e.data).token || ''; } catch {} pulse('srv', NET); });
     es.addEventListener('beam', (e) => { try { spot(JSON.parse(e.data)); } catch {} pulse('srv', NET); });
     es.addEventListener('beam-off', (e) => { try { gone(JSON.parse(e.data).id); } catch {} pulse('srv', NET); });
@@ -59,13 +63,13 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', connect);
   else connect();
 
-  // ---------- фонарики ----------
+  // ---------- torches ----------
   const here = () => document.getElementById('room')?.dataset.rack || '';
   const rackBox = () => document.getElementById('rack')?.getBoundingClientRect();
-  const spots = new Map(); // id гостя → { el, t: когда пришло последнее }
+  const spots = new Map(); // a guest's id -> { el, t: when the last one came }
   let taken = false, mine = null, sent = 0, pending = null, hook = null;
 
-  // Фонарик на стене: кнопка в комнате под выключателем света (подписи — data-* на #cables).
+  // The torch on the wall: a button in the room under the light switch (the captions are data-* on #cables).
   function torch() {
     const room = document.getElementById('room');
     if (!room || hook?.isConnected) return;
@@ -80,7 +84,7 @@
     hook.addEventListener('click', () => take(!taken));
     room.appendChild(hook);
     show();
-    // Пятна чужих фонарей остались в старой комнате (переход между стойками) — в новой их заново рисует spot().
+    // Others' torch spots stayed in the old room (a swap between racks): spot() draws them anew in the new one.
     spots.forEach((s) => s.el.remove());
     spots.clear();
     if (mine) room.appendChild(mine);
@@ -106,7 +110,7 @@
     pulse('srv', NET);
     fetch('/events/beam', { method: 'POST', body: JSON.stringify(b), headers: { 'Content-Type': 'application/json' }, keepalive: true }).catch(() => {});
   }
-  // Свой фонарь: пятно за курсором, позиция — долями стойки, не чаще раза в 100 мс (последняя — всегда).
+  // My torch: a spot following the cursor, its position in fractions of the rack, at most every 100 ms (the last one always).
   addEventListener('pointermove', (e) => {
     if (!taken || document.hidden) return;
     const room = document.getElementById('room'), R = room?.getBoundingClientRect(), B = rackBox();
@@ -123,7 +127,7 @@
     const now = Date.now();
     spots.forEach((s, id) => { if (now - s.t > 15000) gone(id); });
   }, 250);
-  // Чужой фонарь на этой стойке — пятно в комнате; на другой стойке — убрать.
+  // Another's torch on this rack: a spot in the room; on another rack: remove it.
   function spot(b) {
     if (!b?.id) return;
     if (b.r !== here()) { gone(b.id); return; }
@@ -150,34 +154,35 @@
     spots.delete(id);
   }
 
-  // ---------- лампы активности и пакеты ----------
+  // ---------- activity lamps and packets ----------
   const cord = (k) => cords.find((c) => c.key === k);
-  // Путь корда в SVG app.js: группа номер wire, в ней цветной контур — второй.
+  // A cord's path in app.js's SVG: the group number wire, the coloured line in it is the second child.
   const path = (c) => document.querySelectorAll('#cables > g')[c.wire]?.children[1] || null;
-  const NET = ['.led.net']; // своя лампа сети у сервера — рядом с сетевой картой мигает и она
+  const NET = ['.led.net']; // the server's own network lamp blinks too, next to its network card
   const unitOf = Rack.unitOf;
-  // Лампа порта коммутатора — если в нём линк (её зажигает net.js).
+  // A switch port's lamp, if it has a link (net.js lights it).
   const port = (c) => (c?.port?.classList.contains('link') ? c.port.querySelector('.led') : null);
 
-  // Мигнуть: через лампу прошли данные. Не чаще, чем она успевает погаснуть и загореться.
+  // A blink: data went through the lamp. No more often than it can go dark and light again.
   function flash(led) {
     if (!led || reduce.matches || document.hidden || root.classList.contains('steady') || led.classList.contains('tx')) return;
     led.classList.add('tx');
     setTimeout(() => led.classList.remove('tx'), 90);
   }
 
-  // Стойка в сети: есть интернет, коммутатор и роутер включены.
+  // The rack is online: it has internet, the switch and the router are on.
   function up() {
     const rack = document.getElementById('rack'), body = document.getElementById('rack-body');
     return !!rack && !!body && !rack.classList.contains('nonet') && !rack.classList.contains('powered-off') &&
       !body.querySelector(':scope > .u.tor.off, :scope > .u.rtr.off');
   }
 
-  // Маршрут к юниту target: снаружи по оптике (WAN роутера или аплинк коммутатора; оба нарисованы от гнезда к
-  // потолку — значит, против хода), по LAN роутера в коммутатор (по ходу), от коммутатора по корду юнита (против
-  // хода: корд идёт от его сетевой карты). Ноги — [путь, направление, лампы, которые мигают, когда пакет добежал до
-  // конца ноги]: WAN роутера; порт LAN и порт юнита в коммутаторе; сетевая карта юнита и extra (селекторы его ламп).
-  // Юнита на этой стойке нет — маршрута нет: данные шли не к ней.
+  // The way to the unit target: from outside along the fibre (the router's WAN or the switch's uplink; both drawn from
+  // the jack to the ceiling, so against their direction), along the router's LAN into the switch (with it), from the
+  // switch along the unit's cord (against it: the cord runs from its network card). Legs are [path, direction, the
+  // lamps that blink when the packet reaches the leg's end]: the router's WAN; the LAN port and the unit's port on the
+  // switch; the unit's network card and extra (selectors of its lamps). The unit is not on this rack: no way, the data
+  // went elsewhere.
   function route(target, extra = []) {
     if (!up()) return null;
     const body = document.getElementById('rack-body');
@@ -187,23 +192,23 @@
     const lan = cord('lan');
     if (lan && path(lan)) legs.push([path(lan), 1, [port(lan)]]);
     legs[legs.length - 1][2].push(port(nic));
-    // До юнита без связи пакет не доходит.
+    // A packet does not reach a unit without a link.
     if (path(nic) && !unit.classList.contains('off') && !unit.classList.contains('unlinked')) {
       legs.push([path(nic), -1, [unit.querySelector(':scope > .nic .led'), ...extra.map((s) => unit.querySelector(s))]]);
     }
     return legs;
   }
 
-  // Данные прошли без пакета (ответ без новых данных, событие потока): лампы на пути к юниту мигают разом.
+  // Data went through without a packet (an answer without new data, a stream event): the lamps on the way blink at once.
   function pulse(target, extra) {
     route(target, extra)?.forEach(([, , leds]) => leds.forEach(flash));
   }
-  // Рассылку всем получили и гости: мигают их порты.
+  // A broadcast reached the guests too: their ports blink.
   function guests() {
     if (up()) cords.filter((c) => c.type === 'guest').forEach((c) => flash(port(c)));
   }
 
-  // Пускает пакет; возвращает, сколько он будет бежать (мс), или 0, если не побежал.
+  // Sends a packet; returns how long it will run (ms), or 0 when it did not go.
   function run(target, extra) {
     return travel(route(target, extra));
   }
@@ -293,9 +298,10 @@
     document.querySelectorAll(`[data-check="${CSS.escape(name)}"]`).forEach((el) => flash(el.matches('i') ? el : el.querySelector('.led')));
   }
 
-  // Пришёл ответ на запрос юнита (опрос htmx, ящик, форма в ящике). Опрос принёс новое — пакет к юниту, обмен — когда
-  // пакет добежал (swap:…ms). Что считать новым — по юниту: у медиасервера текст ЖК (трек), у журнала первая строка,
-  // у мониторинга состояние ламп. Нового нет или это не опрос — просто мигают лампы на пути к юниту.
+  // An answer to a unit's request came (an htmx poll, the drawer, a form in the drawer). A poll with something new: a
+  // packet to the unit, and the swap when it arrives (swap:...ms). What is new depends on the unit: the media server's
+  // LCD text (the track), the log's first line, the monitoring lamps' state. Nothing new, or not a poll: the lamps on
+  // the way to the unit just blink.
   const SIG = { media: '.lcd', log: 'ol li', mon: '.matrix' };
   const keyOf = (u) => u && Rack.keyOf(u, Rack.WIRED);
   document.addEventListener('htmx:beforeSwap', (e) => {

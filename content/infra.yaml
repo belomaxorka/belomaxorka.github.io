@@ -1,10 +1,10 @@
-# Стена мемов на infra.belomaxorka.dev (templates/infra.html): «хостинг, который мы знаем».
-# Картинки — content/memes/: положить файл (jpg, png, gif, webp) и запушить, больше ничего не нужно.
-# Порядок — по дате в имени файла, новые сверху: Telegram сохраняет как photo_2026-10-12_02-11-28.jpg, свои можно
-# назвать 2026-02-20_что-угодно.jpg; без даты — в конце, по имени. По 24 на страницу, дальше «старее →».
-# Оригиналы наружу не отдаются: site-api ужимает (до 1600 px, превью 400 px) и выкидывает EXIF с геометкой.
+# The meme wall on infra.belomaxorka.dev (templates/infra.html): "hosting as we know it".
+# The pictures are content/memes/: drop in a file (jpg, png, gif, webp) and push, nothing else is needed.
+# Ordered by the date in the file name, newest first: Telegram saves photo_2026-10-12_02-11-28.jpg, your own can be
+# named 2026-02-20_anything.jpg; without a date at the end, by name. 24 a page, then "older ->".
+# The originals are never served: site-api shrinks them (to 1600 px, previews 400 px) and drops EXIF with its geotags.
 #
-# alt — подпись для тех, кто картинку не видит: по имени файла, строкой или {en, ru}. Необязательна.
+# alt: the caption for those who cannot see the picture, by file name, a string or {en, ru}. Optional.
 alt:
   photo_2026-02-20_14-03-08.jpg:
     en: "a router hangs out of a wall box on its own cables, LEDs blinking; caption: «why have you summoned me, human?»"

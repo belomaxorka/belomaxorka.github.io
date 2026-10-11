@@ -1,6 +1,6 @@
-/* Игрушки (assets/js/toys.js): BIOS на KVM, RESET и UID на сервере, настройки BIOS — радуга и ровный свет. */
+/* Toys (assets/js/toys.js): the BIOS on the KVM, RESET and UID on the server, the BIOS settings (rainbow, steady light). */
 
-/* ---------- BIOS Setup поверх консоли ---------- */
+/* ---------- BIOS Setup over the console ---------- */
 .u.kvm { position: relative; }
 .bios {
   position: absolute; inset: 8px 10px; z-index: 5; overflow: auto; padding: 10px 14px; border-radius: 3px;
@@ -20,16 +20,16 @@
 .bios .b-help { color: #a8a8ff; border-top: 1px solid #5555ff; padding-top: 6px; font-size: 13px; }
 @media (max-width: 560px) { .bios { font-size: 12.5px; padding: 8px 10px; } .bios .b-title { margin: -8px -10px 6px; } }
 
-/* ---------- сервер: UID и RESET ---------- */
+/* ---------- the server: UID and RESET ---------- */
 .srv .leds { align-items: center; }
-/* Кнопка — button.uid: у лампы рядом тоже класс uid, и all: unset без тега обнулял её саму. */
+/* The button is button.uid: the lamp next to it has the class uid too, and all: unset without the tag would reset the lamp. */
 .srv button.uid {
   all: unset; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit;
 }
 .srv button.uid:focus-visible, .srv .rst:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .led.uid { background: var(--led-off); box-shadow: inset 0 1px 1px #0006; }
 .srv.uid-on .led.uid { background: #3d8bff; box-shadow: 0 0 8px #3d8bff; }
-/* «Найди меня» видно издалека, как на настоящем сервере: синий маячок по краю юнита. */
+/* "Find me" shows from afar, as on a real server: a blue beacon along the unit's edge. */
 .srv.uid-on .face { box-shadow: inset 0 0 0 2px #3d8bff99, inset 0 0 22px #3d8bff33; }
 @media (prefers-reduced-motion: no-preference) {
   .srv.uid-on .led.uid { animation: uid-blink 1s steps(2, jump-none) infinite; }
@@ -37,13 +37,13 @@
 }
 @keyframes uid-glow { 50% { box-shadow: inset 0 0 0 2px #3d8bff33, inset 0 0 8px #3d8bff11; } }
 @keyframes uid-blink { 50% { background: var(--led-off); box-shadow: none; } }
-/* Отверстие RESET: нажимается «скрепкой» — курсором-перекрестием. */
+/* The RESET hole: pressed with a "paper clip", a crosshair cursor. */
 .srv .rst {
   width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; cursor: crosshair;
   background: #050506; box-shadow: inset 0 1px 2px #000, 0 0 0 2px var(--panel-hi);
 }
 .srv .rst[hidden] { display: none; }
-/* POST на ЖК сервера после RESET (поверх кадров, как надпись «нет связи»). */
+/* POST on the server's LCD after RESET (over the frames, like the "no link" notice). */
 .srv .lcd.post { position: relative; }
 .srv .lcd.post > * { visibility: hidden; }
 .srv .lcd.post::after {
@@ -51,11 +51,11 @@
   font: inherit; font-size: 18px; line-height: 1.1; color: var(--lcd);
 }
 
-/* ---------- настройки BIOS ---------- */
-/* Радуга: зелёные диоды переливаются («на 20% круче»). */
+/* ---------- BIOS settings ---------- */
+/* Rainbow: the green LEDs shimmer ("20% cooler"). */
 @media (prefers-reduced-motion: no-preference) {
   :root.rainbow .led:not(.off, .warn, .err, .pwr, .uid), :root.rainbow .tp.link .led { animation: rainbow 2.4s linear infinite !important; }
 }
 @keyframes rainbow { to { filter: hue-rotate(360deg); } }
-/* Ровный свет: диоды не мигают — ни при включении, ни от трафика (.tx ставит live.js, он же его и не ставит). */
+/* Steady light: the LEDs do not blink, neither at power-up nor from traffic (live.js sets no .tx then either). */
 :root.steady .led, :root.steady .hall .hw > i { animation: none !important; }

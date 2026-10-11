@@ -1,13 +1,13 @@
-// Проход между стойками: стойка меняется без перезагрузки. Ссылки на стойки ряда (таблички, стрелки и любые
-// ссылки на адреса из <html data-racks>), ←/→ и свайп загружают страницу стойки целиком (fetch, она маленькая
-// и сразу несёт свои <title> и meta) и подменяют комнату #room. Камеру вдоль ряда двигает CSS
-// (assets/css/aisle.css): через View Transitions, где они есть, иначе старая стойка уезжает копией.
-// Остальные скрипты узнают о подмене из событий на document:
-//   rack:swap   — новая комната уже на месте (app.js раскладывает юниты, power.js перечитывает ИБП, sticker.js
-//                 убирает упавшие стикеры старой стойки, net.js держит юниты без сети, пока не протянут провода);
-//                 detail.quiet — приедет без анимаций;
-//   rack:landed — стойка доехала (detail.dir: 1 вперёд, -1 назад; detail.quiet — без анимаций): провода.
-// Без JS работают сами ссылки; не вышло загрузить — обычный переход по ссылке.
+// The aisle between the racks: the rack changes without a reload. Links to the row's racks (the signs, the arrows and
+// any link to an address of <html data-racks>), the arrow keys and a swipe fetch the rack's whole page (it is small
+// and brings its own <title> and meta) and swap the room, #room. CSS moves the camera along the row
+// (assets/css/aisle.css): with View Transitions where there are any, otherwise a copy of the old rack slides away.
+// The other scripts learn about the swap from events on document:
+//   rack:swap   - the new room is in place (app.js lays the units out, power.js reads the UPS again, sticker.js clears
+//                 the old rack's fallen stickers, net.js keeps the units offline until the cables are drawn);
+//                 detail.quiet: it comes without animation;
+//   rack:landed - the rack has arrived (detail.dir: 1 forward, -1 back; detail.quiet: no animation): the cables.
+// Without JS the links simply work; when the fetch fails, a plain navigation.
 (() => {
   const root = document.documentElement;
   const order = (root.dataset.racks || '').trim().split(/\s+/);
@@ -17,14 +17,14 @@
   const pathOf = (a) => new URL(a.getAttribute('href'), location.href).pathname;
   const signs = () => [...document.querySelectorAll('#aisle .signs a')];
 
-  // Стойка на экране — по горящей табличке (страница /u/<юнит> — та же стойка с выдвинутым юнитом).
+  // The rack on screen, by its lit sign (?open=<unit> is the same rack with a unit pulled out).
   const shown = () => { const a = $('#aisle .signs a[aria-current]'); return a ? indexOf(pathOf(a)) : -1; };
-  let here = location.pathname + location.search; // адрес показанной страницы
-  let aim = -1; // куда едем или приехали: ←/→ считаются от неё (табличка сменится, только когда стойку подменят)
+  let here = location.pathname + location.search; // the address of the page shown
+  let aim = -1; // where we are going or have arrived: the arrow keys count from it (the sign changes only after the swap)
 
-  // ---------- какие ссылки перехватывать ----------
-  // Только левая кнопка без модификаторов (колёсико, Ctrl, Shift — новая вкладка, как обычно), свой сайт,
-  // путь стойки и без ?запроса (?lang=ru — переключатель языка, ему нужна настоящая загрузка).
+  // ---------- which links to take over ----------
+  // The left button without modifiers only (the wheel, Ctrl, Shift open a new tab as usual), this site, a rack's path
+  // and no ?query (?lang=ru switches the language and needs a real load; ?open=<unit> too).
   function linkOf(e) {
     if (e.defaultPrevented || e.button !== 0 || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return null;
     const a = e.target instanceof Element && e.target.closest('a[href]');
@@ -41,8 +41,8 @@
     go(l.url, { via: l.a });
   });
 
-  // Мышью: страницу начинаем грузить уже на нажатии кнопки, к отпусканию она почти готова. Пальцем — нет:
-  // касание бывает началом прокрутки, а каждая загрузка — просмотр в счётчике.
+  // With a mouse the page starts loading on the button's press, and is nearly ready by its release. Not with a finger:
+  // a touch is often the start of a scroll, and the load would be wasted.
   let early = null; // { href, ctl, p, at }
   document.addEventListener('pointerdown', (e) => {
     if (e.pointerType !== 'mouse') return;
@@ -54,14 +54,14 @@
     early.p.catch(() => {});
   });
 
-  // ---------- переход ----------
-  let job = 0;    // номер последнего перехода: ответы на прежние уже не нужны
-  let ctl = null; // его загрузка
+  // ---------- the swap ----------
+  let job = 0;    // the number of the latest swap: answers to the earlier ones are not needed any more
+  let ctl = null; // its fetch
 
   async function go(url, { push = true, via = null } = {}) {
     const id = ++job;
     ctl?.abort();
-    if (url.pathname + url.search === here) { // та же стойка: просто наверх (или к якорю)
+    if (url.pathname + url.search === here) { // the same rack: just to the top (or to the anchor)
       aim = -1;
       wait(-1);
       if (push && url.hash) history.pushState(history.state, '', url.hash);
@@ -83,7 +83,7 @@
       if (id !== job) return;
       aim = -1;
       wait(-1);
-      location.href = url.href; // сервер не ответил стойкой: пусть браузер сходит сам
+      location.href = url.href; // the server did not answer with a rack: let the browser go itself
       return;
     }
     if (id !== job) return;
@@ -94,8 +94,8 @@
     hop(page.doc, shown(), to, url);
   }
 
-  // Страница стойки целиком: в ней и комната, и всё, что нужно <head>. Картинки стойки (обложка, аватарки)
-  // подгружаются заранее, но не дольше 300 мс, чтобы стойка приехала уже с ними.
+  // The rack's whole page: the room and everything <head> needs. The rack's images (the cover, the avatars) are loaded
+  // ahead too, for 300 ms at most, so the rack arrives with them.
   async function load(url, signal) {
     // X-Rack-Swap: not a visit yet (it may never be shown); swap() reports the rack it shows.
     const res = await fetch(url.href, { signal, headers: { Accept: 'text/html', 'X-Rack-Swap': '1' } });
@@ -112,7 +112,7 @@
     return { doc, url: final };
   }
 
-  // Пока грузится: табличка, к которой едем, мигает, стрелка подталкивает (aisle.css, .pending).
+  // While it loads: the sign we are going to blinks, the arrow nudges (aisle.css, .pending).
   function wait(to, via) {
     document.querySelectorAll('#aisle .pending').forEach((el) => el.classList.remove('pending'));
     const room = $('#room');
@@ -123,8 +123,8 @@
     if (via?.classList.contains('step')) via.classList.add('pending');
   }
 
-  // Наверх, к проходу: камера сначала поднимается, потом едет. Сама, а не behavior: 'smooth' — так одинаково
-  // во всех браузерах и известно, когда закончилась.
+  // Up to the aisle: the camera rises first, then moves. By hand, not behavior: 'smooth', so it is the same in every
+  // browser and we know when it ends.
   let rising = null; // { raf, done }
   function toTop() {
     if (rising) { cancelAnimationFrame(rising.raf); rising.done(); rising = null; }
@@ -150,10 +150,10 @@
     else if (scrollY > 0) scrollTo({ top: 0, behavior: reduce.matches ? 'auto' : 'smooth' });
   }
 
-  // ---------- подмена комнаты ----------
-  // В <head> у каждой стойки свои заголовок, описание, robots или canonical, og:*, profile:*, twitter:*, JSON-LD —
-  // их берём из новой страницы; палитру ЖК — свежую. Не трогаем viewport и theme-color (его красит theme.js).
-  // Атрибуты <html> тоже из новой страницы, кроме тех, что ставит сам посетитель.
+  // ---------- swapping the room ----------
+  // Each rack has its own title, description, robots or canonical, og:*, profile:*, twitter:* and JSON-LD in <head>:
+  // taken from the new page; the LCD palette too, fresh. viewport and theme-color (theme.js paints it) stay. The
+  // attributes of <html> come from the new page too, except the ones the visitor sets.
   const HEAD = 'title, meta[name]:not([name="viewport"]):not([name="theme-color"]), meta[property], ' +
     'link[rel="canonical"], link[rel="alternate"], link[rel="me"], script[type="application/ld+json"]';
   const OWN = new Set(['class', 'style', 'data-theme', 'data-lcd']);
@@ -169,14 +169,14 @@
       if (!OWN.has(name) && root.getAttribute(name) !== value) root.setAttribute(name, value);
     }
     const room = doc.getElementById('room');
-    $('#room').replaceWith(room); // старые юниты: Alpine их разберёт, опрос htmx у отцепленных сам кончится
+    $('#room').replaceWith(room); // the old units: Alpine cleans them up, htmx polls of detached elements stop by themselves
     if (window.htmx) htmx.process(room);
     fetch('/events/visit', { method: 'POST', keepalive: true }).catch(() => {}); // the rack is shown: a page view
     document.dispatchEvent(new CustomEvent('rack:swap', { detail: { quiet } }));
   }
 
-  // После подмены: старая табличка гаснет (.was), фокус — туда же, где был (на стрелку или табличку),
-  // скринридеру — какая стойка теперь.
+  // After the swap: the old sign goes dark (.was), the focus goes where it was (an arrow or a sign), and screen
+  // readers hear which rack this is.
   let live = null;
   function settle(from, focus, url) {
     signs().find((a) => indexOf(pathOf(a)) === from && !a.hasAttribute('aria-current'))?.classList.add('was');
@@ -199,11 +199,11 @@
     return f instanceof Element && f.closest('#aisle') ? (f.dataset.step || 'sign') : null;
   };
 
-  // ---------- камера ----------
+  // ---------- the camera ----------
   const VARS = ['--hop-d', '--hop-s', '--hop-oy', '--hop-ox', '--hop-ry', '--hop-dim', '--hop-blur', '--cam0'];
   const CLASSES = ['hop', 'hop-vt', 'hop-fwd', 'hop-back', 'hop-signs', 'hop-land'];
   const ms = (name, d) => { const v = getComputedStyle(root).getPropertyValue(name).trim(); return (parseFloat(v) || d) * (/ms$/.test(v) ? 1 : 1000); };
-  let run = null; // переход, который сейчас едет: { dir, vt, ghost, timers, landed }
+  let run = null; // the swap moving now: { dir, vt, ghost, timers, landed }
 
   function hop(doc, from, to, url) {
     const dir = Math.sign(to - from), focus = focusOf();
@@ -213,8 +213,8 @@
       document.dispatchEvent(new CustomEvent('rack:landed', { detail: { dir, quiet: true } }));
       return;
     }
-    // Шаг ряда: от этой стойки до соседа в зале; соседей не видно (телефон, светлая тема) — ширина стойки
-    // и проход.
+    // The row's step: from this rack to its neighbour in the hall; no neighbours in sight (phone, light theme): the
+    // rack's width and the aisle.
     const room = $('#room'), rack = $('#rack'), nb = $('#room .hall .nb.r');
     const R = room.getBoundingClientRect(), K = rack.getBoundingClientRect();
     const nbOn = nb && getComputedStyle(nb).display !== 'none';
@@ -235,13 +235,13 @@
     };
     const cab = $('#cables'), pow = $('#power'), net = $('#net');
     if (document.startViewTransition) {
-      // Провода старой стойки — отдельными снимками, чтобы уехали вместе с ней.
+      // The old rack's cables as separate snapshots, so they leave with it.
       cab?.style.setProperty('view-transition-name', 'hop-cables');
       pow?.style.setProperty('view-transition-name', 'hop-power');
       net?.style.setProperty('view-transition-name', 'hop-net');
       root.classList.add('hop-vt');
       me.vt = document.startViewTransition(() => { swap(doc); on(); settle(from, focus, url); });
-      me.vt.ready.catch(() => {}); // пропущенный переход (вкладка скрыта, следующий клик) — не ошибка
+      me.vt.ready.catch(() => {}); // a skipped transition (the tab hidden, the next click) is not an error
       me.vt.finished.then(() => land(me), () => land(me));
       me.vt.updateCallbackDone.catch(() => { location.href = url.href; });
     } else {
@@ -254,7 +254,7 @@
     }
   }
 
-  // Копия старой стойки с проводами для браузеров без View Transitions: без id, Alpine и htmx её не трогают.
+  // A copy of the old rack with its cables for browsers without View Transitions: no id, so Alpine and htmx leave it alone.
   function ghost(room, rack, ...svgs) {
     const R = room.getBoundingClientRect(), K = rack.getBoundingClientRect();
     const g = document.createElement('div');
@@ -289,7 +289,7 @@
     run = null;
   }
 
-  // Новый переход, пока старый едет: старый сразу в конец.
+  // A new swap while the old one moves: the old one jumps to its end.
   function stop() {
     const me = run;
     if (!me) return;
@@ -300,20 +300,20 @@
     if (!me.landed) document.dispatchEvent(new CustomEvent('rack:landed', { detail: { dir: me.dir, quiet: true } }));
   }
 
-  // Назад и вперёд в истории — та же камера, в обратную сторону. Не стойка (например, /u/<юнит>) — загрузить.
+  // Back and forward in the history: the same camera, the other way. Not a rack's address: load it.
   addEventListener('popstate', () => {
-    if (location.pathname + location.search === here) return; // сменился только якорь
+    if (location.pathname + location.search === here) return; // only the anchor changed
     if (indexOf(location.pathname) < 0) { location.reload(); return; }
     go(new URL(location.href), { push: false });
   });
 
-  // ---------- ←/→ и свайп ----------
+  // ---------- the arrow keys and the swipe ----------
   function step(d) {
     const now = shown(), from = aim >= 0 ? aim : now, to = from + d;
     if (from < 0 || to < 0 || to >= order.length) return;
     go(new URL(order[to], location.href), { via: from === now ? $(`#aisle a.step.${d < 0 ? 'prev' : 'next'}`) : null });
   }
-  // Где стрелки и жесты заняты своим: поля ввода, галерея аватарок, холст, диалоги, провода.
+  // Where the arrows and gestures have their own job: inputs, the avatar gallery, the canvas, dialogs, the cables.
   const busy = (t) => t instanceof Element && t.closest('input, textarea, select, [contenteditable], .slides, .pad, canvas, dialog, svg, .bars');
 
   addEventListener('keydown', (e) => {
@@ -324,7 +324,7 @@
     step(e.key === 'ArrowLeft' ? -1 : 1);
   });
 
-  // Свайп: быстрый и в основном горизонтальный, иначе это прокрутка.
+  // A swipe: fast and mostly horizontal, otherwise it is a scroll.
   let start = null;
   addEventListener('touchstart', (e) => {
     const t = e.touches[0];

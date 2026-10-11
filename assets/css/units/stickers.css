@@ -1,4 +1,4 @@
-/* Кнопки 88x31: две заглушки-панели, на каждой лента с подписью и стена кнопок. */
+/* 88x31 buttons: two blank panels, each with a captioned tape and a wall of buttons. */
 .stick .face { flex-direction: column; align-items: flex-start; gap: 8px; padding-block: 10px; }
 .wall { display: flex; flex-wrap: wrap; gap: 4px; }
 .b88 {
@@ -9,11 +9,11 @@
 a.b88:hover, a.b88:focus-visible { transform: translateY(-2px); }
 @media (prefers-reduced-motion: reduce) { .b88 { transition: none; } }
 
-/* Узкая стена (телефон): видно первые три ряда, остальные кнопки — по клавише «показать все» под ними.
-   Колонок на стене floor((ширина + 4) / 92): кнопка 88 и зазор 4. Клавиша — <details> без содержимого:
-   работает без JS, CSS читает [open] через :has(). Где :has() нет — клавишу прячем, видно всё. На стене
-   в 6 колонок и шире клавиши нет и видно всё. Высота юнита меняется — app.js раскладывает стойку
-   и перерисовывает провода в том же кадре (следит за [open] у .more). */
+/* A narrow wall (phone): the first three rows show, the other buttons behind the "show all" key under them. The wall
+   has floor((width + 4) / 92) columns: a button of 88 and a gap of 4. The key is a <details> without content: it works
+   without JS, CSS reads its [open] with :has(). Without :has() the key is hidden and everything shows. A wall of 6
+   columns or wider has no key and shows everything. The unit's height changes, so app.js lays the rack out and
+   redraws the cables in the same frame (it watches [open] of .more). */
 .wall { container: wall / inline-size; width: 100%; }
 .more { display: none; flex: 1 0 100%; margin-top: 4px; }
 .more > summary { list-style: none; width: max-content; }

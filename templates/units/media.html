@@ -1,4 +1,4 @@
-{{/* Медиасервер = Koito. Обновляется через htmx (/fragments/media), вместе с ним приходит палитра ЖК. */}}
+{{/* The media server is Koito. Refreshed through htmx (/fragments/media), the LCD palette comes with it. */}}
 {{define "unit-media"}}
 <section class="u media" style="--h:2" aria-label="{{t "media.aria"}}" id="unit-media"
   hx-get="/fragments/media" hx-trigger="every 60s, fresh" hx-swap="outerHTML">
@@ -23,10 +23,10 @@
 </section>
 {{end}}
 
-{{/* В стойке (content/racks.yaml) юнит получает всю страницу, а сам берёт из неё .Music. */}}
+{{/* In the rack (content/racks.yaml) the unit gets the whole page and takes .Music from it. */}}
 {{define "slot-media"}}{{template "unit-media" .Music}}{{end}}
 
-{{/* Медиасервер выдвинут: неделя в Koito. Данные: вся страница; .Week — цифры и топы (обновляются раз в 5 минут). */}}
+{{/* The media server pulled out: the week in Koito. Data: the whole page; .Week, the numbers and the tops (refreshed every 5 minutes). */}}
 {{define "detail-media"}}
 <div class="detail media-week">
   <p class="silk">koito · {{t "week.title"}}</p>

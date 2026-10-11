@@ -1,8 +1,10 @@
-{{/* infra.belomaxorka.dev: «hosted on belomaxorka infrastructure» с сайта ведёт сюда. Мем в духе stupid.fish technologies
-     (teidesu): вместо их видео — стена мемов про «хостинг, который мы знаем» (картинки — content/memes/, подписи —
-     content/infra.yaml; site-api сам их находит, ужимает и листает по 24, /m/{id} — просмотр одной), заголовок Times, ссылка на fastfetch, status // source, внизу плашка «минздрав предупреждает»
-     (belomaxorka ≈ беломор + махорка). site-api рендерит "/" шаблоном infra, "/fetch" — infra-fetch (живые данные
-     хоста из Proxmox, ИБП из NUT, Gatus). Без скриптов. Кнопка 88x31 — /88x31/infra.gif (docs/tools/make_88x31.py). */}}
+{{/* infra.belomaxorka.dev: "hosted on belomaxorka infrastructure" on the site leads here. A joke in the genre of
+     stupid.fish technologies (teidesu): instead of their video, a wall of memes about "hosting as we know it" (the
+     pictures in content/memes/, captions in content/infra.yaml; site-api finds them, shrinks them and pages them by
+     24, /m/{id} shows one), a Times heading, a link to fastfetch, status // source, and a "the health ministry warns"
+     plate at the bottom (belomaxorka ≈ Belomor + makhorka, Soviet cigarettes and rough tobacco). site-api renders
+     "/" with the infra template and "/fetch" with infra-fetch (the host's live data from Proxmox, the UPS from NUT,
+     Gatus). No scripts. The 88x31 button is /88x31/infra.gif (docs/tools/make_88x31.py). */}}
 {{define "infra" -}}
 <!doctype html>
 <html lang="{{lang}}">
@@ -94,8 +96,8 @@
 </html>
 {{- end}}
 
-{{/* Одна картинка стены (/m/{id}): крупно, ← → к соседям (и стрелками, и свайпом — assets/js/meme.js), Esc — назад
-     к стене. Без JS всё то же ссылками. Клик по картинке открывает её в полном размере. */}}
+{{/* One picture of the wall (/m/{id}): large, left and right to the neighbours (keys and swipe too:
+     assets/js/meme.js), Esc back to the wall. Without JS the same with links. A click opens the picture full size. */}}
 {{define "meme" -}}
 <!doctype html>
 <html lang="{{lang}}">
@@ -148,7 +150,7 @@
 {{define "ff-batt"}}<span class="{{if ge . 50}}g{{else if ge . 20}}y{{else}}r{{end}}">{{.}}%</span>{{end}}
 {{define "ff-colors"}}{{if .}}<s class="k2"></s><s class="r2"></s><s class="g2"></s><s class="y2"></s><s class="b2"></s><s class="m2"></s><s class="c2"></s><s class="w2"></s>{{else}}<s class="k"></s><s class="r"></s><s class="g"></s><s class="y"></s><s class="b"></s><s class="m"></s><s class="c"></s><s class="w"></s>{{end}}{{end}}
 
-{{/* «now with a better server!» у stupid.fish ведёт на fastfetch их сервера — здесь он живой: Proxmox, ИБП, Gatus. */}}
+{{/* stupid.fish's "now with a better server!" leads to their server's fastfetch; here it is live: Proxmox, the UPS, Gatus. */}}
 {{define "infra-fetch" -}}
 <!doctype html>
 <html lang="en">

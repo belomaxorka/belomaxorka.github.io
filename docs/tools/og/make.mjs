@@ -1,11 +1,11 @@
-// Картинка для превью ссылок (og:image): одна на весь сайт, 1200×630 PNG в assets/og/site.png. Без зависимостей
-// (Node 22+ и Chrome, как docs/tools/shot.mjs):
+// The link preview image (og:image): one for the whole site, a 1200x630 PNG in assets/og/site.png. No dependencies
+// (Node 22+ and Chrome, like docs/tools/shot.mjs):
 //
-//   node docs/tools/og/make.mjs [--chrome путь]
+//   node docs/tools/og/make.mjs [--chrome path]
 //
-// Поднимает на минуту локальный сервер на корень репозитория (card.html берёт шрифты, цвета и i18n сайта),
-// снимает card.html через shot.mjs и пережимает PNG в палитру на 256 цветов (pack.mjs), чтобы превью весило меньше
-// 300 КБ. Перезапускать, только если поменялись подписи на карточке (i18n) или сама карточка; новая стойка — нет.
+// Serves the repository's root locally for a minute (card.html takes the site's fonts, colours and i18n), shoots
+// card.html with shot.mjs and repacks the PNG into a 256-colour palette (pack.mjs), so the preview weighs under
+// 300 KB. Run it again only when the card's captions (i18n) or the card itself change; a new rack needs nothing.
 import { createServer } from 'node:http';
 import { readFileSync, writeFileSync, mkdtempSync, rmSync, statSync } from 'node:fs';
 import { execFile } from 'node:child_process';
@@ -36,8 +36,8 @@ const tmp = mkdtempSync(join(tmpdir(), 'og-'));
 try {
   const shot = ['docs/tools/shot.mjs', `${base}/docs/tools/og/card.html`, '--sizes', '1200x630', '--out', tmp, '--name', 'site', '--wait', '1500'];
   if (opt('chrome')) shot.push('--chrome', opt('chrome'));
-  // Асинхронно: сервер выше живёт в этом же процессе и должен отвечать Chrome, пока идёт снимок.
-  // shot.mjs выходит с 1, если в консоли страницы были ошибки: тогда картинку не пишем.
+  // Asynchronously: the server above lives in this process and must answer Chrome while the shot is taken.
+  // shot.mjs exits with 1 when the page's console had errors: then no picture is written.
   const { stdout } = await promisify(execFile)(process.execPath, shot, { cwd: root }).catch((e) => { console.error(e.stdout || e); process.exit(1); });
   process.stdout.write(stdout);
   const raw = readFileSync(join(tmp, 'site-1200x630.png'));

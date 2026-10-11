@@ -1,12 +1,12 @@
-# Ряд стоек: каждая стойка — своя страница, порядок здесь — порядок в проходе (стрелки, ←/→, свайп).
-#   id    — имя; подпись на табличке берётся из i18n: rack.<id> (и rack.<id>.sub — строка под ней);
-#   path  — адрес страницы; у первой стойки должен быть "/" (на главной наверху кольцо otoring);
-#   units — юниты сверху вниз: имя = шаблон templates/units/*.html с {{define "unit-<имя>"}};
-#   router — не используется: роутер теперь юнит router (вариант B: patch, brush, tor, router сверху стойки);
-#   stub  — стойку ещё монтируют: вместо юнитов заглушки.
-# Новый юнит в стойке — строка здесь (и шаблон lite-<имя> для лёгкой версии, templates/lite); новая стойка — блок
-# здесь и две подписи в i18n, без Go: rack.<id> и rack.<id>.sub. Описание и картинка превью у сайта одни на все
-# стойки (meta.desc, assets/og/site.png). В /sitemap.xml стойка попадает сама, заглушка (stub) — нет, и у неё noindex.
+# The row of racks: each rack is a page of its own, in the aisle's order (the arrows, the arrow keys, a swipe).
+#   id    - the name; the sign's caption comes from i18n: rack.<id> (and rack.<id>.sub, the line under it);
+#   path  - the page's address; the first rack must be "/" (the home page has the otoring ring on top);
+#   units - the units from top to bottom: a name is a template in templates/units/*.html with {{define "unit-<name>"}};
+#   stub  - the rack is still being mounted: blanks instead of units.
+# A new unit in a rack is a line here (and a lite-<name> template for the light version, templates/lite); a new rack
+# is a block here and two captions in i18n, no Go: rack.<id> and rack.<id>.sub. The description and the preview image
+# are one for all racks (meta.desc, assets/og/site.png). A rack gets into /sitemap.xml by itself; a stub does not, and
+# it is noindex.
 - id: home
   path: /
   units: [patch, brush, tor, brush, router, mgmt, server, media, monitor, syslog, switch, donate, kvm, buttons, blank, ups]

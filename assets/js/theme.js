@@ -1,5 +1,5 @@
-// Тема и цвет ЖК из прошлого визита: до первой отрисовки, чтобы страница не мигала.
-// Отдельным файлом, а не inline: CSP страницы разрешает только свои скрипты.
+// The theme and the LCD colour from the last visit: before the first paint, so the page does not flash.
+// A file of its own, not inline: the page's CSP allows only its own scripts.
 (function () {
   try {
     var r = document.documentElement, t = localStorage.getItem('theme'), l = localStorage.getItem('lcd');
@@ -8,8 +8,8 @@
   } catch (e) {}
 })();
 
-// Цвет панели браузера (<meta name="theme-color">, по одному на тёмную и светлую тему системы): тема, выбранная
-// кнопкой (data-theme), важнее системной — тогда оба meta получают её цвет.
+// The browser bar's colour (<meta name="theme-color">, one for the system's dark theme and one for its light one): a
+// theme chosen with the button (data-theme) wins over the system's, and then both metas get its colour.
 (function () {
   var r = document.documentElement, metas = document.querySelectorAll('meta[name="theme-color"][media]');
   function paint() {
@@ -25,11 +25,11 @@
   new MutationObserver(paint).observe(r, { attributes: true, attributeFilter: ['data-theme'] });
 })();
 
-// Переход между стойками ряда, когда страница всё-таки загружается заново (View Transitions между страницами,
-// assets/css/aisle.css): вперёд по ряду — стойка уезжает влево, назад — вправо. Обычно стойку меняет без
-// перезагрузки assets/js/aisle.js, сюда попадают остальные случаи: назад в историю на /u/<юнит>, загрузка
-// после ошибки. Порядок стоек — <html data-racks>. Всё остальное (та же стойка, выдвинутый юнит, админка) —
-// без анимации. Здесь, а не в отложенном скрипте: pagereveal срабатывает до первой отрисовки.
+// The move between the row's racks when the page does load anew (View Transitions between pages,
+// assets/css/aisle.css): forward along the row the rack leaves to the left, back to the right. Usually
+// assets/js/aisle.js swaps the rack without a reload; the rest comes here: back in the history to an address it did
+// not load, a load after an error. The racks' order is <html data-racks>. Anything else (the same rack, a pulled-out
+// unit, the admin page) has no animation. Here and not in a deferred script: pagereveal comes before the first paint.
 (function () {
   var order = (document.documentElement.dataset.racks || '').trim().split(/\s+/);
   function dir(from, to) {

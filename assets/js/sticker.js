@@ -1,10 +1,10 @@
-// Стикеры отклеиваются и падают на пол серверной, как листок: раскачиваются, наклоняются по ходу движения,
-// медленно планируют. Когда:
-//   - выдернули вилку юнита, на котором стикер (data-sticker = ключ питания юнита в power.js, srv — сервер);
-//   - погасла вся стойка: кнопка на ИБП или села батарея — тогда падают все стикеры, вразнобой.
-// Шнур ИБП из розетки стикеры не трогает: батарея ещё держит. Тап по упавшему — прилипает обратно.
-// Где лежат — только у посетителя (localStorage, на полчаса), у каждой стойки свои: стикер ИБП есть на каждой. Без JS стикеры
-// просто наклеены.
+// Stickers come unstuck and fall to the server room's floor like a leaf: swaying, tilting the way they move, gliding
+// slowly. When:
+//   - the plug of the unit the sticker is on was pulled (data-sticker is the unit's power key in power.js, srv the server);
+//   - the whole rack went dark: the UPS's button or an empty battery; then all the stickers fall, out of step.
+// The UPS's cord out of the socket leaves the stickers alone: the battery still holds. A tap on a fallen one sticks
+// it back. Where they lie is the visitor's only (localStorage, for half an hour), per rack: every rack has the UPS's
+// sticker. Without JS the stickers simply stay on.
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   // Rack → sticker key → { fx: the centre's x as a share of the room's width, dy: height spread, rot }, for
@@ -12,14 +12,14 @@
   const store = Rack.toyStore('stickers-fallen', () => ({}));
   const all = store.get();
   const keep = () => store.set(all);
-  const live = new Map();  // ключ → { el, w, h, x, y, rot, flying }
+  const live = new Map();  // key -> { el, w, h, x, y, rot, flying }
 
   const room = () => document.getElementById('room');
-  // Упавшие стикеры этой стойки; shown — стойка, чьи стикеры сейчас в комнате (для подмены стойки).
+  // This rack's fallen stickers; shown, the rack whose stickers are in the room now (for a rack swap).
   let shown = '';
   const fallen = () => { shown = room()?.dataset.rack || ''; return (all[shown] ||= {}); };
   const sticker = (key) => document.querySelector(`[data-sticker="${key}"]`);
-  // Центр лежащего стикера: на фальшполе под стойкой.
+  // The centre of a lying sticker: on the raised floor under the rack.
   const floorY = (r, h, dy) => r.offsetHeight - 72 - h / 2 + dy;
 
   function angle(node) {
@@ -29,7 +29,7 @@
     return Math.atan2(b, a) * 180 / Math.PI;
   }
 
-  // Копия стикера в комнате: те же шрифт, цвета и размер, но свободная.
+  // The sticker's copy in the room: the same font, colours and size, but free.
   function clone(src) {
     const cs = getComputedStyle(src);
     const c = src.cloneNode(true);
@@ -37,8 +37,8 @@
     c.className = 'fallen-sticker';
     c.setAttribute('aria-hidden', 'true');
     for (const p of ['font', 'color', 'background', 'padding', 'lineHeight', 'letterSpacing', 'textAlign', 'boxShadow', 'boxSizing', 'whiteSpace']) c.style[p] = cs[p];
-    // Размер — точный, с дробью (offsetWidth округляет вниз, и последнее слово уезжало на новую строку и обрезалось),
-    // и с пикселем запаса: у копии другой шрифтовой контекст.
+    // The exact size, with the fraction (offsetWidth rounds down, and the last word would wrap and be cut off), and a
+    // pixel to spare: the copy has another font context.
     c.style.width = `calc(${cs.width} + 1px)`;
     c.style.minHeight = cs.height;
     if (src.dataset.back) c.title = src.dataset.back;
@@ -57,7 +57,7 @@
 
   function fall(key) {
     const src = sticker(key), R = room();
-    if (!src || !R || live.has(key) || !src.offsetParent) return; // на телефоне стикер сервера спрятан
+    if (!src || !R || live.has(key) || !src.offsetParent) return; // on a phone the server's sticker is hidden
     const rr = R.getBoundingClientRect(), b = src.getBoundingClientRect();
     const s = {
       el: clone(src), w: src.offsetWidth, h: src.offsetHeight,
@@ -75,10 +75,10 @@
       s.y = land; s.rot = dir * 8; place(s); settle(key, s);
       return;
     }
-    // Лист: маятник из стороны в сторону, вниз быстрее всего в нижней точке размаха, наклон по ходу.
-    const A = 30 + Math.random() * 22;         // размах, px
-    const w = 2 + Math.random() * 0.7;        // частота качания, рад/с
-    const fallV = 80 + Math.random() * 30;     // скорость снижения, px/с
+    // A leaf: a pendulum from side to side, falling fastest at the bottom of the swing, tilting the way it moves.
+    const A = 30 + Math.random() * 22;         // the swing, px
+    const w = 2 + Math.random() * 0.7;        // the swing's frequency, rad/s
+    const fallV = 80 + Math.random() * 30;     // the falling speed, px/s
     const drift = dir * (6 + Math.random() * 10);
     const base = s.rot;
     let phase = Math.random() * Math.PI, t = 0, last = performance.now();
@@ -88,12 +88,12 @@
       last = now;
       t += dt;
       if (t < 0.5) {
-        // Отходит от угла: поворот и чуть вниз, ещё держится за край.
+        // It peels off the corner: turns and drops a little, still holding on by its edge.
         s.rot = base + dir * 26 * (t / 0.5) ** 2;
         s.y += 10 * dt;
       } else {
-        // Пока стикер на экране, он планирует медленно; ушёл за край — догоняет пол быстрее (страница длинная,
-        // а смотреть полминуты на пустой экран скучно). Прокрутишь следом — снова увидишь медленный полёт.
+        // While the sticker is on screen it glides slowly; off the screen it catches up with the floor faster (the page
+        // is long, and half a minute of an empty screen is dull). Scroll after it and the slow flight shows again.
         const top = R.getBoundingClientRect().top + s.y;
         const seen = top > -s.h && top < innerHeight + s.h;
         phase += w * dt;
@@ -138,7 +138,7 @@
     setTimeout(done, 900);
   }
 
-  // Упавшие в прошлый раз лежат на полу сразу; после перестройки стойки — на своих местах.
+  // The ones fallen last time lie on the floor at once; after the rack is rebuilt, in their places.
   function restore() {
     const R = room();
     if (!R) return;
@@ -162,20 +162,20 @@
     }
   }
 
-  // Все сразу, но не хором: каждый со своей задержкой.
+  // All at once, but not in chorus: each with its own delay.
   function fallAll() {
     [...document.querySelectorAll('[data-sticker]')].forEach((el, i) => {
       setTimeout(() => fall(el.dataset.sticker), reduce.matches ? 0 : i * 280 + Math.random() * 250);
     });
   }
 
-  // power.js сообщает о каждой выдернутой вилке и о том, что погасла вся стойка.
+  // power.js reports every pulled plug and the whole rack going dark.
   document.addEventListener('rack:plug', (e) => { if (!e.detail.on) fall(e.detail.key); });
   document.addEventListener('rack:power', (e) => { if (!e.detail.on) fallAll(); });
   document.addEventListener('rack:laidout', () => requestAnimationFrame(restore));
 
-  // Стойку подменили без перезагрузки (assets/js/aisle.js): упавшие стикеры остались в старой комнате. Кто ещё
-  // летел — ляжет на пол там, где был: вернёшься к той стойке — найдёшь его на полу.
+  // The rack was swapped without a reload (assets/js/aisle.js): the fallen stickers stayed in the old room. One still
+  // in the air lands where it was: back at that rack, it is on the floor.
   document.addEventListener('rack:swap', () => {
     const w = room()?.offsetWidth || 1, old = (all[shown] ||= {});
     for (const [key, s] of live) {

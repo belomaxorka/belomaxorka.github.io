@@ -1,7 +1,7 @@
-/* Управление: разделы слева, переключатели справа. */
+/* Management: sections on the left, toggles on the right. */
 .mgmt .face { justify-content: space-between; }
 .mgmt .ports { gap: 6px; }
-/* Язык: две клавиши, нажатая утоплена и подсвечена. */
+/* Language: two keys, the pressed one sunk and lit. */
 .langs { display: inline-flex; gap: 0; }
 .langs .key { border-radius: 0; padding-inline: 9px; }
 .langs .key:first-child { border-radius: 4px 0 0 4px; }
@@ -10,6 +10,6 @@
   color: var(--accent); transform: translateY(1px);
   box-shadow: inset 0 2px 3px #0006, 0 1px 0 var(--edge);
 }
-/* Звук (assets/js/sound.js): только значок — динамик или перечёркнутый динамик; подпись в title и aria-label. */
+/* Sound (assets/js/sound.js): only an icon, a speaker or a crossed-out one; the caption in title and aria-label. */
 .mgmt .snd { padding: 0 10px; min-height: 30px; font-size: 14px; }
 .mgmt .snd[aria-pressed="true"] .i-off, .mgmt .snd[aria-pressed="false"] .i-on { display: none; }

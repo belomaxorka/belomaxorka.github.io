@@ -1,4 +1,4 @@
-/* Общие детали: шелкография, ленты этикеточника, светодиоды, ЖК, кнопки, порты, стикеры. */
+/* Shared parts: silkscreen, label maker tapes, LEDs, LCDs, buttons, ports, stickers. */
 .silk { font: 500 10px/1.2 var(--f-silk); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
 .tape {
   display: inline-block; padding: 3px 7px 2px; border-radius: 2px;
@@ -19,9 +19,9 @@
 .led.off { background: var(--led-off); box-shadow: inset 0 1px 1px #0006; }
 .leds { display: flex; gap: 12px; flex-wrap: wrap; }
 .leds span { display: inline-flex; align-items: center; gap: 5px; }
-/* Лампы активности (порты коммутатора, сетевые карты, wan роутера, net и hdd сервера) по таймеру не мигают: мигают,
-   только когда через них правда что-то прошло, — live.js ставит .tx на миг. Пока ничего не идёт, лампа линка горит
-   ровно, а hdd не горит. */
+/* The activity lamps (switch ports, network cards, the router's wan, the server's net and hdd) do not blink on a
+   timer: only when something really went through them, live.js setting .tx for a moment. While nothing goes on the
+   link lamp is steady and hdd is off. */
 .led.hdd { background: var(--led-off); box-shadow: inset 0 1px 1px #0006; }
 .led.tx { opacity: .15; }
 .led.hdd.tx { opacity: 1; background: var(--led-ok); box-shadow: 0 0 6px var(--led-ok); }
@@ -72,7 +72,7 @@ button.port { font: inherit; color: inherit; background: none; border: 0; paddin
 .port.shown .tape.swap > .alt, .port.copied .tape.swap .alt > i { visibility: visible; }
 .tape.swap .alt > i { font-style: normal; }
 
-/* Значки (templates/icons.html): линии цветом текста, 1em. */
+/* Icons (templates/icons.html): lines in the text's colour, 1em. */
 .ic { width: 1em; height: 1em; flex: none; vertical-align: -.14em; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .ic .solid { fill: currentColor; stroke: none; }
 

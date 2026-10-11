@@ -1,12 +1,12 @@
-// Рисовалка гостевой (KVM, templates/units/kvm.html). Холст 640×400 (больше site-api не примет), белый фон.
-// Кисть с нажимом пера, ластик (кнопка или обратный конец пера), заливка, палитра и любой цвет, размер ползунком,
-// отмена и повтор (кнопки, Ctrl+Z, Ctrl+Shift+Z / Ctrl+Y), во весь экран. Картинка после каждого действия
-// уходит в скрытое поле формы, поэтому её отправит и htmx, и обычная форма. Без JS рисовалки нет, форма работает.
+// The guestbook's drawing pad (KVM, templates/units/kvm.html). A 640x400 canvas (site-api takes no more), white.
+// A brush with pen pressure, an eraser (a button or the pen's back end), fill, a palette and any colour, the size on
+// a slider, undo and redo (buttons, Ctrl+Z, Ctrl+Shift+Z / Ctrl+Y), full screen. After every action the picture goes
+// into a hidden field of the form, so both htmx and a plain form send it. Without JS there is no pad; the form works.
 document.addEventListener('alpine:init', () => {
   const Alpine = window.Alpine;
   const W = 640, H = 400;
   const MAX_URL = 400 << 10;   // site-api: guestbook.MaxDrawing
-  const HISTORY = 25;          // шагов отмены (по 1 МБ на шаг)
+  const HISTORY = 25;          // undo steps (1 MB a step)
   const BASE = ['#111111', '#ffffff', '#8a8f98', '#e0322b', '#ff8a00', '#ffd23f', '#3daa63', '#2bb3c0',
     '#3a7bd5', '#7b4fd6', '#ff6fb5', '#8b5a2b'];
 
@@ -22,7 +22,7 @@ document.addEventListener('alpine:init', () => {
     tooBig: false,
 
     init() {
-      // К основной палитре — цвета стойки: ЖК (меняется с обложкой трека) и акцент.
+      // Besides the base palette, the rack's colours: the LCD (it changes with the track's cover) and the accent.
       const cs = getComputedStyle(document.documentElement);
       const rack = ['--lcd', '--accent'].map((v) => cs.getPropertyValue(v).trim()).filter((c) => /^#[0-9a-f]{6}$/i.test(c));
       this.colors = [...new Set([...BASE, ...rack.map((c) => c.toLowerCase())])];
@@ -40,12 +40,12 @@ document.addEventListener('alpine:init', () => {
       c.addEventListener('contextmenu', (e) => e.preventDefault());
       this.onKey = (e) => this.key(e);
       addEventListener('keydown', this.onKey);
-      // KVM обесточили (assets/js/power.js, юнит становится inert): штрих дописать, из полного экрана выйти.
-      // Набранное и нарисованное остаётся; включили — рисуй дальше.
+      // The KVM lost power (assets/js/power.js, the unit turns inert): finish the stroke, leave full screen. What was
+      // typed and drawn stays; turned on, draw on.
       this.unit = this.$root.closest('.u');
       this.onPower = (e) => { if (!e.detail.on) this.dark(); };
       this.unit?.addEventListener('rack:unit', this.onPower);
-      // Открытый холст меняет высоту юнита: пересчитать стойку и провода.
+      // The open canvas changes the unit's height: lay out the rack and the cables again.
       this.$watch('open', () => this.$nextTick(() => document.dispatchEvent(new Event('rack:layout'))));
     },
     destroy() {
@@ -56,14 +56,14 @@ document.addEventListener('alpine:init', () => {
     dark() {
       const s = this.stroke;
       if (s) {
-        try { this.$refs.pad.releasePointerCapture(s.id); } catch { /* захвата уже нет */ }
+        try { this.$refs.pad.releasePointerCapture(s.id); } catch { /* no capture any more */ }
         this.stroke = null;
         this.commit();
       }
       this.setFull(false);
     },
 
-    // ---------- кнопки ----------
+    // ---------- buttons ----------
     toggle() { this.open = !this.open; if (!this.open) this.setFull(false); },
     use(tool) { this.tool = tool; },
     isTool(tool) { return this.tool === tool; },
@@ -79,7 +79,7 @@ document.addEventListener('alpine:init', () => {
     },
     toggleFull() { this.setFull(!this.full); },
 
-    // ---------- холст ----------
+    // ---------- the canvas ----------
     wipe() {
       this.g.globalCompositeOperation = 'source-over';
       this.g.fillStyle = '#ffffff';
@@ -121,19 +121,19 @@ document.addEventListener('alpine:init', () => {
 
     key(e) {
       if (!this.open || !(e.ctrlKey || e.metaKey) || e.altKey) return;
-      if (this.$root.closest('[inert]')) return; // без питания холст не слушается
-      if (e.target instanceof Element && e.target.closest('input:not([type="range"]):not([type="color"]), textarea')) return; // там своя отмена
+      if (this.$root.closest('[inert]')) return; // without power the canvas does not listen
+      if (e.target instanceof Element && e.target.closest('input:not([type="range"]):not([type="color"]), textarea')) return; // they have their own undo
       const k = e.key.toLowerCase();
       if (k === 'z' && !e.shiftKey) { e.preventDefault(); this.undo(); }
       else if ((k === 'z' && e.shiftKey) || k === 'y') { e.preventDefault(); this.redo(); }
     },
 
-    // ---------- рисование ----------
+    // ---------- drawing ----------
     pos(e) {
       const r = this.$refs.pad.getBoundingClientRect();
       return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height };
     },
-    // Толщина: у пера от нажима, у мыши и пальца — как на ползунке.
+    // The width: a pen's from its pressure, a mouse's and a finger's as on the slider.
     width(e) {
       const p = e.pointerType === 'pen' && e.pressure > 0 ? e.pressure : 0.5;
       return Math.max(0.6, this.size * (0.25 + p * 1.5));
@@ -143,8 +143,8 @@ document.addEventListener('alpine:init', () => {
       e.preventDefault();
       const p = this.pos(e);
       if (this.tool === 'fill') { this.fill(Math.floor(p.x), Math.floor(p.y)); this.commit(); return; }
-      try { this.$refs.pad.setPointerCapture(e.pointerId); } catch { /* указатель уже ушёл: рисуем без захвата */ }
-      // Обратный конец пера — ластик, даже если выбрана кисть.
+      try { this.$refs.pad.setPointerCapture(e.pointerId); } catch { /* the pointer is gone already: draw without the capture */ }
+      // The pen's back end erases, even with the brush chosen.
       const erase = this.tool === 'eraser' || (e.pointerType === 'pen' && (e.buttons & 32) !== 0);
       this.stroke = { id: e.pointerId, erase, pts: [p], w: this.width(e) };
       this.dot(p, this.stroke.w, erase);
@@ -156,7 +156,7 @@ document.addEventListener('alpine:init', () => {
       for (const ev of events.length ? events : [e]) {
         const p = this.pos(ev), w = this.width(ev);
         s.pts.push(p);
-        // Сглаживание: кривая через середины соседних отрезков, толщина плавно тянется к новой.
+        // Smoothing: a curve through the middles of neighbouring segments, the width easing towards the new one.
         const n = s.pts.length;
         if (n < 3) { this.line(s.pts[0], p, w, s.erase); s.w = w; continue; }
         const a = s.pts[n - 3], b = s.pts[n - 2];
@@ -193,7 +193,7 @@ document.addEventListener('alpine:init', () => {
       this.g.beginPath(); this.g.moveTo(a.x, a.y); this.g.quadraticCurveTo(c.x, c.y, b.x, b.y); this.g.stroke();
     },
 
-    // Заливка: построчно, с допуском, чтобы сглаженные края линий не оставляли щелей.
+    // Fill: line by line, with a tolerance, so the lines' smoothed edges leave no gaps.
     fill(x, y) {
       if (x < 0 || y < 0 || x >= W || y >= H) return;
       const img = this.snap(), d = img.data;

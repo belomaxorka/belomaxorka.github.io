@@ -1,7 +1,7 @@
-# Адреса для донатов на юните donate (templates/units/donate.html). Порядок здесь — порядок на сайте.
-#   chain — сеть (на ленте), coins — что на этот адрес можно слать, address — адрес.
-# Новый адрес — проверить по контрольной сумме его сети, прежде чем публиковать: опечатка = потерянные деньги.
-#   TRON: base58check, версия 0x41 (адрес на T…); TON: user-friendly, CRC16 (UQ… — обычный кошелёк, mainnet).
+# The donation addresses on the donate unit (templates/units/donate.html), in the order given here.
+#   chain: the network (on the tape); coins: what can be sent to the address; address: the address.
+# Check a new address against its network's checksum before publishing it: a typo is money lost.
+#   TRON: base58check, version 0x41 (addresses start with T); TON: user-friendly, CRC16 (UQ...: a plain wallet, mainnet).
 - chain: TRON
   coins: TRX · USDT TRC-20
   address: TDHitRBeobZEbcASN7y9MPYwVYnEur9ULC

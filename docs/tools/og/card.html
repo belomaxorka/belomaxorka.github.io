@@ -1,7 +1,8 @@
 <!doctype html>
-<!-- Картинка для превью ссылок (og:image), 1200×630: стойка в серверной. Одна на весь сайт (assets/og/site.png,
-     рисует make.mjs): ни номера стойки, ни табличек ряда — новая стойка её не трогает. Подписи — из i18n/en.json
-     (превью видят краулеры, а им достаётся английская версия), шрифты и цвета — сайта. Не деплоится (docs/). -->
+<!-- The link preview image (og:image), 1200x630: the rack in the server room. One for the whole site
+     (assets/og/site.png, drawn by make.mjs): no rack number and no aisle signs, so a new rack does not touch it. The
+     captions come from i18n/en.json (previews are seen by crawlers, and they get the English version), the fonts and
+     colours are the site's. Not deployed (docs/). -->
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
@@ -13,7 +14,7 @@
   html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: var(--room); }
   .card { position: relative; width: 1200px; height: 630px; overflow: hidden; color: var(--ink); font-family: var(--f-text); }
 
-  /* Зал: потолок с лотком и жёлтым коробом, свет, соседние стойки, фальшпол. */
+  /* The hall: the ceiling with its tray and the yellow duct, the light, the neighbour racks, the raised floor. */
   .hall { position: absolute; inset: 0; background: linear-gradient(#15181b, #0e1012 75%); }
   .hall > * { position: absolute; }
   .tray { left: 0; right: 0; top: 14px; height: 18px; opacity: .7;
@@ -33,7 +34,7 @@
     color: #eafff0; background: #1d8a45; box-shadow: 0 0 20px #2ccf6a88, inset 0 0 0 1px #ffffff40; }
 
 
-  /* Стойка: крышка, рейки с отверстиями и номерами, юниты с ушами и винтами (как assets/css/rack.css, крупнее). */
+  /* The rack: the top, the rails with their holes and numbers, units with ears and screws (as assets/css/rack.css, larger). */
   .rack { position: absolute; left: 150px; right: 150px; top: 96px; bottom: -40px; }
   .cap { height: 36px; border-radius: 7px 7px 0 0; background: linear-gradient(var(--rail-hi), var(--rail)); box-shadow: inset 0 -1px 0 var(--edge);
     display: flex; align-items: center; justify-content: space-between; padding: 0 18px;
@@ -60,7 +61,7 @@
     background: linear-gradient(var(--panel-hi), var(--panel) 18%, var(--panel)); box-shadow: inset 0 1px 0 var(--panel-hi), inset 0 -1px 0 var(--edge); }
   .silk { font: 500 14px/1.2 var(--f-silk); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
 
-  /* Патч-панель: гнёзда и ленты, как кольцо otoring на сайте. */
+  /* The patch panel: jacks and tapes, like the otoring ring on the site. */
   .patch .ports { margin-left: auto; display: flex; gap: 22px; }
   .port { display: flex; align-items: center; gap: 10px; }
   .jack { width: 30px; height: 24px; background: var(--hole); border-radius: 2px; position: relative;
@@ -70,7 +71,7 @@
     font: 700 15px/1.2 var(--f-silk); letter-spacing: .1em; text-transform: uppercase; transform: rotate(-.7deg); box-shadow: 0 1px 1px #0007; }
   .tape.b { background: var(--tape-b); } .tape.r { background: var(--tape-r); }
 
-  /* Главный юнит: большой янтарный ЖК и диоды. */
+  /* The main unit: a large amber LCD and LEDs. */
   .main .face { align-items: stretch; padding: 22px 24px; gap: 26px; }
   .lcd { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 16px 28px;
     background: var(--lcd-bg); color: var(--lcd); border-radius: 5px; font-family: var(--f-lcd); letter-spacing: .03em;
@@ -88,7 +89,7 @@
   .led.off { background: var(--led-off); box-shadow: inset 0 1px 1px #0006; }
   .vent { height: 74px; border-radius: 3px; background: repeating-linear-gradient(90deg, var(--void) 0 5px, transparent 5px 11px); opacity: .7; }
 
-  /* Ряд ламп мониторинга. */
+  /* A row of monitoring lamps. */
   .lamps .row { margin-left: auto; display: flex; gap: 17px; }
   .lamps .led { width: 11px; height: 11px; }
 
@@ -137,7 +138,7 @@
   </div>
 </div>
 <script>
-// Подписи из i18n/en.json; ЖК — имя сайта и кто я, стикер — «не выключать».
+// The captions from i18n/en.json; the LCD has the site's name and who I am, the sticker "do not turn off".
 (async () => {
   const t = await (await fetch('/i18n/en.json')).json();
   const $ = (s) => document.getElementById(s);
@@ -155,7 +156,7 @@
   for (const side of ['l', 'r']) {
     $('rail-' + side).innerHTML = Array.from({ length: 8 }, (_, i) => `<span class="n" style="top:calc(var(--U) * ${i + .5})">${42 - i}</span>`).join('');
   }
-  // Длинная строка не должна вылезать из ЖК.
+  // A long line must not overflow the LCD.
   await document.fonts.ready;
   for (const el of [$('big'), $('line'), $('d')]) {
     for (let s = parseFloat(getComputedStyle(el).fontSize); el.scrollWidth > el.clientWidth && s > 24; s -= 2) el.style.fontSize = s + 'px';

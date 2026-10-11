@@ -1,10 +1,10 @@
-{{/* Сервер с именем. Данные: .Age, .DaysToBirthday (-1 — день рождения не указан), .Avatars (аватарки из Telegram,
-     новые первыми), .Data — content/profile.yaml (ленты под именем). */}}
+{{/* The server with my name. Data: .Age, .DaysToBirthday (-1: no birthday given), .Avatars (avatars from Telegram,
+     newest first), .Data, content/profile.yaml (the tapes under the name). */}}
 {{define "unit-server"}}
 <section class="u srv" style="--h:4" aria-labelledby="who">
   <div class="face">
     {{with .Avatars}}
-    {{/* Пульт под фото: клавиши, ЖК-счётчик и лампы по числу фото (горит текущее). Без JS его нет — листается свайпом. */}}
+    {{/* The remote under the photo: keys, an LCD counter and a lamp per photo (the current one lit). Without JS there is none: it swipes. */}}
     <div class="album" x-data="gallery" role="region" aria-roledescription="carousel" aria-label="{{t "me.photos"}}">
       <div class="photo gallery">
         <div class="slides" x-ref="slides" tabindex="0" @scroll.debounce.80ms="sync()">
@@ -46,7 +46,7 @@
         </ul>
       </div>
       <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led hdd"></i>hdd</span><span><i class="led net"></i>net</span><span><i class="led uid"></i><button class="uid" type="button" hidden aria-pressed="false" title="{{t "srv.uid"}}">uid</button></span><button class="rst" type="button" hidden aria-label="{{t "srv.reset"}}" title="{{t "srv.reset"}}"></button></div>
-      {{/* Наклейка инвентарного номера: полный отпечаток PGP, печатный — виден и без питания, выделяется. */}}
+      {{/* The asset tag sticker: the full PGP fingerprint, printed, so it shows without power too and can be selected. */}}
       {{with .Data.pgp}}<div class="asset-tag"><span class="silk">pgp · {{t "me.pgp"}}</span><code translate="no">{{.}}</code><i class="bars" aria-hidden="true"></i></div>{{end}}
     </div>
   </div>
@@ -54,5 +54,5 @@
 </section>
 {{end}}
 
-{{/* В стойке (content/racks.yaml) юнит получает всю страницу, а сам берёт из неё .Profile. */}}
+{{/* In the rack (content/racks.yaml) the unit gets the whole page and takes .Profile from it. */}}
 {{define "slot-server"}}{{template "unit-server" .Profile}}{{end}}

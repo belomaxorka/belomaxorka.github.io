@@ -1,5 +1,5 @@
-// Просмотр одной картинки стены мемов (templates/infra.html, "meme"): ← и → — к соседней (новее и старее), свайп —
-// так же, Esc — назад к стене. Ходит по ссылкам страницы, без них ничего не делает.
+// One picture of the meme wall (templates/infra.html, "meme"): left and right go to the neighbours (newer and older),
+// so does a swipe, Esc back to the wall. It follows the page's links and does nothing without them.
 (() => {
   const go = (sel) => {
     const a = document.querySelector(sel);

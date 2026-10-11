@@ -1,4 +1,4 @@
-/* Стойка: крышка, рейки с отверстиями (три на юнит) и номерами, юниты с ушами и винтами. */
+/* The rack: the top, the rails with their holes (three per unit) and numbers, the units with ears and screws. */
 .rack { position: relative; max-width: 1000px; margin: 0 auto; }
 .cap {
   height: 26px; border-radius: 6px 6px 0 0;

@@ -1,7 +1,7 @@
-{{/* Проход между стойками: таблички R1…Rn (обычные ссылки, работают без JS), стрелки к соседям.
-     С JS (assets/js/aisle.js) стойка меняется без перезагрузки: ссылки, ←/→ и свайп; камера едет вдоль ряда
-     (assets/css/aisle.css). data-now — что прочитать скринридеру, когда стойка сменилась.
-     rel="prev/next" здесь нет специально: им помечено кольцо otoring на патч-панели. */}}
+{{/* The aisle between the racks: the signs R1...Rn (plain links that work without JS), the arrows to the neighbours.
+     With JS (assets/js/aisle.js) the rack changes without a reload: the links, the arrow keys and a swipe; the camera
+     moves along the row (assets/css/aisle.css). data-now is what screen readers hear when the rack changed.
+     No rel="prev/next" here on purpose: the otoring ring on the patch panel has them. */}}
 {{define "aisle"}}
 <nav class="aisle" id="aisle" aria-label="{{t "aisle.aria"}}" data-now="{{t "aisle.now"}}">
   {{with .Rack.Prev}}<a class="step prev" href="{{.Path}}" data-step="prev"><i aria-hidden="true">‹</i><span>r{{.N}} · {{t (print "rack." .ID)}}</span></a>{{else}}<span class="step prev end" aria-hidden="true"></span>{{end}}
@@ -13,9 +13,10 @@
 </nav>
 {{end}}
 
-{{/* Серверная вокруг стойки: потолок с лотками, соседние стойки (их диоды — настоящие лампы Gatus),
-     фальшпол, табличка «выход». Только декор: aria-hidden, без JS, свет — .room[data-light].
-     Соседи ll, c и rr видны только на ходу между стойками: ряд едет мимо камеры (assets/css/aisle.css). */}}
+{{/* The server room around the rack: the ceiling with its trays, the neighbour racks (their status lamps are the real
+     Gatus checks), the raised floor, the exit sign. Decoration only: aria-hidden, no JS, the light is
+     .room[data-light]. The neighbours ll, c and rr show only while moving between racks: the row passes the camera
+     (assets/css/aisle.css). */}}
 {{define "hall"}}
 <div class="hall" aria-hidden="true">
   <div class="ceiling"><div class="plane">{{range seq 13}}<i class="mark" style="--k: {{.}}"></i>{{end}}</div><i class="tray"></i><i class="duct"></i><i class="lamp a"></i><i class="lamp b"></i><i class="lamp c"></i></div>
@@ -29,7 +30,7 @@
 </div>
 {{end}}
 
-{{/* Соседняя стойка: юниты-заглушки и диоды. Диоды — настоящие лампы мониторинга (зелёные, жёлтые, красные). */}}
+{{/* A neighbour rack: a patch panel, a switch, servers, storage and blanks, a UPS. Each server's status lamp is a real monitoring check (green, yellow, red); before the checks come, dark ones. */}}
 {{define "nb-rack"}}<div class="nbr"><div class="stack"><div class="hw patch"></div><div class="hw tor"></div>
 {{- range .}}<div class="hw"><i class="{{.State}}" data-check="{{.Name}}"></i></div>{{else}}{{range seq 24}}<div class="hw"><i class="off"></i></div>{{end}}{{end}}
 {{- range .}}<div class="hw"><i class="{{.State}}" data-check="{{.Name}}"></i></div>{{end}}</div><div class="hw ups"></div></div>{{end}}

@@ -1,15 +1,15 @@
-{{/* Лёгкая версия: та же стойка для старых браузеров (Netscape, IE, Lynx, Dillo) — без CSS и скриптов, HTML 4.01
-     Transitional 1999 года (строгий 3.2 не красит ячейки таблиц, а без этого стойки не нарисовать; Netscape 3 и
-     IE 3 эти атрибуты тоже понимают). Страница проходит валидатор W3C: шрифт <font> оборачивает только текст —
-     таблицы и формы внутрь него не попадают (шаблоны f и f-end).
-     Рендерит site-api на lite.belomaxorka.dev (по http тоже: старые браузеры не умеют нынешний TLS) из той же
-     страницы (web.Page), что и стойку: юниты те же и в том же порядке (content/racks.yaml), у каждого — шаблон
-     lite-<имя> ниже. Данные и тексты общие (content/, i18n/, живые источники): правишь их — меняются обе версии.
-     Разметка своя: юнит без lite-<имя> не пропадёт молча — будет строка «пока только в полной стойке», пока ему не
-     напишут шаблон. Без шаблона нарочно только декор: органайзеры, коммутатор, заглушки. Цвета — атрибутами
-     bgcolor/color, шрифт — в каждой ячейке (в таблицы старые браузеры его не наследуют). Пакетов, ламп и живых
-     обновлений нет: страница — снимок на момент запроса. Без DTD-ссылки в DOCTYPE нынешние браузеры рисуют её в
-     режиме совместимости — так же, как рисовали тогда. */}}
+{{/* The light version: the same rack for old browsers (Netscape, IE, Lynx, Dillo), without CSS or scripts, HTML 4.01
+     Transitional of 1999 (strict 3.2 cannot colour table cells, and the racks cannot be drawn without that; Netscape 3
+     and IE 3 know these attributes too). The page passes the W3C validator: <font> wraps text only, tables and forms
+     never go inside it (the f and f-end templates).
+     site-api renders it on lite.belomaxorka.dev (over http too: old browsers cannot do today's TLS) from the same page
+     (web.Page) as the rack: the same units in the same order (content/racks.yaml), each with its lite-<name> template
+     below. Data and texts are shared (content/, i18n/, the live sources): change them and both versions change. The
+     markup is its own: a unit without lite-<name> does not vanish silently, it gets a line "only in the full rack
+     for now" until it has a template. Only decoration has none on purpose: organisers, the switch, blanks. Colours as
+     bgcolor/color attributes, the font in every cell (old browsers do not inherit it into tables). No packets, lamps
+     or live updates: the page is a snapshot at the time of the request. Without a DTD link in the DOCTYPE today's
+     browsers render it in quirks mode, as browsers did then. */}}
 {{define "lite" -}}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -59,40 +59,40 @@ best viewed with any browser</font></td></tr>
 </html>
 {{end}}
 
-{{/* Шрифт текста юнита. Только вокруг текста: таблица или форма внутри <font> — ошибка разметки. */}}
+{{/* The unit's text font. Around text only: a table or a form inside <font> is a markup error. */}}
 {{define "f"}}<font face="Verdana,Arial,Helvetica,sans-serif" size="2">{{end}}
 {{define "f-end"}}</font>{{end}}
 
-{{/* Подпись юнита, как шелкография на его панели. */}}
+{{/* The unit's caption, like the silkscreen on its panel. */}}
 {{define "lite-silk"}}<font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8">{{.}}</font><br>{{end}}
 
-{{/* Экран юнита: тёмная плашка с янтарным текстом. */}}
+{{/* The unit's screen: a dark plate with amber text. */}}
 {{define "lite-lcd-open"}}<table border="0" cellspacing="0" cellpadding="6" bgcolor="#1a1407"><tr><td><font face="Courier New,Courier,monospace" size="2" color="#ffb238">{{end}}
 {{define "lite-lcd-close"}}</font></td></tr></table>{{end}}
 
-{{/* Лампа: зелёная, жёлтая, красная, погасшая. */}}
+{{/* A lamp: green, yellow, red, dark. */}}
 {{define "lite-led"}}<font color="{{if eq . "err"}}#ff4d4d{{else if eq . "warn"}}#ffc53d{{else if eq . "off"}}#55595f{{else}}#3fd16b{{end}}">●</font>{{end}}
 
 {{define "lite-stub"}}
 <tr><td bgcolor="#2b2e34" height="120" align="center">{{template "lite-lcd-open"}}{{t "rack.stub"}}<br>{{t (print "rack." .Rack.ID ".sub")}}{{template "lite-lcd-close"}}</td></tr>
 {{end}}
 
-{{/* Патч-панель = вебринг otoring. */}}
+{{/* The patch panel is the otoring webring. */}}
 {{define "lite-patch"}}{{template "lite-silk" (t "ring.panel")}}
 {{with .Ring}}{{template "f"}}<a href="{{.PrevURL}}">← {{or .PrevName (t "ring.prev")}}</a> · <a href="{{.Home}}">otoring</a> · <a href="{{.RandomURL}}">{{t "ring.random"}}</a> · <a href="{{.NextURL}}">{{or .NextName (t "ring.next")}} →</a>{{template "f-end"}}{{end}}{{end}}
 
-{{/* Роутер: входы на сайт — основной и запасные аплинки (content/uplinks.yaml). Лампа — проверка Gatus из поля check:
-     зелёная — работает, красная — нет, погасшая — Gatus о ней не знает. */}}
+{{/* The router: the ways into the site, the main one and the spare uplinks (content/uplinks.yaml). The lamp is the
+     Gatus check named in check: green works, red does not, dark Gatus does not know it. */}}
 {{define "lite-router"}}{{template "lite-silk" (print "opnsense · " (t "net.router") " · " (t "lite.uplinks"))}}
 <table border="0" cellspacing="0" cellpadding="2">
 {{range .Content.uplinks}}{{$u := .}}{{$st := "off"}}{{range $.Status.Lamps}}{{if eq .Name $u.check}}{{$st = .State}}{{end}}{{end}}<tr><td valign="top">{{template "lite-led" $st}}</td><td valign="top">{{template "f"}}<b>{{.name}}</b>{{template "f-end"}}</td><td valign="top">{{template "f"}}<a href="{{.url}}">{{.url}}</a>{{if eq .id "lite"}} <font color="#ffc53d">← {{t "lite.here"}}</font>{{end}}{{template "f-end"}}<br><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8">{{loc .note}}</font></td></tr>
 {{end}}</table>{{end}}
 
-{{/* Управление: разделы. */}}
+{{/* Management: the sections. */}}
 {{define "lite-mgmt"}}{{template "lite-silk" (t "nav.aria")}}
 {{template "f"}}{{$sep := ""}}{{range .Content.nav}}{{if or (not .needs) $.HasCV}}{{$sep}}[<a href="{{.link}}">{{t .name}}</a>]{{$sep = " "}}{{end}}{{end}}{{template "f-end"}}{{end}}
 
-{{/* Сервер с именем: фото, кто я, ЖК, отпечаток PGP. */}}
+{{/* The server with my name: a photo, who I am, the LCD, the PGP fingerprint. */}}
 {{define "lite-server"}}{{with .Profile}}
 <table border="0" cellspacing="0" cellpadding="0" width="100%"><tr>
 {{with .Avatars}}<td valign="top" width="170"><img src="{{index . 0}}" width="160" height="160" alt="{{t "me.avatar"}}" border="0"></td>{{end}}
@@ -109,19 +109,19 @@ best viewed with any browser</font></td></tr>
 {{with .Data.pgp}}<br>pgp · {{t "me.pgp"}}:<br><tt>{{.}}</tt>{{end}}{{template "f-end"}}
 </td></tr></table>{{end}}{{end}}
 
-{{/* Медиасервер = Koito: что играет. */}}
+{{/* The media server is Koito: what is playing. */}}
 {{define "lite-media"}}{{template "lite-silk" (t "media.aria")}}{{with .Music}}
 {{template "lite-lcd-open"}}{{if .OK}}{{if .Playing}}► {{t "media.playing"}}{{else}}■ {{t "media.last" (ago .At)}}{{end}}<br>
 <a href="{{.Link}}"><font color="#ffd27a">{{.Track}}</font></a><br>
 {{.Artists}}{{with .Album}} · {{.}}{{end}}{{with .Duration}} · {{mmss .}}{{end}}{{else}}■ koito<br>{{t "media.silence"}}{{end}}{{template "lite-lcd-close"}}{{end}}{{end}}
 
-{{/* Мониторинг = Gatus: лампы и сводка. */}}
+{{/* Monitoring is Gatus: the lamps and the summary. */}}
 {{define "lite-monitor"}}{{template "lite-silk" (t "mon.aria")}}{{with .Status}}
 {{if .OK}}{{template "lite-lcd-open"}}{{t "mon.up" .Up .Total}} · {{if .Down}}{{t "mon.down" (join .Down ", ")}}{{else if .Slow}}{{t "mon.slow" .Slow .SlowMs}}{{else}}{{t "mon.fast" .AvgMs}}{{end}}{{if .Span}}<br>{{t "mon.uptime_all" .Uptime}} · {{t "mon.span" (uptime .Span)}}{{end}}{{template "lite-lcd-close"}}
 <br>{{template "f"}}{{range .Lamps}}{{template "lite-led" .State}}&nbsp;{{.Label}} &nbsp; {{end}}{{template "f-end"}}
 {{else}}{{template "lite-lcd-open"}}{{t "mon.silent"}} · {{t "mon.unavailable"}}{{template "lite-lcd-close"}}{{end}}{{end}}{{end}}
 
-{{/* Журнал: прослушивания и редкие события, новые сверху. */}}
+{{/* The log: listens and rare events, newest first. */}}
 {{define "lite-syslog"}}{{template "lite-silk" "syslog · koito, gatus, ups, proxmox, wakapi"}}
 {{template "lite-lcd-open"}}{{with .Syslog}}{{range .}}<font color="#a07a2a">{{stamp .At}} {{.Src}}</font> {{if .What}}{{if .URL}}<a href="{{.URL}}"><font color="#ffd27a">{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}</font></a>{{else}}{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}{{end}}{{else}}{{if .Now}}{{t "log.now"}} {{end}}{{if .URL}}<a href="{{.URL}}"><font color="#ffd27a">{{.Text}}</font></a>{{else}}{{.Text}}{{end}}{{end}}<br>
 {{end}}{{else}}{{t "log.quiet"}}{{end}}{{template "lite-lcd-close"}}{{end}}
@@ -130,11 +130,11 @@ best viewed with any browser</font></td></tr>
 {{define "lite-switch"}}{{template "lite-silk" (t "sw.title")}}
 {{template "f"}}{{range .Content.contacts}}{{if and .link (or (not .needs) $.HasCV)}}{{template "lite-led" (or .led "")}}&nbsp;<a href="{{.link}}">{{loc .name}}</a>{{else if .copy}}{{template "lite-led" (or .led "")}}&nbsp;{{loc .name}} <tt>{{.copy}}</tt>{{else}}{{template "lite-led" "off"}}&nbsp;<font color="#9aa0a8">{{loc .name}}</font>{{end}} &nbsp; {{end}}{{template "f-end"}}{{end}}
 
-{{/* Донаты: адреса кошельков. */}}
+{{/* Donations: the wallets' addresses. */}}
 {{define "lite-donate"}}{{template "lite-silk" (print (t "donate.title") " · " (t "donate.hint"))}}
 {{template "f"}}{{range .Content.donate}}<b>{{.chain}}</b> <font size="1" color="#9aa0a8">{{.coins}}</font><br><tt>{{.address}}</tt><br>{{end}}{{template "f-end"}}{{end}}
 
-{{/* KVM = гостевая книга: записи и форма (обычный POST, как без JS на стойке). */}}
+{{/* The KVM is the guestbook: the entries and the form (a plain POST, as on the rack without JS). */}}
 {{define "lite-kvm"}}<a name="guestbook"></a>{{template "lite-silk" (print (t "gb.title") " · " (t "gb.moderated"))}}{{with .Guestbook}}
 {{template "lite-lcd-open"}}{{range .Entries}}<font color="#a07a2a">{{or .Name (t "gb.anon")}} · #{{.ID}} · {{stamp .At}}</font><br>
 {{with .Text}}{{.}}<br>{{end}}{{with .Reply}}<font color="#8ab4ff">» {{.}}</font><br>{{end}}{{with .Drawing}}<a href="{{.}}"><font color="#ffd27a">{{t "lite.drawing"}}</font></a><br>{{end}}<br>
@@ -150,7 +150,7 @@ best viewed with any browser</font></td></tr>
 <input type="submit" value="{{t "gb.send"}}"> <font size="1" color="#9aa0a8">{{t "gb.rules"}}</font>{{template "f-end"}}
 </form>{{end}}{{end}}{{end}}
 
-{{/* Кнопки 88x31: мои, люди, сайты. */}}
+{{/* 88x31 buttons: mine, people, sites. */}}
 {{define "lite-buttons"}}{{template "lite-silk" (print (t "btn.mine") " · " (t "btn.mine_hint"))}}
 {{range .Content.buttons.mine}}<img src="/88x31/{{.image}}" width="88" height="31" alt="{{.title}}" border="0"> {{end}}<br>
 {{range .Content.buttons.mine}}{{$code := printf "<a href=\"%s\"><img src=\"%s/88x31/%s\" width=\"88\" height=\"31\" alt=\"%s\"></a>" (or .link $.URL) $.URL .image (or .alt "belomaxorka")}}<tt>{{$code}}</tt><br>{{end}}<br>
@@ -159,13 +159,13 @@ best viewed with any browser</font></td></tr>
 
 {{define "lite-b88"}}{{if .link}}<a href="{{.link}}">{{end}}<img src="{{asset (printf "88x31/%s" .image)}}" width="88" height="31" alt="{{.title}}" border="0">{{if .link}}</a>{{end}} {{end}}
 
-{{/* ИБП = подвал: заряд, нагрузка, счётчик, исходники. */}}
+{{/* The UPS is the footer: charge, load, the counter, the sources. */}}
 {{define "lite-ups"}}{{template "lite-silk" (print (t "ups.label") " · " .Content.hardware.ups.label)}}{{with .UPS}}
 {{template "lite-lcd-open"}}{{if .OK}}{{if .OnBattery}}{{t "ups.battery"}}{{else}}{{t "ups.mains"}}{{end}} · {{.Charge}}% · {{t "ups.load" .Load}} · {{t "ups.runtime" .RuntimeMin}}{{else}}{{t "ups.online"}} · {{t "ups.nodata"}}{{end}}{{template "lite-lcd-close"}}{{end}}
 <br><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8"><b>hosted on <a href="https://infra.belomaxorka.dev/">belomaxorka infrastructure</a></b>{{with .Visits}}{{if .OK}} · {{t "visits" (num .Views) (num .Visitors)}}{{end}}{{end}}<br>
 {{t "ups.updated" (date .Updated)}} · {{t "ups.sources"}} <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev">{{t "ups.site"}}</a>, <a href="https://git.belomaxorka.dev/belomaxorka/site-api">site-api</a></font>{{end}}
 
-{{/* /lab: хост Proxmox и контейнеры. */}}
+{{/* /lab: the Proxmox host and the containers. */}}
 {{define "lite-pve"}}{{template "lite-silk" (print "proxmox ve · " (t "lab.host"))}}{{with .Lab}}
 <font face="Verdana,Arial,Helvetica,sans-serif" size="4" color="#ffffff"><b>{{with .Node.Name}}{{.}}{{else}}pve{{end}}</b></font><br>
 {{template "lite-lcd-open"}}{{if .OK}}cpu · {{.Node.Cores}}: {{.Node.CPUText}}% · ram: {{printf "%.1f" .Node.MemGiB}} / {{printf "%.0f" .Node.MaxGiB}} {{t "lab.gib"}}<br>

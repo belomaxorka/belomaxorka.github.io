@@ -1,6 +1,6 @@
-# Стойка /lab: какие гости Proxmox показывать по имени (юнит на каждого). Остальные на том же хосте (там
-# и проекты друзей) — только числом, их имена на сайт не попадают.
-#   tag   — все гости с этим тегом в Proxmox (тег ставится в Proxmox: Options → Tags);
-#   vmids — и ещё эти номера, без тега.
+# The /lab rack: which Proxmox guests are shown by name (a unit each). The others on the same host (friends' projects
+# among them) only as a number; their names never reach the site.
+#   tag   - every guest with this tag in Proxmox (set in Proxmox: Options -> Tags);
+#   vmids - and these IDs too, without the tag.
 tag: belomaxorka-dev
 vmids: []

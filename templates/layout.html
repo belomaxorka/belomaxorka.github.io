@@ -1,21 +1,23 @@
-{{/* Каркас страницы. Рендерит site-api (Go html/template), данные — в README site-api.
-     По onion-адресу (.Onion) стойка сразу тёмная: Tor Browser всем сайтам говорит «светлая тема» (защита от
-     отпечатков), настоящую не узнать, а стойка задумана тёмной. Выбор кнопкой (assets/js/theme.js) главнее. */}}
+{{/* The page's frame. site-api renders it (Go html/template); its data is described in site-api's README.
+     On the onion address (.Onion) the rack is dark from the start: Tor Browser tells every site "light theme" (against
+     fingerprinting), so the real one is unknown, and the rack is meant to be dark. A choice with the button
+     (assets/js/theme.js) wins. */}}
 {{define "layout" -}}
 <!doctype html>
 <html lang="{{lang}}"{{if .Onion}} data-theme="dark"{{end}} data-lcd="cover" data-tz="{{.TZ}}" data-racks="{{range .Racks}}{{.Path}} {{end}}">
 <head>
 <meta charset="utf-8">
-{{/* Что странице можно загружать: только свои скрипты (Alpine — CSP-сборка, без eval; никаких inline-скриптов
-     и onclick=), стили свои и в атрибутах style, картинки отовсюду по https (обложки Koito, кнопки 88x31).
-     Остальное (frame-ancestors, base-uri, form-action) site-api шлёт заголовком. */}}
+{{/* What the page may load: only its own scripts (Alpine is the CSP build, without eval; no inline scripts and no
+     onclick=), its own styles and style attributes, images from anywhere over https (Koito's covers, 88x31 buttons).
+     The rest (frame-ancestors, base-uri, form-action) site-api sends as a header. */}}
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-{{- /* Для поисковиков и превью ссылок. У страницы один адрес на оба языка (язык — в cookie, ?lang=ru только
-     ставит её), краулеры приходят без cookie и видят английскую версию: canonical — адрес стойки без query,
-     hreflang нет (нет отдельных адресов). Выдвинутый юнит (/u/...) и стойка-заглушка — noindex.
-     Картинка превью и описание — одни на весь сайт (assets/og/site.png, docs/tools/og/make.mjs; i18n meta.desc):
-     новая стойка ничего здесь не требует. Заголовок — свой у каждой стойки, из её же подписей rack.<id>. */ -}}
+{{- /* For search engines and link previews. The page has one address for both languages (the language is a cookie,
+     ?lang=ru only sets it); crawlers come without the cookie and see English: canonical is the rack's address without
+     a query, and there is no hreflang (no separate addresses). A pulled-out unit (?open=...) and a stub rack are
+     noindex. The preview image and the description are one for the whole site (assets/og/site.png,
+     docs/tools/og/make.mjs; i18n meta.desc): a new rack needs nothing here. The title is each rack's own, from its
+     rack.<id> captions. */ -}}
 {{- $home := eq .Rack.Path "/"}}
 {{- $title := t "meta.title.home"}}{{if not $home}}{{$title = t "meta.title" (t (print "rack." .Rack.ID)) (t (print "rack." .Rack.ID ".sub"))}}{{end}}
 {{- $desc := t "meta.desc"}}
@@ -56,7 +58,7 @@
 ]}
 </script>
 {{- end}}{{end}}
-{{- /* Цвет панели браузера — фон зала в теме посетителя; выбранную вручную тему учитывает assets/js/theme.js. */}}
+{{- /* The browser bar's colour is the hall's background in the visitor's theme; assets/js/theme.js handles a theme chosen by hand. */}}
 <meta name="theme-color" content="#121315" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#d8d2c4" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
@@ -84,8 +86,8 @@
 </html>
 {{- end}}
 
-{{/* Цвета ЖК из обложки текущего трека. Пусто — остаётся янтарь из tokens.css. */}}
+{{/* The LCD colours from the current track's cover. Empty: the amber of tokens.css stays. */}}
 {{define "palette"}}{{with .Palette}}:root[data-lcd="cover"] { {{.}} }{{end}}{{end}}
 
-{{/* То же для htmx: при обновлении медиасервера палитра меняется вне юнита. */}}
+{{/* The same for htmx: when the media server refreshes, the palette changes outside the unit. */}}
 {{define "palette-oob"}}<style id="cover-palette" hx-swap-oob="true">{{template "palette" .}}</style>{{end}}

@@ -1,10 +1,10 @@
-{{/* KVM-консоль = гостевая книга. Форма работает и без JS (обычный POST и редирект назад),
-     с JS уходит через htmx и умеет рисунок (assets/js/oekaki.js); без связи у KVM не уходит вовсе, над ней —
-     data-nolink или data-nonet (assets/js/net.js). Записи появляются после модерации.
-     Данные: .Enabled, .Entries (ID, Name, Text, Reply, At, Drawing), .Status, .Stamp. */}}
+{{/* The KVM console is the guestbook. The form works without JS (a plain POST and a redirect back); with JS it goes
+     through htmx and can carry a drawing (assets/js/oekaki.js); while the KVM is offline it does not go at all, with
+     data-nolink or data-nonet above it (assets/js/net.js). Entries show after moderation.
+     Data: .Enabled, .Entries (ID, Name, Text, Reply, At, Drawing), .Status, .Stamp. */}}
 {{define "unit-kvm"}}
 <section class="u kvm" style="--h:5" aria-labelledby="gbh" id="unit-kvm">
-  {{/* Пасхалка (assets/js/toys.js): код Konami или пять тапов по надписи — BIOS Setup поверх консоли. */}}
+  {{/* An easter egg (assets/js/toys.js): the Konami code or five taps on the caption, BIOS Setup over the console. */}}
   <div class="bios" hidden role="dialog" aria-label="{{t "bios.title"}}">
     <p class="b-title">{{t "bios.title"}}</p>
     <p class="b-tabs"><b>main</b> advanced boot exit</p>
@@ -84,5 +84,5 @@
 </section>
 {{end}}
 
-{{/* В стойке (content/racks.yaml) юнит получает всю страницу, а сам берёт из неё .Guestbook. */}}
+{{/* In the rack (content/racks.yaml) the unit gets the whole page and takes .Guestbook from it. */}}
 {{define "slot-kvm"}}{{template "unit-kvm" .Guestbook}}{{end}}

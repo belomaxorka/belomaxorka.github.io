@@ -1,11 +1,12 @@
-// Игрушки стойки, без которых всё работает: пасхалки и мелкие кнопки «как на настоящем железе».
-//   - BIOS на KVM: код Konami (↑↑↓↓←→←→BA) или пять быстрых тапов по надписи «kvm · гостевая» — экран BIOS Setup
-//     поверх консоли. Три настройки меняют стойку: радуга на диодах («на 20% круче»), ровный свет вместо мигания,
-//     экран POST при перезагрузке сервера. Стрелки — выбор, Enter или пробел — сменить, Esc — выйти. Выбор помнится.
-//   - RESET на сервере: отверстие под скрепку — сервер перезагружается (power.js гасит его и грузит заново), на его
-//     ЖК пробегает POST.
-//   - UID на сервере: «найди меня» — синий диод мигает, пока не нажмёшь ещё раз.
-// Погасший юнит inert (power.js): его кнопки не нажимаются, BIOS на обесточенном KVM не открывается.
+// The rack's toys, which nothing else needs: easter eggs and small buttons "like on real hardware".
+//   - the BIOS on the KVM: the Konami code (up up down down left right left right B A) or five quick taps on the
+//     "kvm · guestbook" caption, a BIOS Setup screen over the console. Three settings change the rack: a rainbow on
+//     the LEDs ("20% cooler"), steady light instead of blinking, a POST screen when the server restarts. The arrows
+//     choose, Enter or space change, Esc leaves. The choice is remembered.
+//   - RESET on the server: a hole for a paper clip; the server restarts (power.js turns it off and boots it), POST
+//     runs on its LCD.
+//   - UID on the server: "find me", the blue LED blinks until pressed again.
+// A dark unit is inert (power.js): its buttons do not press, the BIOS of a KVM without power does not open.
 (() => {
   const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
   const store = {
@@ -21,8 +22,8 @@
   apply();
 
   // ---------- BIOS ----------
-  // Ловится до всех (capture на window): ← и → — ещё и переход к соседней стойке (aisle.js); когда ↑↑↓↓ уже набраны,
-  // они идут в код, а не в проход, иначе посреди кода уехала бы вся стойка.
+  // Caught before everyone (capture on window): left and right also move to the next rack (aisle.js); once up up down
+  // down are typed they go to the code, not the aisle, or the whole rack would leave in the middle of the code.
   let typed = 0;
   addEventListener('keydown', (e) => {
     const t = e.target;
@@ -69,8 +70,8 @@
     const c = shown?.querySelector('[data-clock]');
     if (c) c.textContent = '[' + new Date().toLocaleTimeString('en-GB', { timeZone: root.dataset.tz || undefined }) + ']'; // the site's zone (Page.TZ)
   }
-  // Подписи значений — data-yes/data-no: атрибут data-on html/template принял бы за обработчик события (on…) и
-  // экранировал бы как строку JS, с кавычками.
+  // The values' captions are data-yes/data-no: html/template would take a data-on attribute for an event handler
+  // (on...) and escape it as a JS string, with quotes.
   function paint() {
     shown.querySelectorAll('[data-opt]').forEach((b) => {
       const on = !!opts[b.dataset.opt];
@@ -99,8 +100,8 @@
     }
   }
 
-  // ---------- RESET и UID на сервере ----------
-  // Без JS эти кнопки ничего не умеют — они скрыты; показать после каждой раскладки (новая стойка, htmx).
+  // ---------- RESET and UID on the server ----------
+  // Without JS these buttons can do nothing, so they are hidden; shown after every layout (a new rack, htmx).
   const reveal = () => document.querySelectorAll('.srv button.uid[hidden], .srv .rst[hidden]').forEach((b) => { b.hidden = false; });
   document.addEventListener('rack:laidout', reveal);
   document.addEventListener('DOMContentLoaded', reveal);
@@ -118,7 +119,7 @@
       uid.setAttribute('aria-pressed', String(on));
     }
   });
-  // Сервер загрузился после RESET: на ЖК — POST (если его не выключили в BIOS), потом обычные кадры.
+  // The server booted after RESET: POST on its LCD (unless the BIOS turned it off), then the usual frames.
   document.addEventListener('rack:unit', (e) => {
     if (!posting || e.detail?.key !== 'srv' || !e.detail.on) return;
     posting = false;

@@ -1,4 +1,4 @@
-{{/* Кнопки 88x31: две полосы, люди и сайты. Список — content/buttons.yaml, картинки — assets/88x31/. */}}
+{{/* 88x31 buttons: two strips, people and sites. The list is content/buttons.yaml, the pictures assets/88x31/. */}}
 {{define "unit-buttons"}}
 <section class="u stick mine" style="--h:3" aria-labelledby="btn-mine">
   <div class="face">
@@ -28,9 +28,9 @@
 </section>
 {{end}}
 
-{{/* «Показать все» для узкого экрана: стена показывает первые три ряда, остальное — по этой клавише
-     (assets/css/units/stickers.css). Без JS: <details> без содержимого — просто переключатель, CSS читает [open].
-     На широкой стене клавиши нет. */}}
+{{/* "Show all" for a narrow screen: the wall shows its first three rows, the rest behind this key
+     (assets/css/units/stickers.css). Without JS: a <details> without content is just a toggle, CSS reads [open].
+     A wide wall has no key. */}}
 {{define "b88-more"}}<details class="more"><summary class="key"><span class="m-all">{{t "btn.show_all" .}}</span><span class="m-less">{{t "btn.show_less"}}</span>{{template "icon" "more"}}</summary></details>{{end}}
 
 {{define "b88"}}{{if .link}}<a class="b88" href="{{.link}}"{{ext .link}} title="{{.title}}">{{else}}<span class="b88" title="{{.title}}">{{end}}<img src="{{asset (printf "88x31/%s" .image)}}" width="88" height="31" alt="{{.title}}" loading="lazy" decoding="async">{{if .link}}</a>{{else}}</span>{{end}}
