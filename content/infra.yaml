@@ -19,10 +19,10 @@ memes:
     alt:
       en: "a LEGO box «disorganized network closet», ages 12+: a minifigure among burning racks and cable spaghetti"
       ru: "коробка LEGO «Disorganized network closet», 12+: человечек посреди горящих стоек и кабельной лапши"
-  - file: lego-it.jpg
+  - file: serverroom.jpg
     alt:
-      en: "a LEGO IT set: a sysadmin minifigure, a server rack, patch cords and a keyboard"
-      ru: "набор LEGO IT: сисадмин, серверная стойка, патч-корды и клавиатура"
+      en: "the server room: boxes piled on a cart in an empty room, a waterfall of cables up to the ceiling"
+      ru: "серверная: коробки свалены на тележку посреди пустой комнаты, к потолку уходит водопад кабелей"
   - file: oncall.jpg
     alt:
       en: "a grey wolf fursuiter types on a laptop at an office desk: the admin on call"
