@@ -1,5 +1,7 @@
 /* Токены. По умолчанию тёмная тема (чёрная стойка), светлая — бежевое железо из 90-х.
-   Цвета ЖК заданы парами -d/-l: site-api подставляет пару из обложки трека в <style id="cover-palette">. */
+   Цвета ЖК заданы парами -d/-l: site-api подставляет пару из обложки трека в <style id="cover-palette">.
+   Пара из обложки не обязана следовать теме: чёрная обложка даёт чёрный экран с белым текстом и в светлой теме,
+   белая — бумажный экран и в тёмной. Поэтому --lcd ставится только на фон --lcd-bg, не на панель. */
 @property --lcd { syntax: "<color>"; inherits: true; initial-value: #ffb547; }
 @property --lcd-bg { syntax: "<color>"; inherits: true; initial-value: #1b1306; }
 @property --lcd-dim { syntax: "<color>"; inherits: true; initial-value: #a87a35; }

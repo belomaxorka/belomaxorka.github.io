@@ -52,7 +52,12 @@
 .media-week li a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; }
 .media-week li a:hover { text-decoration: underline; }
 .media-week li small { grid-column: 2; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-.media-week li b { grid-column: 3; grid-row: 1 / span 2; font: 400 18px/1 var(--f-lcd); color: var(--lcd); }
+/* Счётчик — маленький ЖК: цвета из обложки бывают любыми (бумажный экран в тёмной теме, чёрный в светлой),
+   поэтому текст ЖК стоит только на фоне ЖК. */
+.media-week li b {
+  grid-column: 3; grid-row: 1 / span 2; font: 400 18px/1 var(--f-lcd); color: var(--lcd);
+  background: var(--lcd-bg); padding: 3px 6px 2px; border-radius: 2px; box-shadow: inset 0 0 0 1px var(--edge);
+}
 .media-week li:not(:has(small)) a { grid-row: span 2; }
 
 /* Мониторинг: столбики последних проверок. */
