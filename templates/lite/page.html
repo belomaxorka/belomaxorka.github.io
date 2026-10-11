@@ -162,7 +162,7 @@ infp-t · {{t "lcd.mbti2"}}{{template "lite-lcd-close"}}
 {{/* ИБП = подвал: заряд, нагрузка, счётчик, исходники. */}}
 {{define "lite-ups"}}{{template "lite-silk" (print (t "ups.label") " · cbr 1000 va")}}{{with .UPS}}
 {{template "lite-lcd-open"}}{{if .OK}}{{if .OnBattery}}{{t "ups.battery"}}{{else}}{{t "ups.mains"}}{{end}} · {{.Charge}}% · {{t "ups.load" .Load}} · {{t "ups.runtime" .RuntimeMin}}{{else}}{{t "ups.online"}} · {{t "ups.nodata"}}{{end}}{{template "lite-lcd-close"}}{{end}}
-<br><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8"><b>hosted on belomaxorka infrastructure</b>{{with .Visits}}{{if .OK}} · {{t "visits" (num .Views) (num .Visitors)}}{{end}}{{end}}<br>
+<br><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8"><b>hosted on <a href="https://infra.belomaxorka.dev/">belomaxorka infrastructure</a></b>{{with .Visits}}{{if .OK}} · {{t "visits" (num .Views) (num .Visitors)}}{{end}}{{end}}<br>
 {{t "ups.updated" (date .Updated)}} · {{t "ups.sources"}} <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev">{{t "ups.site"}}</a>, <a href="https://git.belomaxorka.dev/belomaxorka/site-api">site-api</a></font>{{end}}
 
 {{/* /lab: хост Proxmox и контейнеры. */}}

@@ -13,7 +13,7 @@
     {{end}}
     <div class="sticker" aria-hidden="true" data-sticker="ups" data-back="{{t "note.back"}}">{{th "ups.sticker"}}</div>
     <div class="meta">
-      <span><b>hosted on belomaxorka infrastructure</b></span>
+      <span><b>hosted on <a href="https://infra.belomaxorka.dev"{{ext "https://infra.belomaxorka.dev"}}>belomaxorka infrastructure</a></b></span>
       {{with .Visits}}{{if .OK}}<span>{{t "visits" (num .Views) (num .Visitors)}}</span>{{end}}{{end}}
       <span>{{t "ups.updated" (date .Updated)}} · {{t "ups.sources"}} <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev" target="_blank" rel="noopener">{{t "ups.site"}}</a>, <a href="https://git.belomaxorka.dev/belomaxorka/site-api" target="_blank" rel="noopener">site-api</a></span>
     </div>

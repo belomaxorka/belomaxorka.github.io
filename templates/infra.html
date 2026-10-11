@@ -1,0 +1,279 @@
+{{/* infra.belomaxorka.dev: «hosted on belomaxorka infrastructure» с сайта ведёт сюда. Мем в духе stupid.fish technologies
+     (teidesu): «видео» в рамке, заголовок Times, ссылка на fastfetch, status // source. belomaxorka ≈ беломор + махорка,
+     поэтому сервер курит папиросу под табличкой «не курить», иногда кашляет, а внизу — плашка «минздрав предупреждает».
+     site-api рендерит "/" шаблоном infra, "/fetch" — infra-fetch (живые данные хоста из Proxmox, ИБП из NUT, Gatus).
+     Без скриптов: сцена — SVG с CSS-анимацией. Кнопка 88x31 — /88x31/infra.gif (docs/tools/make_88x31.py, infra). */}}
+{{define "infra" -}}
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>belomaxorka infrastructure</title>
+<meta name="description" content="{{t "infra.desc"}}">
+<link rel="icon" href="/favicon.ico">
+<meta property="og:type" content="website">
+<meta property="og:title" content="belomaxorka infrastructure">
+<meta property="og:description" content="{{t "infra.desc"}}">
+<meta property="og:url" content="https://infra.belomaxorka.dev/">
+<meta property="og:image" content="https://infra.belomaxorka.dev{{asset "og/infra.png"}}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{t "infra.scene"}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#000000">
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; background: #000; color: #fff; }
+  body {
+    min-height: 100vh; min-height: 100dvh; box-sizing: border-box; padding: 32px 16px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    font-family: 'Times New Roman', Times, serif; text-align: center; overflow-x: hidden;
+  }
+  a { color: #fff; }
+  .video { display: block; width: 440px; max-width: 100%; height: auto; border: 4px #000 solid; outline: 2px #fff solid; background: #0c0d10; }
+  h1 { font-size: 2.5rem; font-weight: 400; margin: 8px 0 32px; line-height: 1.1; }
+  footer { margin-top: 4px; }
+  .badge { margin-top: 24px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: .85rem; color: #bbb; }
+  .badge img { image-rendering: pixelated; display: block; }
+  .badge details { max-width: 100%; }
+  .badge summary { cursor: pointer; }
+  .badge input { width: 440px; max-width: calc(100vw - 32px); box-sizing: border-box; margin-top: 6px; font: 12px ui-monospace, Consolas, monospace; background: #111; color: #ddd; border: 1px solid #444; padding: 6px; }
+  .warn {
+    margin-top: 32px; width: 440px; max-width: 100%; box-sizing: border-box; padding: 10px 14px;
+    background: #fff; color: #000; border: 3px solid #000; outline: 2px solid #fff;
+    font: 700 15px/1.25 Arial, Helvetica, sans-serif; text-transform: uppercase; letter-spacing: .02em;
+  }
+  .warn b { display: block; font-size: 12px; margin-bottom: 2px; }
+
+  /* the scene */
+  .rig { animation: shake 9s infinite; }
+  .smoke circle { fill: #c9ced6; opacity: 0; transform-box: fill-box; transform-origin: center; animation: puff 4.9s linear infinite; }
+  .smoke circle:nth-child(2) { animation-delay: -.7s; }
+  .smoke circle:nth-child(3) { animation-delay: -1.4s; }
+  .smoke circle:nth-child(4) { animation-delay: -2.1s; }
+  .smoke circle:nth-child(5) { animation-delay: -2.8s; }
+  .smoke circle:nth-child(6) { animation-delay: -3.5s; }
+  .smoke circle:nth-child(7) { animation-delay: -4.2s; }
+  .smoke .burst { animation: burst 9s infinite; }
+  .ember { animation: ember 2.4s ease-in-out infinite; }
+  .glow { animation: glow 2.4s ease-in-out infinite; }
+  .cough { opacity: 0; animation: cough 9s infinite; }
+  .led { animation: blink 1.3s steps(1) infinite; }
+  .led.b { animation-duration: .9s; animation-delay: -.3s; }
+  .led.c { animation-duration: 1.7s; animation-delay: -.8s; }
+  .led.d { animation-duration: .7s; animation-delay: -.1s; }
+  .pwr { animation: breathe 3s ease-in-out infinite; }
+  @keyframes puff {
+    0% { transform: translate(0, 0) scale(.35); opacity: 0; }
+    8% { opacity: .55; }
+    45% { transform: translate(-9px, -42px) scale(1.5); opacity: .38; }
+    100% { transform: translate(10px, -96px) scale(3.2); opacity: 0; }
+  }
+  @keyframes burst {
+    0%, 86% { transform: translate(0, 0) scale(.3); opacity: 0; }
+    88% { transform: translate(-4px, -4px) scale(1.4); opacity: .75; }
+    100% { transform: translate(-26px, -70px) scale(4.5); opacity: 0; }
+  }
+  @keyframes shake {
+    0%, 86%, 92%, 100% { transform: translate(0, 0); }
+    87% { transform: translate(-2px, 1px); }
+    88% { transform: translate(2px, -1px); }
+    89% { transform: translate(-2px, 0); }
+    90% { transform: translate(1px, 1px); }
+    91% { transform: translate(-1px, 0); }
+  }
+  @keyframes cough { 0%, 86% { opacity: 0; } 88%, 97% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes ember { 0%, 100% { fill: #ff6a1a; } 50% { fill: #ffb347; } }
+  @keyframes glow { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+  @keyframes blink { 0% { opacity: 1; } 50% { opacity: .2; } }
+  @keyframes breathe { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+  @media (max-width: 540px) { h1 { font-size: 2rem; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, .smoke circle { animation: none !important; }
+    .smoke circle { opacity: .25; }
+    .smoke circle:nth-child(2) { transform: translate(-6px, -24px) scale(1.2); }
+    .smoke circle:nth-child(3) { transform: translate(-8px, -48px) scale(1.8); opacity: .18; }
+    .smoke .burst, .cough { opacity: 0; }
+  }
+</style>
+</head>
+<!-- 0LvRjtCx0L7Qv9GL0YLQvdC+0Lkg0LLQsNGA0LLQsNGA0LUg0L3QsCDQsdCw0LfQsNGA0LUg0L3QvtGBINC+0YLQvtGA0LLQsNC70Lg= -->
+<body>
+<svg class="video" viewBox="0 0 320 180" width="440" height="248" role="img" aria-label="{{t "infra.scene"}}">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c1f24"/><stop offset="1" stop-color="#0d0e11"/></linearGradient>
+    <radialGradient id="hot"><stop offset="0" stop-color="#ffb347" stop-opacity=".9"/><stop offset="1" stop-color="#ff6a1a" stop-opacity="0"/></radialGradient>
+    <pattern id="holes" width="10" height="8" patternUnits="userSpaceOnUse"><rect width="10" height="8" fill="#2a2d33"/><rect x="3.5" y="2.5" width="3" height="3" fill="#121316"/></pattern>
+    <filter id="soft" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="2.2"/></filter>
+  </defs>
+  <rect width="320" height="180" fill="url(#wall)"/>
+  <rect y="156" width="320" height="24" fill="#08090b"/>
+  <!-- не курить -->
+  <g transform="translate(46 50)">
+    <circle r="19" fill="#f2f2f2"/>
+    <rect x="-12" y="-2.5" width="15" height="5" fill="#1b1b1b"/><rect x="4" y="-2.5" width="5" height="5" fill="#1b1b1b"/>
+    <path d="M7 -4.5 q2.5 -2.5 0 -5" fill="none" stroke="#1b1b1b" stroke-width="1.6"/>
+    <circle r="16" fill="none" stroke="#d3262e" stroke-width="4.5"/>
+    <line x1="-11.3" y1="-11.3" x2="11.3" y2="11.3" stroke="#d3262e" stroke-width="4.5"/>
+  </g>
+  <!-- the rack -->
+  <rect x="88" y="10" width="148" height="8" fill="#1d1f23"/>
+  <rect x="92" y="18" width="10" height="138" fill="url(#holes)"/>
+  <rect x="222" y="18" width="10" height="138" fill="url(#holes)"/>
+  <rect x="92" y="18" width="1" height="138" fill="#454951"/><rect x="222" y="18" width="1" height="138" fill="#454951"/>
+  <!-- switch, 1U -->
+  <g>
+    <rect x="96" y="40" width="132" height="16" rx="1.5" fill="#26292e" stroke="#0b0c0e"/>
+    <g fill="#0f1012"><rect x="112" y="45" width="8" height="7"/><rect x="123" y="45" width="8" height="7"/><rect x="134" y="45" width="8" height="7"/><rect x="145" y="45" width="8" height="7"/><rect x="156" y="45" width="8" height="7"/><rect x="167" y="45" width="8" height="7"/><rect x="178" y="45" width="8" height="7"/><rect x="189" y="45" width="8" height="7"/></g>
+    <circle class="led" cx="116" cy="44" r=".9" fill="#4ee483"/><circle class="led b" cx="127" cy="44" r=".9" fill="#4ee483"/>
+    <circle class="led c" cx="138" cy="44" r=".9" fill="#4ee483"/><circle class="led d" cx="149" cy="44" r=".9" fill="#ffb547"/>
+    <circle class="led b" cx="160" cy="44" r=".9" fill="#4ee483"/><circle class="led" cx="182" cy="44" r=".9" fill="#4ee483"/>
+    <rect x="112" y="48" width="2" height="9" fill="#3a7bd5"/><rect x="123" y="48" width="2" height="9" fill="#e0b93a"/>
+    <rect x="134" y="48" width="2" height="9" fill="#d9534f"/><rect x="156" y="48" width="2" height="9" fill="#3daa63"/>
+    <rect x="178" y="48" width="2" height="9" fill="#9b6bd6"/>
+  </g>
+  <!-- the server, 2U: it smokes -->
+  <g class="rig">
+    <rect x="96" y="62" width="132" height="36" rx="1.5" fill="#2b2e33" stroke="#0b0c0e"/>
+    <rect x="97" y="63" width="130" height="1" fill="#4b5058"/>
+    <circle cx="98.5" cy="68" r="1.2" fill="#8a9099"/><circle cx="98.5" cy="92" r="1.2" fill="#8a9099"/>
+    <circle cx="225.5" cy="68" r="1.2" fill="#8a9099"/><circle cx="225.5" cy="92" r="1.2" fill="#8a9099"/>
+    <g fill="#1a1c1f" stroke="#3a3e45" stroke-width=".6">
+      <rect x="106" y="67" width="16" height="11"/><rect x="124" y="67" width="16" height="11"/>
+      <rect x="142" y="67" width="16" height="11"/><rect x="160" y="67" width="16" height="11"/>
+    </g>
+    <circle class="led" cx="119.5" cy="69.5" r=".9" fill="#4ee483"/><circle class="led c" cx="137.5" cy="69.5" r=".9" fill="#4ee483"/>
+    <circle class="led b" cx="155.5" cy="69.5" r=".9" fill="#4ee483"/><circle class="led d" cx="173.5" cy="69.5" r=".9" fill="#ffb547"/>
+    <text x="107" y="91" fill="#8a9099" font-family="ui-monospace, Consolas, monospace" font-size="6.5" letter-spacing=".5">belomaxorka</text>
+    <g fill="#141518"><rect x="182" y="80" width="30" height="1.6" rx=".8"/><rect x="182" y="83" width="30" height="1.6" rx=".8"/><rect x="182" y="86" width="30" height="1.6" rx=".8"/><rect x="182" y="89" width="30" height="1.6" rx=".8"/><rect x="182" y="92" width="30" height="1.6" rx=".8"/></g>
+    <circle cx="214" cy="70" r="3.2" fill="#1a1c1f" stroke="#4ee483" stroke-width="1" class="pwr"/>
+    <!-- the papirosa: a pinched cardboard tube, paper with makhorka, ash, the ember -->
+    <g transform="translate(194 87) rotate(-9)">
+      <path d="M0 -2.8 L5 -2.8 Q8 -1.4 11 -2.8 L40 -2.8 L40 2.8 L11 2.8 Q8 1.4 5 2.8 L0 2.8 Z" fill="#f4f1e8" stroke="#9c988c" stroke-width=".5"/>
+      <path d="M8 -1.6 v3.2 M16 -2.8 l2 2.8 l-2 2.8" fill="none" stroke="#b4ae9e" stroke-width=".7"/>
+      <rect x="40" y="-3.1" width="21" height="6.2" fill="#ece5d3" stroke="#9c988c" stroke-width=".5"/>
+      <rect x="61" y="-3.1" width="3" height="6.2" fill="#8d8d8d"/>
+      <circle class="glow" cx="66" cy="0" r="7" fill="url(#hot)"/>
+      <rect class="ember" x="64" y="-3.1" width="3" height="6.2" rx="1" fill="#ff6a1a"/>
+    </g>
+  </g>
+  <g class="smoke" filter="url(#soft)">
+    <circle cx="259" cy="76" r="5"/><circle cx="259" cy="76" r="5"/><circle cx="259" cy="76" r="5"/><circle cx="259" cy="76" r="5"/>
+    <circle cx="259" cy="76" r="5"/><circle cx="259" cy="76" r="5"/><circle cx="259" cy="76" r="5"/>
+    <circle class="burst" cx="200" cy="84" r="6"/>
+  </g>
+  <text class="cough" x="268" y="104" fill="#e9e9e9" font-family="'Times New Roman', Times, serif" font-style="italic" font-size="12" text-anchor="middle">{{t "infra.cough"}}</text>
+  <!-- the router, 1U -->
+  <g>
+    <rect x="96" y="104" width="132" height="16" rx="1.5" fill="#26292e" stroke="#0b0c0e"/>
+    <g fill="#0f1012"><rect x="160" y="108" width="8" height="7"/><rect x="171" y="108" width="8" height="7"/><rect x="182" y="108" width="8" height="7"/><rect x="193" y="108" width="8" height="7"/></g>
+    <circle class="led d" cx="164" cy="107" r=".9" fill="#4ee483"/><circle class="led b" cx="175" cy="107" r=".9" fill="#4ee483"/>
+    <circle class="led c" cx="186" cy="107" r=".9" fill="#ffb547"/>
+    <rect x="163" y="111" width="2" height="9" fill="#3a7bd5"/><rect x="174" y="111" width="2" height="9" fill="#e0b93a"/>
+    <text x="107" y="115" fill="#8a9099" font-family="ui-monospace, Consolas, monospace" font-size="6">opnsense</text>
+  </g>
+  <!-- the ups, 2U at the bottom, with its real charge -->
+  <g>
+    <rect x="96" y="126" width="132" height="28" rx="1.5" fill="#2b2e33" stroke="#0b0c0e"/>
+    <rect x="97" y="127" width="130" height="1" fill="#4b5058"/>
+    <rect x="108" y="132" width="36" height="14" fill="#1b1306" stroke="#0b0c0e"/>
+    <text x="126" y="142" fill="#ffb547" font-family="ui-monospace, Consolas, monospace" font-size="8" text-anchor="middle">{{with .UPS}}{{if .OK}}{{.Charge}}%{{else}}ups{{end}}{{end}}</text>
+    <circle class="pwr" cx="153" cy="139" r="1.6" fill="{{if .UPS.OnBattery}}#ffb547{{else}}#4ee483{{end}}"/>
+    <g fill="#141518"><rect x="170" y="132" width="40" height="1.6" rx=".8"/><rect x="170" y="136" width="40" height="1.6" rx=".8"/><rect x="170" y="140" width="40" height="1.6" rx=".8"/><rect x="170" y="144" width="40" height="1.6" rx=".8"/></g>
+    <text x="214" y="151" fill="#8a9099" font-family="ui-monospace, Consolas, monospace" font-size="5.5" text-anchor="end">ups · cbr 1000 va</text>
+  </g>
+</svg>
+<h1>belomaxorka infrastructure</h1>
+<div><small>{{th "infra.now"}}</small></div>
+<footer>
+  <a href="https://status.belomaxorka.dev">{{t "infra.status"}}</a>
+  //
+  <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev/src/branch/main/templates/infra.html">{{t "infra.source"}}</a>
+  //
+  <a href="https://belomaxorka.dev">belomaxorka.dev</a>
+  //
+  {{if eq lang "ru"}}<a href="?lang=en" hreflang="en" lang="en">en</a>{{else}}<a href="?lang=ru" hreflang="ru" lang="ru">ru</a>{{end}}
+</footer>
+{{- $code := `<a href="https://infra.belomaxorka.dev"><img src="https://belomaxorka.dev/88x31/infra.gif" width="88" height="31" alt="hosted on belomaxorka infrastructure"></a>`}}
+<div class="badge">
+  <img src="/88x31/infra.gif" width="88" height="31" alt="hosted on belomaxorka infrastructure">
+  <details><summary>{{t "infra.badge"}}</summary><input readonly value="{{$code}}" aria-label="{{t "infra.badge"}}"></details>
+</div>
+<div class="warn" role="note"><b>{{t "infra.warn_head"}}</b>{{t "infra.warn"}}</div>
+</body>
+</html>
+{{- end}}
+
+{{define "ff-pct"}}<span class="{{if ge . 80}}r{{else if ge . 50}}y{{else}}g{{end}}">{{.}}%</span>{{end}}
+{{define "ff-batt"}}<span class="{{if ge . 50}}g{{else if ge . 20}}y{{else}}r{{end}}">{{.}}%</span>{{end}}
+{{define "ff-colors"}}{{if .}}<s class="k2"></s><s class="r2"></s><s class="g2"></s><s class="y2"></s><s class="b2"></s><s class="m2"></s><s class="c2"></s><s class="w2"></s>{{else}}<s class="k"></s><s class="r"></s><s class="g"></s><s class="y"></s><s class="b"></s><s class="m"></s><s class="c"></s><s class="w"></s>{{end}}{{end}}
+
+{{/* «now with a better server!» у stupid.fish ведёт на fastfetch их сервера — здесь он живой: Proxmox, ИБП, Gatus. */}}
+{{define "infra-fetch" -}}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fastfetch · belomaxorka infrastructure</title>
+<link rel="icon" href="/favicon.ico">
+<meta name="theme-color" content="#1e1e2e">
+<style>
+  :root {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace; font-size: 12px; line-height: 1.15;
+    background: #1e1e2e; color: #cdd6f4; color-scheme: dark;
+  }
+  body { margin: 8px; }
+  pre { margin: 0; font: inherit; overflow-x: auto; }
+  .o, i { color: #fab387; font-style: normal; font-weight: 700; }
+  .o { font-weight: 400; }
+  b.o { font-weight: 700; }
+  .sh { color: #a6e3a1; }
+  a { color: #89b4fa; }
+  span.g { color: #a6e3a1; } span.y { color: #f9e2af; } span.r { color: #f38ba8; }
+  s { display: inline-block; width: 3ch; height: 1.15em; vertical-align: top; text-decoration: none; }
+  s.k { background: #45475a; } s.r { background: #f38ba8; } s.g { background: #a6e3a1; } s.y { background: #f9e2af; }
+  s.b { background: #89b4fa; } s.m { background: #f5c2e7; } s.c { background: #94e2d5; } s.w { background: #a6adc8; }
+  s.k2 { background: #585b70; } s.r2 { background: #f47799; } s.g2 { background: #89d88b; } s.y2 { background: #ebd391; }
+  s.b2 { background: #74a8fc; } s.m2 { background: #f2aede; } s.c2 { background: #6ad7ca; } s.w2 { background: #bac2de; }
+  .caret { display: inline-block; width: 2px; background: #cdd6f4; animation: blink 1s infinite; }
+  @keyframes blink { 0%, 50%, 100% { opacity: 1; } 75% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .caret { animation: none; } }
+</style>
+</head>
+<body>
+<pre>
+<span class="sh">&gt; </span>fastfetch
+{{if .Lab.OK}}{{$n := .Lab.Node -}}
+         .://:`              `://:.            <b class="o">root</b>@<b class="o">{{$n.Name}}</b>
+       `hMMMMMMd/          /dMMMMMMh`          ----------------
+        `sMMMMMMMd:      :mMMMMMMMs`           <i>OS</i>: Proxmox VE{{with $n.PVE}} {{.}}{{end}} x86_64
+`<b class="o">-/+oo+/:`</b>.yMMMMMMMh-  -hMMMMMMMy.`<b class="o">:/+oo+/-`</b>   <i>Host</i>: ASUS PRIME Z390-A
+`<b class="o">:oooooooo/`</b>-hMMMMMMMyyMMMMMMMh-`<b class="o">/oooooooo:`</b>   <i>Kernel</i>: Linux{{with $n.Kernel}} {{.}}{{end}}
+  `<b class="o">/oooooooo:`</b>:mMMMMMMMMMMMMm:`<b class="o">:oooooooo/</b>`     <i>Uptime</i>: {{uptime $n.Uptime}}
+    <b class="o">./ooooooo+-</b> +NMMMMMMMMN+ <b class="o">-+ooooooo/.</b>       <i>Guests</i>: {{.Lab.Up}} running, {{.Lab.Total}} total (pct)
+      <b class="o">.+ooooooo+-`oNMMMMNo`-+ooooooo+.</b>         <i>Shell</i>: bash 5.2.37
+        <b class="o">-+ooooooo/.`</b>sMMs`<b class="o">./ooooooo+-</b>           <i>CPU</i>: {{or $n.CPUModel "unknown"}} ({{$n.Cores}}){{with $n.GHz}} @ {{.}} GHz{{end}}
+          <b class="o">:oooooooo/`</b>..`<b class="o">/oooooooo:</b>             <i>GPU</i>: none (it's a server)
+          <b class="o">:oooooooo/`</b>..`<b class="o">/oooooooo:</b>             <i>Memory</i>: {{printf "%.2f" $n.MemGiB}} GiB / {{printf "%.2f" $n.MaxGiB}} GiB ({{template "ff-pct" $n.Mem}})
+        <b class="o">-+ooooooo/.`</b>sMMs`<b class="o">./ooooooo+-</b>           <i>Swap</i>: {{if $n.MaxSwapGiB}}{{printf "%.2f" $n.SwapGiB}} GiB / {{printf "%.2f" $n.MaxSwapGiB}} GiB ({{template "ff-pct" $n.Swap}}){{else}}Disabled{{end}}
+      <b class="o">.+ooooooo+-`oNMMMMNo`-+ooooooo+.</b>         <i>Disk (/)</i>: {{if $n.MaxRootGiB}}{{printf "%.2f" $n.RootGiB}} GiB / {{printf "%.2f" $n.MaxRootGiB}} GiB ({{template "ff-pct" $n.Root}}){{else}}unknown{{end}}
+    <b class="o">./ooooooo+-</b> +NMMMMMMMMN+ <b class="o">-+ooooooo/.</b>       <i>Load</i>: {{with index $n.Load 0}}{{.}}, {{index $n.Load 1}}, {{index $n.Load 2}}{{else}}unknown{{end}}
+  `<b class="o">/oooooooo:`</b>:mMMMMMMMMMMMMm:`<b class="o">:oooooooo/</b>`     <i>Battery (CBR ESN-1KT)</i>: {{with .UPS}}{{if .OK}}{{template "ff-batt" .Charge}} [{{if .OnBattery}}Discharging{{else if .Charging}}Charging{{else}}AC Connected{{end}}]{{else}}unknown{{end}}{{end}}
+`<b class="o">:oooooooo/`</b>-hMMMMMMMyyMMMMMMMh-`<b class="o">/oooooooo:`</b>   <i>Monitoring</i>: {{with .Status}}{{if .OK}}<span class="{{if eq .Up .Total}}g{{else}}r{{end}}">{{.Up}}/{{.Total}}</span> checks up (Gatus){{else}}unknown{{end}}{{end}}
+`<b class="o">-/+oo+/:`</b>.yMMMMMMMh-  -hMMMMMMMy.`<b class="o">:/+oo+/-`</b>   <i>Smoke detector</i>: disabled
+        `sMMMMMMMm:      :dMMMMMMMs`           <i>Locale</i>: ru_RU.UTF-8
+       `hMMMMMMd/          /dMMMMMMh`
+         `://:`              `://:`            {{template "ff-colors" 0}}
+                                               {{template "ff-colors" 1}}
+{{else -}}
+fastfetch: the host is not answering. probably on a smoke break, try again in a minute
+{{end}}
+<span class="sh">&gt; </span><a href="/">cd ..</a><span class="caret">&nbsp;</span>
+</pre>
+</body>
+</html>
+{{- end}}

@@ -22,6 +22,9 @@ works with JavaScript off. On top of that, [htmx](https://htmx.org) refreshes th
 [Alpine.js](https://alpinejs.dev) handles the small interface state. No build step, no Node.
 
 - `templates/`: `layout.html` and `index.html`, one component per rack unit in `templates/units/`
+- `templates/infra.html`: [infra.belomaxorka.dev](https://infra.belomaxorka.dev), where «hosted on belomaxorka
+  infrastructure» leads: a joke page in the genre of stupid.fish technologies (the server smokes a papirosa) and a
+  live fastfetch of the Proxmox host at `/fetch`; its 88x31 is `/88x31/infra.gif`
 - `assets/css/`: plain CSS split by component; `site.css` lists them as `@import`s and site-api joins
   them into one file
 - `assets/js/app.js`: Alpine components, unit heights snapped to whole rack units, rail numbers, cables

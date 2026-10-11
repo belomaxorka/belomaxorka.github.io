@@ -535,6 +535,64 @@ def lcd():
 
 
 # =============================================================================
+# 6. infra (the badge of infra.belomaxorka.dev: a Belomorkanal pack, a papirosa smoking)
+# =============================================================================
+def infra():
+    PACK = hx('f3f5f7')
+    INK = hx('1d3d7a')
+    INK2 = hx('3a6bc0')
+    FRAME_IN = hx('8fa9d6')
+    EDGE = hx('8f8c82')
+    TUBE = hx('fbf9f2')
+    PINCH = hx('bdb8aa')
+    PAPER = hx('efe9db')
+    ASH = (hx('9b9b9b'), hx('7d7d7d'))
+    EMBER = (hx('ff6a1a'), hx('ffb03a'))
+    SMOKE = [hx('8e98a3'), hx('a3acb6'), hx('bcc3cb'), hx('d3d8de'), hx('e3e7eb')]
+    flicker = [1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0]
+    nick, sub = 'belomaxorka', 'infrastructure'
+    f_sub = font('tahoma.ttf', 9)
+    x0, x1 = 24, 83  # text between the papirosa and the inner frame
+    nick_x = x0 + (x1 - x0 + 1 - ink_w(F_NICK, nick)) // 2
+    sub_x = x0 + (x1 - x0 + 1 - ink_w(f_sub, sub)) // 2
+    frames, durs = [], []
+    for i in range(12):
+        im, d = canvas(PACK)
+        # the pack's inner frame
+        d.rectangle((2, 2, W - 3, H - 3), outline=FRAME_IN)
+        # smoke: a ribbon from the ember that rises one pixel per frame, with gaps between the puffs
+        for y in range(21, 3, -1):
+            k = y + i
+            if k % 6 == 0:
+                continue
+            x = 20 + round(1.6 * math.sin(2 * math.pi * k / 12)) - (21 - y) // 9
+            col = SMOKE[min((21 - y) // 4, len(SMOKE) - 1)]
+            d.point((x, y), fill=col)
+            if y > 12 and k % 3 == 1:
+                d.point((x + 1, y), fill=SMOKE[min((21 - y) // 4 + 1, len(SMOKE) - 1)])
+        # the papirosa: a cardboard tube pinched twice, the paper with tobacco, ash and the ember
+        d.rectangle((3, 22, 11, 26), fill=TUBE, outline=EDGE)
+        for px in (5, 8):
+            d.line((px, 23, px, 25), fill=PINCH)
+        d.rectangle((12, 22, 17, 26), fill=PAPER, outline=EDGE)
+        d.rectangle((18, 23, 18, 25), fill=ASH[0])
+        d.point((19, 23), fill=ASH[1])
+        d.point((19, 25), fill=ASH[1])
+        hot = flicker[i]
+        d.rectangle((19, 24, 20, 24), fill=EMBER[hot])
+        d.point((20, 23), fill=EMBER[0])
+        d.point((20, 25), fill=EMBER[0])
+        if hot:
+            d.point((21, 24), fill=hx('ffc58a'))
+        tt(d, nick_x, 14, nick, F_NICK, INK)
+        tt(d, sub_x, 25, sub, f_sub, INK2)
+        border(d, INK)
+        frames.append(im)
+        durs.append(110)
+    return frames, durs
+
+
+# =============================================================================
 # output
 # =============================================================================
 def save_gif(path, frames, durs):
@@ -618,6 +676,7 @@ def main():
         ('terminal', terminal, -1),
         ('rainbow-bolt', bolt, 6),
         ('lcd', lcd, 0),
+        ('infra', infra, 0),
     ]
     only = set(sys.argv[2:])
     items = []

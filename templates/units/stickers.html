@@ -4,7 +4,7 @@
   <div class="face">
     <div class="mine-head"><span class="tape r" id="btn-mine">{{t "btn.mine"}}</span><span class="silk">{{t "btn.mine_hint"}}</span></div>
     <div class="items">
-      {{range .Content.buttons.mine}}{{$code := printf "<a href=\"https://belomaxorka.dev\"><img src=\"https://belomaxorka.dev/88x31/%s\" width=\"88\" height=\"31\" alt=\"belomaxorka\"></a>" .image}}
+      {{range .Content.buttons.mine}}{{$code := printf "<a href=\"%s\"><img src=\"https://belomaxorka.dev/88x31/%s\" width=\"88\" height=\"31\" alt=\"%s\"></a>" (or .link "https://belomaxorka.dev") .image (or .alt "belomaxorka")}}
       <div class="item" x-data="copyCode">
         <img class="b88" src="/88x31/{{.image}}" width="88" height="31" alt="{{.title}}" loading="lazy" decoding="async">
         <button class="key" type="button" hidden :hidden="false" data-code="{{$code}}" data-copy="{{t "btn.copy"}}" data-done="{{t "btn.copied"}}" @click="copy($el)" x-text="label">{{t "btn.copy"}}</button>

@@ -272,5 +272,14 @@
   "ago.yesterday": "yesterday",
   "uptime.m": "%d min",
   "uptime.hm": "%dh %dm",
-  "uptime.dh": "%dd %dh"
+  "uptime.dh": "%dd %dh",
+  "infra.desc": "belomaxorka infrastructure: a homelab on proxmox in a closet, behind a ups. the servers smoke.",
+  "infra.scene": "a rack server smoking a papirosa under a no smoking sign; now and then it coughs",
+  "infra.cough": "*cough*",
+  "infra.now": "now with a <a href=\"/fetch\">genuine intel cpu 0000</a>!",
+  "infra.status": "status",
+  "infra.source": "source",
+  "infra.badge": "badge for your site",
+  "infra.warn_head": "surgeon general's warning:",
+  "infra.warn": "self-hosting is hazardous to your free time"
 }

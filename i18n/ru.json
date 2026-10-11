@@ -272,5 +272,14 @@
   "ago.yesterday": "вчера",
   "uptime.m": "%d мин",
   "uptime.hm": "%d ч %d мин",
-  "uptime.dh": "%d д %d ч"
+  "uptime.dh": "%d д %d ч",
+  "infra.desc": "belomaxorka infrastructure: хоумлаб на proxmox в шкафу, за ибп. серверы курят.",
+  "infra.scene": "сервер в стойке курит папиросу под табличкой «не курить» и иногда кашляет",
+  "infra.cough": "кхе-кхе",
+  "infra.now": "теперь на <a href=\"/fetch\">genuine intel cpu 0000</a>!",
+  "infra.status": "статус",
+  "infra.source": "исходники",
+  "infra.badge": "кнопка для твоего сайта",
+  "infra.warn_head": "минздрав предупреждает:",
+  "infra.warn": "селфхостинг опасен для вашего свободного времени"
 }

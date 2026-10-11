@@ -5,6 +5,7 @@
 
 # Мои кнопки: файлы лежат в /88x31/ (стабильный адрес, чтобы другие могли вставить к себе),
 # у каждой на сайте есть код для копирования. Подписей нет: кнопка сама себя показывает.
+# В коде кнопка ведёт на https://belomaxorka.dev с alt «belomaxorka»; link и alt это меняют.
 mine:
   - title: belomaxorka · rack
     image: rack.gif
@@ -16,6 +17,11 @@ mine:
     image: terminal.gif
   - title: belomaxorka · 20% cooler
     image: rainbow-bolt.gif
+  # для сайтов, которые живут на моём железе: ведёт на мемную страницу инфраструктуры
+  - title: hosted on belomaxorka infrastructure
+    image: infra.gif
+    link: https://infra.belomaxorka.dev
+    alt: hosted on belomaxorka infrastructure
 
 people:
   - title: otomir23
