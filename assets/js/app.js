@@ -84,7 +84,18 @@
       init() { this.label = this.$root.querySelector('[data-copy]').dataset.copy; },
       copy(btn) {
         const done = () => { this.label = btn.dataset.done; setTimeout(() => { this.label = btn.dataset.copy; }, 1600); };
-        const fallback = () => { const d = this.$root.querySelector('details'); d.open = true; d.querySelector('input').select(); };
+        // Буфера обмена нет (http, старый браузер): код открыть и выделить, адрес кошелька — выделить.
+        const fallback = () => {
+          const d = this.$root.querySelector('details'), code = this.$root.querySelector('input.code');
+          if (d) d.open = true;
+          if (code) { code.select(); return; }
+          const addr = this.$root.querySelector('.addr');
+          if (!addr) return;
+          const r = document.createRange(), sel = getSelection();
+          r.selectNodeContents(addr);
+          sel.removeAllRanges();
+          sel.addRange(r);
+        };
         if (!navigator.clipboard) return fallback();
         navigator.clipboard.writeText(btn.dataset.code).then(done, fallback);
       },

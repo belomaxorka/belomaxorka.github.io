@@ -1,0 +1,10 @@
+# Адреса для донатов на юните donate (templates/units/donate.html). Порядок здесь — порядок на сайте.
+#   chain — сеть (на ленте), coins — что на этот адрес можно слать, address — адрес.
+# Новый адрес — проверить по контрольной сумме его сети, прежде чем публиковать: опечатка = потерянные деньги.
+#   TRON: base58check, версия 0x41 (адрес на T…); TON: user-friendly, CRC16 (UQ… — обычный кошелёк, mainnet).
+- chain: TRON
+  coins: TRX · USDT TRC-20
+  address: TDHitRBeobZEbcASN7y9MPYwVYnEur9ULC
+- chain: TON
+  coins: TON · USDT
+  address: UQC9veFZOR8IB6UdzLWtOMERpv2j9rTwIb2dby47G_EBIUzk
