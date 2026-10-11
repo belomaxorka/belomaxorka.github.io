@@ -7,6 +7,7 @@ labels:
   Site (Tor): tor
   Site (Yggdrasil): ygg
   Blog: blog
+  Infra page: infra
   Site API: api
   Git (Forgejo): git
   Vault (Vaultwarden): vault
