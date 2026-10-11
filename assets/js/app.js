@@ -124,14 +124,15 @@
     }));
 
     // Выдвижной юнит: ручка на левом ухе. Без JS это ссылка на /u/<имя> (страница с выдвинутым юнитом), с JS
-    // htmx подгружает ящик под юнит (/fragments/unit/<имя>), повторное нажатие задвигает.
+    // htmx подгружает ящик под юнит (/fragments/unit/<имя>), повторное нажатие задвигает. Запрос идёт от ручки:
+    // так net.js знает, чей это ящик, и у юнита без сети вместо загрузки выдвигает ящик с ошибкой.
     Alpine.data('pull', () => ({
       toggle() {
         const el = this.$el, name = el.dataset.unit, box = document.getElementById('drawer-' + name);
         if (!box || !window.htmx) { location.href = el.href; return; }
         if (box.classList.contains('open')) { box.dispatchEvent(new CustomEvent('drawer:shut')); return; }
         el.setAttribute('aria-busy', 'true');
-        htmx.ajax('GET', '/fragments/unit/' + name, { target: box, swap: 'outerHTML' })
+        htmx.ajax('GET', '/fragments/unit/' + name, { source: el, target: box, swap: 'outerHTML' })
           .finally(() => el.removeAttribute('aria-busy'));
       },
     }));

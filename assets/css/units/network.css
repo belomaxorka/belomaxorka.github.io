@@ -108,10 +108,9 @@
   :is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.has-nic, .rack.nonet .u.has-nic, .u.unlinked):not(.off) :is(.lcd, .screen)::after { animation: nolink 1.6s steps(2, jump-none) infinite; }
 }
 @keyframes nolink { 50% { opacity: .35; } }
-/* Без связи обложки не загрузить: лоток пустой, в ящике медиасервера — серые квадраты (как без питания, power.css). */
-:is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) .u.media.has-nic img.tray, .u.media.unlinked img.tray,
-:is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) #drawer-media .media-week img,
-.u.media.unlinked + #drawer-media .media-week img { object-position: 200px 0; }
+/* Без связи обложки не загрузить: лоток пустой (как без питания, power.css). */
+:is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) .u.media.has-nic img.tray,
+.u.media.unlinked img.tray { object-position: 200px 0; }
 :is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off), .rack.nonet) .u.media.has-nic img.tray,
 .u.media.unlinked img.tray { background: repeating-linear-gradient(135deg, var(--void) 0 6px, var(--panel) 6px 12px); }
 /* И играть нечему: VU-метр гаснет. */
@@ -123,6 +122,27 @@
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked).ct:not(.off) .meter i { background: var(--led-off); box-shadow: none; animation: none; }
 /* Без линка гаснет и своя лампа сети у юнита (net на сервере). */
 :is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked) .led.net { background: var(--led-off); box-shadow: none; animation: none; }
+
+/* Ящик юнита без сети: никаких деталей, только та же ошибка, что на его экранах (надписи — data-* у .slide, шаблон
+   drawer). Детали в разметке остаются, их просто не видно; выдвинутый без сети ящик net.js не загружает, а показывает
+   пустым (data-later) и загружает, когда связь вернётся. */
+:is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) + .drawer.open .slide,
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) + .drawer.open .slide { position: relative; }
+:is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) + .drawer.open .slide > *,
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) + .drawer.open .slide > * { visibility: hidden; }
+:is(.rack:has(#rack-body > .u.rtr.off), .rack.nonet) .u.has-nic:not(.off) + .drawer.open .slide::after,
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) + .drawer.open .slide::after {
+  content: attr(data-nonet); position: absolute; left: 50%; top: 50%; translate: -50% -50%;
+  white-space: pre; text-align: center; padding: 8px 18px; border-radius: 3px;
+  font: 400 20px/1.05 var(--f-lcd); letter-spacing: .06em;
+  background: var(--lcd-bg); color: var(--lcd); text-shadow: 0 0 6px color-mix(in srgb, var(--lcd) 45%, transparent);
+  box-shadow: inset 0 0 0 2px var(--edge), inset 0 3px 10px #0007;
+}
+:is(.rack:has(#rack-body > .u.tor.off) .u.has-nic, .u.unlinked):not(.off) + .drawer.open .slide::after { content: attr(data-nolink) "\A" attr(data-nonet); }
+@media (prefers-reduced-motion: no-preference) {
+  :is(.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.has-nic, .rack.nonet .u.has-nic, .u.unlinked):not(.off) + .drawer.open .slide::after { animation: nolink 1.6s steps(2, jump-none) infinite; }
+}
+.drawer[data-later] .slide { min-height: calc(var(--U) * 2); }
 
 /* Роутер без WAN или без LAN (net.js): на его ЖК «нет линка», лампа WAN гаснет. */
 .rtr:is(.nowan, .nolan):not(.off) .lcd { position: relative; color: transparent; text-shadow: none; }

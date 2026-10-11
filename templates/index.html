@@ -34,10 +34,11 @@
 <div class="u blank free" style="--h:4" aria-hidden="true"><div class="face"></div></div>
 {{end}}
 
-{{/* Выдвинутый юнит: детали из detail-<имя> и ручка «задвинуть». Данные: вся страница, .Open — имя юнита. */}}
+{{/* Выдвинутый юнит: детали из detail-<имя> и ручка «задвинуть». Данные: вся страница, .Open — имя юнита.
+     data-nolink и data-nonet — что ящик показывает вместо деталей, когда у юнита нет сети (assets/js/net.js). */}}
 {{define "drawer"}}
 <div class="drawer open" id="drawer-{{.Open}}" x-data="drawer" @keydown.escape="shut()">
-  <div class="slide">
+  <div class="slide" data-nolink="{{t "net.lost"}}" data-nonet="{{t "net.nointernet"}}">
     {{detail .Open .}}
     <a class="key shut" href="{{.Rack.Path}}#unit-{{.Open}}" @click.prevent="shut()">{{t "drawer.shut"}}</a>
   </div>

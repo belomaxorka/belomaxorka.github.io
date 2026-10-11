@@ -2,8 +2,8 @@
 //
 // Юнит в сети, когда его корд в порту, а коммутатор и роутер работают. Нет — юнит офлайн: на экранах «связь потеряна /
 // нет интернета», гаснут диоды сетевой карты и порта, обложка, VU-метр, лампы мониторинга (assets/css/units/
-// network.css), и он не обновляется: опрос htmx отменяется, а вернулась связь — один раз обновляется, если что-то
-// пропустил. Причины:
+// network.css), его ящик — без деталей, с той же ошибкой, и он не обновляется: опрос htmx и загрузка ящика
+// отменяются, а вернулась связь — один раз обновляется, если что-то пропустил. Причины:
 //   - корд выдернут: тянешь вилку из сетевой карты юнита — корд выходит из гнезда, вытягивается из органайзера и
 //     повисает; связи нет только у этого юнита. LAN или WAN роутера (на остальных стойках — аплинк к R1) — нет
 //     интернета у всей стойки. Поднести вилку к гнезду (или тапнуть по ней) — воткнётся;
@@ -72,11 +72,15 @@
       rtr.classList.toggle('nolan', cut('lan'));
     }
     rk.classList.toggle('nonet', cut('lan') || cut('wan') || cut('uplink'));
-    // Связь вернулась — кто пропустил обновление, обновляется.
+    // Связь вернулась — кто пропустил обновление, обновляется, пустые ящики загружаются.
     for (const u of missed) {
       if (!u.isConnected) missed.delete(u);
       else if (!offline(u)) { missed.delete(u); refresh(u); }
     }
+    body.querySelectorAll(':scope > .drawer.open[data-later]').forEach((d) => {
+      const u = d.previousElementSibling;
+      if (u && !offline(u)) fill(d);
+    });
   }
 
   // Офлайн: нет своего линка, обесточен коммутатор или роутер, нет интернета у стойки (то же, что видно на экранах).
@@ -88,17 +92,45 @@
   }
 
   // Офлайн-юнит не обновляется: его опрос htmx (медиа, монитор, журнал) отменяется — ни нового трека за надписью, ни
-  // новой палитры ЖК (она приходит вместе с медиа). Запросы, которые шлёт не сам юнит (форма гостевой, ящики), идут.
+  // новой палитры ЖК (она приходит вместе с медиа). Его ящик (запрос от ручки, app.js) не загружается: выдвигается
+  // пустым, с той же ошибкой, что на экранах (network.css), и загружается, когда связь вернётся. Форма гостевой идёт:
+  // её отправляет сам посетитель.
   const missed = new Set();
   document.addEventListener('htmx:beforeRequest', (e) => {
-    const u = e.target;
-    if (!(u instanceof Element) || u.parentElement?.id !== 'rack-body' || !offline(u)) return;
+    const t = e.target;
+    if (!(t instanceof Element)) return;
+    const handle = t.closest('.pull[data-unit]'), u = handle ? handle.parentElement : t;
+    if (u.parentElement?.id !== 'rack-body' || !offline(u)) return;
     e.preventDefault();
-    missed.add(u);
+    if (handle) empty(handle); else missed.add(u);
   });
   function refresh(u) {
     const url = u.getAttribute('hx-get');
     if (url && window.htmx) htmx.ajax('GET', url, { source: u, target: u, swap: 'outerHTML' });
+  }
+
+  // Ящик без деталей (data-later): тот же компонент drawer (app.js) — задвигается ручкой, — в нём только ошибка.
+  function empty(handle) {
+    const box = document.getElementById('drawer-' + handle.dataset.unit), body = document.getElementById('rack-body');
+    if (!box || box.classList.contains('open') || !body) return;
+    const d = document.createElement('div'), slide = document.createElement('div');
+    d.className = 'drawer open';
+    d.id = box.id;
+    d.dataset.later = '';
+    d.setAttribute('x-data', 'drawer');
+    slide.className = 'slide';
+    slide.dataset.nolink = body.dataset.nolink || '';
+    slide.dataset.nonet = body.dataset.nonet || '';
+    d.append(slide);
+    box.replaceWith(d);
+  }
+
+  // Связь вернулась: в пустой ящик — детали (только его содержимое: сам ящик уже выдвинут и не выезжает заново).
+  function fill(d) {
+    const handle = d.previousElementSibling?.querySelector(':scope > .pull[data-unit]');
+    if (!handle || !window.htmx) return;
+    delete d.dataset.later;
+    htmx.ajax('GET', '/fragments/unit/' + handle.dataset.unit, { source: handle, target: d.querySelector(':scope > .slide'), swap: 'outerHTML', select: '.slide' });
   }
 
   // ---------- корды ----------
