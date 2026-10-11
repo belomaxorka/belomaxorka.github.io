@@ -20,13 +20,24 @@
 </div>
 {{end}}
 
+{{/* Роутер. Кроме WAN и LAN — запасные входы на сайт (content/uplinks.yaml, все, кроме самого https): гнёзда-ссылки,
+     как кольцо на патч-панели, лента — подпись (port), в подсказке — адрес. Лампа — проверка Gatus из поля check:
+     горит — вход работает, красная — нет; без WAN или LAN у роутера (net.js) гаснет, как и лампы мониторинга без
+     связи. Ссылка на лёгкую версию — порт «http»: спрятана среди портов. Остальное на роутере — декор. */}}
 {{define "unit-router"}}
-<div class="u rtr" style="--h:1" aria-hidden="true">
+<div class="u rtr" style="--h:1">
   <div class="face">
-    <div class="tor-id"><span class="brand">opnsense</span><span class="silk">{{t "net.router"}}</span></div>
-    <div class="rtr-ports"><span class="silk">wan</span><i class="jack wan" data-port="wan"></i><span class="silk">lan</span><i class="jack" data-port="lan"></i><i class="jack"></i><i class="jack"></i></div>
-    <span class="lcd" data-nowan="{{t "net.router_nowan"}}" data-nolan="{{t "net.router_nolan"}}">{{t "net.router_lcd"}}</span>
-    <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led wan"></i>wan</span></div>
+    <div class="tor-id" aria-hidden="true"><span class="brand">opnsense</span><span class="silk">{{t "net.router"}}</span></div>
+    <div class="rtr-ports">
+      <span class="silk" aria-hidden="true">wan</span><i class="jack wan" data-port="wan" aria-hidden="true"></i><span class="silk" aria-hidden="true">lan</span><i class="jack" data-port="lan" aria-hidden="true"></i>
+      <nav class="uplinks" aria-label="{{t "net.uplinks"}}">
+        {{- range .Content.uplinks}}{{if .port}}{{$u := .}}{{$st := "off"}}{{range $.Status.Lamps}}{{if eq .Name $u.check}}{{$st = .State}}{{end}}{{end}}
+        <a class="port up" href="{{.url}}"{{ext .url}} title="{{.name}} · {{.url}}" data-uplink="{{.id}}"><i class="jack"></i><span class="tape{{if eq .id "tor"}} r{{else if eq .id "ygg"}} b{{end}}">{{.port}}</span><i class="led{{with $st}} {{.}}{{end}}"></i></a>
+        {{- end}}{{end}}
+      </nav>
+    </div>
+    <span class="lcd" aria-hidden="true" data-nowan="{{t "net.router_nowan"}}" data-nolan="{{t "net.router_nolan"}}">{{t "net.router_lcd"}}</span>
+    <div class="leds silk" aria-hidden="true"><span><i class="led pwr"></i>pwr</span><span><i class="led wan"></i>wan</span></div>
   </div>
 </div>
 {{end}}

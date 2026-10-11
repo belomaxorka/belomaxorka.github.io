@@ -230,6 +230,7 @@
   "net.router_lcd": "wan ok · dns over tls",
   "net.router_nowan": "wan: no carrier",
   "net.router_nolan": "lan: no carrier",
+  "net.uplinks": "ways into the site",
   "cable.uplink_r1": "uplink to r1 ↑",
   "cable.uplink": "to the internet ↑",
   "cable.power": "220 V",
