@@ -1,0 +1,166 @@
+{{/* Лёгкая версия: та же стойка для старых браузеров (Netscape, IE, Lynx, Dillo) — HTML 3.2, без CSS и скриптов.
+     Рендерит site-api на lite.belomaxorka.dev (по http тоже: старые браузеры не умеют нынешний TLS) из той же
+     страницы (web.Page), что и стойку: юниты те же и в том же порядке (content/racks.yaml), у каждого — шаблон
+     lite-<имя> ниже, нет его — юнита в лёгкой версии нет (органайзеры, коммутатор, заглушки). Цвета — атрибутами
+     bgcolor/color, шрифт — <font> в каждой ячейке (в таблицы старые браузеры его не наследуют). Пакетов, ламп и
+     живых обновлений нет: страница — снимок на момент запроса. */}}
+{{define "lite" -}}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>{{if eq .Rack.Path "/"}}{{t "meta.title.home"}}{{else}}{{t "meta.title" (t (print "rack." .Rack.ID)) (t (print "rack." .Rack.ID ".sub"))}}{{end}}</title>
+<meta name="description" content="{{t (print "meta.desc." .Rack.ID)}}">
+<meta name="robots" content="noindex">
+</head>
+<body bgcolor="#15171a" text="#d6d8dc" link="#8ab4ff" vlink="#c39bff" alink="#ffffff">
+<center>
+<table width="640" border="0" cellspacing="0" cellpadding="4">
+<tr>
+<td valign="bottom"><font face="Verdana,Arial,Helvetica,sans-serif" size="5" color="#ffffff"><b>belomaxorka.dev</b></font><br>
+<font face="Verdana,Arial,Helvetica,sans-serif" size="2" color="#9aa0a8">{{t "rack.cap"}} · r{{.Rack.N}} · {{t (print "rack." .Rack.ID)}}{{if ne .Rack.Path "/"}} — {{t (print "rack." .Rack.ID ".sub")}}{{end}}</font></td>
+<td align="right" valign="bottom"><font face="Verdana,Arial,Helvetica,sans-serif" size="2">{{if eq .Lang "en"}}<b>[en]</b>{{else}}[<a href="?lang=en">en</a>]{{end}} {{if eq .Lang "ru"}}<b>[ru]</b>{{else}}[<a href="?lang=ru">ru</a>]{{end}}</font></td>
+</tr>
+<tr>
+<td colspan="2"><font face="Verdana,Arial,Helvetica,sans-serif" size="2">{{t "lite.racks"}}: {{range .Racks}}{{if .Current}}<b>[r{{.N}} {{t (print "rack." .ID)}}]</b>{{else}}<a href="{{.Path}}">r{{.N}} {{t (print "rack." .ID)}}</a>{{end}} {{end}}</font></td>
+</tr>
+</table>
+
+<table width="640" border="0" cellspacing="0" cellpadding="6" bgcolor="#0b0c0e">
+<tr><td>
+<table width="100%" border="0" cellspacing="4" cellpadding="8">
+{{- $stubbed := false}}
+{{- range .Rack.Units}}
+{{- if and $.Rack.Stub (eq . "ups")}}{{template "lite-stub" $}}{{$stubbed = true}}{{end}}
+{{- with lite . $}}
+<tr><td bgcolor="#2b2e34"><font face="Verdana,Arial,Helvetica,sans-serif" size="2">{{.}}</font></td></tr>
+{{- end}}
+{{- end}}
+{{- if and .Rack.Stub (not $stubbed)}}{{template "lite-stub" .}}{{end}}
+</table>
+</td></tr>
+</table>
+
+<table width="640" border="0" cellspacing="0" cellpadding="4">
+<tr><td><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8">{{t "lite.about"}} <a href="{{.URL}}{{.Rack.Path}}">{{t "lite.full"}}</a><br>
+best viewed with any browser</font></td></tr>
+</table>
+</center>
+</body>
+</html>
+{{end}}
+
+{{/* Подпись юнита, как шелкография на его панели. */}}
+{{define "lite-silk"}}<font size="1" color="#9aa0a8">{{.}}</font><br>{{end}}
+
+{{/* Экран юнита: тёмная плашка с янтарным текстом. */}}
+{{define "lite-lcd-open"}}<table border="0" cellspacing="0" cellpadding="6" bgcolor="#1a1407"><tr><td><font face="Courier New,Courier,monospace" size="2" color="#ffb238">{{end}}
+{{define "lite-lcd-close"}}</font></td></tr></table>{{end}}
+
+{{/* Лампа: зелёная, жёлтая, красная, погасшая. */}}
+{{define "lite-led"}}<font color="{{if eq . "err"}}#ff4d4d{{else if eq . "warn"}}#ffc53d{{else if eq . "off"}}#55595f{{else}}#3fd16b{{end}}">●</font>{{end}}
+
+{{define "lite-stub"}}
+<tr><td bgcolor="#2b2e34" height="120" align="center"><font face="Verdana,Arial,Helvetica,sans-serif" size="2">{{template "lite-lcd-open"}}{{t "rack.stub"}}<br>{{t (print "rack." .Rack.ID ".sub")}}{{template "lite-lcd-close"}}</font></td></tr>
+{{end}}
+
+{{/* Патч-панель = вебринг otoring. */}}
+{{define "lite-patch"}}{{template "lite-silk" (t "ring.panel")}}
+{{with .Ring}}<a href="{{.PrevURL}}">← {{or .PrevName (t "ring.prev")}}</a> · <a href="{{.Home}}">otoring</a> · <a href="{{.RandomURL}}">{{t "ring.random"}}</a> · <a href="{{.NextURL}}">{{or .NextName (t "ring.next")}} →</a>{{end}}{{end}}
+
+{{/* Роутер: входы на сайт — основной и запасные аплинки (content/uplinks.yaml). Лампа — проверка Gatus из поля check:
+     зелёная — работает, красная — нет, погасшая — Gatus о ней не знает. */}}
+{{define "lite-router"}}{{template "lite-silk" (print "opnsense · " (t "net.router") " · " (t "lite.uplinks"))}}
+<table border="0" cellspacing="0" cellpadding="2">
+{{range .Content.uplinks}}{{$u := .}}{{$st := "off"}}{{range $.Status.Lamps}}{{if eq .Name $u.check}}{{$st = .State}}{{end}}{{end}}<tr><td valign="top">{{template "lite-led" $st}}</td><td valign="top"><b>{{.name}}</b></td><td valign="top"><a href="{{.url}}">{{.url}}</a>{{if eq .id "lite"}} <font color="#ffc53d">← {{t "lite.here"}}</font>{{end}}<br><font size="1" color="#9aa0a8">{{loc .note}}</font></td></tr>
+{{end}}</table>{{end}}
+
+{{/* Управление: разделы. */}}
+{{define "lite-mgmt"}}{{template "lite-silk" (t "nav.aria")}}
+[<a href="https://blog.belomaxorka.dev">{{t "nav.blog"}}</a>] {{if .HasCV}}[<a href="/cv.pdf">{{t "nav.cv"}}</a>] {{end}}[<a href="https://status.belomaxorka.dev">{{t "nav.status"}}</a>] [<a href="https://git.belomaxorka.dev/belomaxorka">{{t "nav.git"}}</a>]{{end}}
+
+{{/* Сервер с именем: фото, кто я, ЖК, отпечаток PGP. */}}
+{{define "lite-server"}}{{with .Profile}}
+<table border="0" cellspacing="0" cellpadding="0" width="100%"><tr>
+{{with .Avatars}}<td valign="top" width="170"><img src="{{index . 0}}" width="160" height="160" alt="{{t "me.avatar"}}" border="0"></td>{{end}}
+<td valign="top">
+<font size="5" color="#ffffff"><b>belomaxorka</b></font><br>
+<font size="1" color="#9aa0a8">{{t "me.sub"}}</font><br><br>
+{{$p := .}}{{range .Data.tapes}}{{range .}}{{$c := or .color ""}}<font size="1" color="{{if eq $c "r"}}#ff7a6b{{else if eq $c "b"}}#8ab4ff{{else}}#f1efe8{{end}}"><b>[{{if .age}}{{$p.Age}} {{tn "years" $p.Age}}{{else if .t}}{{t .t}}{{else}}{{.text}}{{end}}]</b></font> {{end}}<br>{{end}}
+<br>{{th "me.intro"}}<br><br>
+{{template "lite-lcd-open"}}{{t "lcd.hello"}} · {{if eq .DaysToBirthday 0}}{{t "lcd.bday_today"}}{{else if gt .DaysToBirthday 0}}{{t "lcd.bday_in" .DaysToBirthday (tn "days" .DaysToBirthday)}}{{else}}{{t "lcd.web2"}}{{end}}<br>
+{{t "lcd.web"}} · {{t "lcd.web2"}}<br>
+{{t "lcd.lab"}} · {{t "lcd.lab2"}}<br>
+infp-t · {{t "lcd.mbti2"}}{{template "lite-lcd-close"}}
+{{with .Data.colors}}<br>{{t "lcd.colors"}}: {{range .}}<font color="{{.}}">■</font> {{end}}{{end}}
+{{with .Data.pgp}}<br>pgp · {{t "me.pgp"}}:<br><tt>{{.}}</tt>{{end}}
+</td></tr></table>{{end}}{{end}}
+
+{{/* Медиасервер = Koito: что играет. */}}
+{{define "lite-media"}}{{template "lite-silk" (t "media.aria")}}{{with .Music}}
+{{template "lite-lcd-open"}}{{if .OK}}{{if .Playing}}► {{t "media.playing"}}{{else}}■ {{t "media.last" (ago .At)}}{{end}}<br>
+<a href="{{.Link}}"><font color="#ffd27a">{{.Track}}</font></a><br>
+{{.Artists}}{{with .Album}} · {{.}}{{end}}{{with .Duration}} · {{mmss .}}{{end}}{{else}}■ koito<br>{{t "media.silence"}}{{end}}{{template "lite-lcd-close"}}{{end}}{{end}}
+
+{{/* Мониторинг = Gatus: лампы и сводка. */}}
+{{define "lite-monitor"}}{{template "lite-silk" (t "mon.aria")}}{{with .Status}}
+{{if .OK}}{{template "lite-lcd-open"}}{{t "mon.up" .Up .Total}} · {{if .Down}}{{t "mon.down" (join .Down ", ")}}{{else if .Slow}}{{t "mon.slow" .Slow .SlowMs}}{{else}}{{t "mon.fast" .AvgMs}}{{end}}{{if .Span}}<br>{{t "mon.uptime_all" .Uptime}} · {{t "mon.span" (uptime .Span)}}{{end}}{{template "lite-lcd-close"}}
+<br>{{range .Lamps}}{{template "lite-led" .State}}&nbsp;{{.Label}} &nbsp; {{end}}
+{{else}}{{template "lite-lcd-open"}}{{t "mon.silent"}} · {{t "mon.unavailable"}}{{template "lite-lcd-close"}}{{end}}{{end}}{{end}}
+
+{{/* Журнал: прослушивания и редкие события, новые сверху. */}}
+{{define "lite-syslog"}}{{template "lite-silk" "syslog · koito, gatus, ups, proxmox, wakapi"}}
+{{template "lite-lcd-open"}}{{with .Syslog}}{{range .}}<font color="#a07a2a">{{stamp .At}} {{.Src}}</font> {{if .What}}{{if .URL}}<a href="{{.URL}}"><font color="#ffd27a">{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}</font></a>{{else}}{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}{{end}}{{else}}{{if .Now}}{{t "log.now"}} {{end}}{{if .URL}}<a href="{{.URL}}"><font color="#ffd27a">{{.Text}}</font></a>{{else}}{{.Text}}{{end}}{{end}}<br>
+{{end}}{{else}}{{t "log.quiet"}}{{end}}{{template "lite-lcd-close"}}{{end}}
+
+{{/* Свитч = контакты. */}}
+{{define "lite-switch"}}{{template "lite-silk" (t "sw.title")}}
+{{range .Content.contacts}}{{if and .link (or (not .needs) $.HasCV)}}{{template "lite-led" (or .led "")}}&nbsp;<a href="{{.link}}">{{loc .name}}</a>{{else}}{{template "lite-led" "off"}}&nbsp;<font color="#9aa0a8">{{loc .name}}</font>{{end}} &nbsp; {{end}}{{end}}
+
+{{/* Донаты: адреса кошельков. */}}
+{{define "lite-donate"}}{{template "lite-silk" (print (t "donate.title") " · " (t "donate.hint"))}}
+{{range .Content.donate}}<b>{{.chain}}</b> <font size="1" color="#9aa0a8">{{.coins}}</font><br><tt>{{.address}}</tt><br>{{end}}{{end}}
+
+{{/* KVM = гостевая книга: записи и форма (обычный POST, как без JS на стойке). */}}
+{{define "lite-kvm"}}<a name="guestbook"></a>{{template "lite-silk" (print (t "gb.title") " · " (t "gb.moderated"))}}{{with .Guestbook}}
+{{template "lite-lcd-open"}}{{range .Entries}}<font color="#a07a2a">{{or .Name (t "gb.anon")}} · #{{.ID}} · {{stamp .At}}</font><br>
+{{with .Text}}{{.}}<br>{{end}}{{with .Reply}}<font color="#8ab4ff">» {{.}}</font><br>{{end}}{{with .Drawing}}<a href="{{.}}"><font color="#ffd27a">{{t "lite.drawing"}}</font></a><br>{{end}}<br>
+{{else}}{{if .Enabled}}{{t "gb.none"}}{{else}}{{t "gb.off"}}{{end}}{{end}}{{template "lite-lcd-close"}}
+{{if .Enabled}}<br>
+{{with .Status}}<font color="{{if eq . "sent"}}#3fd16b{{else}}#ff4d4d{{end}}"><b>{{t (printf "gb.%s" .)}}</b></font><br><br>{{end}}
+<form method="post" action="/guestbook">
+<input type="hidden" name="stamp" value="{{.Stamp}}">
+<input type="hidden" name="website" value="">
+{{t "gb.name"}}:<br><input type="text" name="name" size="32" maxlength="32"><br>
+{{t "gb.message"}}:<br><textarea name="text" rows="5" cols="56" wrap="virtual"></textarea><br>
+<input type="checkbox" name="private" value="1"> {{t "gb.private"}}<br>
+<input type="submit" value="{{t "gb.send"}}"> <font size="1" color="#9aa0a8">{{t "gb.rules"}}</font>
+</form>{{end}}{{end}}{{end}}
+
+{{/* Кнопки 88x31: мои, люди, сайты. */}}
+{{define "lite-buttons"}}{{template "lite-silk" (print (t "btn.mine") " · " (t "btn.mine_hint"))}}
+{{range .Content.buttons.mine}}<img src="/88x31/{{.image}}" width="88" height="31" alt="{{.title}}" border="0"> {{end}}<br>
+<tt>&lt;a href="https://belomaxorka.dev"&gt;&lt;img src="https://belomaxorka.dev/88x31/rack.gif"&gt;&lt;/a&gt;</tt><br><br>
+{{template "lite-silk" (t "btn.people")}}{{range .Content.buttons.people}}{{template "lite-b88" .}}{{end}}<br><br>
+{{template "lite-silk" (t "btn.sites")}}{{range .Content.buttons.sites}}{{template "lite-b88" .}}{{end}}{{end}}
+
+{{define "lite-b88"}}{{if .link}}<a href="{{.link}}">{{end}}<img src="{{asset (printf "88x31/%s" .image)}}" width="88" height="31" alt="{{.title}}" border="0">{{if .link}}</a>{{end}} {{end}}
+
+{{/* ИБП = подвал: заряд, нагрузка, счётчик, исходники. */}}
+{{define "lite-ups"}}{{template "lite-silk" (print (t "ups.label") " · cbr 1000 va")}}{{with .UPS}}
+{{template "lite-lcd-open"}}{{if .OK}}{{if .OnBattery}}{{t "ups.battery"}}{{else}}{{t "ups.mains"}}{{end}} · {{.Charge}}% · {{t "ups.load" .Load}} · {{t "ups.runtime" .RuntimeMin}}{{else}}{{t "ups.online"}} · {{t "ups.nodata"}}{{end}}{{template "lite-lcd-close"}}{{end}}
+<br><font size="1" color="#9aa0a8"><b>hosted on belomaxorka infrastructure</b>{{with .Visits}}{{if .OK}} · {{t "visits" (num .Views) (num .Visitors)}}{{end}}{{end}}<br>
+{{t "ups.updated" (date .Updated)}} · {{t "ups.sources"}} <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev">{{t "ups.site"}}</a>, <a href="https://git.belomaxorka.dev/belomaxorka/site-api">site-api</a></font>{{end}}
+
+{{/* /lab: хост Proxmox и контейнеры. */}}
+{{define "lite-pve"}}{{template "lite-silk" (print "proxmox ve · " (t "lab.host"))}}{{with .Lab}}
+<font size="4" color="#ffffff"><b>{{with .Node.Name}}{{.}}{{else}}pve{{end}}</b></font><br>
+{{template "lite-lcd-open"}}{{if .OK}}cpu · {{.Node.Cores}}: {{.Node.CPUText}}% · ram: {{printf "%.1f" .Node.MemGiB}} / {{printf "%.0f" .Node.MaxGiB}} {{t "lab.gib"}}<br>
+{{t "lab.guests_up" .Up .Total}} · {{t "lab.uptime" (uptime .Node.Uptime)}}{{else}}{{t "lab.silent"}} · {{t "lab.silent2"}}{{end}}{{template "lite-lcd-close"}}{{end}}{{end}}
+
+{{define "lite-guests"}}{{with .Lab}}{{if .OK}}
+<table border="0" cellspacing="0" cellpadding="3" width="100%">
+{{range .Guests}}<tr><td>{{template "lite-led" (or (and (not .Running) "err") "")}}</td><td><tt>{{if eq .Type "qemu"}}vm{{else}}ct{{end}}{{.ID}}</tt></td><td><b>{{.Name}}</b></td>
+{{if .Running}}<td><font size="1">cpu {{.CPUText}}% · ram {{.MemMiB}}/{{.MaxMiB}} {{t "lab.mib"}}</font></td><td><font size="1" color="#9aa0a8">{{t "lab.uptime" (uptime .Uptime)}}</font></td>{{else}}<td colspan="2"><font size="1" color="#9aa0a8">{{t "lab.stopped"}}</font></td>{{end}}</tr>
+{{end}}</table>
+{{if .Others}}<font size="1" color="#9aa0a8">{{t "lab.others" .Others .OthersUp}}</font>{{end}}{{end}}{{end}}{{end}}

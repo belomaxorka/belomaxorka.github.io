@@ -1,0 +1,26 @@
+# Входы на сайт: основной и запасные аплинки (роутер на R1, лёгкая версия). Все ведут в тот же site-api.
+#   id   — имя: web, lite, tor, ygg. По id: tor site-api шлёт url в заголовке Onion-Location (Tor Browser
+#          предлагает onion-адрес), lite — «вы здесь» в лёгкой версии;
+#   name — подпись, url — адрес, note — для чего (строка или {en, ru}), check — проверка в Gatus (infra
+#          gatus/config.yaml): по ней горит лампа входа.
+# Откуда они: CT120 uplinks (Tor и Yggdrasil) и lite.belomaxorka.dev (Caddy, http без редиректа) — infra/uplinks.
+- id: web
+  check: belomaxorka.dev
+  name: https
+  url: https://belomaxorka.dev
+  note: {en: "the internet, through cloudflare", ru: "интернет, через cloudflare"}
+- id: lite
+  check: Site (light, http)
+  name: http 1.0
+  url: http://lite.belomaxorka.dev
+  note: {en: "html 3.2 for old browsers: netscape, internet explorer, lynx", ru: "html 3.2 для старых браузеров: netscape, internet explorer, lynx"}
+- id: tor
+  check: Site (Tor)
+  name: tor
+  url: http://wpyf3efefcpshrs2cjuh6tlutvpmu6nwcaob6nouhjyajv4lbbswpvyd.onion
+  note: {en: "onion service, open in tor browser", ru: "onion-сервис, открывать в tor browser"}
+- id: ygg
+  check: Site (Yggdrasil)
+  name: yggdrasil
+  url: http://[200:88bc:4f5d:30b5:52c0:3b61:6d30:a916]/
+  note: {en: "the yggdrasil mesh network", ru: "mesh-сеть yggdrasil"}

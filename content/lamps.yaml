@@ -3,6 +3,9 @@
 # («Proxmox» → proxmox, «Notes (Memos)» → notes).
 labels:
   belomaxorka.dev: site
+  Site (light, http): lite
+  Site (Tor): tor
+  Site (Yggdrasil): ygg
   Blog: blog
   Site API: api
   Git (Forgejo): git
