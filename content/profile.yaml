@@ -9,13 +9,15 @@ person:
   first: {en: Roman, ru: Роман}
   last: {en: Kelesidis, ru: Келесидис}
   username: belomaxorka
-  job: {en: web developer, ru: веб-разработчик}
+  job: {en: full-stack web developer, ru: фулстек веб-разработчик}
 tapes:
   - - {t: me.pronouns}
     - {age: true}
     - {text: infp-t, color: r}
     - {text: ru · en}
-  - - {t: me.backend, color: b}
-    - {t: me.frontend, color: b}
-    - {t: me.devops, color: b}
-    - {t: me.selfhosted, color: b}
+  - - {t: me.fullstack, color: b}
+    - {text: laravel, color: b}
+    - {text: vue · react, color: b}
+  - - {t: me.devops}
+    - {t: me.network}
+    - {t: me.homelab}

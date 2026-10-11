@@ -9,7 +9,7 @@
 # node docs/tools/og/make.mjs. В /sitemap.xml стойка попадает сама, заглушка (stub) — нет, и у неё noindex.
 - id: home
   path: /
-  units: [patch, brush, tor, brush, router, mgmt, server, media, monitor, disks, syslog, switch, kvm, buttons, blank, ups]
+  units: [patch, brush, tor, brush, router, mgmt, server, media, monitor, syslog, switch, kvm, buttons, blank, ups]
 
 - id: lab
   path: /lab

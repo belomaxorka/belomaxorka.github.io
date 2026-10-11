@@ -105,6 +105,12 @@
   .rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.has-nic:not(.off) :is(.lcd, .screen)::after { animation: nolink 1.6s steps(2, jump-none) infinite; }
 }
 @keyframes nolink { 50% { opacity: .35; } }
+/* Без связи обложки не загрузить: лоток пустой, в ящике медиасервера — серые квадраты (как без питания, power.css). */
+.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.media.has-nic img.tray,
+.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) #drawer-media .media-week img { object-position: 200px 0; }
+.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.media.has-nic img.tray { background: repeating-linear-gradient(135deg, var(--void) 0 6px, var(--panel) 6px 12px); }
+/* И играть нечему: VU-метр гаснет. */
+.rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.media.has-nic .vu i { background: var(--led-off); box-shadow: none; }
 /* Без связи статусы неизвестны: лампы мониторинга и шкалы контейнеров гаснут. */
 .rack:has(#rack-body > :is(.u.tor, .u.rtr).off) .u.mon.has-nic:not(.off) .matrix .led,
 .rack:has(#rack-body > .u.tor.off) .u.ct.has-nic:not(.off) .meter i { background: var(--led-off); box-shadow: none; animation: none; }

@@ -209,7 +209,7 @@
   const RING = ['#e0b93a', '#3a7bd5', '#e0b93a', '#e0b93a'];
   const DATA = '#3a7bd5', MGMT = '#9b6bd6', LAN = '#3daa63', FIBER = '#e8c21a', UPFIBER = '#2bb3c0';
   // Юниты с сетевой картой: как питаемые в power.js, плюс контейнеры /lab (data-power).
-  const NETWORKED = ['mgmt', 'srv', 'media', 'mon', 'disks', 'log', 'sw', 'kvm', 'pve'];
+  const NETWORKED = ['mgmt', 'srv', 'media', 'mon', 'log', 'sw', 'kvm', 'pve'];
 
   function el(name, attrs, parent) {
     const node = document.createElementNS(NS, name);
@@ -228,6 +228,12 @@
 
   function plug(svg, x, y, color, w = 9, h = 11) {
     el('rect', { x: x - w / 2, y: y - h / 2, width: w, height: h, rx: 2, fill: color, stroke: 'rgba(0,0,0,.45)' }, svg);
+  }
+
+  // Штекер, вставленный в гнездо: по его центру и почти во всё гнездо, по краю видна только рамка.
+  function seat(svg, b, color) {
+    plug(svg, b.cx, b.cy, color, Math.max(6, b.w - 5), Math.max(6, b.h - 4));
+    el('rect', { x: b.cx - b.w * .18, y: b.cy - b.h * .16, width: b.w * .36, height: b.h * .32, rx: 1, fill: 'rgba(0,0,0,.22)' }, svg);
   }
 
   // Сетевые карты юнитов и вертикальный органайзер: декор, который есть только с JS (как разъёмы питания).
@@ -289,8 +295,8 @@
       if (!t || !t.offsetParent || lowest - j.y > 4) return;
       const p = box(t.querySelector('.jack'));
       cable(svg, `M${j.cx} ${j.b - 3} C${j.cx} ${j.b + 26}, ${p.cx} ${p.y - 30}, ${p.cx} ${p.y + 3}`, RING[i], 3.5);
-      plug(svg, j.cx, j.b - 5, RING[i], 9, 10);
-      plug(svg, p.cx, p.y + 5, RING[i], 8, 9);
+      seat(svg, j, RING[i]);
+      seat(svg, p, RING[i]);
       lit(n);
     });
 
@@ -303,7 +309,7 @@
       const v = box(vmEl), x = v.x + v.w - 4;
       const y = lowEl ? box(lowEl).cy + 6 : from.y - 14;
       cable(svg, `M${from.cx} ${from.y + 2} C${from.cx} ${y + 8}, ${from.cx - 10} ${y}, ${from.cx - 24} ${y} L${x + 14} ${y} C${x + 4} ${y}, ${x} ${y - 6}, ${x} ${y - 18} L${x} ${cap.y + 4} C${x} ${cap.y - 16}, ${x} ${cap.y - 30}, ${x} -10`, color, 3);
-      plug(svg, from.cx, from.y + 4, color, 8, 9);
+      seat(svg, from, color);
       if (label) el('text', { x: x + 10, y: cap.y - 5, class: 'lbl small' }, svg).textContent = label;
     };
 
@@ -317,8 +323,8 @@
       if (last) {
         const p = box(last.querySelector('.jack')), n = Number(last.dataset.port) + 1;
         cable(svg, `M${lan.cx} ${lan.y + 2} C${lan.cx} ${lan.y - 22}, ${p.cx} ${p.b + 22}, ${p.cx} ${p.b - 3}`, LAN, 3.5);
-        plug(svg, lan.cx, lan.y + 4, LAN, 8, 9);
-        plug(svg, p.cx, p.b - 5, LAN, 8, 9);
+        seat(svg, lan, LAN);
+        seat(svg, p, LAN);
         lit(n);
       }
       fiber(box(rtr.querySelector('[data-port="wan"]')), FIBER, svg.dataset.uplink);
@@ -345,8 +351,8 @@
       const y = yBase + (i % 6) * 2.4;                   // и поперёк — своими полосками
       const color = u.classList.contains('mgmt') ? MGMT : DATA;
       cable(svg, `M${j.x + 2} ${j.cy} C${j.x - 14} ${j.cy}, ${x + 10} ${j.cy}, ${x} ${j.cy - 12} L${x} ${y + 10} C${x} ${y}, ${x + 6} ${y}, ${x + 14} ${y} L${p.cx - 12} ${y} C${p.cx - 3} ${y}, ${p.cx} ${y - 4}, ${p.cx} ${p.b - 3}`, color, 2.4);
-      plug(svg, j.x + 4, j.cy, color, 7, 8);
-      plug(svg, p.cx, p.b - 5, color, 7, 8);
+      seat(svg, j, color);
+      seat(svg, p, color);
       if (!u.classList.contains('off')) port(n).classList.add('link');
     });
   }

@@ -28,5 +28,5 @@
 </section>
 {{end}}
 
-{{define "b88"}}{{if .link}}<a class="b88" href="{{.link}}" title="{{.title}}">{{else}}<span class="b88" title="{{.title}}">{{end}}<img src="{{asset (printf "88x31/%s" .image)}}" width="88" height="31" alt="{{.title}}" loading="lazy" decoding="async">{{if .link}}</a>{{else}}</span>{{end}}
+{{define "b88"}}{{if .link}}<a class="b88" href="{{.link}}"{{ext .link}} title="{{.title}}">{{else}}<span class="b88" title="{{.title}}">{{end}}<img src="{{asset (printf "88x31/%s" .image)}}" width="88" height="31" alt="{{.title}}" loading="lazy" decoding="async">{{if .link}}</a>{{else}}</span>{{end}}
 {{end}}

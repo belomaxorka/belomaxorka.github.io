@@ -15,6 +15,10 @@
 .u.off .lcd, .u.off .lcd *, .drawer.off .lcd, .drawer.off .lcd * { color: transparent !important; text-shadow: none !important; }
 .u.off .led, .u.off .vu i, .drawer.off .led { background: var(--led-off) !important; box-shadow: inset 0 1px 1px #0006 !important; animation: none !important; }
 .u.off img, .drawer.off img { filter: grayscale(1) brightness(.4); }
+/* Обложек без питания нет: лоток пустой, как когда обложки нет, в ящике — серые квадраты. Картинка уезжает за край
+   своей рамки, рамка и фон остаются (то же без связи — assets/css/units/network.css). */
+.u.off img.tray, .drawer.off .media-week img { object-position: 200px 0; }
+.u.off img.tray { background: repeating-linear-gradient(135deg, var(--void) 0 6px, var(--panel) 6px 12px); }
 /* И не нажимается: power.js ставит ему inert — ни клика, ни наведения, ни фокуса, курсор обычный. pointer-events —
    ещё и для браузера без inert. ИБП (у него .off, когда села батарея) inert не бывает: его кнопка включает стойку. */
 .u[inert], .drawer[inert] { pointer-events: none; user-select: none; cursor: default; }

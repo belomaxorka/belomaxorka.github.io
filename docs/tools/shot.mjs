@@ -3,6 +3,7 @@
 //
 //   node docs/tools/shot.mjs http://127.0.0.1:8099/ [--sizes 390x844,1366x768] [--out shots] [--full]
 //        [--dark] [--light] [--reduced] [--nojs] [--wait 1500] [--eval "js-выражение"] [--chrome путь]
+//        [--clip x,y,w,h[,scale]]   — только этот кусок страницы (координаты от верха документа), увеличенный
 //
 // Печатает ошибки консоли, исключения, нарушения CSP и горизонтальную прокрутку; PNG кладёт в --out.
 import { spawn } from 'node:child_process';
@@ -11,7 +12,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const args = process.argv.slice(2);
-const url = args.find(a => !a.startsWith('--') && !args[args.indexOf(a) - 1]?.match(/^--(sizes|out|wait|eval|chrome|name)$/));
+const url = args.find(a => !a.startsWith('--') && !args[args.indexOf(a) - 1]?.match(/^--(sizes|out|wait|eval|chrome|name|clip)$/));
 const opt = (k, d) => { const i = args.indexOf('--' + k); return i < 0 ? d : args[i + 1]; };
 const flag = (k) => args.includes('--' + k);
 if (!url) { console.error('usage: node shot.mjs <url> [--sizes WxH,...] [--out dir] [--full] [--dark|--light] [--reduced] [--nojs] [--wait ms] [--eval js]'); process.exit(2); }
@@ -99,7 +100,10 @@ try {
     const extra = opt('eval') && !flag('nojs') ? await evalJS(opt('eval')) : undefined;
 
     let clip;
-    if (flag('full')) {
+    if (opt('clip')) {
+      const [x, y, width, height, scale = 3] = opt('clip').split(',').map(Number);
+      clip = { x, y, width, height, scale };
+    } else if (flag('full')) {
       const m = await send('Page.getLayoutMetrics', {}, s);
       clip = { x: 0, y: 0, width: w, height: Math.min(m.cssContentSize.height, 16000), scale: 1 };
     }

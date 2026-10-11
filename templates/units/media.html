@@ -8,7 +8,7 @@
     <div class="lcd">
       {{if .OK}}
       <span class="d">{{if .Playing}}{{template "icon" "play"}} {{t "media.playing"}}{{else}}{{template "icon" "stop"}} {{t "media.last" (ago .At)}}{{end}}</span><br>
-      <a href="{{.Link}}">{{.Track}}</a><br>
+      <a href="{{.Link}}"{{ext .Link}}>{{.Track}}</a><br>
       <span class="row2">{{.Artists}}{{with .Album}} · {{.}}{{end}}{{with .Duration}} · {{mmss .}}{{end}}</span>
       {{else}}
       <span class="d">{{template "icon" "stop"}} koito</span><br>{{t "media.silence"}}<br><span class="row2 d">{{t "media.nolistens"}}</span>
@@ -34,10 +34,10 @@
   <div class="lcd stats"><span>{{t "week.listens" .Listens}}</span><span>{{t "week.minutes" .Minutes}}</span><span>{{t "week.artists" .Artists}}</span></div>
   <div class="tops">
     <section><h3 class="silk">{{t "week.tracks"}}</h3>
-      <ol>{{range .TopTracks}}<li>{{if .Cover}}<img src="{{.Cover}}" width="32" height="32" alt="" loading="lazy">{{else}}<i class="nocover"></i>{{end}}<a href="{{.Link}}">{{.Name}}</a><small>{{.Artists}}</small><b>{{t "week.plays" .Count}}</b></li>{{end}}</ol>
+      <ol>{{range .TopTracks}}<li>{{if .Cover}}<img src="{{.Cover}}" width="32" height="32" alt="" loading="lazy">{{else}}<i class="nocover"></i>{{end}}<a href="{{.Link}}"{{ext .Link}}>{{.Name}}</a><small>{{.Artists}}</small><b>{{t "week.plays" .Count}}</b></li>{{end}}</ol>
     </section>
     <section><h3 class="silk">{{t "week.top_artists"}}</h3>
-      <ol>{{range .TopArtists}}<li>{{if .Cover}}<img src="{{.Cover}}" width="32" height="32" alt="" loading="lazy">{{else}}<i class="nocover"></i>{{end}}<a href="{{.Link}}">{{.Name}}</a><b>{{t "week.plays" .Count}}</b></li>{{end}}</ol>
+      <ol>{{range .TopArtists}}<li>{{if .Cover}}<img src="{{.Cover}}" width="32" height="32" alt="" loading="lazy">{{else}}<i class="nocover"></i>{{end}}<a href="{{.Link}}"{{ext .Link}}>{{.Name}}</a><b>{{t "week.plays" .Count}}</b></li>{{end}}</ol>
     </section>
   </div>
   {{else}}<p class="lcd">{{t "week.empty"}}</p>{{end}}{{end}}

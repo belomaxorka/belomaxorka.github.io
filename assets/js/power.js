@@ -9,7 +9,7 @@
 (() => {
   // Юниты с питанием; патч-панель и заглушки с наклейками пассивные, как в жизни. Несколько одинаковых юнитов
   // (контейнеры в /lab) различаются атрибутом data-power.
-  const POWERED = ['tor', 'rtr', 'mgmt', 'srv', 'media', 'mon', 'disks', 'log', 'sw', 'kvm', 'pve'];
+  const POWERED = ['tor', 'rtr', 'mgmt', 'srv', 'media', 'mon', 'log', 'sw', 'kvm', 'pve'];
   const NS = 'http://www.w3.org/2000/svg';
   const COLOR = '#4a4f57';
   const PLUG = '#1b1d20';
@@ -271,7 +271,8 @@
     const x0 = rk.left - R.left, b0 = rk.bottom - R.top;
     const wall = x0 > 110;
     const ox = wall ? x0 - 62 : x0 + railW + 120, oy = wall ? b0 - 40 : b0 + 34 + 26;
-    return { wall, s: { x: ox, y: oy + 4 }, o: { x: x0 + railW + 46, y: u.bottom - R.top - 6 } };
+    // s — точка, где вилка в розетке: её центр приходится на отверстия (drawMains рисует розетку вокруг неё).
+    return { wall, s: { x: ox, y: oy - 6 }, o: { x: x0 + railW + 46, y: u.bottom - R.top - 6 } };
   }
 
   function relayout() {
@@ -397,11 +398,12 @@
   function drawMains(r) {
     const p = r.pts, s = r.socket;
     // Розетка на стене (или на полу) и подпись.
-    el('rect', { x: s.x - 16, y: s.y - 22, width: 32, height: 36, rx: 5, class: 'outlet' }, svg);
-    el('circle', { cx: s.x - 6, cy: s.y - 8, r: 2.6, class: 'outlet-hole' }, svg);
-    el('circle', { cx: s.x + 6, cy: s.y - 8, r: 2.6, class: 'outlet-hole' }, svg);
+    // Отверстия — на 2 px ниже s: там центр корпуса воткнутой вилки (он сдвинут к кабелю), и вилка их закрывает.
+    el('rect', { x: s.x - 16, y: s.y - 12, width: 32, height: 36, rx: 5, class: 'outlet' }, svg);
+    el('circle', { cx: s.x - 6, cy: s.y + 2, r: 2.6, class: 'outlet-hole' }, svg);
+    el('circle', { cx: s.x + 6, cy: s.y + 2, r: 2.6, class: 'outlet-hole' }, svg);
     const label = document.getElementById('cables')?.dataset.power;
-    if (r.wall && label) el('text', { x: s.x - 22, y: s.y - 30, class: 'lbl' }, svg).textContent = label;
+    if (r.wall && label) el('text', { x: s.x - 22, y: s.y - 20, class: 'lbl' }, svg).textContent = label;
     let d = `M${p[0].x} ${p[0].y}`;
     for (let i = 1; i < p.length - 1; i++) {
       const mx = (p[i].x + p[i + 1].x) / 2, my = (p[i].y + p[i + 1].y) / 2;
