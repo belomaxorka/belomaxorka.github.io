@@ -19,7 +19,7 @@
   "lite.uplinks": "ways in",
   "lite.here": "you are here",
   "lite.drawing": "[drawing]",
-  "lite.about": "the light version of the rack for old browsers: html 3.2, no css, no scripts, a snapshot of the moment you asked.",
+  "lite.about": "the light version of the rack for old browsers: html 4.01, no css, no scripts, a snapshot of the moment you asked.",
   "lite.full": "the full rack →",
   "lite.only_full": "only in the full rack for now",
   "lab.host": "the host",

@@ -26,4 +26,4 @@
   check: Site (light, http)
   name: http 1.0
   url: http://lite.belomaxorka.dev
-  note: {en: "html 3.2 for old browsers: netscape, internet explorer, lynx", ru: "html 3.2 для старых браузеров: netscape, internet explorer, lynx"}
+  note: {en: "html 4.01 for old browsers: netscape, internet explorer, lynx", ru: "html 4.01 для старых браузеров: netscape, internet explorer, lynx"}
