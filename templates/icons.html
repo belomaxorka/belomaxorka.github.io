@@ -12,6 +12,8 @@
 {{- else if eq . "full"}}<path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/>
 {{- else if eq . "prev"}}<path d="M14.5 5l-7 7 7 7"/>
 {{- else if eq . "next"}}<path d="M9.5 5l7 7-7 7"/>
+{{- else if eq . "sound"}}<path class="solid" d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/>
+{{- else if eq . "mute"}}<path class="solid" d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z"/><path d="M16 9.5l5 5"/><path d="M21 9.5l-5 5"/>
 {{- else if eq . "close"}}<path d="M6 6l12 12"/><path d="M18 6L6 18"/>
 {{- else if eq . "more"}}<path d="M6 9l6 6 6-6"/>
 {{- else if eq . "play"}}<path class="solid" d="M7 5l12 7-12 7z"/>

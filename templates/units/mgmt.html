@@ -16,6 +16,8 @@
       </nav>
       <button class="key" type="button" hidden x-data="lcdToggle" data-cover="{{t "lcd.cover"}}" data-amber="{{t "lcd.amber"}}" @click="toggle" x-text="label">{{t "lcd.cover"}}</button>
       <button class="key" type="button" hidden x-data="themeToggle" data-dark="{{t "theme.dark"}}" data-light="{{t "theme.light"}}" @click="toggle" aria-label="{{t "theme.aria"}}"><i class="led pwr"></i><span x-text="label">{{t "theme.dark"}}</span></button>
+      {{/* Звук серверной (assets/js/sound.js): по умолчанию выключен; без JS кнопки нет. */}}
+      <button class="key snd" type="button" hidden aria-pressed="false" data-yes="{{t "sound.on"}}" data-no="{{t "sound.off"}}" aria-label="{{t "sound.off"}}" title="{{t "sound.off"}}"><span class="i-on">{{template "icon" "sound"}}</span><span class="i-off">{{template "icon" "mute"}}</span></button>
     </div>
   </div>
 </div>

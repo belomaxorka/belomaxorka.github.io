@@ -65,6 +65,8 @@
   "theme.aria": "switch theme",
   "theme.dark": "night",
   "theme.light": "day",
+  "sound.on": "sound: on",
+  "sound.off": "sound: off",
 
   "me.photo": "photo goes here",
   "me.photos": "my telegram avatars",

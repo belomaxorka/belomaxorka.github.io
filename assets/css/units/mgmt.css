@@ -10,3 +10,6 @@
   color: var(--accent); transform: translateY(1px);
   box-shadow: inset 0 2px 3px #0006, 0 1px 0 var(--edge);
 }
+/* Звук (assets/js/sound.js): только значок — динамик или перечёркнутый динамик; подпись в title и aria-label. */
+.mgmt .snd { padding: 0 10px; min-height: 30px; font-size: 14px; }
+.mgmt .snd[aria-pressed="true"] .i-off, .mgmt .snd[aria-pressed="false"] .i-on { display: none; }
