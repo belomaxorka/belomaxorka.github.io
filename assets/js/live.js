@@ -18,7 +18,6 @@
 // гостей есть. Без JS — ничего.
 (() => {
   if (!window.EventSource) return;
-  const NS = 'http://www.w3.org/2000/svg';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const root = document.documentElement;
   let cords = [], token = '';
@@ -145,7 +144,7 @@
   // Путь корда в SVG app.js: группа номер wire, в ней цветной контур — второй.
   const path = (c) => document.querySelectorAll('#cables > g')[c.wire]?.children[1] || null;
   const NET = ['.led.net']; // своя лампа сети у сервера — рядом с сетевой картой мигает и она
-  const unitOf = (body, k) => body.querySelector(`:scope > .u[data-power="${CSS.escape(k)}"]`) || body.querySelector(`:scope > .u.${CSS.escape(k)}`);
+  const unitOf = Rack.unitOf;
   // Лампа порта коммутатора — если в нём линк (её зажигает net.js).
   const port = (c) => (c?.port?.classList.contains('link') ? c.port.querySelector('.led') : null);
 
@@ -202,18 +201,11 @@
     if (!room || !cab) return;
     let svg = document.getElementById('packets');
     if (!svg) {
-      svg = document.createElementNS(NS, 'svg');
-      svg.id = 'packets';
-      svg.setAttribute('class', 'cables packets');
-      svg.setAttribute('aria-hidden', 'true');
-      room.appendChild(svg);
+      svg = Rack.svg('svg', { id: 'packets', class: 'cables packets', 'aria-hidden': 'true' }, room);
     }
     svg.setAttribute('viewBox', cab.getAttribute('viewBox') || '');
     const total = legs.reduce((s, [p]) => s + Math.max(260, p.getTotalLength() * 1.1), 0);
-    const dot = document.createElementNS(NS, 'circle');
-    dot.setAttribute('r', '3.6');
-    dot.setAttribute('class', 'packet');
-    svg.appendChild(dot);
+    const dot = Rack.svg('circle', { r: 3.6, class: 'packet' }, svg);
     let leg = 0, t0 = performance.now();
     const step = (now) => {
       const [p, dir, leds] = legs[leg];
@@ -236,7 +228,7 @@
   // пакет добежал (swap:…ms). Что считать новым — по юниту: у медиасервера текст ЖК (трек), у журнала первая строка,
   // у мониторинга состояние ламп. Нового нет или это не опрос — просто мигают лампы на пути к юниту.
   const SIG = { media: '.lcd', log: 'ol li', mon: '.matrix' };
-  const keyOf = (u) => u && (u.dataset.power || cords.find((c) => c.type === 'nic' && u.classList.contains(c.key))?.key);
+  const keyOf = (u) => u && Rack.keyOf(u, Rack.WIRED);
   document.addEventListener('htmx:beforeSwap', (e) => {
     const t = e.detail.target, elt = e.detail.requestConfig?.elt || e.detail.elt;
     if (!(elt instanceof Element)) return;

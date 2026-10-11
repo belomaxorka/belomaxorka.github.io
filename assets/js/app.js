@@ -222,28 +222,15 @@
   // вверх, к нижнему ряду коммутатора; роутер (на главной) — в коммутатор, его WAN жёлтой оптикой через крышу
   // «в интернет»; на остальных стойках из SFP коммутатора оптика уходит к R1. Всё в одном SVG поверх комнаты,
   // клики проходят насквозь. Силовые кабели рисует power.js.
-  const NS = 'http://www.w3.org/2000/svg';
   const RING = ['#e0b93a', '#3a7bd5', '#e0b93a', '#e0b93a'];
   const GUEST = '#c9ccd2';  // корды гостей онлайн (assets/js/live.js)
   let drawnGuests = 0;      // сколько их уже нарисовано: новый корд протягивается, остальные просто на месте
   const DATA = '#3a7bd5', MGMT = '#9b6bd6', LAN = '#3daa63', FIBER = '#e8c21a', UPFIBER = '#2bb3c0';
-  // Юниты с сетевой картой: как питаемые в power.js, плюс контейнеры /lab (data-power).
-  const NETWORKED = ['mgmt', 'srv', 'media', 'mon', 'log', 'sw', 'kvm', 'pve'];
-  const keyOf = (u) => u.dataset.power || NETWORKED.find((k) => u.classList.contains(k)); // как в power.js
-
-  function el(name, attrs, parent) {
-    const node = document.createElementNS(NS, name);
-    for (const k in attrs) node.setAttribute(k, attrs[k]);
-    if (parent) parent.appendChild(node);
-    return node;
-  }
+  const keyOf = (u) => Rack.keyOf(u, Rack.WIRED); // units with a network card (rack.js)
+  const el = Rack.svg;
 
   function cable(svg, d, color, w) {
-    const g = el('g', {}, svg);
-    const line = { d, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
-    el('path', { ...line, stroke: 'rgba(0,0,0,.35)', 'stroke-width': w + 3, transform: 'translate(0 2)' }, g);
-    el('path', { ...line, stroke: color, 'stroke-width': w }, g);
-    el('path', { ...line, stroke: 'rgba(255,255,255,.28)', 'stroke-width': Math.max(1, w * .3), transform: `translate(${-w * .2} ${-w * .2})` }, g);
+    Rack.setCord(Rack.cord(el('g', {}, svg), color, w), d);
   }
 
   function plug(svg, x, y, color, w = 9, h = 11) {
@@ -335,8 +322,7 @@
 
     // Какие корды этой стойки выдернуты, знает net.js: хвост и вилку такого корда рисует он, здесь — остальной путь
     // до коммутатора (или до лотков).
-    const pulled = new Set();
-    document.dispatchEvent(new CustomEvent('rack:pulled', { detail: pulled }));
+    const pulled = Rack.pulled();
     // Корд с хвостом tail ([от вилки, …, до органайзера]) и путём дальше rest (продолжение: «L…», «C…»). Вилку в гнезде
     // at ставит сам, на дальнем конце — тот, кто позвал. hit — куда хватать (по умолчанию само гнездо).
     const pullable = (key, type, port, at, color, w, tail, rest, hit) => {

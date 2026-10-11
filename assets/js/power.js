@@ -10,10 +10,6 @@
 // говорит тем, кто внутри, что он погас или загрузился.
 // Без JS всего этого нет: юниты просто горят и работают.
 (() => {
-  // Юниты с питанием; патч-панель и заглушки с наклейками пассивные, как в жизни. Несколько одинаковых юнитов
-  // (контейнеры в /lab) различаются атрибутом data-power.
-  const POWERED = ['tor', 'rtr', 'mgmt', 'srv', 'media', 'mon', 'log', 'sw', 'kvm', 'pve'];
-  const NS = 'http://www.w3.org/2000/svg';
   const COLOR = '#4a4f57';
   const PLUG = '#1b1d20';
   const MAINS = '#26292e';       // шнур ИБП
@@ -53,22 +49,17 @@
   const here = () => document.getElementById('room')?.dataset.rack || '';
   let state = null, stateId = null; // питание той стойки, что сейчас в комнате (useRack)
 
-  const ropes = new Map(); // ключ юнита → верёвка
-  let probing = null;      // ключ шнура под мышью (тестер кабеля)
-  let room = null, svg = null, raf = 0, calm = 0, drag = null;
-  let kick = 0; // стойка доехала: куда качнуть кабели при следующей раскладке (1, -1)
+  const ropes = new Map(); // unit key → its cable (rope, rack.js), with its SVG (view) once drawn
+  let probing = null;      // the cable under the mouse (the cable tester)
+  let room = null, svg = null, hand = null;
+  let kick = 0; // the rack has arrived: which way the next layout swings the cables (1, -1)
 
-  const keyOf = (u) => u.dataset.power || POWERED.find((k) => u.classList.contains(k));
+  const keyOf = (u) => Rack.keyOf(u);
+  const el = Rack.svg;
   const units = () => [...document.querySelectorAll('#rack-body > .u')].filter(keyOf);
   const unitBy = (k) => units().find((u) => keyOf(u) === k);
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-
-  function el(name, attrs, parent) {
-    const n = document.createElementNS(NS, name);
-    for (const k in attrs) n.setAttribute(k, attrs[k]);
-    if (parent) parent.appendChild(n);
-    return n;
-  }
+  const held = (r) => (hand?.held?.key === r.key ? hand.held : null);
 
   // Стойка в комнате сменилась (или страница только открылась): её питание, досчитанное до этой минуты. Батарея
   // прошлой стойки досчитана и сохранена, её таймер остановлен; верёвки строятся заново из нового состояния.
@@ -80,6 +71,7 @@
     clearInterval(timer); timer = 0; wasDead = null;
     // Настоящие ЖК ИБП и свет в зале у новой стойки — свои; запомнить их до того, как их подменит симуляция.
     lcdReal = lightReal = null;
+    for (const r of ropes.values()) r.view?.g.remove();
     ropes.clear();
     stateId = id;
     state = rackState(id);
@@ -155,8 +147,15 @@
     svg = document.getElementById('power');
     if (!svg) {
       svg = el('svg', { id: 'power', class: 'cables power', 'aria-hidden': 'true' }, room);
-      svg.addEventListener('pointerdown', grab);
-
+      hand = Rack.hand(svg, () => room, {
+        take: (k) => { const r = ropes.get(k); return r && { plugged: r.plugged }; },
+        pull: (k) => { const r = ropes.get(k); if (r?.plugged) unplug(r); },
+        // Let go near the socket — it goes in; a tap puts a plugged one out and a hanging one in.
+        drop: (k) => { const r = ropes.get(k); if (r && dist(r.pts[0], r.socket) < (r.mains ? 30 : 22)) plug(r); },
+        tap: (k, was) => { const r = ropes.get(k); if (r) { if (was.plugged) unplug(r); else plug(r); } },
+        moved: wake,
+      });
+      for (const r of ropes.values()) r.view = null; // a new room: the cables are drawn anew in it
     }
     units().forEach((u) => {
       if (!u.querySelector(':scope > .psu')) {
@@ -500,7 +499,7 @@
         const dx = o.x - r.outlet.x, dy = o.y - r.outlet.y;
         r.socket = s;
         r.outlet = o;
-        if (r.plugged && drag?.key !== 'mains') r.pts = rest(s, o, r.len, r.n);
+        if (r.plugged && !held(r)) r.pts = rest(s, o, r.len, r.n);
         else r.pts.forEach((p) => { p.x += dx; p.y += dy; p.px += dx; p.py += dy; });
       }
       r.wall = wall;
@@ -521,14 +520,14 @@
         const dx = o.x - r.outlet.x, dy = o.y - r.outlet.y;
         r.socket = s;
         r.outlet = o;
-        if (r.plugged && drag?.key !== k) {
+        if (r.plugged && !held(r)) {
           r.pts = rest(s, o, r.len, r.n);
         } else {
           r.pts.forEach((p) => { p.x += dx; p.y += dy; p.px += dx; p.py += dy; });
         }
       }
     });
-    for (const k of ropes.keys()) if (!seen.has(k)) ropes.delete(k);
+    for (const [k, r] of ropes) if (!seen.has(k)) { r.view?.g.remove(); ropes.delete(k); }
     // Пол и стены комнаты: выдернутая вилка ложится на фальшпол, а не улетает за край страницы.
     for (const r of ropes.values()) { r.floor = R.height - 34; r.right = R.width - 8; }
     if (kick) swing(kick);
@@ -541,7 +540,7 @@
   function swing(dir) {
     if (reduce.matches) return;
     for (const r of ropes.values()) {
-      if (drag?.key === r.key) continue;
+      if (held(r)) continue;
       const n = r.pts.length - 1;
       r.pts.forEach((p, i) => {
         if (i === 0 || i === n) return;
@@ -552,191 +551,92 @@
     }
   }
 
-  // ---------- физика ----------
+  // ---------- physics (rack.js) ----------
   function step(r) {
-    const g = 0.42;                           // гравитация, px за кадр²
-    const damp = reduce.matches ? 0.8 : 0.985; // без анимаций — быстро успокаивается
-    const last = r.pts.length - 1;
-    const pinned = (i) => i === last || (i === 0 && (r.plugged || drag?.key === r.key));
-    let motion = 0;
-    const floor = r.floor ?? Infinity, right = r.right ?? Infinity;
-    const keepIn = (p) => {
-      if (p.y > floor) p.y = floor;
-      if (p.x < 8) p.x = 8; else if (p.x > right) p.x = right;
-    };
-    r.pts.forEach((p, i) => {
-      if (pinned(i)) return;
-      const rub = p.y >= floor - 0.5 ? 0.7 : 1; // на полу кабель не скользит, а ложится
-      const vx = (p.x - p.px) * damp * rub, vy = (p.y - p.py) * damp;
-      p.px = p.x; p.py = p.y;
-      p.x += vx; p.y += vy + g;
-      motion += Math.abs(vx) + Math.abs(vy);
+    return Rack.stepRope(r, {
+      end: r.outlet, seat: r.plugged ? r.socket : null, hold: held(r), reach: r.len * 0.97,
+      damp: reduce.matches ? 0.8 : 0.985, // without animations it calms down at once
     });
-    const head = r.pts[0];
-    if (r.plugged) {
-      head.x = head.px = r.socket.x; head.y = head.py = r.socket.y;
-    } else if (drag?.key === r.key) {
-      // Вилка за пальцем, но не дальше, чем пускает кабель.
-      let tx = drag.x, ty = drag.y;
-      const d = Math.hypot(tx - r.outlet.x, ty - r.outlet.y), max = r.len * 0.97;
-      if (d > max) { tx = r.outlet.x + (tx - r.outlet.x) * max / d; ty = r.outlet.y + (ty - r.outlet.y) * max / d; }
-      head.px = head.x; head.py = head.y;
-      head.x = tx; head.y = ty;
-      keepIn(head);
-      motion += 1;
-    }
-    const tail = r.pts[last];
-    tail.x = tail.px = r.outlet.x; tail.y = tail.py = r.outlet.y;
-    for (let k = 0; k < 16; k++) {
-      for (let i = 0; i < last; i++) {
-        const a = r.pts[i], b = r.pts[i + 1];
-        const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.001;
-        const diff = (d - r.seg) / d;
-        const pa = pinned(i), pb = pinned(i + 1);
-        if (pa && pb) continue;
-        const wa = pa ? 0 : pb ? 1 : 0.5, wb = pb ? 0 : pa ? 1 : 0.5;
-        a.x += dx * diff * wa; a.y += dy * diff * wa;
-        b.x -= dx * diff * wb; b.y -= dy * diff * wb;
-      }
-      r.pts.forEach((p, i) => { if (!pinned(i)) keepIn(p); });
-    }
-    return motion;
   }
 
-  // ---------- рисование ----------
-  function drawMains(r) {
-    const p = r.pts, s = r.socket;
-    // Розетка на стене (или на полу) и подпись.
-    // Отверстия — на 2 px ниже s: там центр корпуса воткнутой вилки (он сдвинут к кабелю), и вилка их закрывает.
-    el('rect', { x: s.x - 16, y: s.y - 12, width: 32, height: 36, rx: 5, class: 'outlet' }, svg);
-    el('circle', { cx: s.x - 6, cy: s.y + 2, r: 2.6, class: 'outlet-hole' }, svg);
-    el('circle', { cx: s.x + 6, cy: s.y + 2, r: 2.6, class: 'outlet-hole' }, svg);
-    const label = document.getElementById('cables')?.dataset.power;
-    if (r.wall && label) el('text', { x: s.x - 22, y: s.y - 20, class: 'lbl' }, svg).textContent = label;
-    let d = `M${p[0].x} ${p[0].y}`;
-    for (let i = 1; i < p.length - 1; i++) {
-      const mx = (p[i].x + p[i + 1].x) / 2, my = (p[i].y + p[i + 1].y) / 2;
-      d += ` Q${p[i].x} ${p[i].y} ${mx} ${my}`;
+  // ---------- drawing ----------
+  // Every cable is drawn once (build) and then only moved (update): a frame changes attributes, not elements.
+  function build(r) {
+    const g = el('g', {}, svg);
+    const v = { g };
+    if (r.mains) {
+      // The wall socket (or the floor's) and its caption; the plug's body sits over the holes when it is in.
+      v.outlet = el('rect', { width: 32, height: 36, rx: 5, class: 'outlet' }, g);
+      v.holes = [el('circle', { r: 2.6, class: 'outlet-hole' }, g), el('circle', { r: 2.6, class: 'outlet-hole' }, g)];
+      v.label = el('text', { class: 'lbl' }, g);
+      v.label.textContent = document.getElementById('cables')?.dataset.power || '';
+      v.cord = el('g', { 'data-cord': r.key }, g);
+      v.paths = Rack.cord(v.cord, MAINS, 6, { shadow: 9, hiW: 1.6, shift: 1.2 });
+      v.plug = el('g', {}, g);
+      el('rect', { x: -11, y: -9, width: 18, height: 18, rx: 4, fill: MAINS, stroke: 'rgba(0,0,0,.5)' }, v.plug);
+      v.pins = [el('rect', { x: 7, y: -6, width: 7, height: 3, rx: 1.5, fill: '#b9bec5' }, v.plug),
+        el('rect', { x: 7, y: 3, width: 7, height: 3, rx: 1.5, fill: '#b9bec5' }, v.plug)];
+      el('circle', { cx: 0, cy: 0, r: 18, class: 'hit', 'data-key': r.key }, v.plug);
+    } else {
+      // The PDU's socket, the cable, the plug: along the cable, facing the unit's inlet when it is in.
+      v.outlet = el('rect', { width: 12, height: 10, rx: 2, fill: '#0c0d0f', stroke: '#3b3f46' }, g);
+      v.cord = el('g', { 'data-cord': r.key }, g);
+      v.paths = Rack.cord(v.cord, COLOR, 4.5, { shadow: 7, hi: 0.22, hiW: 1.2, shift: 1 });
+      v.plug = el('g', {}, g);
+      el('rect', { x: -9, y: -6, width: 14, height: 12, rx: 2.5, fill: PLUG, stroke: 'rgba(255,255,255,.25)' }, v.plug);
+      el('rect', { x: 3, y: -3, width: 3, height: 6, rx: 1, fill: '#9aa0a8' }, v.plug);
+      el('circle', { cx: 0, cy: 0, r: 16, class: 'hit', 'data-key': r.key }, v.plug); // wide, to hit with a finger
     }
-    d += ` L${p[p.length - 1].x} ${p[p.length - 1].y}`;
-    const line = { d, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
-    const cord = el('g', { class: r.key === probing ? 'probe' : '', 'data-cord': r.key }, svg);
-    el('path', { ...line, stroke: 'rgba(0,0,0,.35)', 'stroke-width': 9, transform: 'translate(0 2)' }, cord);
-    el('path', { ...line, stroke: MAINS, 'stroke-width': 6 }, cord);
-    el('path', { ...line, stroke: 'rgba(255,255,255,.28)', 'stroke-width': 1.6, transform: 'translate(-1.2 -1.2)' }, cord);
-    // Вилка: в розетке — корпус поверх неё, кабель уходит вниз; выдернута — штыри наружу, вдоль кабеля.
-    const a = r.plugged ? -Math.PI / 2 : Math.atan2(p[0].y - p[1].y, p[0].x - p[1].x);
-    const g = el('g', { transform: `translate(${p[0].x} ${p[0].y}) rotate(${a * 180 / Math.PI})` }, svg);
-    el('rect', { x: -11, y: -9, width: 18, height: 18, rx: 4, fill: MAINS, stroke: 'rgba(0,0,0,.5)' }, g);
-    if (!r.plugged) {
-      el('rect', { x: 7, y: -6, width: 7, height: 3, rx: 1.5, fill: '#b9bec5' }, g);
-      el('rect', { x: 7, y: 3, width: 7, height: 3, rx: 1.5, fill: '#b9bec5' }, g);
+    return v;
+  }
+
+  function update(r) {
+    const v = r.view ||= build(r);
+    const p = r.pts;
+    if (r.mains) {
+      const s = r.socket;
+      v.outlet.setAttribute('x', s.x - 16); v.outlet.setAttribute('y', s.y - 12);
+      // The holes are 2 px below s: the plugged plug's body (shifted towards its cable) covers them.
+      v.holes.forEach((h, i) => { h.setAttribute('cx', s.x + (i ? 6 : -6)); h.setAttribute('cy', s.y + 2); });
+      v.label.setAttribute('x', s.x - 22); v.label.setAttribute('y', s.y - 20);
+      v.label.style.display = r.wall && v.label.textContent ? '' : 'none';
+      v.pins.forEach((pin) => { pin.style.display = r.plugged ? 'none' : ''; });
+    } else {
+      v.outlet.setAttribute('x', r.outlet.x - 6); v.outlet.setAttribute('y', r.outlet.y - 5);
     }
-    el('circle', { cx: 0, cy: 0, r: 18, class: 'hit', 'data-key': r.key }, g);
+    Rack.setCord(v.paths, Rack.ropePath(p));
+    v.cord.classList.toggle('probe', r.key === probing);
+    // A plugged plug looks into its socket (up for the mains, left for a unit); a hanging one along the cable.
+    const a = r.plugged ? (r.mains ? -Math.PI / 2 : Math.PI) : Math.atan2(p[0].y - p[1].y, p[0].x - p[1].x);
+    v.plug.setAttribute('transform', `translate(${p[0].x} ${p[0].y}) rotate(${a * 180 / Math.PI})`);
   }
 
   function draw() {
-    svg.replaceChildren();
-    for (const r of ropes.values()) {
-      if (r.mains) { drawMains(r); continue; }
-      const p = r.pts;
-      // Розетка PDU.
-      el('rect', { x: r.outlet.x - 6, y: r.outlet.y - 5, width: 12, height: 10, rx: 2, fill: '#0c0d0f', stroke: '#3b3f46' }, svg);
-      let d = `M${p[0].x} ${p[0].y}`;
-      for (let i = 1; i < p.length - 1; i++) {
-        const mx = (p[i].x + p[i + 1].x) / 2, my = (p[i].y + p[i + 1].y) / 2;
-        d += ` Q${p[i].x} ${p[i].y} ${mx} ${my}`;
-      }
-      d += ` L${p[p.length - 1].x} ${p[p.length - 1].y}`;
-      const line = { d, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
-      const cord = el('g', { class: r.key === probing ? 'probe' : '', 'data-cord': r.key }, svg);
-      el('path', { ...line, stroke: 'rgba(0,0,0,.35)', 'stroke-width': 7, transform: 'translate(0 2)' }, cord);
-      el('path', { ...line, stroke: COLOR, 'stroke-width': 4.5 }, cord);
-      el('path', { ...line, stroke: 'rgba(255,255,255,.22)', 'stroke-width': 1.2, transform: 'translate(-1 -1)' }, cord);
-      // Вилка: повёрнута вдоль кабеля; когда воткнута — смотрит в разъём.
-      const a = r.plugged ? Math.PI : Math.atan2(p[0].y - p[1].y, p[0].x - p[1].x);
-      const g = el('g', { transform: `translate(${p[0].x} ${p[0].y}) rotate(${a * 180 / Math.PI})` }, svg);
-      el('rect', { x: -9, y: -6, width: 14, height: 12, rx: 2.5, fill: PLUG, stroke: 'rgba(255,255,255,.25)' }, g);
-      el('rect', { x: 3, y: -3, width: 3, height: 6, rx: 1, fill: '#9aa0a8' }, g);
-      // Широкая невидимая зона, чтобы попасть пальцем.
-      el('circle', { cx: 0, cy: 0, r: 16, class: 'hit', 'data-key': r.key }, g);
-    }
+    for (const r of ropes.values()) update(r);
   }
 
-  function tick() {
+  const anim = Rack.loop(() => {
     let motion = 0;
     for (const r of ropes.values()) motion += step(r);
-    draw();
-    calm = motion < 0.08 && !drag ? calm + 1 : 0;
-    raf = calm > 45 ? 0 : requestAnimationFrame(tick);
-  }
+    return motion;
+  }, draw, () => !!hand?.held);
 
   function wake() {
-    calm = 0;
-    if (!raf && svg) raf = requestAnimationFrame(tick);
+    if (svg) anim.wake();
   }
 
-  // ---------- тестер кабеля ----------
-  // Навёл мышь на вилку — шнур светится целиком. Только переключает класс у уже нарисованного шнура (data-cord), ничего
-  // не перерисовывает: перерисовка прямо на наведении уводила круг из-под нажатия (Chrome перед pointerdown шлёт
-  // pointerover новому кругу) — вилку было не схватить, а «ушёл» исчезнувшему кругу не приходит — подсветка залипала.
-  // Поэтому и смотрим цель каждого движения мыши, а не pointerover/pointerout.
+  // ---------- the cable tester ----------
+  // The mouse over a plug lights its whole cable. Only a class on the cable already drawn (data-cord) changes:
+  // anything drawn anew on hover took the grab zone from under the press (Chrome sends pointerover to the new circle
+  // right before pointerdown), so the plug could not be grabbed and the glow stuck. Hence the target of every mouse
+  // move, not pointerover and pointerout.
   addEventListener('pointermove', (e) => {
-    if (e.pointerType !== 'mouse' || drag || !svg) return;
+    if (e.pointerType !== 'mouse' || hand?.held || !svg) return;
     const k = (e.target instanceof Element && e.target.closest('#power .hit')?.dataset.key) || null;
     if (k === probing) return;
     probing = k;
     svg.querySelectorAll('g[data-cord]').forEach((g) => g.classList.toggle('probe', g.dataset.cord === k));
   }, { passive: true });
-
-  // ---------- руки ----------
-  function local(e) {
-    const R = room.getBoundingClientRect();
-    return { x: e.clientX - R.left, y: e.clientY - R.top };
-  }
-
-  function grab(e) {
-    const k = e.target?.dataset?.key;
-    const r = k && ropes.get(k);
-    if (!r) return;
-    e.preventDefault();
-    const at = local(e);
-    drag = { key: k, ...at, from: at, wasPlugged: r.plugged, moved: false };
-    addEventListener('pointermove', move);
-    addEventListener('pointerup', release);
-    addEventListener('pointercancel', release);
-    wake();
-  }
-
-  function move(e) {
-    if (!drag) return;
-    const at = local(e);
-    drag.x = at.x; drag.y = at.y;
-    if (!drag.moved && dist(at, drag.from) > 6) {
-      drag.moved = true;
-      const r = ropes.get(drag.key);
-      if (r.plugged) unplug(r);
-    }
-    wake();
-  }
-
-  function release() {
-    removeEventListener('pointermove', move);
-    removeEventListener('pointerup', release);
-    removeEventListener('pointercancel', release);
-    if (!drag) return;
-    const r = ropes.get(drag.key);
-    if (r) {
-      if (!drag.moved) {
-        // Тап: воткнутую — вытащить, висящую — воткнуть обратно.
-        if (drag.wasPlugged) unplug(r); else plug(r);
-      } else if (dist(r.pts[0], r.socket) < (r.mains ? 30 : 22)) {
-        plug(r);
-      }
-    }
-    drag = null;
-    wake();
-  }
 
   // Кто ещё следит за вилками (assets/js/sticker.js): событие на каждую выдернутую и воткнутую.
   const told = (key, on) => document.dispatchEvent(new CustomEvent('rack:plug', { detail: { key, on } }));

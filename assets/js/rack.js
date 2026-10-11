@@ -1,5 +1,20 @@
 // What the rack's scripts share. Loaded before them (templates/layout.html), it only defines window.Rack.
+//
+// The scripts also talk through events on document:
+//   rack:layout   (anyone → app.js)     lay the rack out again now: a drawer opened, a cord was pulled, the canvas opened
+//   rack:laidout  (app.js → all)        the rack is laid out; detail.cords — the network cords app.js drew
+//   rack:swap     (aisle.js → all)      another rack is in the room, not shown yet; detail.quiet — it comes without animation
+//   rack:landed   (aisle.js → all)      it has arrived; detail.dir — 1 forward, -1 back
+//   rack:drawing  (app.js → net.js)     the cords are being drawn in; detail — { lag, step } in ms, or null: all at once
+//   rack:unit     (power.js → unit)     a unit went dark or booted (bubbles from the unit; detail.key, detail.on)
+//   rack:power    (power.js → all)      the whole rack went dark or came back; detail.on, detail.why
+//   rack:plug     (power.js → all)      a power plug out or in; detail.key, detail.on
+//   rack:link     (net.js → all)        a network cord out or in; detail.key, detail.on
+//   rack:reset    (toys.js → power.js)  RESET on a unit; detail.key
+//   rack:beep     (power.js → sound.js) the UPS beeps; detail.n times
+// and net.js answers Rack.pulled() for app.js: which cords of this rack are out.
 window.Rack = (() => {
+  // ---------- the toys' memory ----------
   // The toys (power plugs, network cords, the UPS, fallen stickers) remember what a visitor did for a while: a
   // reload or a walk to another rack and back finds them as they were. Not for good: a visitor who comes back
   // later finds the rack running, not dark and unclickable because of what someone did on this device last week.
@@ -22,5 +37,152 @@ window.Rack = (() => {
     };
   }
 
-  return { TOY_TTL, toyStore };
+  // ---------- units ----------
+  // Units with a power plug (their cables to the PDU, power.js) and, of those, the ones with a network card (their
+  // cords to the switch, app.js and net.js): the switch and the router are the network itself. Patch panels and
+  // blanks are passive. Several units of one kind (the containers on /lab) tell themselves apart by data-power.
+  const POWERED = ['tor', 'rtr', 'mgmt', 'srv', 'media', 'mon', 'log', 'sw', 'kvm', 'pve'];
+  const WIRED = POWERED.filter((k) => k !== 'tor' && k !== 'rtr');
+  const keyOf = (u, kinds = POWERED) => u.dataset.power || kinds.find((k) => u.classList.contains(k));
+  const unitOf = (body, k) => body.querySelector(`:scope > .u[data-power="${CSS.escape(k)}"]`) ||
+    body.querySelector(`:scope > .u.${CSS.escape(k)}`);
+
+  // ---------- SVG ----------
+  const NS = 'http://www.w3.org/2000/svg';
+  function svg(name, attrs, parent) {
+    const n = document.createElementNS(NS, name);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+
+  // ---------- hanging cables (power.js: the PDU's cables, net.js: pulled network cords) ----------
+  // A cable is a rope of points (Verlet): pts[0] is the plug, the last point is fixed where the cable comes from.
+  // seg is one link's length; floor and right keep it in the room.
+  // stepRope moves it one frame. end — the fixed point; seat — the socket the plug sits in, if it does; hold — where a
+  // hand pulls the plug, if it does (the plug follows, no further than reach from end); damp — how fast it calms
+  // down. Returns how much it moved.
+  function stepRope(r, { end, seat = null, hold = null, reach = Infinity, damp = 0.985 }) {
+    const g = 0.42; // gravity, px per frame²
+    const last = r.pts.length - 1;
+    const pinned = (i) => i === last || (i === 0 && (seat || hold));
+    const floor = r.floor ?? Infinity, right = r.right ?? Infinity;
+    const keepIn = (p) => {
+      if (p.y > floor) p.y = floor;
+      if (p.x < 8) p.x = 8; else if (p.x > right) p.x = right;
+    };
+    let motion = 0;
+    r.pts.forEach((p, i) => {
+      if (pinned(i)) return;
+      const rub = p.y >= floor - 0.5 ? 0.7 : 1; // on the floor a cable lies down instead of sliding
+      const vx = (p.x - p.px) * damp * rub, vy = (p.y - p.py) * damp;
+      p.px = p.x; p.py = p.y;
+      p.x += vx; p.y += vy + g;
+      motion += Math.abs(vx) + Math.abs(vy);
+    });
+    const head = r.pts[0];
+    if (seat) {
+      head.x = head.px = seat.x; head.y = head.py = seat.y;
+    } else if (hold) {
+      let tx = hold.x, ty = hold.y;
+      const d = Math.hypot(tx - end.x, ty - end.y);
+      if (d > reach) { tx = end.x + (tx - end.x) * reach / d; ty = end.y + (ty - end.y) * reach / d; }
+      head.px = head.x; head.py = head.y;
+      head.x = tx; head.y = ty;
+      keepIn(head);
+      motion += 1;
+    }
+    const tail = r.pts[last];
+    tail.x = tail.px = end.x; tail.y = tail.py = end.y;
+    for (let k = 0; k < 16; k++) {
+      for (let i = 0; i < last; i++) {
+        const a = r.pts[i], b = r.pts[i + 1];
+        const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.001;
+        const diff = (d - r.seg) / d;
+        const pa = pinned(i), pb = pinned(i + 1);
+        if (pa && pb) continue;
+        const wa = pa ? 0 : pb ? 1 : 0.5, wb = pb ? 0 : pa ? 1 : 0.5;
+        a.x += dx * diff * wa; a.y += dy * diff * wa;
+        b.x -= dx * diff * wb; b.y -= dy * diff * wb;
+      }
+      r.pts.forEach((p, i) => { if (!pinned(i)) keepIn(p); });
+    }
+    return motion;
+  }
+
+  // ropePath is a smooth path through a rope's points.
+  function ropePath(p) {
+    let d = `M${p[0].x} ${p[0].y}`;
+    for (let i = 1; i < p.length - 1; i++) d += ` Q${p[i].x} ${p[i].y} ${(p[i].x + p[i + 1].x) / 2} ${(p[i].y + p[i + 1].y) / 2}`;
+    return d + ` L${p[p.length - 1].x} ${p[p.length - 1].y}`;
+  }
+
+  // cord draws a cable's three strokes (shadow, colour, highlight) into parent and returns them: set their d with
+  // setCord as the cable moves, instead of drawing it anew every frame. The highlight's look can be tuned.
+  function cord(parent, color, w, { shadow = w + 3, hi = 0.28, hiW = Math.max(1, w * .3), shift = w * .2 } = {}) {
+    const line = { fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
+    return [
+      svg('path', { ...line, stroke: 'rgba(0,0,0,.35)', 'stroke-width': shadow, transform: 'translate(0 2)' }, parent),
+      svg('path', { ...line, stroke: color, 'stroke-width': w }, parent),
+      svg('path', { ...line, stroke: `rgba(255,255,255,${hi})`, 'stroke-width': hiW, transform: `translate(${-shift} ${-shift})` }, parent),
+    ];
+  }
+  const setCord = (paths, d) => paths.forEach((p) => p.setAttribute('d', d));
+
+  // loop runs step() and then draw() every frame until things have been still for 45 frames (busy() keeps it going,
+  // as while a hand holds a plug); wake() starts it again.
+  function loop(step, draw, busy) {
+    let raf = 0, calm = 0;
+    const tick = () => {
+      const motion = step();
+      draw();
+      calm = motion < 0.08 && !busy() ? calm + 1 : 0;
+      raf = calm > 45 ? 0 : requestAnimationFrame(tick);
+    };
+    return { wake() { calm = 0; if (!raf) raf = requestAnimationFrame(tick); } };
+  }
+
+  // hand lets a mouse or a finger take a plug in an SVG layer by its grab zone (an element with data-key):
+  //   take(key) — whether it can be taken, and what to remember about it (was, given back to the others);
+  //   pull(key) — the hand moved more than 6 px: the plug comes out;
+  //   drop(key, was) — let go after a pull; tap(key, was) — let go without one;
+  //   moved() — after every move, to wake the drawing.
+  // hand.held is { key, x, y } in the room's coordinates while a plug is held, null otherwise.
+  function hand(layer, room, { take, pull, drop, tap, moved }) {
+    const h = { held: null };
+    const local = (e) => { const R = room().getBoundingClientRect(); return { x: e.clientX - R.left, y: e.clientY - R.top }; };
+    const move = (e) => {
+      const d = h.held;
+      if (!d) return;
+      const at = local(e);
+      d.x = at.x; d.y = at.y;
+      if (!d.moved && Math.hypot(at.x - d.from.x, at.y - d.from.y) > 6) { d.moved = true; pull(d.key); }
+      moved();
+    };
+    const release = () => {
+      removeEventListener('pointermove', move);
+      removeEventListener('pointerup', release);
+      removeEventListener('pointercancel', release);
+      const d = h.held;
+      if (!d) return;
+      if (d.moved) drop(d.key, d.was); else tap(d.key, d.was);
+      h.held = null;
+      moved();
+    };
+    layer.addEventListener('pointerdown', (e) => {
+      const key = e.target?.dataset?.key;
+      const was = key && take(key);
+      if (was === undefined || was === false) return;
+      e.preventDefault();
+      const at = local(e);
+      h.held = { key, ...at, from: at, was, moved: false };
+      addEventListener('pointermove', move);
+      addEventListener('pointerup', release);
+      addEventListener('pointercancel', release);
+      moved();
+    });
+    return h;
+  }
+
+  return { TOY_TTL, toyStore, POWERED, WIRED, keyOf, unitOf, svg, stepRope, ropePath, cord, setCord, loop, hand, pulled: () => new Set() };
 })();
