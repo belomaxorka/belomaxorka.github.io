@@ -253,6 +253,9 @@
   "ups.test_aria": "ups self test",
   "hall.light_modes": "auto,day,evening,night",
   "hall.light_aria": "hall lights",
+  "hall.torch": "torch",
+  "hall.torch_take": "take the torch: the other guests will see where it shines",
+  "hall.torch_back": "hang the torch back",
 
   "ago.long": "long ago",
   "ago.now": "just now",

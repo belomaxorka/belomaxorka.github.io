@@ -110,3 +110,34 @@
 }
 .lightsw:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 @media (max-width: 760px) { .lightsw { top: 30px; left: 12px; } }
+
+/* Фонарик на стене зала (assets/js/live.js) — рядом с выключателем света. Взят — висит пустой крючок. */
+.torch {
+  position: absolute; z-index: 6; top: 46px; left: 60px; display: grid; justify-items: center; gap: 3px;
+  padding: 0; border: 0; background: none; cursor: pointer; color: var(--dim);
+  font: 600 9px/1 var(--f-silk); letter-spacing: .12em; text-transform: uppercase;
+}
+.torch .shell {
+  position: relative; width: 12px; height: 30px; border-radius: 3px 3px 2px 2px;
+  background: linear-gradient(90deg, #3a3e45, #5d636c 45%, #2b2e33); box-shadow: 0 2px 4px #0007;
+  transition: opacity .2s;
+}
+.torch .shell::before { /* крючок */
+  content: ""; position: absolute; left: 4px; top: -6px; width: 4px; height: 6px; border: 1.5px solid #7d838c; border-bottom: 0; border-radius: 3px 3px 0 0;
+}
+.torch .lens { position: absolute; left: -2px; right: -2px; top: -1px; height: 7px; border-radius: 3px; background: radial-gradient(#fff6d8, #c9b37a); box-shadow: 0 0 0 1px #0006; }
+.torch[aria-pressed="true"] .shell { opacity: .18; }
+.torch:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+@media (max-width: 760px) { .torch { top: 36px; left: 46px; } }
+
+/* Пятна света: свой фонарик за курсором и фонарики других гостей на этой стойке. Видны всегда, ярче всего ночью. */
+.beam {
+  position: absolute; z-index: 7; width: 200px; height: 200px; margin: -100px 0 0 -100px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 244, 214, .42), rgba(255, 244, 214, .14) 38%, transparent 68%);
+  mix-blend-mode: screen; transition: opacity .35s;
+}
+.beam:not(.me) { transition: left .12s linear, top .12s linear, opacity .35s; }
+.beam.out { opacity: 0; }
+:root[data-theme="light"] .beam { mix-blend-mode: multiply; background: radial-gradient(circle, rgba(255, 196, 92, .38), rgba(255, 210, 120, .12) 40%, transparent 68%); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .beam { mix-blend-mode: multiply; background: radial-gradient(circle, rgba(255, 196, 92, .38), rgba(255, 210, 120, .12) 40%, transparent 68%); } }
+@media (prefers-reduced-motion: reduce) { .beam:not(.me) { transition: none; } }
