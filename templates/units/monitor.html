@@ -4,7 +4,7 @@
 {{define "unit-monitor"}}
 <section class="u mon" style="--h:2" aria-label="{{t "mon.aria"}}" id="unit-monitor"
   hx-get="/fragments/monitor" hx-trigger="every 60s" hx-swap="outerHTML">
-  <a class="pull" href="/u/monitor" data-unit="monitor" x-data="pull" @click.prevent="toggle" title="{{t "drawer.pull"}}" aria-label="{{t "drawer.pull"}}: {{t "mon.aria"}}"><i></i></a>
+  <a class="pull" href="?open=monitor" data-unit="monitor" x-data="pull" @click.prevent="toggle" title="{{t "drawer.pull"}}" aria-label="{{t "drawer.pull"}}: {{t "mon.aria"}}"><i></i></a>
   <div class="face">
     <div class="matrix" style="--cols: {{.Cols}}">
       {{range .Lamps}}<div class="cell" title="{{.Name}} · {{if eq .State "err"}}{{t "mon.notresponding"}}{{else}}{{.Ms}} {{t "ms"}}{{end}}"><i class="led {{.State}}"></i><span class="silk">{{.Label}}</span></div>

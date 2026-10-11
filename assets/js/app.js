@@ -7,6 +7,8 @@
     set(k, v) { try { localStorage.setItem(k, v); } catch {} },
   };
   const motion = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // The drawer of a unit for the rack on screen (a unit can stand on more than one rack).
+  const drawerURL = (name) => '/fragments/unit/' + encodeURIComponent(name) + '?rack=' + encodeURIComponent(document.getElementById('room')?.dataset.rack || '');
   const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : !matchMedia('(prefers-color-scheme: light)').matches;
 
   // ---------- Alpine ----------
@@ -143,7 +145,7 @@
         if (!box || !window.htmx) { location.href = el.href; return; }
         if (box.classList.contains('open')) { box.dispatchEvent(new CustomEvent('drawer:shut')); return; }
         el.setAttribute('aria-busy', 'true');
-        htmx.ajax('GET', '/fragments/unit/' + name, { source: el, target: box, swap: 'outerHTML' })
+        htmx.ajax('GET', drawerURL(name), { source: el, target: box, swap: 'outerHTML' })
           .finally(() => el.removeAttribute('aria-busy'));
       },
     }));
@@ -168,7 +170,7 @@
         const back = el.querySelector('.shut')?.getAttribute('href')?.split('#')[0];
         const done = () => {
           if (!el.isConnected) return;
-          if (back && location.pathname.startsWith('/u/')) history.replaceState(history.state, '', back);
+          if (back && new URLSearchParams(location.search).has('open')) history.replaceState(history.state, '', back);
           const empty = document.createElement('div');
           empty.className = 'drawer';
           empty.id = el.id;

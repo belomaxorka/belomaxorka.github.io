@@ -155,7 +155,8 @@
     const handle = d.previousElementSibling?.querySelector(':scope > .pull[data-unit]');
     if (!handle || !window.htmx) return;
     delete d.dataset.later;
-    htmx.ajax('GET', '/fragments/unit/' + handle.dataset.unit, { source: handle, target: d.querySelector(':scope > .slide'), swap: 'outerHTML', select: '.slide' });
+    const rack = document.getElementById('room')?.dataset.rack || '';
+    htmx.ajax('GET', '/fragments/unit/' + encodeURIComponent(handle.dataset.unit) + '?rack=' + encodeURIComponent(rack), { source: handle, target: d.querySelector(':scope > .slide'), swap: 'outerHTML', select: '.slide' });
   }
 
   // ---------- корды ----------

@@ -97,7 +97,8 @@
   // Страница стойки целиком: в ней и комната, и всё, что нужно <head>. Картинки стойки (обложка, аватарки)
   // подгружаются заранее, но не дольше 300 мс, чтобы стойка приехала уже с ними.
   async function load(url, signal) {
-    const res = await fetch(url.href, { signal, headers: { Accept: 'text/html' } });
+    // X-Rack-Swap: not a visit yet (it may never be shown); swap() reports the rack it shows.
+    const res = await fetch(url.href, { signal, headers: { Accept: 'text/html', 'X-Rack-Swap': '1' } });
     const final = new URL(res.url || url.href);
     if (!res.ok || final.origin !== location.origin) throw new Error('HTTP ' + res.status);
     const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
@@ -170,6 +171,7 @@
     const room = doc.getElementById('room');
     $('#room').replaceWith(room); // старые юниты: Alpine их разберёт, опрос htmx у отцепленных сам кончится
     if (window.htmx) htmx.process(room);
+    fetch('/events/visit', { method: 'POST', keepalive: true }).catch(() => {}); // the rack is shown: a page view
     document.dispatchEvent(new CustomEvent('rack:swap', { detail: { quiet } }));
   }
 
