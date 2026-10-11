@@ -48,6 +48,10 @@
   }
   const here = () => document.getElementById('room')?.dataset.rack || '';
   let state = null, stateId = null; // питание той стойки, что сейчас в комнате (useRack)
+  // The UPS's real LCD and hall light (from site-api) before the battery simulation replaces them; the battery's
+  // timer; whether the rack was dead at the last look (null: not looked yet). Reset by useRack for each rack.
+  let lcdReal = null, lightReal = null, alarmReal = false, timer = 0, wasDead = null;
+  let testing = false; // the UPS self-test is running
 
   const ropes = new Map(); // unit key → its cable (rope, rack.js), with its SVG (view) once drawn
   let probing = null;      // the cable under the mouse (the cable tester)
@@ -184,7 +188,6 @@
 
   // ---------- ИБП на батарее ----------
   // Пока шнур в розетке и батарея полна, ЖК ИБП показывает настоящие данные (NUT). Иначе — своя симуляция.
-  let lcdReal = null, lightReal = null, alarmReal = false, timer = 0, wasDead = null; // null: ещё не смотрели
 
   // Выключатель у таблички «выход»: auto — свет по часам Барнаула (как его отдал сервер), или вручную день, вечер,
   // ночь. Пока в розетках есть ток; без тока горит аварийка, настоящая (сервер сказал battery) — тоже.
@@ -341,7 +344,6 @@
   // ---------- самотест ИБП ----------
   // Кнопка test: ИБП пищит, ЖК гоняет батарею вниз и обратно, свет в зале трижды моргает — нагрузка на миг ушла на
   // батарею. Стойка не гаснет. Без тока, выключенный или севший ИБП тест не делает: на ЖК — отказ.
-  let testing = false;
   function wireTest() {
     const b = document.querySelector('.ups .utest');
     if (!b || b.dataset.wired) return;
