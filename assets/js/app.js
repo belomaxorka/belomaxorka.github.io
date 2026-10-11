@@ -149,8 +149,11 @@
       },
       shut() {
         const el = this.box;
+        // Открыт со страницы /u/<имя> (без JS-ящика): адрес возвращается к стойке, без перезагрузки.
+        const back = el.querySelector('.shut')?.getAttribute('href')?.split('#')[0];
         const done = () => {
           if (!el.isConnected) return;
+          if (back && location.pathname.startsWith('/u/')) history.replaceState(history.state, '', back);
           const empty = document.createElement('div');
           empty.className = 'drawer';
           empty.id = el.id;
