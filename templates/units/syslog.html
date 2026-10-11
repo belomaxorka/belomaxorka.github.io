@@ -6,7 +6,7 @@
      Список прокручивается, прокрутка переживает обновление htmx раз в минуту (/fragments/syslog). */}}
 {{define "unit-syslog"}}
 <section class="u log" style="--h:5" aria-label="{{t "log.aria"}}" id="unit-syslog"
-  hx-get="/fragments/syslog" hx-trigger="every 60s" hx-swap="outerHTML">
+  hx-get="/fragments/syslog" hx-trigger="every 120s, fresh" hx-swap="outerHTML">
   <div class="face">
     <div class="bar">
       <span class="silk">syslog · koito, gatus, ups, proxmox, wakapi</span>

@@ -42,8 +42,19 @@
       pulse('srv', NET);
       guests();
     });
-    es.addEventListener('visit', () => { run('srv', [...NET, '.led.hdd']); guests(); });
+    es.addEventListener('visit', () => { run('srv', NET); guests(); });
     es.addEventListener('gb', () => { run('kvm'); guests(); });
+    // The server's real work, once a second when there was any (site-api: live.Hub's act).
+    es.addEventListener('act', (e) => { try { act(JSON.parse(e.data)); } catch { /* not ours */ } });
+    // Units whose source brought new data: refreshed now, not at their next poll (hx-trigger "fresh").
+    es.addEventListener('fresh', (e) => {
+      let units = [];
+      try { units = JSON.parse(e.data); } catch { /* not ours */ }
+      for (const u of units) {
+        const el = document.getElementById('unit-' + u);
+        if (el && window.htmx) htmx.trigger(el, 'fresh');
+      }
+    });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', connect);
   else connect();
@@ -194,11 +205,15 @@
 
   // Пускает пакет; возвращает, сколько он будет бежать (мс), или 0, если не побежал.
   function run(target, extra) {
-    if (reduce.matches || document.hidden) return 0;
-    const legs = route(target, extra);
-    if (!legs || !legs.length) return 0;
+    return travel(route(target, extra));
+  }
+
+  // travel sends a packet along legs ([path, direction, lamps to blink at the leg's end], ...); returns how long it
+  // will run (ms), 0 when it does not.
+  function travel(legs) {
+    if (reduce.matches || document.hidden || !legs || !legs.length) return 0;
     const room = document.getElementById('room'), cab = document.getElementById('cables');
-    if (!room || !cab) return;
+    if (!room || !cab) return 0;
     let svg = document.getElementById('packets');
     if (!svg) {
       svg = Rack.svg('svg', { id: 'packets', class: 'cables packets', 'aria-hidden': 'true' }, room);
@@ -222,6 +237,60 @@
     };
     requestAnimationFrame(step);
     return total;
+  }
+
+  // ---------- the server's work (act) ----------
+  // A source site-api fetched → the unit that shows it: the packet goes there and back, as the request did.
+  const FEEDS = { koito: 'media', gatus: 'mon', proxmox: 'pve' };
+
+  // lan is the way from one unit of this rack to another through the switch: out along the first's cord (drawn from
+  // its network card to the switch), in along the second's.
+  function lan(from, to, extra = []) {
+    if (!up()) return null;
+    const body = document.getElementById('rack-body');
+    const a = cord(from), b = cord(to), ua = a && unitOf(body, from), ub = b && unitOf(body, to);
+    if (!path(a) || !path(b) || !ua || !ub || [ua, ub].some((u) => u.classList.contains('off') || u.classList.contains('unlinked'))) return null;
+    return [
+      [path(a), 1, [port(a)]],
+      [path(b), -1, [ub.querySelector(':scope > .nic .led'), ...extra.map((s) => ub.querySelector(s))]],
+    ];
+  }
+
+  // blinks n times, spread over the next second: requests come in bunches, not all in one frame.
+  function blinks(leds, n) {
+    for (let i = 0; i < Math.min(n, 8); i++) setTimeout(() => leds.forEach(flash), i === 0 ? 0 : Math.random() * 900);
+  }
+
+  function act(a) {
+    const body = document.getElementById('rack-body');
+    if (!body) return;
+    // Requests served: in through the WAN, the router's LAN port and the switch to the server.
+    if (a.r > 0) {
+      const legs = route('srv', NET);
+      if (legs) blinks(legs.flatMap(([, , leds]) => leds), a.r);
+    }
+    // Every source fetched: a packet from the server to its unit and back (on a rack without the server, in through
+    // the uplink from R1, where site-api runs). Sources outside the home network only blink the WAN lamp.
+    for (const src of a.p || []) {
+      const to = FEEDS[src];
+      if (!to || !cord(to)) {
+        if (!to) route('srv', NET)?.forEach(([, , leds]) => leds.forEach(flash));
+        continue;
+      }
+      const there = cord('srv') ? lan('srv', to) : route(to);
+      const ms = travel(there);
+      if (ms && cord('srv')) setTimeout(() => travel(lan(to, 'srv', NET)), ms + 120);
+    }
+    // A state file written: the server's disk lamp.
+    if (a.d > 0) blinks([body.querySelector(':scope > .u.srv .led.hdd')], a.d);
+    // The checks Gatus ran: each lamp blinks with the others' real spacing (they arrive together, every 30 s).
+    const first = Math.min(...(a.c || []).map((c) => c.t));
+    for (const c of a.c || []) setTimeout(() => checked(c.n), Math.min(30000, c.t - first));
+  }
+
+  // A monitoring check ran: its lamp on the monitoring unit and on the neighbour racks, which show the same checks.
+  function checked(name) {
+    document.querySelectorAll(`[data-check="${CSS.escape(name)}"]`).forEach((el) => flash(el.matches('i') ? el : el.querySelector('.led')));
   }
 
   // Пришёл ответ на запрос юнита (опрос htmx, ящик, форма в ящике). Опрос принёс новое — пакет к юниту, обмен — когда

@@ -67,6 +67,7 @@
 .hall .leds i.warn { background: var(--led-warn); box-shadow: 0 0 8px var(--led-warn); }
 .hall .leds i.err { background: var(--led-err); box-shadow: 0 0 10px var(--led-err); }
 /* Соседняя стойка погасла (power.js: кнопка её ИБП, села батарея, у стойки без ИБП — щиток): лампы не горят. */
+.hall .leds i.tx { opacity: .15; box-shadow: none; } /* a check ran on that service (live.js) */
 .hall .nb.dark .leds i { background: var(--led-off) !important; box-shadow: none !important; animation: none !important; }
 .hall .nb.dark .nbr { filter: brightness(.8); }
 
