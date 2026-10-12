@@ -66,6 +66,20 @@ Push, and site-api picks the change up by itself:
 - the profile, contacts, buttons, donations: `content/*.yaml`; every text: `i18n/en.json` and `i18n/ru.json`
 - the meme wall of the infrastructure page: a picture dropped into `content/memes/`
 
+## Real and simulated
+
+- The data is real: site-api reads the live sources (Koito, Gatus, Proxmox, NUT, Telegram, Wakapi, the webring) and
+  the page refreshes units as soon as their source has something new.
+- The lamps and packets are real events: each blink or packet stands for something site-api did (a request served, a
+  source fetched, a file written, a Gatus check that ran), sent once a second over the live stream. Where they run is
+  the rack's topology: a source from outside the home network (site-api tells which, from its address) comes in
+  through the WAN, one from inside comes from the server, to the units that show it (`data-feed`).
+- The toys (plugs, cords, the UPS, the breaker) are simulated for each visitor and change nothing on the server; the
+  page then behaves as the rack would, by one rule (`Rack.live`, `Rack.reached` in `assets/js/rack.js`): a unit
+  without power or a link gets nothing (no data, no blinks, its screen stands still and says why), a rack without the
+  internet gets nothing from outside (no visits, no other visitors' cords and torches); back online, a unit catches up.
+  The visitor is not simulated: the page itself stays reachable whatever is pulled.
+
 ## Adding a unit
 
 A unit is a template in `templates/units/` whose root element says what it is; the scripts go by that, not by names
@@ -77,7 +91,9 @@ A unit is a template in `templates/units/` whose root element says what it is; t
   without a link (lan) or also without the internet (wan); its screens say which;
 - `data-host="key"` instead, if it runs on another unit (like a container on the host): no cables of its own, it is on
   and online while its host is;
-- `data-live="lamps|bar|text|image"` on what shows live data: it goes dark while the unit is offline.
+- `data-live="lamps|bar|text|image"` on what shows live data: it goes dark while the unit is offline;
+- `data-feed="source ..."` for the server's sources it shows (packets go there), `data-news` on what changes with new
+  data.
 
 Then a line in `content/racks.yaml` and a `lite-<name>` template for the light version. CI
 (`docs/tools/check-units.mjs`) refuses a unit that shows live data without saying how it gets it.
