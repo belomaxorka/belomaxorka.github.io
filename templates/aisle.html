@@ -14,7 +14,7 @@
 {{end}}
 
 {{/* The server room around the rack: the ceiling with its trays, the neighbour racks (their status lamps are the real
-     Gatus checks), the raised floor, the exit sign. Decoration only: aria-hidden, no JS, the light is
+     Gatus checks), the raised floor. Decoration only: aria-hidden, no JS, the light is
      .room[data-light]. The neighbours ll, c and rr show only while moving between racks: the row passes the camera
      (assets/css/aisle.css). */}}
 {{define "hall"}}
@@ -26,7 +26,6 @@
   <div class="nb r"{{with .Rack.Next}} data-rack="{{.ID}}"{{if .Stub}} data-noups{{end}}{{end}}>{{template "nb-rack" .Status.Lamps}}</div>
   <div class="nb rr">{{template "nb-rack" .Status.Lamps}}</div>
   <div class="floor"><i class="vent"></i></div>
-  <div class="exit">{{t "hall.exit"}}</div>
 </div>
 {{end}}
 

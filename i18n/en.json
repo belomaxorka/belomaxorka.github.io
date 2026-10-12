@@ -34,7 +34,6 @@
   "lab.others": "+ %d more containers on this host (%d running)",
   "aisle.aria": "racks in the row",
   "aisle.now": "rack %s",
-  "hall.exit": "exit",
   "drawer.pull": "pull out",
   "drawer.shut": "push back",
   "week.title": "last 7 days",
@@ -122,8 +121,6 @@
   "media.last": "koito · last played %s",
   "media.silence": "silence on air",
   "media.nolistens": "no listens yet",
-  "lcd.note.cover": "screens follow the cover",
-  "lcd.note.amber": "screens: plain amber",
 
   "mon.aria": "service status",
   "mon.up": "%d/%d up",
@@ -146,7 +143,6 @@
 
 
   "log.aria": "log",
-  "log.blog": "blog →",
   "log.now": "now:",
   "log.quiet": "quiet: nothing happened yet",
   "log.ev.artist_new": "first time listening to %[1]s",

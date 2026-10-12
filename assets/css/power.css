@@ -91,7 +91,7 @@
 .ups .utest:active { transform: translateY(1px); box-shadow: inset 0 1px 0 var(--panel-hi), 0 1px 0 var(--edge); }
 .ups .utest:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* The light switch by the exit sign (power.js): a key on the wall, its caption the mode: auto, day, evening, night. */
+/* The light switch on the hall's wall (power.js): a key on the wall, its caption the mode: auto, day, evening, night. */
 .lightsw {
   position: absolute; z-index: 7; top: 40px; left: 22px; display: grid; justify-items: center; gap: 3px;
   padding: 0; border: 0; background: none; cursor: pointer; color: var(--dim);

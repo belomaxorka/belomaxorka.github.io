@@ -14,4 +14,3 @@
 .vu i.on { background: var(--led-ok); box-shadow: 0 0 4px var(--led-ok); }
 .vu i.on.w { background: var(--led-warn); box-shadow: 0 0 4px var(--led-warn); }
 .vu i.on.e { background: var(--led-err); box-shadow: 0 0 4px var(--led-err); }
-.vu .silk + .silk { margin-top: 2px; }

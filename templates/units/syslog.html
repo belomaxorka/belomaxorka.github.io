@@ -10,8 +10,7 @@
   hx-get="/fragments/syslog" hx-trigger="every 120s, fresh" hx-swap="outerHTML">
   <div class="face">
     <div class="bar">
-      <span class="silk">syslog · {{$feed}}</span>
-      {{with (content).links.blog}}<a class="key" href="{{.}}"{{ext .}}>{{t "log.blog"}}</a>{{end}}
+      <span class="silk">syslog · {{join (fields $feed) " · "}}</span>
     </div>
     <div class="lcd">
       {{if .}}<ol tabindex="0" aria-label="{{t "log.aria"}}">

@@ -211,7 +211,7 @@
   // ---------- the UPS on battery ----------
   // While the cord is in and the battery full, the UPS's LCD shows the real data (NUT). Otherwise the simulation.
 
-  // The light switch by the exit sign: auto, the light by the site's clock (as the server sent it), or day, evening,
+  // The light switch on the hall's wall: auto, the light by the site's clock (as the server sent it), or day, evening,
   // night by hand. While the sockets have current; without it the emergency light is on, and so with a real one (the
   // server said battery).
   const MODES = ['auto', 'day', 'evening', 'night'];
