@@ -51,8 +51,8 @@
   box-shadow: inset 0 1px 0 var(--panel-hi), 0 2px 0 var(--edge);
 }
 .key:active { transform: translateY(1px); box-shadow: inset 0 1px 0 var(--panel-hi), 0 1px 0 var(--edge); }
-.key.off, .key:disabled { opacity: .5; cursor: default; }
-.key.off:active, .key:disabled:active { transform: none; }
+.key:disabled { opacity: .5; cursor: default; }
+.key:disabled:active { transform: none; }
 
 .ports { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; }
 .port { display: inline-flex; align-items: center; gap: 8px; min-height: 30px; text-decoration: none; }
