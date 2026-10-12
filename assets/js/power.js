@@ -507,7 +507,9 @@
   }
 
   // A cable's rope where its socket s and outlet o are now. A new one (n links of len in all, plugged or not) rests
-  // between them; one plugged in is laid between them anew; a pulled or held one moves with its outlet.
+  // between them; one already hanging moves with its outlet, as it hangs (the physics takes it to its socket if that
+  // moved otherwise). Laid anew at every layout, as it was, a plugged cable jumped to its resting curve and swung back
+  // into the shape its physics had found, on every htmx refresh.
   function place(key, s, o, n, len, plugged) {
     let r = ropes.get(key);
     if (!r) {
@@ -518,8 +520,7 @@
     const dx = o.x - r.outlet.x, dy = o.y - r.outlet.y;
     r.socket = s;
     r.outlet = o;
-    if (r.plugged && !held(r)) r.pts = rest(s, o, r.len, r.n);
-    else r.pts.forEach((p) => { p.x += dx; p.y += dy; p.px += dx; p.py += dy; });
+    if (dx || dy) r.pts.forEach((p) => { p.x += dx; p.y += dy; p.px += dx; p.py += dy; });
     return r;
   }
 
