@@ -276,9 +276,6 @@
   "infra.page": "page %d of %d",
   "infra.newer": "newer",
   "infra.older": "older",
-  "infra.count": "%d of %d",
-  "infra.back": "back to the wall",
-  "infra.full": "open full size",
   "infra.status": "status",
   "infra.source": "source",
   "infra.badge": "badge for your site"

@@ -84,61 +84,12 @@
 </html>
 {{- end}}
 
-{{/* One picture of the wall (/m/{id}): large, left and right to the neighbours (keys and swipe too:
-     assets/js/meme.js), Esc back to the wall. Without JS the same with links. A click opens the picture full size. */}}
-{{define "meme" -}}
-<!doctype html>
-<html lang="{{lang}}">
-<head>
-<meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{with .Meme}}#{{.N}} · {{end}}belomaxorka infrastructure</title>
-<meta name="robots" content="noindex">
-<link rel="icon" href="/favicon.ico">
-<meta name="theme-color" content="#000000">
-<style>
-  :root { color-scheme: dark; }
-  html, body { margin: 0; background: #000; color: #fff; }
-  body {
-    min-height: 100vh; min-height: 100dvh; box-sizing: border-box; padding: 20px 16px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-    font-family: 'Times New Roman', Times, serif; text-align: center; overflow-x: hidden;
-  }
-  a { color: #fff; }
-  .one { margin: 0; }
-  .one a { display: block; border: 4px solid #000; outline: 2px solid #fff; }
-  .one img { display: block; max-width: calc(100vw - 44px); max-height: calc(100dvh - 150px); width: auto; height: auto; }
-  .one figcaption { margin: 12px auto 0; max-width: 640px; font-size: .95rem; color: #bbb; }
-  .pager { display: flex; gap: 18px; align-items: baseline; justify-content: center; font-size: 1.15rem; }
-  .pager a { padding: 6px 4px; }
-</style>
-</head>
-<body>
-{{- with .Meme}}
-<figure class="one">
-  <a href="{{.Full}}" title="{{t "infra.full"}}"><img src="{{.Full}}" width="{{.FW}}" height="{{.FH}}" alt="{{or .Alt (t "infra.meme_alt")}}"></a>
-  {{- with .Alt}}<figcaption>{{.}}</figcaption>{{end}}
-</figure>
-<nav class="pager">
-  {{- with .Prev}}<a href="{{.Href}}" rel="prev">← {{t "infra.newer"}}</a>{{end}}
-  <span>{{t "infra.count" .N .Total}}</span>
-  {{- with .Next}}<a href="{{.Href}}" rel="next">{{t "infra.older"}} →</a>{{end}}
-</nav>
-<a class="back" href="{{.Back}}">{{t "infra.back"}}</a>
-{{- else}}
-<a class="back" href="/">{{t "infra.back"}}</a>
-{{- end}}
-<script src="{{asset "js/meme.js"}}" defer></script>
-</body>
-</html>
-{{- end}}
-
 {{define "ff-pct"}}<span class="{{if ge . 80}}r{{else if ge . 50}}y{{else}}g{{end}}">{{.}}%</span>{{end}}
 {{define "ff-batt"}}<span class="{{if ge . 50}}g{{else if ge . 20}}y{{else}}r{{end}}">{{.}}%</span>{{end}}
 {{define "ff-colors"}}{{if .}}<s class="k2"></s><s class="r2"></s><s class="g2"></s><s class="y2"></s><s class="b2"></s><s class="m2"></s><s class="c2"></s><s class="w2"></s>{{else}}<s class="k"></s><s class="r"></s><s class="g"></s><s class="y"></s><s class="b"></s><s class="m"></s><s class="c"></s><s class="w"></s>{{end}}{{end}}
 
-{{/* stupid.fish's "now with a better server!" leads to their server's fastfetch; here it is live: Proxmox, the UPS, Gatus. */}}
+{{/* stupid.fish's "now with a better server!" leads to their server's fastfetch; here it is live: Proxmox, the UPS, Gatus.
+     The page above no longer links to it: only its address, /fetch, leads here. */}}
 {{define "infra-fetch" -}}
 <!doctype html>
 <html lang="en">

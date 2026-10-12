@@ -26,9 +26,9 @@ works with JavaScript off. On top of that, [htmx](https://htmx.org) refreshes th
 - `content/*.yaml`: what the page lists (racks, contacts, buttons, donations, lamps, the profile, the hardware's names,
   the addresses the templates link to in `links.yaml`); edit and push, no code
 - `templates/infra.html`: [infra.belomaxorka.dev](https://infra.belomaxorka.dev), where «hosted on belomaxorka
-  infrastructure» leads: a joke page in the genre of stupid.fish technologies (a wall of homelab memes: drop a
-  picture into `content/memes/` and push; site-api lists, shrinks and pages them, `/m/{id}` shows one) and a live fastfetch of the Proxmox host at `/fetch`; its 88x31 is
-  `/88x31/infra.gif`
+  infrastructure» leads: a joke page in the genre of stupid.fish technologies (a grid of homelab memes, just the
+  pictures: drop one into `content/memes/` and push; site-api lists them, crops them square and pages them) and a live
+  fastfetch of the Proxmox host at `/fetch` (not linked from the page); its 88x31 is `/88x31/infra.gif`
 - `assets/css/`: plain CSS split by component; `site.css` lists them as `@import`s and site-api joins
   them into one file
 - `assets/js/`: `rack.js` (shared by the rest: what the units declare about themselves, cable physics, the hand that

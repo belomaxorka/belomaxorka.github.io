@@ -276,9 +276,6 @@
   "infra.page": "страница %d из %d",
   "infra.newer": "новее",
   "infra.older": "старее",
-  "infra.count": "%d из %d",
-  "infra.back": "назад к стене",
-  "infra.full": "открыть в полном размере",
   "infra.status": "статус",
   "infra.source": "исходники",
   "infra.badge": "кнопка для твоего сайта"
