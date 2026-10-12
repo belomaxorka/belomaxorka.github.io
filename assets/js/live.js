@@ -32,9 +32,9 @@
     const es = new EventSource('/events');
     // Every event came from the server along this stream: the lamps on the way to it blink. A broadcast (a guest came
     // or left, a visit, a guestbook entry) reached the guests too: their ports blink.
-    es.addEventListener('hello', (e) => { try { token = JSON.parse(e.data).token || ''; } catch {} pulse('srv', NET); });
-    es.addEventListener('beam', (e) => { try { if (Rack.reached()) spot(JSON.parse(e.data)); } catch {} pulse('srv', NET); });
-    es.addEventListener('beam-off', (e) => { try { gone(JSON.parse(e.data).id); } catch {} pulse('srv', NET); });
+    es.addEventListener('hello', (e) => { try { token = JSON.parse(e.data).token || ''; } catch {} pulse(site()); });
+    es.addEventListener('beam', (e) => { try { if (Rack.reached()) spot(JSON.parse(e.data)); } catch {} pulse(site()); });
+    es.addEventListener('beam-off', (e) => { try { gone(JSON.parse(e.data).id); } catch {} pulse(site()); });
     es.addEventListener('online', (e) => {
       let n = 0;
       try { n = JSON.parse(e.data).n || 0; } catch {}
@@ -43,11 +43,11 @@
         root.dataset.guests = g;
         document.dispatchEvent(new Event('rack:layout'));
       }
-      pulse('srv', NET);
+      pulse(site());
       guests();
     });
-    es.addEventListener('visit', () => { run('srv', NET); guests(); });
-    es.addEventListener('gb', () => { run('kvm'); guests(); });
+    es.addEventListener('visit', () => { run(site()); guests(); });
+    es.addEventListener('gb', () => { feeds('guestbook').forEach((k) => run(k)); guests(); });
     // The server's real work, once a second when there was any (site-api: live.Hub's act).
     es.addEventListener('act', (e) => { try { act(JSON.parse(e.data)); } catch { /* not ours */ } });
     // Units whose source brought new data: refreshed now, not at their next poll (hx-trigger "fresh").
@@ -107,7 +107,7 @@
   }
   function post(b) {
     if (!b.t) return;
-    pulse('srv', NET);
+    pulse(site());
     fetch('/events/beam', { method: 'POST', body: JSON.stringify(b), headers: { 'Content-Type': 'application/json' }, keepalive: true }).catch(() => {});
   }
   // My torch: a spot following the cursor, its position in fractions of the rack, at most every 100 ms (the last one always).
@@ -160,8 +160,13 @@
   const cord = (k) => cords.find((c) => c.key === k);
   // A cord's path in app.js's SVG: the group number wire, the coloured line in it is the second child.
   const path = (c) => document.querySelectorAll('#cables > g')[c.wire]?.children[1] || null;
-  const NET = ['.led.net']; // the server's own network lamp blinks too, next to its network card
   const unitOf = Rack.unitOf;
+  // The units that show a source's data (data-feed, rack.js): where its packets go. The server shows "site": it
+  // serves the pages and keeps the state.
+  const feeds = (src) => [...(document.getElementById('rack-body')?.querySelectorAll(`:scope > .u[data-feed~="${CSS.escape(src)}"]`) || [])].map(Rack.keyOf).filter(Boolean);
+  const site = () => feeds('site')[0] || '';
+  // The lamps at a unit's end of its cord: its network card's, and its own net lamp if it has one.
+  const ends = (u) => [u.querySelector(':scope > .nic .led'), u.querySelector('.led.net')];
   // A switch port's lamp, if it has a link (net.js lights it).
   const port = (c) => (c?.port?.classList.contains('link') ? c.port.querySelector('.led') : null);
 
@@ -179,9 +184,9 @@
   // the jack to the ceiling, so against their direction), along the router's LAN into the switch (with it), from the
   // switch along the unit's cord (against it: the cord runs from its network card). Legs are [path, direction, the
   // lamps that blink when the packet reaches the leg's end]: the router's WAN; the LAN port and the unit's port on the
-  // switch; the unit's network card and extra (selectors of its lamps). A unit running on another (a container) is
-  // reached through its host's cord. The unit is not on this rack: no way, the data went elsewhere.
-  function route(target, extra = []) {
+  // switch; the lamps at the unit's end (ends). A unit running on another (a container) is reached through its host's
+  // cord. The unit is not on this rack: no way, the data went elsewhere.
+  function route(target) {
     if (!up()) return null;
     const body = document.getElementById('rack-body');
     const via = unitOf(body, target)?.dataset.host || target;
@@ -194,14 +199,14 @@
     legs[legs.length - 1][2].push(port(nic));
     // A packet does not reach a unit without a link.
     if (path(nic) && !unit.classList.contains('off') && !unit.classList.contains('unlinked')) {
-      legs.push([path(nic), -1, [unit.querySelector(':scope > .nic .led'), ...extra.map((s) => unit.querySelector(s))]]);
+      legs.push([path(nic), -1, ends(unit)]);
     }
     return legs;
   }
 
   // Data went through without a packet (an answer without new data, a stream event): the lamps on the way blink at once.
-  function pulse(target, extra) {
-    route(target, extra)?.forEach(([, , leds]) => leds.forEach(flash));
+  function pulse(target) {
+    route(target)?.forEach(([, , leds]) => leds.forEach(flash));
   }
   // A broadcast reached the guests too: their ports blink.
   function guests() {
@@ -209,8 +214,8 @@
   }
 
   // Sends a packet; returns how long it will run (ms), or 0 when it did not go.
-  function run(target, extra) {
-    return travel(route(target, extra));
+  function run(target) {
+    return travel(route(target));
   }
 
   // travel sends a packet along legs ([path, direction, lamps to blink at the leg's end], ...); returns how long it
@@ -245,19 +250,16 @@
   }
 
   // ---------- the server's work (act) ----------
-  // A source site-api fetched → the unit that shows it: the packet goes there and back, as the request did.
-  const FEEDS = { koito: 'media', gatus: 'mon', proxmox: 'pve' };
-
   // lan is the way from one unit of this rack to another through the switch: out along the first's cord (drawn from
   // its network card to the switch), in along the second's.
-  function lan(from, to, extra = []) {
+  function lan(from, to) {
     if (!up()) return null;
     const body = document.getElementById('rack-body');
     const a = cord(from), b = cord(to), ua = a && unitOf(body, from), ub = b && unitOf(body, to);
     if (!path(a) || !path(b) || !ua || !ub || [ua, ub].some((u) => u.classList.contains('off') || u.classList.contains('unlinked'))) return null;
     return [
       [path(a), 1, [port(a)]],
-      [path(b), -1, [ub.querySelector(':scope > .nic .led'), ...extra.map((s) => ub.querySelector(s))]],
+      [path(b), -1, ends(ub)],
     ];
   }
 
@@ -269,26 +271,32 @@
   function act(a) {
     const body = document.getElementById('rack-body');
     if (!body) return;
+    const srv = site();
     // Requests served: in through the WAN, the router's LAN port and the switch to the server.
     if (a.r > 0) {
-      const legs = route('srv', NET);
+      const legs = route(srv);
       if (legs) blinks(legs.flatMap(([, , leds]) => leds), a.r);
     }
-    // Every source fetched: a packet from the server to its unit and back (on a rack without the server, in through
-    // the uplink from R1, where site-api runs). Sources outside the home network only blink the WAN lamp.
+    // Every source fetched, to each unit here that shows it (data-feed). From outside the home network (site-api says
+    // which: x) the packet comes in through the WAN; from inside, the server fetched it over the rack's network, there
+    // and back (a rack without the server: in through its uplink, from the rack where site-api is). A source no unit
+    // here shows: from outside, the lamps on the way to the server blink; from inside, it went to another rack.
+    const away = new Set(a.x || []);
     for (const src of a.p || []) {
-      const to = FEEDS[src];
-      if (!to || !cord(to)) {
-        if (!to) route('srv', NET)?.forEach(([, , leds]) => leds.forEach(flash));
+      const to = feeds(src).filter((k) => cord(unitOf(body, k)?.dataset.host || k));
+      if (!to.length) {
+        if (away.has(src)) pulse(srv);
         continue;
       }
-      const there = cord('srv') ? lan('srv', to) : route(to);
-      const ms = travel(there);
-      if (ms && cord('srv')) setTimeout(() => travel(lan(to, 'srv', NET)), ms + 120);
+      for (const k of to) {
+        if (away.has(src) || !cord(srv)) { travel(route(k)); continue; }
+        const ms = travel(lan(srv, k));
+        if (ms) setTimeout(() => travel(lan(k, srv)), ms + 120);
+      }
     }
     // A state file written: the server's disk lamp, while the server is online (the writes follow what reaches it).
-    const srv = Rack.unitOf(body, 'srv');
-    if (a.d > 0 && Rack.live(srv)) blinks([srv.querySelector('.led.hdd')], a.d);
+    const server = Rack.unitOf(body, srv);
+    if (a.d > 0 && Rack.live(server)) blinks([server.querySelector('.led.hdd')], a.d);
     // The checks Gatus ran: each lamp blinks with the others' real spacing (they arrive together, every 30 s).
     const first = Math.min(...(a.c || []).map((c) => c.t));
     for (const c of a.c || []) setTimeout(() => checked(c.n), Math.min(30000, c.t - first));
@@ -303,10 +311,13 @@
   }
 
   // An answer to a unit's request came (an htmx poll, the drawer, a form in the drawer). A poll with something new: a
-  // packet to the unit, and the swap when it arrives (swap:...ms). What is new depends on the unit: the media server's
-  // LCD text (the track), the log's first line, the monitoring lamps' state. Nothing new, or not a poll: the lamps on
-  // the way to the unit just blink.
-  const SIG = { media: '.lcd', log: 'ol li', mon: '.matrix' };
+  // packet to the unit, and the swap when it arrives (swap:...ms). What is new, each unit says (data-news on the element
+  // whose text changes with news: the media server's LCD, the log's lines; data-news="markup": its markup too, the
+  // monitoring lamps' states). Nothing new, or not a poll: the lamps on the way to the unit just blink.
+  const news = (root) => {
+    const n = root?.querySelector('[data-news]');
+    return n ? (n.dataset.news === 'markup' ? n.innerHTML : n.textContent).replace(/\s+/g, ' ').trim() : null;
+  };
   const keyOf = (u) => (u?.matches('[data-net]') ? Rack.keyOf(u) : '');
   document.addEventListener('htmx:beforeSwap', (e) => {
     const t = e.detail.target, elt = e.detail.requestConfig?.elt || e.detail.elt;
@@ -314,16 +325,11 @@
     const unit = elt.closest('#rack-body > .u') || elt.closest('#rack-body > .drawer')?.previousElementSibling;
     const target = keyOf(unit);
     if (!target) return;
-    const key = t === unit && t.hasAttribute('hx-get') && e.detail.shouldSwap && t.dataset.key in SIG && t.dataset.key;
-    if (key) {
-      const sel = SIG[key];
-      const now = t.querySelector(sel), next = new DOMParser().parseFromString(e.detail.serverResponse, 'text/html').querySelector(sel);
-      const sig = (n) => (key === 'mon' ? n?.innerHTML : n?.textContent)?.replace(/\s+/g, ' ').trim() || '';
-      if (sig(now) !== sig(next)) {
-        const ms = run(target);
-        if (ms) { e.detail.swapOverride = `outerHTML swap:${Math.round(ms)}ms`; return; }
-      }
+    const now = t === unit && t.hasAttribute('hx-get') && e.detail.shouldSwap ? news(t) : null;
+    if (now !== null && now !== (news(new DOMParser().parseFromString(e.detail.serverResponse, 'text/html')) ?? '')) {
+      const ms = run(target);
+      if (ms) { e.detail.swapOverride = `outerHTML swap:${Math.round(ms)}ms`; return; }
     }
-    pulse(target, target === 'srv' ? NET : []);
+    pulse(target);
   });
 })();

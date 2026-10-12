@@ -5,7 +5,7 @@
      A line is marked with data-kind (not data-src: html/template takes *src* for a URL and encodes the value).
      The list scrolls, and the scroll survives the htmx refresh every minute (/fragments/syslog). */}}
 {{define "unit-syslog"}}
-<section class="u log" style="--h:5" aria-label="{{t "log.aria"}}" id="unit-syslog" data-key="log" data-power data-net="wan"
+<section class="u log" style="--h:5" aria-label="{{t "log.aria"}}" id="unit-syslog" data-key="log" data-power data-net="wan" data-feed="koito gatus proxmox wakapi"
   hx-get="/fragments/syslog" hx-trigger="every 120s, fresh" hx-swap="outerHTML">
   <div class="face">
     <div class="bar">
@@ -14,7 +14,7 @@
     </div>
     <div class="lcd">
       {{if .}}<ol tabindex="0" aria-label="{{t "log.aria"}}">
-        {{range .}}<li data-kind="{{if eq .Src "♪"}}music{{else}}{{.Src}}{{end}}" class="{{if .What}}ev {{end}}{{.State}}"><span class="d">{{stamp .At}}</span><span class="src">{{.Src}}</span><span>{{if .What}}{{if .URL}}<a href="{{.URL}}"{{ext .URL}}>{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}</a>{{else}}{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}{{end}}{{else}}{{if .Now}}{{t "log.now"}} {{end}}{{if .URL}}<a href="{{.URL}}"{{ext .URL}}>{{.Text}}</a>{{else}}{{.Text}}{{end}}{{end}}</span></li>
+        {{range .}}<li data-news data-kind="{{if eq .Src "♪"}}music{{else}}{{.Src}}{{end}}" class="{{if .What}}ev {{end}}{{.State}}"><span class="d">{{stamp .At}}</span><span class="src">{{.Src}}</span><span>{{if .What}}{{if .URL}}<a href="{{.URL}}"{{ext .URL}}>{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}</a>{{else}}{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}{{end}}{{else}}{{if .Now}}{{t "log.now"}} {{end}}{{if .URL}}<a href="{{.URL}}"{{ext .URL}}>{{.Text}}</a>{{else}}{{.Text}}{{end}}{{end}}</span></li>
         {{end}}
       </ol>{{else}}<span class="d">{{t "log.quiet"}}</span>{{end}}
     </div>

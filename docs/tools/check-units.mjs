@@ -7,7 +7,8 @@
 //   - one that shows live data (hx-get, hx-post, hx-trigger, data-live inside it) says how it gets it: data-net, or
 //     data-host (it runs on another unit), or data-role (the rack's infrastructure);
 //   - one with any declaration has a data-key, and no two units in one template share a key;
-//   - data-net is lan or wan, data-role switch, router or ups, data-live lamps, bar, text or image;
+//   - data-net is lan or wan, data-role switch, router or ups, data-live lamps, bar, text or image, data-news empty
+//     or markup, data-vlan mgmt, data-feed names at least one source;
 //   - data-host names a unit that exists.
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
@@ -17,7 +18,7 @@ const files = (function walk(d) {
   return readdirSync(d).flatMap((f) => (statSync(join(d, f)).isDirectory() ? walk(join(d, f)) : f.endsWith('.html') ? [join(d, f)] : []));
 })(dir).filter((f) => !/[\\/]lite[\\/]/.test(f)); // the light version has no scripts and no units of this kind
 
-const NET = ['lan', 'wan'], ROLE = ['switch', 'router', 'ups'], LIVE = ['lamps', 'bar', 'text', 'image'];
+const NET = ['lan', 'wan'], ROLE = ['switch', 'router', 'ups'], LIVE = ['lamps', 'bar', 'text', 'image'], NEWS = ['', 'markup'], VLAN = ['mgmt'];
 const attr = (tag, name) => { const m = tag.match(new RegExp(`\\s${name}(?:="([^"]*)")?(?=[\\s>{])`)); return m ? m[1] ?? '' : null; };
 const unitTag = /<([a-z]+)\s[^>]*class="u[ "][^>]*>/g;
 
@@ -35,6 +36,13 @@ for (const f of files) {
     if ((net ?? host ?? role ?? power) !== null && !key) problems.push(`${where} has declarations but no data-key`);
     if (net !== null && !NET.includes(net)) problems.push(`${where} data-net="${net}": lan or wan`);
     if (role !== null && !ROLE.includes(role)) problems.push(`${where} data-role="${role}": ${ROLE.join(', ')}`);
+    const vlan = attr(tag, 'data-vlan'), feed = attr(tag, 'data-feed');
+    if (vlan !== null && !VLAN.includes(vlan)) problems.push(`${where} data-vlan="${vlan}": ${VLAN.join(', ')}`);
+    if (feed !== null && !feed.trim()) problems.push(`${where} data-feed names no source`);
+    if (feed !== null && net === null && host === null) problems.push(`${where} data-feed without data-net or data-host: the data could not reach it`);
+    for (const n of (tag + body).matchAll(/\sdata-news(?:="([^"]*)")?(?=[\s>{])/g)) {
+      if (!NEWS.includes(n[1] ?? '')) problems.push(`${where} data-news="${n[1]}": empty or markup`);
+    }
     if (host !== null) hosts.push([where, host]);
     if (key && !key.includes('{{')) {
       if ((keys.get(f) || new Set()).has(key)) problems.push(`${where} data-key="${key}" twice in this template`);

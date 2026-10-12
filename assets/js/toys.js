@@ -102,28 +102,29 @@
 
   // ---------- RESET and UID on the server ----------
   // Without JS these buttons can do nothing, so they are hidden; shown after every layout (a new rack, htmx).
-  const reveal = () => document.querySelectorAll('.srv button.uid[hidden], .srv .rst[hidden]').forEach((b) => { b.hidden = false; });
+  const reveal = () => document.querySelectorAll('#rack-body > .u button.uid[hidden], #rack-body > .u .rst[hidden]').forEach((b) => { b.hidden = false; });
   document.addEventListener('rack:laidout', reveal);
   document.addEventListener('DOMContentLoaded', reveal);
-  let posting = false;
+  let posting = ''; // the unit reset, until it boots with POST on its screen
   document.addEventListener('click', (e) => {
     const t = e.target instanceof Element ? e.target : null;
-    const rst = t?.closest('.srv .rst'), uid = t?.closest('.srv button.uid');
+    const rst = t?.closest('#rack-body > .u .rst'), uid = t?.closest('#rack-body > .u button.uid');
     if (rst) {
-      posting = !!opts.logo;
-      document.dispatchEvent(new CustomEvent('rack:reset', { detail: { key: 'srv' } }));
+      const key = Rack.keyOf(rst.closest('#rack-body > .u'));
+      posting = opts.logo ? key : '';
+      document.dispatchEvent(new CustomEvent('rack:reset', { detail: { key } }));
     }
     if (uid) {
-      const srv = uid.closest('.u.srv'), on = !srv.classList.contains('uid-on');
-      srv.classList.toggle('uid-on', on);
+      const u = uid.closest('#rack-body > .u'), on = !u.classList.contains('uid-on');
+      u.classList.toggle('uid-on', on);
       uid.setAttribute('aria-pressed', String(on));
     }
   });
-  // The server booted after RESET: POST on its LCD (unless the BIOS turned it off), then the usual frames.
+  // The unit booted after RESET: POST on its screen (the LCD with data-post; unless the BIOS turned it off), then the usual frames.
   document.addEventListener('rack:unit', (e) => {
-    if (!posting || e.detail?.key !== 'srv' || !e.detail.on) return;
-    posting = false;
-    const lcd = e.target.querySelector?.('.status-col .lcd');
+    if (!posting || e.detail?.key !== posting || !e.detail.on) return;
+    posting = '';
+    const lcd = e.target.querySelector?.('.lcd[data-post]');
     if (!lcd) return;
     lcd.classList.add('post');
     setTimeout(() => lcd.classList.remove('post'), 2200);

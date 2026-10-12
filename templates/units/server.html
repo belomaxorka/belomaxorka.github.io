@@ -1,7 +1,7 @@
 {{/* The server with my name. Data: .Age, .DaysToBirthday (-1: no birthday given), .Avatars (avatars from Telegram,
      newest first), .Data, content/profile.yaml (the tapes under the name). */}}
 {{define "unit-server"}}
-<section class="u srv" style="--h:4" aria-labelledby="who" data-key="srv" data-power data-net="wan">
+<section class="u srv" style="--h:4" aria-labelledby="who" data-key="srv" data-power data-net="wan" data-feed="site telegram">
   <div class="face">
     {{with .Avatars}}
     {{/* The remote under the photo: keys, an LCD counter and a lamp per photo (the current one lit). Without JS there is none: it swipes. */}}

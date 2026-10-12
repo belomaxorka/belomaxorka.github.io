@@ -55,8 +55,13 @@ window.Rack = (() => {
   //   data-host="pve"         it runs on another unit (a container on the Proxmox host): no supply or cord of its own,
   //                           it is on while the host is and has the network while the host does;
   //   data-role="switch|router|ups"   the rack's infrastructure (the switch's data-uplink: the rack it uplinks to);
+  //   data-feed="koito gatus"  the server's data sources it shows ("site": it serves the pages, "guestbook": the
+  //                           guestbook): where their packets go (live.js), in through the WAN when site-api says a
+  //                           source is outside the home network, from the server otherwise;
+  //   data-vlan="mgmt"        on the management network: a purple cord;
   //   data-live="lamps|bar|text|image" on an element inside: live data, dark while the unit cannot get it
-  //                           (assets/css/units/network.css).
+  //                           (assets/css/units/network.css);
+  //   data-news (="markup")   on the element whose text (markup) changes when new data comes: then a packet runs to it.
   // Units without data-key (patch panels, organisers, blanks, button walls) are passive. docs/tools/check-units.mjs
   // fails CI for a unit that shows live data without saying how it gets it.
   const keyOf = (u) => u?.dataset.key || '';

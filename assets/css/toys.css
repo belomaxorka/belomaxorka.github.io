@@ -28,12 +28,12 @@
 }
 .srv button.uid:focus-visible, .srv .rst:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .led.uid { background: var(--led-off); box-shadow: inset 0 1px 1px #0006; }
-.srv.uid-on .led.uid { background: #3d8bff; box-shadow: 0 0 8px #3d8bff; }
+.u.uid-on .led.uid { background: #3d8bff; box-shadow: 0 0 8px #3d8bff; }
 /* "Find me" shows from afar, as on a real server: a blue beacon along the unit's edge. */
-.srv.uid-on .face { box-shadow: inset 0 0 0 2px #3d8bff99, inset 0 0 22px #3d8bff33; }
+.u.uid-on .face { box-shadow: inset 0 0 0 2px #3d8bff99, inset 0 0 22px #3d8bff33; }
 @media (prefers-reduced-motion: no-preference) {
-  .srv.uid-on .led.uid { animation: uid-blink 1s steps(2, jump-none) infinite; }
-  .srv.uid-on .face { animation: uid-glow 2s ease-in-out infinite; }
+  .u.uid-on .led.uid { animation: uid-blink 1s steps(2, jump-none) infinite; }
+  .u.uid-on .face { animation: uid-glow 2s ease-in-out infinite; }
 }
 @keyframes uid-glow { 50% { box-shadow: inset 0 0 0 2px #3d8bff33, inset 0 0 8px #3d8bff11; } }
 @keyframes uid-blink { 50% { background: var(--led-off); box-shadow: none; } }
@@ -44,9 +44,9 @@
 }
 .srv .rst[hidden] { display: none; }
 /* POST on the server's LCD after RESET (over the frames, like the "no link" notice). */
-.srv .lcd.post { position: relative; }
-.srv .lcd.post > * { visibility: hidden; }
-.srv .lcd.post::after {
+.u .lcd.post { position: relative; }
+.u .lcd.post > * { visibility: hidden; }
+.u .lcd.post::after {
   content: attr(data-post); position: absolute; inset: 0; padding: 7px 10px; white-space: pre-line;
   font: inherit; font-size: 18px; line-height: 1.1; color: var(--lcd);
 }

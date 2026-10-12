@@ -470,7 +470,7 @@
       const j = box(nic.querySelector('.jack')), p = box(port(n).querySelector('.jack'));
       const x = lane.x + 4 + (i % 6) * 2.2;              // the cords side by side in the organiser, not on top of each other
       const y = yBase + (i % 6) * 2.4;                   // and across, each in its own lane
-      const color = u.classList.contains('mgmt') ? MGMT : DATA;
+      const color = u.dataset.vlan === 'mgmt' ? MGMT : DATA; // the management network's cords are purple
       // The tail runs from the network card to the organiser. Grab slightly right of the jack: the drawer's handle is on the ear.
       const tail = [{ x: j.x + 2, y: j.cy }, { x: j.x - 14, y: j.cy }, { x: x + 10, y: j.cy }, { x, y: j.cy - 12 }];
       pullable(keyOf(u), 'nic', port(n), j, color, 2.4, tail, `L${x} ${y + 10} C${x} ${y}, ${x + 6} ${y}, ${x + 14} ${y} L${p.cx - 12} ${y} C${p.cx - 3} ${y}, ${p.cx} ${y - 4}, ${p.cx} ${p.b - 3}`, { x: j.cx + 6, y: j.cy, r: 13 });
