@@ -279,10 +279,7 @@
   "infra.count": "%d of %d",
   "infra.back": "back to the wall",
   "infra.full": "open full size",
-  "infra.now": "now with a <a href=\"/fetch\">genuine intel cpu 0000</a>!",
   "infra.status": "status",
   "infra.source": "source",
-  "infra.badge": "badge for your site",
-  "infra.warn_head": "surgeon general's warning:",
-  "infra.warn": "self-hosting is hazardous to your free time"
+  "infra.badge": "badge for your site"
 }

@@ -279,10 +279,7 @@
   "infra.count": "%d из %d",
   "infra.back": "назад к стене",
   "infra.full": "открыть в полном размере",
-  "infra.now": "теперь на <a href=\"/fetch\">genuine intel cpu 0000</a>!",
   "infra.status": "статус",
   "infra.source": "исходники",
-  "infra.badge": "кнопка для твоего сайта",
-  "infra.warn_head": "минздрав предупреждает:",
-  "infra.warn": "селфхостинг опасен для вашего свободного времени"
+  "infra.badge": "кнопка для твоего сайта"
 }

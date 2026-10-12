@@ -1,10 +1,11 @@
 {{/* infra.belomaxorka.dev: "hosted on belomaxorka infrastructure" on the site leads here. A joke in the genre of
-     stupid.fish technologies (teidesu): instead of their video, a wall of memes about "hosting as we know it" (the
-     pictures in content/memes/, captions in content/infra.yaml; site-api finds them, shrinks them and pages them by
-     24, /m/{id} shows one), a Times heading, a link to fastfetch, status // source, and a "the health ministry warns"
-     plate at the bottom (belomaxorka ≈ Belomor + makhorka, Soviet cigarettes and rough tobacco). site-api renders
-     "/" with the infra template and "/fetch" with infra-fetch (the host's live data from Proxmox, the UPS from NUT,
-     Gatus). No scripts. The 88x31 button is /88x31/infra.gif (docs/tools/make_88x31.py). */}}
+     stupid.fish technologies (teidesu): instead of their video, a grid of memes about "hosting as we know it", a Times
+     heading, status // source, the 88x31 button. Just the pictures: no captions, no viewer, nothing to click on them.
+     They are content/memes/ (jpg, png, gif, webp): drop a file in and push, nothing else names it. site-api orders
+     them by the date in the file name, newest first (Telegram's photo_2026-10-12_02-11-28.jpg, or
+     2026-02-20_anything.jpg; without a date, by name, after the dated ones), crops them square without EXIF and pages
+     them by 24. site-api renders "/" with the infra template and "/fetch" with infra-fetch (the host's live data from
+     Proxmox, the UPS from NUT, Gatus). No scripts. The 88x31 button is /88x31/infra.gif (docs/tools/make_88x31.py). */}}
 {{define "infra" -}}
 <!doctype html>
 <html lang="{{lang}}">
@@ -34,49 +35,36 @@
     font-family: 'Times New Roman', Times, serif; text-align: center; overflow-x: hidden;
   }
   a { color: #fff; }
-  h1 { font-size: 2.5rem; font-weight: 400; margin: 8px 0 32px; line-height: 1.1; }
+  h1 { font-size: 2.5rem; font-weight: 400; margin: 20px 0 12px; line-height: 1.1; }
   footer { margin-top: 4px; }
   .badge { margin-top: 24px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: .85rem; color: #bbb; }
   .badge img { image-rendering: pixelated; display: block; }
   .badge details { max-width: 100%; }
   .badge summary { cursor: pointer; }
   .badge input { width: 440px; max-width: calc(100vw - 32px); box-sizing: border-box; margin-top: 6px; font: 12px ui-monospace, Consolas, monospace; background: #111; color: #ddd; border: 1px solid #444; padding: 6px; }
-  .warn {
-    margin-top: 32px; width: 440px; max-width: 100%; box-sizing: border-box; padding: 10px 14px;
-    background: #fff; color: #000; border: 3px solid #000; outline: 2px solid #fff;
-    font: 700 15px/1.25 Arial, Helvetica, sans-serif; text-transform: uppercase; letter-spacing: .02em;
-  }
-  .warn b { display: block; font-size: 12px; margin-bottom: 2px; }
 
-  /* the wall: memes in frames, a little crooked, straightened under the cursor */
-  .wall { width: 900px; max-width: 100%; display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
-    gap: 20px 18px; padding: 8px; box-sizing: border-box; }
-  .pic { display: block; border: 4px solid #000; outline: 2px solid #fff; background: #111;
-    transform: rotate(var(--r, 0deg)); transition: transform .15s ease-out; }
-  .pic:nth-child(4n+1) { --r: -1.6deg; } .pic:nth-child(4n+2) { --r: 1.2deg; }
-  .pic:nth-child(4n+3) { --r: -.7deg; } .pic:nth-child(4n) { --r: 1.8deg; }
-  .pic:hover, .pic:focus-visible { transform: rotate(0) scale(1.03); position: relative; z-index: 1; }
-  .pic img { display: block; height: 200px; width: auto; max-width: calc(100vw - 60px); object-fit: contain; }
+  /* the grid: square pictures, four in a row, two on a phone */
+  .wall { list-style: none; margin: 0; padding: 0; width: 880px; max-width: 100%;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .wall img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; background: #111; }
   .pages { display: flex; gap: 14px; justify-content: center; align-items: baseline; margin: 6px 0 4px; }
-  @media (max-width: 540px) { .wall { gap: 16px 12px; } .pic img { height: 120px; } }
+  @media (max-width: 600px) { .wall { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
   @media (max-width: 540px) { h1 { font-size: 2rem; } }
-  @media (prefers-reduced-motion: reduce) { .pic { transition: none; } }
 </style>
 </head>
 <!-- 0LvRjtCx0L7Qv9GL0YLQvdC+0Lkg0LLQsNGA0LLQsNGA0LUg0L3QsCDQsdCw0LfQsNGA0LUg0L3QvtGBINC+0YLQvtGA0LLQsNC70Lg= -->
 <body>
 {{- with .Gallery}}{{if .Items}}
-<div class="wall" role="list" aria-label="{{t "infra.wall"}}">
+<ul class="wall" aria-label="{{t "infra.wall"}}">
   {{- range .Items}}
-  <a class="pic" role="listitem" id="m-{{.ID}}" href="{{.Href}}"><img src="{{.Thumb}}" width="{{.TW}}" height="{{.TH}}" alt="{{or .Alt (t "infra.meme_alt")}}"{{if gt .N 6}} loading="lazy"{{end}} decoding="async"></a>
+  <li><img src="{{.Thumb}}" width="{{.TW}}" height="{{.TH}}" alt="{{t "infra.meme_alt"}}"{{if gt .N 8}} loading="lazy"{{end}} decoding="async"></li>
   {{- end}}
-</div>
+</ul>
 {{- if gt .Pages 1}}
 <nav class="pages" aria-label="{{t "infra.pages"}}">{{with .PrevHref}}<a href="{{.}}" rel="prev">← {{t "infra.newer"}}</a>{{end}} <span>{{t "infra.page" .Page .Pages}}</span> {{with .NextHref}}<a href="{{.}}" rel="next">{{t "infra.older"}} →</a>{{end}}</nav>
 {{- end}}
 {{- end}}{{end}}
 <h1>belomaxorka infrastructure</h1>
-<div><small>{{th "infra.now"}}</small></div>
 <footer>
   {{- $l := .Content.links}}{{$src := print $l.source "/src/branch/main/templates/infra.html"}}
   <a href="{{$l.status}}"{{ext $l.status}}>{{t "infra.status"}}</a>
@@ -92,7 +80,6 @@
   <img src="/88x31/infra.gif" width="88" height="31" alt="hosted on belomaxorka infrastructure">
   <details><summary>{{t "infra.badge"}}</summary><input readonly value="{{$code}}" aria-label="{{t "infra.badge"}}"></details>
 </div>
-<div class="warn" role="note"><b>{{t "infra.warn_head"}}</b>{{t "infra.warn"}}</div>
 </body>
 </html>
 {{- end}}
