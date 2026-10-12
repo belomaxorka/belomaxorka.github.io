@@ -1,4 +1,9 @@
 /* Tokens. The dark theme by default (a black rack), the light one beige hardware from the 90s.
+   The theme is one switch: --light is 0 in the dark theme and 1 in the light one (--L the same as a percentage), set
+   below by the system's choice or by the visitor's (data-theme on <html>: the theme key, assets/js/theme.js; over
+   Tor the page comes dark). A value the themes do not share is written once, with both: a colour as
+   color-mix(in srgb, LIGHT var(--L), DARK), a number as calc(LIGHT * var(--light) + DARK * (1 - var(--light))).
+   docs/tools/check-themes.mjs (CI) keeps the switch here: no other stylesheet asks for the theme itself.
    The LCD colours come in -d/-l pairs: site-api puts the pair from the track's cover into <style id="cover-palette">.
    The cover's pair does not have to follow the theme: a black cover gives a black screen with white text in the light
    theme too, a white one a paper screen in the dark. So --lcd goes only on the background, --lcd-bg, not the panel. */
@@ -6,33 +11,41 @@
 @property --lcd-bg { syntax: "<color>"; inherits: true; initial-value: #1b1306; }
 @property --lcd-dim { syntax: "<color>"; inherits: true; initial-value: #a87a35; }
 
+/* The switch. color-scheme (the browser's own controls and scrollbars) and the torch's light, which mixes into the
+   hall differently on a dark wall and on a light one (power.css), are keywords: they go with it. */
+:root { --light: 0; color-scheme: dark; --beam-blend: screen; }
+@media (prefers-color-scheme: light) { :root { --light: 1; color-scheme: light; --beam-blend: multiply; } }
+:root[data-theme="dark"] { --light: 0; color-scheme: dark; --beam-blend: screen; }
+:root[data-theme="light"] { --light: 1; color-scheme: light; --beam-blend: multiply; }
+
 :root {
+  --L: calc(var(--light) * 100%);
   transition: --lcd .8s, --lcd-bg .8s, --lcd-dim .8s;
-  --room: #121315;
-  --void: #0a0b0c;
-  --rail: #2b2e33;
-  --rail-hi: #3b3f46;
-  --hole: #060707;
-  --num: #7d8188;
-  --panel: #1d1f23;
-  --panel-hi: #2a2d33;
-  --edge: #0b0c0e;
-  --ink: #ebe8e2;
-  --dim: #8f9299;
+  --room: color-mix(in srgb, #d8d2c4 var(--L), #121315);
+  --void: color-mix(in srgb, #a49d8e var(--L), #0a0b0c);
+  --rail: color-mix(in srgb, #bdb6a6 var(--L), #2b2e33);
+  --rail-hi: color-mix(in srgb, #d0caba var(--L), #3b3f46);
+  --hole: color-mix(in srgb, #5d584e var(--L), #060707);
+  --num: color-mix(in srgb, #5f5a50 var(--L), #7d8188);
+  --panel: color-mix(in srgb, #e9e3d3 var(--L), #1d1f23);
+  --panel-hi: color-mix(in srgb, #f6f1e5 var(--L), #2a2d33);
+  --edge: color-mix(in srgb, #aaa392 var(--L), #0b0c0e);
+  --ink: color-mix(in srgb, #2b2925 var(--L), #ebe8e2);
+  --dim: color-mix(in srgb, #6c675d var(--L), #8f9299);
   --lcd-bg-d: #1b1306; --lcd-d: #ffb547; --lcd-dim-d: #a87a35;
   --lcd-bg-l: #a3b18c; --lcd-l: #1d2715; --lcd-dim-l: #344029;
-  --lcd-bg: var(--lcd-bg-d);
-  --lcd: var(--lcd-d);
-  --lcd-dim: var(--lcd-dim-d);
+  --lcd-bg: color-mix(in srgb, var(--lcd-bg-l) var(--L), var(--lcd-bg-d));
+  --lcd: color-mix(in srgb, var(--lcd-l) var(--L), var(--lcd-d));
+  --lcd-dim: color-mix(in srgb, var(--lcd-dim-l) var(--L), var(--lcd-dim-d));
   --led-ok: #4ee483;
   --led-warn: #ffb547;
   --led-err: #ff5a4e;
-  --led-off: #33363b;
-  --accent: #b58cf0;
-  --screw: #8b8f96;
-  --screw-hi: #c9ccd1;
-  --key: #2a2d32;
-  --key-ink: #e9e6df;
+  --led-off: color-mix(in srgb, #c9c2b1 var(--L), #33363b);
+  --accent: color-mix(in srgb, #7438bb var(--L), #b58cf0);
+  --screw: color-mix(in srgb, #8f8b82 var(--L), #8b8f96);
+  --screw-hi: color-mix(in srgb, #f2efe8 var(--L), #c9ccd1);
+  --key: color-mix(in srgb, #d9d2c0 var(--L), #2a2d32);
+  --key-ink: color-mix(in srgb, #2b2925 var(--L), #e9e6df);
   --tape-k: #161616;
   --tape-r: #b8322b;
   --tape-b: #2456a6;
@@ -47,26 +60,8 @@
   --f-lcd: "Handjet", "Consolas", monospace;
   --f-text: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   --f-hand: "Caveat", "Segoe Print", cursive;
-  color-scheme: dark;
 }
 @media (prefers-reduced-motion: reduce) { :root { transition: none; } }
-/* The light theme twice, for the system's and for the picked one: docs/tools/check-themes.mjs (CI) keeps them the same. */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --room: #d8d2c4; --void: #a49d8e; --rail: #bdb6a6; --rail-hi: #d0caba; --hole: #5d584e; --num: #5f5a50;
-    --panel: #e9e3d3; --panel-hi: #f6f1e5; --edge: #aaa392; --ink: #2b2925; --dim: #6c675d;
-    --lcd-bg: var(--lcd-bg-l); --lcd: var(--lcd-l); --lcd-dim: var(--lcd-dim-l); --led-off: #c9c2b1;
-    --accent: #7438bb; --screw: #8f8b82; --screw-hi: #f2efe8; --key: #d9d2c0; --key-ink: #2b2925;
-    color-scheme: light;
-  }
-}
-:root[data-theme="light"] {
-  --room: #d8d2c4; --void: #a49d8e; --rail: #bdb6a6; --rail-hi: #d0caba; --hole: #5d584e; --num: #5f5a50;
-  --panel: #e9e3d3; --panel-hi: #f6f1e5; --edge: #aaa392; --ink: #2b2925; --dim: #6c675d;
-  --lcd-bg: var(--lcd-bg-l); --lcd: var(--lcd-l); --lcd-dim: var(--lcd-dim-l); --led-off: #c9c2b1;
-  --accent: #7438bb; --screw: #8f8b82; --screw-hi: #f2efe8; --key: #d9d2c0; --key-ink: #2b2925;
-  color-scheme: light;
-}
 @media (max-width: 560px) {
   :root { --U: 40px; --rail-w: 26px; --ear: 16px; }
 }

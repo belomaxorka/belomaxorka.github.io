@@ -21,8 +21,8 @@ jobs:
         with:
           path: site
 
-      # The light theme is written twice (system theme and the picked one); the twins must say the same.
-      - name: Light theme twins agree
+      # The theme is one switch in tokens.css; no other stylesheet asks for it, and the switch's sides agree.
+      - name: One theme switch
         run: node site/docs/tools/check-themes.mjs site/assets/css
 
       # A unit that shows live data must say how it gets it (data-net, data-host, data-role): the scripts go by that.

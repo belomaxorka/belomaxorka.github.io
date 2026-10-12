@@ -1,19 +1,22 @@
-// The light theme is written twice in the stylesheets: for a visitor whose system is light
-// (@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) … }) and for one who picked it with the
-// theme key (:root[data-theme="light"] …). CSS has no way to say it once without changing the cascade or browser
-// support, so this check makes sure every such rule has its twin with the same declarations.
+// The theme is one switch in tokens.css: --light (0 dark, 1 light) with the keywords that go with it, set by the
+// system's choice (@media (prefers-color-scheme: light)) or by the visitor's (:root[data-theme]); every value that
+// differs between the themes is written once with both, through --light. This check keeps it so:
+//   - no other stylesheet asks for the theme itself (prefers-color-scheme, [data-theme]): it would be a second copy
+//     of a theme's values, the kind that drifts;
+//   - the switch's two light rules (the system's, the picked one) set the same, and so do its two dark ones (the
+//     default and the picked one).
 //
-//   node docs/tools/check-themes.mjs assets/css     (CI runs it before a deploy; exit 1 lists what differs)
+//   node docs/tools/check-themes.mjs assets/css     (CI runs it before a deploy; exit 1 says what is wrong)
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 
 const files = (dir) => readdirSync(dir).flatMap((f) => {
   const p = join(dir, f);
   return statSync(p).isDirectory() ? files(p) : p.endsWith('.css') ? [p] : [];
 });
 
-// rules returns [selector, body, inMediaLight] for every rule, top level or inside an @media.
-function rules(css, media = false) {
+// rules returns [selector, body, media] for every rule, top level or inside an @media (media: its condition).
+function rules(css, media = '') {
   const out = [];
   css = css.replace(/\/\*[\s\S]*?\*\//g, '');
   let i = 0;
@@ -24,7 +27,7 @@ function rules(css, media = false) {
     let depth = 1, j = open + 1;
     while (j < css.length && depth) { if (css[j] === '{') depth++; else if (css[j] === '}') depth--; j++; }
     const body = css.slice(open + 1, j - 1);
-    if (head.startsWith('@media')) out.push(...rules(body, media || /prefers-color-scheme:\s*light/.test(head)));
+    if (head.startsWith('@media')) out.push(...rules(body, head));
     else if (!head.startsWith('@')) out.push([head.replace(/\s+/g, ' '), body, media]);
     i = j;
   }
@@ -32,24 +35,30 @@ function rules(css, media = false) {
 }
 
 const decls = (body) => body.split(';').map((d) => d.trim().replace(/\s+/g, ' ')).filter(Boolean).sort().join('; ');
-
+const dir = process.argv[2] || 'assets/css';
 const problems = [];
-for (const f of files(process.argv[2] || 'assets/css')) {
-  const system = new Map(), picked = new Map();
+const sw = { light: [], dark: [] };
+for (const f of files(dir)) {
   for (const [sel, body, media] of rules(readFileSync(f, 'utf8'))) {
-    for (const s of sel.split(',').map((x) => x.trim())) {
-      if (media && s.startsWith(':root:not([data-theme="dark"])')) system.set(s.slice(':root:not([data-theme="dark"])'.length), decls(body));
-      if (!media && s.startsWith(':root[data-theme="light"]')) picked.set(s.slice(':root[data-theme="light"]'.length), decls(body));
+    const asks = /prefers-color-scheme/.test(media) || /\[data-theme/.test(sel);
+    if (basename(f) !== 'tokens.css') {
+      if (asks) problems.push(`${f}: "${media ? media + ' ' : ''}${sel}" asks for the theme: write the value once in its rule, through --light (tokens.css)`);
+      continue;
     }
+    if (!/--light\s*:/.test(body)) {
+      if (asks) problems.push(`${f}: "${sel}" asks for the theme but is not the switch (it sets no --light)`);
+      continue;
+    }
+    const light = /--light\s*:\s*1\b/.test(body);
+    sw[light ? 'light' : 'dark'].push([`${media ? media + ' ' : ''}${sel}`, decls(body)]);
   }
-  for (const [rest, d] of system) {
-    if (!picked.has(rest)) problems.push(`${f}: "${rest || ':root'}" has a light rule for the system theme only`);
-    else if (picked.get(rest) !== d) problems.push(`${f}: "${rest || ':root'}" differs between the system's light theme and the picked one`);
-  }
-  for (const rest of picked.keys()) if (!system.has(rest)) problems.push(`${f}: "${rest || ':root'}" has a light rule for the picked theme only`);
+}
+for (const [theme, list] of Object.entries(sw)) {
+  if (list.length !== 2) problems.push(`tokens.css: ${list.length} ${theme} rules of the switch, want 2 (${theme === 'light' ? 'the system\'s and the picked one' : 'the default and the picked one'})`);
+  else if (list[0][1] !== list[1][1]) problems.push(`tokens.css: the ${theme} rules of the switch differ:\n    ${list[0][0]} { ${list[0][1]} }\n    ${list[1][0]} { ${list[1][1]} }`);
 }
 if (problems.length) {
-  console.error(problems.join('\n'));
+  console.error('theme:\n  ' + problems.join('\n  '));
   process.exit(1);
 }
-console.log('light theme: both twins agree');
+console.log('theme: one switch in tokens.css, both sides of it agree');

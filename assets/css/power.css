@@ -139,11 +139,10 @@
 /* The light spots: my torch following the cursor and the other guests' torches on this rack. Always visible, brightest at night. */
 .beam {
   position: absolute; z-index: 7; width: 200px; height: 200px; margin: -100px 0 0 -100px; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle, rgba(255, 244, 214, .42), rgba(255, 244, 214, .14) 38%, transparent 68%);
-  mix-blend-mode: screen; transition: opacity .35s;
+  background: radial-gradient(circle, color-mix(in srgb, rgba(255, 196, 92, .38) var(--L), rgba(255, 244, 214, .42)),
+    color-mix(in srgb, rgba(255, 210, 120, .12) var(--L), rgba(255, 244, 214, .14)) calc(40% * var(--light) + 38% * (1 - var(--light))), transparent 68%);
+  mix-blend-mode: var(--beam-blend); transition: opacity .35s;
 }
 .beam:not(.me) { transition: left .12s linear, top .12s linear, opacity .35s; }
 .beam.out { opacity: 0; }
-:root[data-theme="light"] .beam { mix-blend-mode: multiply; background: radial-gradient(circle, rgba(255, 196, 92, .38), rgba(255, 210, 120, .12) 40%, transparent 68%); }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .beam { mix-blend-mode: multiply; background: radial-gradient(circle, rgba(255, 196, 92, .38), rgba(255, 210, 120, .12) 40%, transparent 68%); } }
 @media (prefers-reduced-motion: reduce) { .beam:not(.me) { transition: none; } }

@@ -3,11 +3,26 @@
    rack turned off by its button darkens the hall too. */
 .room > .rack { z-index: 1; }
 .hall {
-  --hall-bg: #0e1012; --hall-wall: #15181b; --tile: #1c1f23; --tile-line: #0a0b0d; --hole-c: #07080a;
-  --tray: #3a3e45; --duct: #d8b23a; --lamp: #eaf2ff; --lamp-on: 1; --cold: #3d7bd9; --cold-a: .22;
-  --nb-dim: .55;
+  --hall-bg: color-mix(in srgb, #d3cec3 var(--L), #0e1012);
+  --hall-wall: color-mix(in srgb, #e8e4db var(--L), #15181b);
+  --tile: color-mix(in srgb, #d9d4c9 var(--L), #1c1f23);
+  --tile-line: color-mix(in srgb, #b9b2a3 var(--L), #0a0b0d);
+  --hole-c: color-mix(in srgb, #b4ad9e var(--L), #07080a);
+  --tray: color-mix(in srgb, #a8a191 var(--L), #3a3e45);
+  --duct: color-mix(in srgb, #d9b73f var(--L), #d8b23a);
+  --lamp: color-mix(in srgb, #fffaf0 var(--L), #eaf2ff);
+  --lamp-on: 1;
+  --cold: #3d7bd9;
+  --cold-a: calc(.12 * var(--light) + .22 * (1 - var(--light)));
+  --nb-dim: calc(.97 * var(--light) + .55 * (1 - var(--light)));
   /* The neighbour racks: rails, body, units, blanks, the highlight on a unit's edge. */
-  --nb-rail: #2b2e33; --nb-body: #0b0c0e; --nb-edge: #000; --nu-a: #24272c; --nu-b: #1b1d21; --nu-blank: #101113; --nu-hi: #ffffff10;
+  --nb-rail: color-mix(in srgb, #b8b1a1 var(--L), #2b2e33);
+  --nb-body: color-mix(in srgb, #c9c2b2 var(--L), #0b0c0e);
+  --nb-edge: color-mix(in srgb, #9e9686 var(--L), #000);
+  --nu-a: color-mix(in srgb, #efebe2 var(--L), #24272c);
+  --nu-b: color-mix(in srgb, #e0d9cb var(--L), #1b1d21);
+  --nu-blank: color-mix(in srgb, #bdb6a6 var(--L), #101113);
+  --nu-hi: color-mix(in srgb, #fff9 var(--L), #ffffff10);
   position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
   background: linear-gradient(var(--hall-wall), var(--hall-bg) 70%);
   transition: filter .8s, background .8s;
@@ -157,10 +172,15 @@
   color: #eafff0; background: #1d8a45; box-shadow: 0 0 18px #2ccf6a88, inset 0 0 0 1px #ffffff40;
 }
 
-/* ---------- light ---------- */
-.room[data-light="evening"] .hall { --lamp: #ffd9a8; --lamp-on: .7; filter: brightness(.85); }
-.room[data-light="night"] .hall { --lamp-on: 0; --cold-a: .35; --nb-dim: .45; filter: brightness(.75); }
-.room[data-light="battery"] .hall { --lamp-on: 0; --cold-a: .1; }
+/* ---------- light ----------
+   In the light theme the evening keeps the day's lamps and the night and the battery the day's cold light and
+   neighbours: the hall by day is lit by daylight too. */
+.room[data-light="evening"] .hall { --lamp: color-mix(in srgb, #fffaf0 var(--L), #ffd9a8); --lamp-on: .7; filter: brightness(.85); }
+.room[data-light="night"] .hall {
+  --lamp-on: 0; --cold-a: calc(.12 * var(--light) + .35 * (1 - var(--light)));
+  --nb-dim: calc(.97 * var(--light) + .45 * (1 - var(--light))); filter: brightness(.75);
+}
+.room[data-light="battery"] .hall { --lamp-on: 0; --cold-a: calc(.12 * var(--light) + .1 * (1 - var(--light))); }
 .room[data-light="battery"] .hall::after {
   content: ""; position: absolute; inset: 0;
   background: radial-gradient(70% 60% at 50% 0, #ff2a1a40, transparent 70%), #ff1a0a14;
@@ -178,22 +198,6 @@
   .hall .nb, .hall .lamp.a, .hall .lamp.c { display: none; }
   .hall .exit { top: 6px; left: 8px; font-size: 10px; }
   .hall .floor { height: 110px; }
-}
-
-/* ---------- light theme: the same machine hall by day ----------
-   The row of racks, the ceiling with its trays and the yellow duct, the raised floor: as at night, only light.
-   Only the colours change. */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .hall {
-    --hall-bg: #d3cec3; --hall-wall: #e8e4db; --tile: #d9d4c9; --tile-line: #b9b2a3; --hole-c: #b4ad9e;
-    --tray: #a8a191; --duct: #d9b73f; --lamp: #fffaf0; --cold-a: .12; --nb-dim: .97;
-    --nb-rail: #b8b1a1; --nb-body: #c9c2b2; --nb-edge: #9e9686; --nu-a: #efebe2; --nu-b: #e0d9cb; --nu-blank: #bdb6a6; --nu-hi: #fff9;
-  }
-}
-:root[data-theme="light"] .hall {
-  --hall-bg: #d3cec3; --hall-wall: #e8e4db; --tile: #d9d4c9; --tile-line: #b9b2a3; --hole-c: #b4ad9e;
-  --tray: #a8a191; --duct: #d9b73f; --lamp: #fffaf0; --cold-a: .12; --nb-dim: .97;
-  --nb-rail: #b8b1a1; --nb-body: #c9c2b2; --nb-edge: #9e9686; --nu-a: #efebe2; --nu-b: #e0d9cb; --nu-blank: #bdb6a6; --nu-hi: #fff9;
 }
 
 /* ---------- the aisle in perspective: the floor and the ceiling go into the distance ---------- */

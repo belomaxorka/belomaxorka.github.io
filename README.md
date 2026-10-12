@@ -107,7 +107,7 @@ Then a line in `content/racks.yaml` and a `lite-<name>` template for the light v
 
 Push to `main` → CI (`.forgejo/workflows/deploy.yml`): first `site-api -check` with site-api's `main` renders every
 page of the commit (each rack in each language, pulled-out units, the light and infrastructure pages, the htmx
-fragments), and `docs/tools/check-themes.mjs` checks that the light theme's two copies agree; only then the site is
+fragments), and `docs/tools/check-themes.mjs` checks that the theme is switched in one place (tokens.css); only then the site is
 shipped to the server, where site-api picks the new release up by itself.
 
 ## Hosting
