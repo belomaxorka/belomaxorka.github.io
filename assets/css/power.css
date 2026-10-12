@@ -5,6 +5,9 @@
   background: var(--hole); box-shadow: inset 0 0 0 1px #000, 0 0 0 1px var(--panel-hi);
 }
 .u:is(.has-psu, [data-host]) .face { padding-right: 36px; } /* a guest keeps its host's inset */
+/* The UPS's own inlet: low on its left, on the wall socket's side; its cord is plugged in there. */
+.ups > .psu { left: calc(var(--ear) + 6px); right: auto; top: auto; bottom: 14px; transform: none; }
+.ups:has(> .psu) .face { padding-left: 36px; }
 .cables.power { z-index: 6; }
 .cables.power .hit { fill: transparent; pointer-events: auto; cursor: grab; touch-action: manipulation; -webkit-touch-callout: none; user-select: none; }
 .cables.power .hit:active { cursor: grabbing; }

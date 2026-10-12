@@ -183,15 +183,19 @@
       });
       for (const r of ropes.values()) r.view = null; // a new room: the cables are drawn anew in it
     }
+    const inlet = (u) => {
+      if (u.querySelector(':scope > .psu')) return;
+      const s = document.createElement('span');
+      s.className = 'psu';
+      s.setAttribute('aria-hidden', 'true');
+      u.appendChild(s);
+    };
     units().forEach((u) => {
-      if (!u.querySelector(':scope > .psu')) {
-        const s = document.createElement('span');
-        s.className = 'psu';
-        s.setAttribute('aria-hidden', 'true');
-        u.appendChild(s);
-      }
+      inlet(u);
       u.classList.add('has-psu'); // after htmx too: on settle it restores the unit's class from the response
     });
+    // The UPS has one too, low on its left (the wall socket's side): its own cord is plugged in there (mainsAnchors).
+    if (upsUnit()) inlet(upsUnit());
     powers().forEach((u) => paint(u, keyOf(u), false));
     const rack = document.getElementById('rack');
     if (rack) rack.classList.toggle('powered-off', state.off || dead());
@@ -492,18 +496,21 @@
     return pts;
   }
 
-  // The UPS's cord: fixed at the bottom of the UPS (outlet: the fixed end here), the plug in the wall socket left of
-  // the rack or, without room, on the floor (socket). The socket and its "220 V" label are drawn with it.
+  // The UPS's cord: plugged into the UPS's inlet (outlet: the fixed end here, out of the bottom of the plug that sits in
+  // it, which update draws), the plug at the other end in the wall socket left of the rack or, without room, on the
+  // floor (socket). The socket and its "220 V" label are drawn with it.
   function mainsAnchors(ups) {
     const R = room.getBoundingClientRect();
     const rk = document.getElementById('rack').getBoundingClientRect();
     const u = (ups || document.getElementById('rack')).getBoundingClientRect();
     const railW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rail-w')) || 34;
     const x0 = rk.left - R.left, b0 = rk.bottom - R.top;
+    const inl = ups?.querySelector(':scope > .psu')?.getBoundingClientRect();
     const wall = x0 > 110;
     const ox = wall ? x0 - 62 : x0 + railW + 120, oy = wall ? b0 - 40 : b0 + 34 + 26;
     // s: where the plug sits in the socket, its centre on the holes (drawMains draws the socket around it).
-    return { wall, s: { x: ox, y: oy - 6 }, o: { x: x0 + railW + 46, y: u.bottom - R.top - 6 } };
+    const o = inl ? { x: inl.left - R.left + inl.width / 2, y: inl.top - R.top + inl.height / 2 + 10 } : { x: x0 + railW + 46, y: u.bottom - R.top - 6 };
+    return { wall, s: { x: ox, y: oy - 6 }, o };
   }
 
   // A cable's rope where its socket s and outlet o are now. A new one (n links of len in all, plugged or not) rests
@@ -591,6 +598,8 @@
       v.label.textContent = document.getElementById('cables')?.dataset.power || '';
       v.cord = el('g', { 'data-cord': r.key }, g);
       v.paths = Rack.cord(v.cord, MAINS, 6, { shadow: 9, hiW: 1.6, shift: 1.2 });
+      // The plug in the UPS's inlet: its top in the inlet, the cord out of its bottom.
+      v.conn = el('rect', { width: 11, height: 13, rx: 2, fill: MAINS, stroke: 'rgba(255,255,255,.25)' }, g);
       v.plug = el('g', {}, g);
       el('rect', { x: -11, y: -9, width: 18, height: 18, rx: 4, fill: MAINS, stroke: 'rgba(0,0,0,.5)' }, v.plug);
       v.pins = [el('rect', { x: 7, y: -6, width: 7, height: 3, rx: 1.5, fill: '#b9bec5' }, v.plug),
@@ -619,6 +628,7 @@
       v.holes.forEach((h, i) => { h.setAttribute('cx', s.x + (i ? 6 : -6)); h.setAttribute('cy', s.y + 2); });
       v.label.setAttribute('x', s.x - 22); v.label.setAttribute('y', s.y - 20);
       v.label.style.display = r.wall && v.label.textContent ? '' : 'none';
+      v.conn.setAttribute('x', r.outlet.x - 5.5); v.conn.setAttribute('y', r.outlet.y - 13);
       v.pins.forEach((pin) => { pin.style.display = r.plugged ? 'none' : ''; });
     } else {
       v.outlet.setAttribute('x', r.outlet.x - 6); v.outlet.setAttribute('y', r.outlet.y - 5);
