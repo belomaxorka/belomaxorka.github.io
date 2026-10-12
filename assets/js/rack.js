@@ -183,12 +183,17 @@ window.Rack = (() => {
   // toggles the plug. While a finger has a plug, the page does not scroll under it: its touchmoves are cancelled, on the
   // layer (so the browser asks before scrolling a touch that starts on a plug) and on the touched element itself (a
   // plug drawn anew when it comes out leaves the old one out of the page, and the layer would not hear of them).
+  // A touch on a plug never ends in a click: on its release the plug is gone from under the finger, and the click would
+  // land on whatever is there now (a hanging plug put back over the router's links opened a link). Only the pointer that
+  // took the plug moves it and lets it go: another finger tapping elsewhere meanwhile is not a tap on the plug. The
+  // vibration only after the page has had a tap (Chrome blocks it before, with a warning in the console).
   const HOLD = 350, SLOP = 10;
   function hand(layer, room, { take, pull, drop, tap, moved }) {
     const h = { held: null };
-    let wait = null;   // a finger on a plug, not long enough yet: { from, timer, move, up, cancel }
+    let wait = null;   // a finger on a plug, not long enough yet: { id, from, timer, move, up, cancel }
     let touched = null; // the element a finger is on
     const block = (e) => { if (h.held && e.cancelable) e.preventDefault(); };
+    const noclick = (e) => { if (e.cancelable) e.preventDefault(); };
     const unwait = () => {
       if (!wait) return;
       clearTimeout(wait.timer);
@@ -202,13 +207,14 @@ window.Rack = (() => {
     const local = (e) => { const R = room().getBoundingClientRect(); return { x: e.clientX - R.left, y: e.clientY - R.top }; };
     const move = (e) => {
       const d = h.held;
-      if (!d) return;
+      if (!d || e.pointerId !== d.id) return;
       const at = local(e);
       d.x = at.x; d.y = at.y;
       if (!d.moved && Math.hypot(at.x - d.from.x, at.y - d.from.y) > 6) { d.moved = true; pull(d.key); }
       moved();
     };
-    const release = () => {
+    const release = (e) => {
+      if (h.held && e.pointerId !== h.held.id) return;
       touched?.removeEventListener('touchmove', block);
       touched = null;
       removeEventListener('pointermove', move);
@@ -220,8 +226,8 @@ window.Rack = (() => {
       h.held = null;
       moved();
     };
-    const grab = (key, was, at) => {
-      h.held = { key, ...at, from: at, was, moved: false };
+    const grab = (key, was, at, id) => {
+      h.held = { key, ...at, from: at, was, moved: false, id };
       addEventListener('pointermove', move);
       addEventListener('pointerup', release);
       addEventListener('pointercancel', release);
@@ -232,16 +238,24 @@ window.Rack = (() => {
       const was = key && take(key);
       if (was === undefined || was === false) return;
       const at = local(e);
-      if (e.pointerType !== 'touch') { e.preventDefault(); grab(key, was, at); return; }
+      if (e.pointerType !== 'touch') { e.preventDefault(); grab(key, was, at, e.pointerId); return; }
       unwait();
       touched?.removeEventListener('touchmove', block);
+      touched?.removeEventListener('touchend', noclick);
       touched = e.target;
       touched.addEventListener('touchmove', block, { passive: false });
-      const w = wait = { from: { x: e.clientX, y: e.clientY } };
-      w.move = (m) => { if (Math.hypot(m.clientX - w.from.x, m.clientY - w.from.y) > SLOP) unwait(); }; // a scroll
-      w.up = () => { unwait(); tap(key, was); moved(); };                                             // a quick tap
-      w.cancel = unwait;                                                                              // the browser scrolls
-      w.timer = setTimeout(() => { unwait(); navigator.vibrate?.(12); grab(key, was, at); }, HOLD);
+      touched.addEventListener('touchend', noclick, { passive: false, once: true });
+      const w = wait = { id: e.pointerId, from: { x: e.clientX, y: e.clientY } };
+      const mine = (m) => m.pointerId === w.id;
+      // Moved first: a scroll. Let go: a quick tap. Cancelled: the browser scrolls. Held still: taken.
+      w.move = (m) => { if (mine(m) && Math.hypot(m.clientX - w.from.x, m.clientY - w.from.y) > SLOP) unwait(); };
+      w.up = (m) => { if (mine(m)) { unwait(); tap(key, was); moved(); } };
+      w.cancel = (m) => { if (mine(m)) unwait(); };
+      w.timer = setTimeout(() => {
+        unwait();
+        if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(12);
+        grab(key, was, at, w.id);
+      }, HOLD);
       addEventListener('pointermove', w.move);
       addEventListener('pointerup', w.up);
       addEventListener('pointercancel', w.cancel);
