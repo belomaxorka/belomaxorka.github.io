@@ -60,7 +60,7 @@
   //   uplink to the rack that feeds the row, which needs its own power, switch, router and cords (feeds).
   // A unit without a link is .unlinked; one that needs the internet (data-net="wan") and has a link but no internet is
   // .nonet; the rack without internet is .nonet too. The router shows what it misses (.nowan, .nolan), and a port's lamp
-  // is lit while its cord is in, the switch is on and the unit at its end is on.
+  // is lit while its cord is in, the switch is on and the unit at its end is on (for the uplink's SFP, the far switch).
   let feedTimer = 0;
   function sync() {
     const body = document.getElementById('rack-body'), rk = document.getElementById('rack');
@@ -80,8 +80,9 @@
     }
     for (const c of cords) {
       const u = c.type === 'nic' ? unitOf(body, c.key) : c.type === 'lan' ? rtr : null;
-      c.port?.classList.toggle('link', switchUp && !down(c.key) && !u?.classList.contains('off'));
-      c.port?.classList.toggle('linking', switchUp && linking.has(c.key) && !u?.classList.contains('off'));
+      const far = c.type !== 'uplink' || feeds(tor, true);
+      c.port?.classList.toggle('link', switchUp && far && !down(c.key) && !u?.classList.contains('off'));
+      c.port?.classList.toggle('linking', switchUp && far && linking.has(c.key) && !u?.classList.contains('off'));
     }
     if (rtr) {
       // The router's LAN goes to the switch: the switch without power means no link on LAN, as with a pulled cord.
@@ -106,15 +107,15 @@
   }
 
   // The rack that feeds this one its internet (the switch's data-uplink, the row's first rack): it has power, its switch
-  // and router are plugged in and its LAN and WAN cords are in. Its battery can run out while we are elsewhere: then ask
-  // again in a while.
-  function feeds(tor) {
+  // and router are plugged in and its LAN and WAN cords are in; for the uplink fibre's link (link), its power and its
+  // switch are enough. Its battery can run out while we are elsewhere: then ask again in a while.
+  function feeds(tor, link) {
     const id = tor?.dataset.uplink;
     if (!id || id === here()) return true;
     const p = Rack.rackPower(id, 'uplinkNoups' in tor.dataset);
     clearTimeout(feedTimer);
     if (p.draining) feedTimer = setTimeout(sync, 2000);
-    return p.on && !p.unplugged.tor && !p.unplugged.rtr && !out[id + '/lan'] && !out[id + '/wan'];
+    return p.on && !p.unplugged.tor && (link || (!p.unplugged.rtr && !out[id + '/lan'] && !out[id + '/wan']));
   }
 
   // Offline: a unit on the network without a link, or without the internet it needs (as its screens say).

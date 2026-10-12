@@ -52,7 +52,7 @@
 /* ---------- BIOS settings ---------- */
 /* Rainbow: the green LEDs shimmer ("20% cooler"). */
 @media (prefers-reduced-motion: no-preference) {
-  :root.rainbow .led:not(.off, .warn, .err, .pwr, .uid), :root.rainbow .tp.link .led { animation: rainbow 2.4s linear infinite !important; }
+  :root.rainbow .led:not(.off, .warn, .err, .pwr, .uid), :root.rainbow :is(.tp, .sfp-port).link .led { animation: rainbow 2.4s linear infinite !important; }
 }
 @keyframes rainbow { to { filter: hue-rotate(360deg); } }
 /* Steady light: the LEDs do not blink, neither at power-up nor from traffic (live.js sets no .tx then either). */

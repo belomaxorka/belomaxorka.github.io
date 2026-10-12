@@ -350,7 +350,7 @@
     live.setAttribute('viewBox', `0 0 ${R.width} ${R.height}`);
     live.replaceChildren(...svg.childNodes);
     // The ports' lamps are net.js's: lit for the cords with a link.
-    Rack.roleOf(document.getElementById('rack-body'), 'switch')?.querySelectorAll('.tp.link').forEach(t => t.classList.remove('link'));
+    Rack.roleOf(document.getElementById('rack-body'), 'switch')?.querySelectorAll(':is(.tp, .sfp-port).link').forEach(t => t.classList.remove('link'));
     return cords;
   }
 
@@ -433,7 +433,7 @@
     // hall.css) ~40 px high, above the aisle signs; along the ceiling to it and into the duct through an entry turned
     // along the duct. No ceiling (light theme) or the duct below the rack's roof: straight up. The tail runs from the
     // jack to the brush: a pulled fibre hangs from it.
-    const fiber = (key, from, color, label) => {
+    const fiber = (key, from, color, label, port = null) => {
       if (!vmEl || !vmEl.offsetParent) return;
       const v = box(vmEl), x = v.x + v.w - 4;
       const y = lowEl ? box(lowEl).cy + 6 : from.y - 14;
@@ -444,7 +444,7 @@
         ? `L${x} ${j.cy + r} Q${x} ${j.cy}, ${x + s * r} ${j.cy} L${j.cx} ${j.cy}`
         : `C${x} ${cap.y - 16}, ${x} ${cap.y - 30}, ${x} -10`;
       const tail = [{ x: from.cx, y: from.y + 2 }, { x: from.cx, y: y + 8 }, { x: from.cx - 10, y }, { x: from.cx - 24, y }];
-      pullable(key, key, null, from, color, 3, tail, `L${x + 14} ${y} C${x + 4} ${y}, ${x} ${y - 6}, ${x} ${y - 18} L${x} ${cap.y + 4} ${top}`);
+      pullable(key, key, port, from, color, 3, tail, `L${x + 14} ${y} C${x + 4} ${y}, ${x} ${y - 6}, ${x} ${y - 18} L${x} ${cap.y + 4} ${top}`);
       if (j && j.cy < cap.y - 30) {
         const n = marks[Math.max(0, marks.indexOf(j) - 1)];
         const len = Math.hypot(n.cx - j.cx, n.cy - j.cy) || 1;
@@ -473,9 +473,9 @@
       }
       fiber('wan', box(rtr.querySelector('[data-port="wan"]')), FIBER, svg.dataset.uplink);
     } else {
-      // The other racks: fibre from the switch's SFP towards R1.
+      // The other racks: fibre from the switch's SFP towards R1; the SFP's lamp is its port's.
       const sfp = tor.querySelector('.sfp');
-      if (sfp && sfp.offsetParent) fiber('uplink', box(sfp), UPFIBER, svg.dataset.uplinkR1);
+      if (sfp && sfp.offsetParent) fiber('uplink', box(sfp), UPFIBER, svg.dataset.uplinkR1, sfp.closest('.sfp-port'));
     }
 
     // Network cards: left into the vertical organiser, up along it to the switch, under it right to the port.

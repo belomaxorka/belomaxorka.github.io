@@ -11,8 +11,8 @@
 //   - a unit's new data (its htmx response: a new track on the media server, a log line, the monitoring lamps): first
 //     a packet runs to that unit (on other racks through the uplink into the switch), and the unit changes only when
 //     it has arrived;
-//   - the activity lamps (the router's WAN, the switch ports, the network cards, the server's net and hdd) blink only
-//     when something really went through them; with nothing going on they are steady;
+//   - the activity lamps (the router's WAN and LAN, the switch's ports and SFP, the network cards, the server's net and
+//     hdd) blink only when something really went through them; with nothing going on they are steady;
 //   - torches: one hangs on the hall's wall by the light switch. Take it (that is the consent) and a spot of light
 //     follows the cursor, and where it shines (as fractions of the rack's width and height, nothing else) the other
 //     guests of this rack see; hang it back and it is off. Others' torches are such spots too; a guest gone or 15 s
@@ -177,9 +177,9 @@
   // The way to the unit target: from outside along the fibre (the router's WAN or the switch's uplink; both drawn from
   // the jack to the ceiling, so against their direction), along the router's LAN into the switch (with it), from the
   // switch along the unit's cord (against it: the cord runs from its network card). Legs are [path, direction, the
-  // lamps that blink when the packet reaches the leg's end]: the router's WAN; the LAN port and the unit's port on the
-  // switch; the lamps at the unit's end (ends). A unit running on another (a container) is reached through its host's
-  // cord. The unit is not on this rack: no way, the data went elsewhere.
+  // lamps that blink when the packet reaches the leg's end]: the router's WAN and LAN (or the switch's SFP); the LAN
+  // port and the unit's port on the switch; the lamps at the unit's end (ends). A unit running on another (a
+  // container) is reached through its host's cord. The unit is not on this rack: no way, the data went elsewhere.
   function route(target) {
     if (!up()) return null;
     const body = document.getElementById('rack-body');
@@ -187,7 +187,7 @@
     const fiber = cord('wan') || cord('uplink'), nic = cord(via), unit = nic && unitOf(body, via);
     if (!fiber || !path(fiber) || !unit) return null;
     const rtr = Rack.roleOf(body, 'router');
-    const legs = [[path(fiber), -1, [rtr && !rtr.classList.contains('nowan') ? rtr.querySelector('.led.wan') : null]]];
+    const legs = [[path(fiber), -1, rtr ? [rtr.querySelector('.led.wan'), rtr.querySelector('.led.lan')] : [port(fiber)]]];
     const lan = cord('lan');
     if (lan && path(lan)) legs.push([path(lan), 1, [port(lan)]]);
     legs[legs.length - 1][2].push(port(nic));

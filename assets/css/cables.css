@@ -31,7 +31,7 @@
    card blink fast, as with a tester at the other end. Without animation, only the glow. */
 .cables g.probe { filter: brightness(1.35) drop-shadow(0 0 4px rgba(255, 255, 255, .5)); }
 @media (prefers-reduced-motion: no-preference) {
-  .tp.link.probe .led, .nic.probe .led { animation: probe-blink .14s steps(2, jump-none) infinite !important; }
+  :is(.tp, .sfp-port).link.probe .led, .nic.probe .led { animation: probe-blink .14s steps(2, jump-none) infinite !important; }
 }
 @keyframes probe-blink { 50% { opacity: .15; } }
 

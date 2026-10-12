@@ -2,8 +2,9 @@
      router. The switch's ports: the top row odd (1, 3, 5, 7: the ring from the patch panel), the bottom row even (the
      units' network cards, the router). assets/js/app.js decides which ports are taken when it draws the cables; lit
      are the ones with a link (assets/js/net.js), blinking when data really went through the port
-     (assets/js/live.js); without JS only the power lamp is lit. All of it is decoration: aria-hidden, nothing to
-     click. The router's cords pull out (net.js): without WAN or LAN its LCD says data-nowan or data-nolan. */}}
+     (assets/js/live.js); without JS only the power lamp is lit. The SFP+ cages too: a rack without the router gets its
+     uplink fibre in the first one. All of it is decoration: aria-hidden, nothing to click. The router's cords pull out
+     (net.js): without WAN or LAN its LCD says data-nowan or data-nolan and that side's lamp goes dark. */}}
 
 {{define "unit-brush"}}
 <div class="u brush" style="--h:1" aria-hidden="true"><div class="face"><span class="slot"></span><span class="silk">cable mgmt</span></div></div>
@@ -14,7 +15,7 @@
   <div class="face">
     <div class="tor-id"><span class="brand">switch</span><span class="silk">24 × 1g · 2 × sfp+</span></div>
     <div class="tor-ports">{{range $i := seq 24}}<span class="tp" data-port="{{$i}}"><i class="led"></i><i class="jack"></i></span>{{end}}</div>
-    <div class="tor-sfp"><span class="silk">sfp+</span><i class="sfp" data-port="sfp1"></i><i class="sfp" data-port="sfp2"></i></div>
+    <div class="tor-sfp"><span class="silk">sfp+</span><span class="sfp-port"><i class="led"></i><i class="sfp" data-port="sfp1"></i></span><span class="sfp-port"><i class="led"></i><i class="sfp" data-port="sfp2"></i></span></div>
     <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led"></i>sys</span></div>
   </div>
 </div>
@@ -23,7 +24,7 @@
 {{/* The router. Besides WAN and LAN, the site's spare ways in (content/uplinks.yaml, all but https itself): jacks that
      are links, like the ring on the patch panel, the tape the caption (port), the address in the hint. The lamp is
      the Gatus check named in check: lit, the way in works; red, it does not; dark without the router's WAN or LAN
-     (net.js), like the monitoring lamps without a link. A way without check (Tor, Yggdrasil: Gatus is in neither
+     (net.js), like the monitoring lamps without a link; it blinks when the check runs, as they do. A way without check (Tor, Yggdrasil: Gatus is in neither
      network) has no lamp. The link to the light version is the "http" port, hidden among
      the ports. The rest of the router is decoration. */}}
 {{define "unit-router"}}
@@ -34,12 +35,12 @@
       <span class="silk" aria-hidden="true">wan</span><i class="jack wan" data-port="wan" aria-hidden="true"></i><span class="silk" aria-hidden="true">lan</span><i class="jack" data-port="lan" aria-hidden="true"></i>
       <nav class="uplinks" aria-label="{{t "net.uplinks"}}">
         {{- range .Content.uplinks}}{{if .port}}{{$u := .}}{{$st := "off"}}{{range $.Status.Lamps}}{{if eq .Name $u.check}}{{$st = .State}}{{end}}{{end}}
-        <a class="port up" href="{{.url}}"{{ext .url}} title="{{.name}} · {{.url}}" data-uplink="{{.id}}"><i class="jack"></i><span class="tape{{if eq .id "tor"}} r{{else if eq .id "ygg"}} b{{end}}">{{.port}}</span>{{if .check}}<i class="led{{with $st}} {{.}}{{end}}"></i>{{end}}</a>
+        <a class="port up" href="{{.url}}"{{ext .url}} title="{{.name}} · {{.url}}" data-uplink="{{.id}}"><i class="jack"></i><span class="tape{{if eq .id "tor"}} r{{else if eq .id "ygg"}} b{{end}}">{{.port}}</span>{{if .check}}<i class="led{{with $st}} {{.}}{{end}}" data-check="{{.check}}"></i>{{end}}</a>
         {{- end}}{{end}}
       </nav>
     </div>
     <span class="lcd" aria-hidden="true" data-nowan="{{t "net.router_nowan"}}" data-nolan="{{t "net.router_nolan"}}">{{t "net.router_lcd"}}</span>
-    <div class="leds silk" aria-hidden="true"><span><i class="led pwr"></i>pwr</span><span><i class="led wan"></i>wan</span></div>
+    <div class="leds silk" aria-hidden="true"><span><i class="led pwr"></i>pwr</span><span><i class="led wan"></i>wan</span><span><i class="led lan"></i>lan</span></div>
   </div>
 </div>
 {{end}}

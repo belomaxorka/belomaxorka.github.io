@@ -137,7 +137,7 @@
   .aisle a.step.prev.pending i { animation-name: step-nudge-back; }
 
   /* Arrived: the router brings the links up. */
-  html.hop-land :is(.tor .tp.link, .rtr, .nic) .led { animation: link-up .5s steps(5, jump-none) both; }
+  html.hop-land :is(.tor :is(.tp, .sfp-port).link, .rtr, .nic) .led { animation: link-up .5s steps(5, jump-none) both; }
 }
 html.hop-wait, html.hop-wait a { cursor: progress; }
 
