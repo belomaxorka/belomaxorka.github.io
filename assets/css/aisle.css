@@ -1,7 +1,5 @@
-/* The aisle: the racks' signs and the arrows to the neighbours (templates/aisle.html). The rack changes without a
-   reload (assets/js/aisle.js): the camera moves along the row, the rack leaves towards its neighbours, the next one
-   arrives, the hall and the signs respond. Without JS plain links, and View Transitions between pages (assets/js/theme.js
-   sets the direction). */
+/* The aisle: the signs and the arrows (templates/aisle.html). With JS the rack changes without a reload
+   (aisle.js), without it plain links and View Transitions between pages. */
 .aisle {
   position: relative; z-index: 5; max-width: 1000px; margin: 0 auto 12px;
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
@@ -58,18 +56,11 @@
 @keyframes rack-out-back { to { transform: translateX(70vw) scale(.94); opacity: 0; } }
 @keyframes rack-in-back { from { transform: translateX(-70vw) scale(.94); opacity: 0; } }
 
-/* ---------- the move without a reload: the camera along the row (assets/js/aisle.js) ----------
-   The racks of the row are 1028px apart (a rack and the aisle between them), and the neighbours in the hall stand
-   there too. Forward along the row the whole world moves left by --hop-d (back: right, --hop-d < 0): the old rack
-   darkens and melts into the left neighbour, the right neighbour brightens and becomes the new rack, the ceiling, the
-   lamps and the floor move less (parallax). A spring at the end: the camera overshoots a little and comes back.
-   Classes on <html>:
-     hop        - moving; hop-vt - with View Transitions, otherwise the old rack is a copy (.hop-ghost);
-     hop-fwd, hop-back - where to; hop-signs - the signs swing, the new one lights up; hop-land - arrived.
-   aisle.js sets the variables on <html>: --hop-d (px), --hop-s (1 or -1), --hop-oy (the middle of the screen from the
-   rack's top), --hop-ox and --hop-ry (the rack's centre and the middle of the screen from the room's corner), --hop-dim
-   and --hop-blur (how much the rack darkens and blurs among the neighbours: as they do; none in sight, no darkening),
-   --cam0 (where from). */
+/* ---------- the move without a reload (aisle.js) ----------
+   The world moves by --hop-d (one rack and its aisle, 1028px; negative going back), the old rack fading into a
+   neighbour, the hall moving less (parallax). Classes on <html>: hop (moving), hop-vt (with View Transitions,
+   otherwise .hop-ghost is a copy of the old rack), hop-fwd / hop-back, hop-signs, hop-land. aisle.js sets the
+   --hop-* variables and --cam0. */
 :root {
   --hop-t: .72s;
   --hop-ease: cubic-bezier(.3, .75, .25, 1);

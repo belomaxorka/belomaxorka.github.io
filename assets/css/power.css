@@ -12,19 +12,16 @@
 .cables.power .hit { fill: transparent; pointer-events: auto; cursor: grab; touch-action: manipulation; -webkit-touch-callout: none; user-select: none; }
 .cables.power .hit:active { cursor: grabbing; }
 
-/* A unit without power: dim, its screens empty, its lamps dark. The text stays in the markup. Its pulled-out drawer
-   and the drawer's handle the same. */
+/* A unit without power: dim, its screens empty, its lamps dark; its drawer the same. */
 .u.off .face, .u.off > .pull, .drawer.off .slide { filter: saturate(.2) brightness(.6); }
 .u.off .lcd, .u.off .lcd *, .drawer.off .lcd, .drawer.off .lcd * { color: transparent !important; text-shadow: none !important; }
 .u.off .led, .u.off .vu i, .drawer.off .led { background: var(--led-off) !important; box-shadow: inset 0 1px 1px #0006 !important; animation: none !important; }
 .u.off img, .drawer.off img { filter: grayscale(1) brightness(.4); }
-/* No covers without power: the tray is empty, as when there is no cover; grey squares in the drawer. The picture moves
-   out past its frame, the frame and the background stay (the same without a link: assets/css/units/network.css). */
+/* No covers without power: the tray is empty, as when there is no cover. */
 .u.off img.tray, .drawer.off .media-week img { object-position: 200px 0; }
 .u.off img.tray { background: repeating-linear-gradient(135deg, var(--void) 0 6px, var(--panel) 6px 12px); }
-/* And it cannot be pressed: power.js sets inert on it, so no click, hover or focus, and the usual cursor.
-   pointer-events also for a browser without inert. The UPS (.off when its battery is empty) is never inert: its
-   button turns the rack on. */
+/* And it cannot be pressed (power.js sets inert; pointer-events for browsers without it). The UPS is never
+   inert: its button turns the rack on. */
 .u[inert], .drawer[inert] { pointer-events: none; user-select: none; cursor: default; }
 /* The focus from a dark unit goes to the UPS (or the rack). */
 .u.ups:focus-visible, .rack:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -51,7 +48,7 @@
 .ups .pwr .ic { width: 18px; height: 18px; stroke-width: 2.6; filter: drop-shadow(0 0 3px currentColor); }
 .rack.powered-off .ups .pwr { color: var(--led-err); }
 
-/* A sticker came unstuck (assets/js/sticker.js): the unit shows nothing, a copy falls and lies on the floor; a tap puts it back. */
+/* A sticker came unstuck (sticker.js): a copy falls to the floor; a tap puts it back. */
 .peeled { visibility: hidden; }
 .fallen-sticker {
   position: absolute; z-index: 5; left: 0; top: 0; margin: 0; max-width: none; box-sizing: border-box;
@@ -61,9 +58,8 @@
 .fallen-sticker.on-floor:hover { filter: none; }
 .fallen-sticker.returning { transition: transform .7s cubic-bezier(.3, .7, .3, 1); }
 
-/* The hall's breaker (power.js): a grey box on the wall by the socket with a switch in it. Up: current in the row's
-   sockets; down: every UPS on battery. A real button: Tab, space, aria-pressed. It and the light switch and the torch
-   stand over the cable layers, which the scripts add to the room after them (z-index 7). */
+/* The hall's breaker (power.js): up, the row's sockets have current; down, every UPS is on battery. It, the
+   light switch and the torch stand over the cable layers (z-index 7). */
 .breaker {
   position: absolute; z-index: 7; display: grid; justify-items: center; gap: 4px;
   padding: 0; border: 0; background: none; cursor: pointer; color: var(--dim);
@@ -94,7 +90,7 @@
 .ups .utest:active { transform: translateY(1px); box-shadow: inset 0 1px 0 var(--panel-hi), 0 1px 0 var(--edge); }
 .ups .utest:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* The light switch on the hall's wall (power.js): a key on the wall, its caption the mode: auto, day, evening, night. */
+/* The light switch (power.js): auto, day, evening, night. */
 .lightsw {
   position: absolute; z-index: 7; top: 40px; left: 22px; display: grid; justify-items: center; gap: 3px;
   padding: 0; border: 0; background: none; cursor: pointer; color: var(--dim);
@@ -118,7 +114,7 @@
 /* A phone: the hall hardly shows around the rack, the light would have nothing to light. */
 @media (max-width: 560px) { .lightsw { display: none; } }
 
-/* The torch on the hall's wall (assets/js/live.js), next to the light switch. Taken: an empty hook hangs there. */
+/* The torch (live.js); taken, an empty hook hangs there. */
 .torch {
   position: absolute; z-index: 7; top: 46px; left: 60px; display: grid; justify-items: center; gap: 3px;
   padding: 0; border: 0; background: none; cursor: pointer; color: var(--dim);
@@ -136,10 +132,10 @@
 .torch[aria-pressed="true"] .shell { opacity: .18; }
 .torch:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 @media (max-width: 760px) { .torch { top: 36px; left: 46px; } }
-/* A touch screen has no cursor for the spot to follow (a finger scrolls): no torch to take; the others' spots still shine. */
+/* A touch screen has no cursor to follow: no torch; the others' spots still shine. */
 @media (hover: none) { .torch { display: none; } }
 
-/* The light spots: my torch following the cursor and the other guests' torches on this rack. Always visible, brightest at night. */
+/* The light spots: my torch and the other guests' torches on this rack. */
 .beam {
   position: absolute; z-index: 7; width: 200px; height: 200px; margin: -100px 0 0 -100px; border-radius: 50%; pointer-events: none;
   background: radial-gradient(circle, color-mix(in srgb, rgba(255, 196, 92, .38) var(--L), rgba(255, 244, 214, .42)),

@@ -1,18 +1,15 @@
-/* Tokens. The dark theme by default (a black rack), the light one beige hardware from the 90s.
-   The theme is one switch: --light is 0 in the dark theme and 1 in the light one (--L the same as a percentage), set
-   below by the system's choice or by the visitor's (data-theme on <html>: the theme key, assets/js/theme.js; over
-   Tor the page comes dark). A value the themes do not share is written once, with both: a colour as
+/* Tokens. Dark by default (a black rack), light is beige 90s hardware.
+   The theme is one switch: --light is 0 or 1 (--L the same in %), set below by the system or by data-theme on
+   <html> (theme.js). A value the themes differ in is written once: a colour as
    color-mix(in srgb, LIGHT var(--L), DARK), a number as calc(LIGHT * var(--light) + DARK * (1 - var(--light))).
-   tools/check-themes.mjs (CI) keeps the switch here: no other stylesheet asks for the theme itself.
-   The LCD colours come in -d/-l pairs: site-api puts the pair from the track's cover into <style id="cover-palette">.
-   The cover's pair does not have to follow the theme: a black cover gives a black screen with white text in the light
-   theme too, a white one a paper screen in the dark. So --lcd goes only on the background, --lcd-bg, not the panel. */
+   tools/check-themes.mjs (CI) keeps the switch here.
+   LCD colours come in -d/-l pairs; site-api puts the cover's pair into <style id="cover-palette">. A cover's
+   screen need not follow the theme, so --lcd colours only the screen's background. */
 @property --lcd { syntax: "<color>"; inherits: true; initial-value: #ffb547; }
 @property --lcd-bg { syntax: "<color>"; inherits: true; initial-value: #1b1306; }
 @property --lcd-dim { syntax: "<color>"; inherits: true; initial-value: #a87a35; }
 
-/* The switch. color-scheme (the browser's own controls and scrollbars) and the torch's light, which mixes into the
-   hall differently on a dark wall and on a light one (power.css), are keywords: they go with it. */
+/* The switch. color-scheme and the torch's blend mode are keywords: they go with it. */
 :root { --light: 0; color-scheme: dark; --beam-blend: screen; }
 @media (prefers-color-scheme: light) { :root { --light: 1; color-scheme: light; --beam-blend: multiply; } }
 :root[data-theme="dark"] { --light: 0; color-scheme: dark; --beam-blend: screen; }

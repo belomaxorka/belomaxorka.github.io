@@ -1,28 +1,12 @@
-// Live guests (site-api's /events, Server-Sent Events): who else is looking at the rack and what happens on it now.
-//   - online: how many pages are open. Every other guest is a patch cord from a free patch panel jack to a free switch
-//     port (app.js draws them by data-guests on <html>); a guest comes, the cord is pulled in; leaves, it is gone;
-//   - visit: someone opened a page: a packet runs from the ceiling along the fibre into the router, the switch and the
-//     server (it serves the site; a rack without the server gets no packet: the request is not to it);
-//   - gb: a new guestbook entry: a packet the same way to the KVM (only on the rack with the KVM);
-//   - act, once a second, the server's real work: requests served (the lamps on the way to the server), sources
-//     fetched (a packet from the server to the unit that shows the source and back), state files written (the
-//     server's hdd lamp), Gatus checks run (their lamps here and on the neighbour racks);
-//   - fresh: units whose source brought new data refresh at once;
-//   - a unit's new data (its htmx response: a new track on the media server, a log line, the monitoring lamps): first
-//     a packet runs to that unit (on other racks through the uplink into the switch), and the unit changes only when
-//     it has arrived;
-//   - the activity lamps (the router's WAN and LAN, the switch's ports and SFP, the network cards, the server's net and
-//     hdd) blink when something really went through them;
-//   - and, besides, the background chatter every network has: dim packets now and then, the ports flickering, the
-//     server's disk at work. It stands for nothing site-api did and refreshes nothing; its packets are dimmer than
-//     the real ones, which carry the data the units show;
-//   - torches: one hangs on the hall's wall by the light switch. Take it (that is the consent) and a spot of light
-//     follows the cursor, and where it shines (as fractions of the rack's width and height, nothing else) the other
-//     guests of this rack see; hang it back and it is off. Others' torches are such spots too; a guest gone or 15 s
-//     without news, they go out.
-// No packets without the rack's internet, the switch or the router; a packet does not reach a unit without a link.
-// Without animation (prefers-reduced-motion) and in a background tab there are no packets or blinks; with "steady
-// light" in the BIOS the lamps do not blink (the packets still run); the guests' cords stay. Without JS, nothing.
+// Live guests (site-api's /events, Server-Sent Events):
+//   online   other guests as patch cords from the patch panel to the switch (app.js draws them by data-guests on <html>);
+//   visit    a packet along the fibre to the server; gb: a packet to the KVM;
+//   act      once a second the server's real work: requests, sources fetched, state files written, Gatus checks run;
+//   fresh    units whose source brought new data refresh at once, once a packet reaches them;
+//   torches  take the one on the wall and a spot follows the cursor; the other guests of this rack see it.
+// Besides, background chatter: dim packets and flickering lamps that stand for nothing. No packets without the
+// internet, the switch or the router, none to a unit without a link; none without animation or in a background tab;
+// "steady light" (BIOS) stops the blinks.
 (() => {
   if (!window.EventSource) return;
   const { motion, here } = Rack;
@@ -177,12 +161,9 @@
   // The rack is online: it has the internet (net.js: the switch, the router or the uplink, the rack feeding it) and power.
   const up = Rack.reached;
 
-  // The way to the unit target: from outside along the fibre (the router's WAN or the switch's uplink; both drawn from
-  // the jack to the ceiling, so against their direction), along the router's LAN into the switch (with it), from the
-  // switch along the unit's cord (against it: the cord runs from its network card). Legs are [path, direction, the
-  // lamps that blink when the packet reaches the leg's end]: the router's WAN and LAN (or the switch's SFP); the LAN
-  // port and the unit's port on the switch; the lamps at the unit's end (ends). A unit running on another (a
-  // container) is reached through its host's cord. The unit is not on this rack: no way, the data went elsewhere.
+  // The way to a unit: from outside along the fibre (the router's WAN or the switch's uplink, drawn from the jack, so
+  // walked backwards), the router's LAN into the switch, then the unit's cord (backwards too). Legs are [path, direction,
+  // lamps at the leg's end]. A container is reached through its host's cord; a unit not on this rack: no way.
   function route(target) {
     if (!up()) return null;
     const body = document.getElementById('rack-body');
@@ -247,9 +228,7 @@
   }
 
   // ---------- the server's work (act) ----------
-  // hop is the way from one unit of this rack to another through the switch: out along the first's cord (drawn from
-  // its network card to the switch), in along the second's; none without a link at either end. lan is the server's way
-  // to fetch: the rack must be online.
+  // hop: from one unit to another through the switch (none without a link at either end); lan: the server's way.
   const lan = (from, to) => (up() ? hop(from, to) : null);
   function hop(from, to) {
     const body = document.getElementById('rack-body');
@@ -275,10 +254,8 @@
       const legs = route(srv);
       if (legs) blinks(legs.flatMap(([, , leds]) => leds), a.r);
     }
-    // Every source fetched, to each unit here that shows it (data-feed). From outside the home network (site-api says
-    // which: x) the packet comes in through the WAN; from inside, the server fetched it over the rack's network, there
-    // and back (a rack without the server: in through its uplink, from the rack where site-api is). A source no unit
-    // here shows: from outside, the lamps on the way to the server blink; from inside, it went to another rack.
+    // Each source fetched, to every unit here that shows it (data-feed): from outside (x) in through the WAN, from inside
+    // from the server and back. A source no unit here shows: from outside, the lamps on the way blink.
     const away = new Set(a.x || []);
     for (const src of a.p || []) {
       const to = feeds(src).filter((k) => cord(unitOf(body, k)?.dataset.host || k));
@@ -309,10 +286,7 @@
   }
 
   // ---------- the background chatter ----------
-  // What every network does besides the real work above: a dim packet now and then (from the internet to a unit that
-  // uses it, or from one unit to another), the ports flickering, the server's disk at work. Nothing from outside without
-  // the internet, nothing to a unit without power or a link, and, as for the real ones, no packets or blinks without
-  // animation or in a background tab, no blinks with steady lamps (travel, flash).
+  // Dim packets now and then, flickering ports, the server's disk; by the same rules of power, links and animation.
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   // every(min, max, fn): fn again and again, between min and max ms apart.
   function every(min, max, fn) {
@@ -358,10 +332,8 @@
     for (let i = 0, n = 1 + Math.floor(Math.random() * 4); i < n; i++) setTimeout(() => flash(hdd), i * (110 + Math.random() * 60));
   });
 
-  // An answer to a unit's request came (an htmx poll, the drawer, a form in the drawer). A poll with something new: a
-  // packet to the unit, and the swap when it arrives (swap:...ms). What is new, each unit says (data-news on the element
-  // whose text changes with news: the media server's LCD, the log's lines; data-news="markup": its markup too, the
-  // monitoring lamps' states). Nothing new, or not a poll: the lamps on the way to the unit just blink.
+  // An answer to a unit's request came. A poll with news (data-news on the element whose text, or markup, changes): a
+  // packet to the unit and the swap when it arrives (swap:...ms). Otherwise the lamps on the way just blink.
   const news = (root) => {
     const n = root?.querySelector('[data-news]');
     return n ? (n.dataset.news === 'markup' ? n.innerHTML : n.textContent).replace(/\s+/g, ' ').trim() : null;

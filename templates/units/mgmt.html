@@ -1,5 +1,5 @@
-{{/* Management: the sections, the language (plain links that work without JS) and the toggles for the screens and the
-     theme (useless without JS, so hidden until Alpine starts). */}}
+{{/* Management: the sections, the language (plain links), the screen and theme toggles (hidden until Alpine
+     starts). */}}
 {{define "unit-mgmt"}}
 <div class="u mgmt" style="--h:1" data-key="mgmt" data-power data-net="wan" data-vlan="mgmt">
   <div class="face">
@@ -14,7 +14,7 @@
       </nav>
       <button class="key" type="button" hidden x-data="lcdToggle" data-cover="{{t "lcd.cover"}}" data-amber="{{t "lcd.amber"}}" @click="toggle" x-text="label">{{t "lcd.cover"}}</button>
       <button class="key" type="button" hidden x-data="themeToggle" data-dark="{{t "theme.dark"}}" data-light="{{t "theme.light"}}" @click="toggle" aria-label="{{t "theme.aria"}}"><i class="led pwr"></i><span x-text="label">{{t "theme.dark"}}</span></button>
-      {{/* The server room's sound (assets/js/sound.js): off by default; no button without JS. */}}
+      {{/* Sound (sound.js): off by default, no button without JS. */}}
       <button class="key snd" type="button" hidden aria-pressed="false" data-yes="{{t "sound.on"}}" data-no="{{t "sound.off"}}" aria-label="{{t "sound.off"}}" title="{{t "sound.off"}}"><span class="i-on">{{template "icon" "sound"}}</span><span class="i-off">{{template "icon" "mute"}}</span></button>
     </div>
   </div>

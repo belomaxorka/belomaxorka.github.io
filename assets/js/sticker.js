@@ -1,10 +1,6 @@
-// Stickers come unstuck and fall to the server room's floor like a leaf: swaying, tilting the way they move, gliding
-// slowly. When:
-//   - the plug of the unit the sticker is on was pulled (data-sticker is the unit's power key in power.js, srv the server);
-//   - the whole rack went dark: the UPS's button or an empty battery; then all the stickers fall, out of step.
-// The UPS's cord out of the socket leaves the stickers alone: the battery still holds. A tap on a fallen one sticks
-// it back. Where they lie is the visitor's only (localStorage, for half an hour), per rack: every rack has the UPS's
-// sticker. Without JS the stickers simply stay on.
+// Stickers come unstuck and fall to the floor like a leaf: when their unit's plug is pulled (data-sticker is the unit's
+// power key) or the whole rack goes dark. A tap sticks one back. The state is the visitor's (localStorage, half an
+// hour, per rack).
 (() => {
   const { motion } = Rack;
   // Rack → sticker key → { fx: the centre's x as a share of the room's width, dy: height spread, rot }, for

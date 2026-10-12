@@ -1,9 +1,6 @@
-{{/* The log: Koito's listens and the rare live events around them, newest first, up to 45 lines (site-api decides
-     what and how many). An event is the i18n key log.ev.<What>, given Subject, N and Dur (through uptime) as %[1]s,
-     %[2]d and %[3]s. The tags in the second column: ♪ music, net a service went down/up, ups, pve Proxmox, gb the
-     guestbook, code Wakapi. Single Gatus checks are not shown here: they would flood it; the monitor shows them.
-     A line is marked with data-kind (not data-src: html/template takes *src* for a URL and encodes the value).
-     The list scrolls, and the scroll survives the htmx refresh every minute (/fragments/syslog). */}}
+{{/* The log: Koito's listens and rare events, newest first. An event is the i18n key log.ev.<What> with
+     Subject, N and Dur as %[1]s, %[2]d and %[3]s. data-kind, not data-src: html/template treats *src* attributes
+     as URLs. The scroll survives the htmx refresh. */}}
 {{define "unit-syslog"}}
 {{- $feed := "koito gatus ups proxmox wakapi"}}
 <section class="u log" style="--h:5" aria-label="{{t "log.aria"}}" id="unit-syslog" data-key="log" data-power data-net="wan" data-feed="{{$feed}}"
@@ -22,5 +19,4 @@
 </section>
 {{end}}
 
-{{/* In the rack (content/racks.yaml) the unit gets the whole page and takes .Syslog from it. */}}
 {{define "slot-syslog"}}{{template "unit-syslog" .Syslog}}{{end}}

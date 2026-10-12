@@ -21,7 +21,7 @@
 
 /* ---------- the server: UID and RESET ---------- */
 .srv .leds { align-items: center; }
-/* The button is button.uid: the lamp next to it has the class uid too, and all: unset without the tag would reset the lamp. */
+/* button.uid, not .uid: the lamp next to it is .uid too, and all: unset would reset it. */
 .srv button.uid {
   all: unset; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit;
 }

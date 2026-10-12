@@ -1,13 +1,7 @@
-// The aisle between the racks: the rack changes without a reload. Links to the row's racks (the signs, the arrows and
-// any link to an address of <html data-racks>), the arrow keys and a swipe fetch the rack's whole page (it is small
-// and brings its own <title> and meta) and swap the room, #room. CSS moves the camera along the row
-// (assets/css/aisle.css): with View Transitions where there are any, otherwise a copy of the old rack slides away.
-// The other scripts learn about the swap from events on document:
-//   rack:swap   - the new room is in place (app.js lays the units out, power.js reads the UPS again, sticker.js clears
-//                 the old rack's fallen stickers, net.js keeps the units offline until the cables are drawn);
-//                 detail.quiet: it comes without animation;
-//   rack:landed - the rack has arrived (detail.dir: 1 forward, -1 back; detail.quiet: no animation): the cables.
-// Without JS the links simply work; when the fetch fails, a plain navigation.
+// The aisle: the rack changes without a reload. Links to the row's racks (<html data-racks>), the arrow keys and a
+// swipe fetch the rack's page and swap #room; aisle.css moves the camera (View Transitions, or a copy of the old rack).
+// rack:swap: the new room is in place (detail.quiet: no animation); rack:landed: it has arrived (detail.dir). Without JS,
+// or when the fetch fails, a plain navigation.
 (() => {
   const root = document.documentElement;
   const order = (root.dataset.racks || '').trim().split(/\s+/);
@@ -22,8 +16,7 @@
   let aim = -1; // where we are going or have arrived: the arrow keys count from it (the sign changes only after the swap)
 
   // ---------- which links to take over ----------
-  // The left button without modifiers only (the wheel, Ctrl, Shift open a new tab as usual), this site, a rack's path
-  // and no ?query (?lang=ru switches the language and needs a real load; ?open=<unit> too).
+  // The plain left click only, on this site, to a rack's path without a query (?lang and ?open need a real load).
   function linkOf(e) {
     if (e.defaultPrevented || e.button !== 0 || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return null;
     const a = e.target instanceof Element && e.target.closest('a[href]');
@@ -143,9 +136,8 @@
   }
 
   // ---------- swapping the room ----------
-  // Each rack has its own title, description, robots or canonical, og:*, profile:*, twitter:* and JSON-LD in <head>:
-  // taken from the new page; the LCD palette too, fresh. viewport and theme-color (theme.js paints it) stay. The
-  // attributes of <html> come from the new page too, except the ones the visitor sets.
+  // The new page's <head> (title, meta, og:*, JSON-LD, the LCD palette) and <html> attributes come over, except viewport,
+  // theme-color and what the visitor set.
   const HEAD = 'title, meta[name]:not([name="viewport"]):not([name="theme-color"]), meta[property], ' +
     'link[rel="canonical"], link[rel="alternate"], link[rel="me"], script[type="application/ld+json"]';
   const OWN = new Set(['class', 'style', 'data-theme', 'data-lcd']);

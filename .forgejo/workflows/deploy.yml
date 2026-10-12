@@ -10,10 +10,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # The contract with site-api: every page of this commit must render with site-api's main (site-api -check: each
-  # rack in each language, pulled-out units, the light version, the infrastructure pages, the htmx fragments), or
-  # the deploy would leave visitors on the old templates (site-api refuses ones that do not render) or, at a
-  # restart, on the fallback page.
+  # Every page of this commit must render with site-api's main (site-api -check), or the server would refuse the
+  # new templates.
   check:
     runs-on: docker
     steps:
@@ -25,7 +23,7 @@ jobs:
       - name: One theme switch
         run: node site/tools/check-themes.mjs site/assets/css
 
-      # A unit that shows live data must say how it gets it (data-net, data-host, data-role): the scripts go by that.
+      # A unit that shows live data must say how it gets it (data-net, data-host, data-role).
       - name: Every unit is declared
         run: node site/tools/check-units.mjs site/templates
 

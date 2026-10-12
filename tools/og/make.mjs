@@ -1,11 +1,7 @@
-// The link preview image (og:image): one for the whole site, a 1200x630 PNG in assets/og/site.png. No dependencies
-// (Node 22+ and Chrome, like tools/shot.mjs):
+// The link preview image: shoots card.html with shot.mjs into assets/og/site.png (1200x630, 256 colours by pack.mjs).
+// Node 22+ and Chrome, no dependencies.
 //
 //   node tools/og/make.mjs [--chrome path]
-//
-// Serves the repository's root locally for a minute (card.html takes the site's fonts, colours and i18n), shoots
-// card.html with shot.mjs and repacks the PNG into a 256-colour palette (pack.mjs), so the preview weighs under
-// 300 KB. Run it again only when the card's captions (i18n) or the card itself change; a new rack needs nothing.
 import { createServer } from 'node:http';
 import { readFileSync, writeFileSync, mkdtempSync, rmSync, statSync } from 'node:fs';
 import { execFile } from 'node:child_process';

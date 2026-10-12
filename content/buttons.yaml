@@ -1,11 +1,9 @@
 # 88x31 buttons: two strips on the site, in the order given here.
 # To add a button: put the picture into assets/88x31/ and add three lines.
 #   title: the hint and the alt; image: the file in assets/88x31/; link: where it leads (without link it is not a link).
-# Changes are picked up by themselves after a push: site-api reads content/ again without a restart.
 
-# My buttons: the files are in /88x31/ (a stable address, so others can embed them), each with its code to copy on
-# the site. No captions: a button shows itself. In the code a button leads to https://belomaxorka.dev with the alt
-# "belomaxorka"; link and alt change that.
+# My buttons: the files are in /88x31/ (a stable address to embed), each with its code to copy. The code links to
+# https://belomaxorka.dev with the alt "belomaxorka"; link and alt change that.
 mine:
   - title: belomaxorka · rack
     image: rack.gif

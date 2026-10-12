@@ -1,7 +1,6 @@
-// The guestbook's drawing pad (KVM, templates/units/kvm.html). A 640x400 canvas (site-api takes no more), white.
-// A brush with pen pressure, an eraser (a button or the pen's back end), fill, a palette and any colour, the size on
-// a slider, undo and redo (buttons, Ctrl+Z, Ctrl+Shift+Z / Ctrl+Y), full screen. After every action the picture goes
-// into a hidden field of the form, so both htmx and a plain form send it. Without JS there is no pad; the form works.
+// The guestbook's drawing pad: a white 640x400 canvas (site-api takes no more), a brush with pen pressure, eraser,
+// fill, colours, size, undo/redo, full screen. Every action writes the picture into a hidden field, so htmx and a plain
+// form both send it.
 document.addEventListener('alpine:init', () => {
   const Alpine = window.Alpine;
   const W = 640, H = 400;
@@ -62,9 +61,7 @@ document.addEventListener('alpine:init', () => {
       this.setFull(false);
     },
 
-    // A colour token of the rack as #rrggbb (the swatches and the colour input take that), as the browser works it out
-    // on an element: a token is a mix of its two themes' colours (tokens.css) and the LCD's a registered property,
-    // so the stylesheet's text is no hex. null when it is not a colour.
+    // A colour token as #rrggbb, as the browser computes it (tokens are color-mix() of both themes); null if none.
     hex(token) {
       const probe = document.createElement('i');
       probe.style.color = `var(${token})`;

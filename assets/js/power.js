@@ -1,15 +1,8 @@
-// The rack's power. Every unit with its own supply (data-power, rack.js) has a cable from the vertical PDU on the right
-// rail; a unit that runs on another (data-host: a container on the Proxmox host) is on while its host is. A plug can be pulled
-// out with a mouse or a finger: the cable hangs and swings (a Verlet rope) and the unit goes dark. Bring the plug to
-// its inlet (or tap it) and it goes back in, the unit lights up. The UPS's button turns the whole rack off and boots it
-// again. The UPS's own cord comes out of the wall socket too: the UPS goes on battery (red light in the hall, the LCD
-// blinks, the charge melts); the battery empty, everything goes dark; plugged back, it charges and the rack boots.
-// Each rack of the row has its own power: UPS, button, cord, battery, plugs. The breaker on the hall's wall (by the
-// socket) cuts the sockets of the whole row: every UPS goes on battery and each rack lives as long as its battery
-// does. The battery is counted by the clock: walk to another rack and this one keeps draining.
-// The state is the visitor's only (localStorage, for half an hour: Rack.toyStore). A dark unit cannot be pressed
-// (inert); the rack:unit event on the unit tells what is inside that it went dark or booted.
-// Without JS there is none of this: the units are simply on and working.
+// The rack's power. Every unit with its own supply (data-power) has a cable from the PDU; a guest (data-host) is on
+// while its host is. A plug pulled out hangs (a Verlet rope) and the unit goes dark; brought back (or tapped) it boots.
+// The UPS's button turns the rack off and on; its own cord pulled from the wall puts it on battery, which runs down by
+// the clock, even while the visitor is at another rack. The hall's breaker cuts every rack's socket. The state is the
+// visitor's (localStorage, half an hour). A dark unit is inert; rack:unit tells its insides.
 (() => {
   const COLOR = '#4a4f57';
   const PLUG = '#1b1d20';
@@ -92,9 +85,7 @@
     return !state.off && !state.unplugged[k] && !dead();
   }
 
-  // A dark unit cannot be pressed either: inert on it and on its pulled-out drawer, so no click, hover or focus (Tab
-  // skips it) and screen readers do not see it. One place for every cause: a plug, the UPS's button, the battery.
-  // Typed text, a drawing and the data stay: turned on, everything is as it was.
+  // A dark unit and its drawer are inert: no click, hover, focus or screen reader. Typed text and drawings stay.
   function paint(u, k, boot) {
     const on = powered(k) && !queued.has(k);
     const box = u.nextElementSibling?.classList.contains('drawer') ? u.nextElementSibling : null;
@@ -113,9 +104,8 @@
     if (!was && on) u.dispatchEvent(new CustomEvent('rack:unit', { bubbles: true, detail: { key: k, on } }));
   }
 
-  // Before a unit turns inert: tell what is inside (the drawing pad finishes its stroke and leaves full screen), close
-  // its dialogs (the guestbook's lightbox is modal: inside an inert unit it would lock the whole page) and move the
-  // focus out if it was inside.
+  // Before a unit turns inert: tell its insides (the drawing pad ends its stroke, leaves full screen), close its dialogs
+  // (a modal inside an inert unit would lock the page) and move the focus out.
   function shutdown(u, k, box) {
     u.dispatchEvent(new CustomEvent('rack:unit', { bubbles: true, detail: { key: k, on: false } }));
     [u, box].forEach((n) => n?.querySelectorAll('dialog[open]').forEach((d) => d.close()));
@@ -215,9 +205,7 @@
   // ---------- the UPS on battery ----------
   // While the cord is in and the battery full, the UPS's LCD shows the real data (NUT). Otherwise the simulation.
 
-  // The light switch on the hall's wall: auto, the light by the site's clock (as the server sent it), or day, evening,
-  // night by hand. While the sockets have current; without it the emergency light is on, and so with a real one (the
-  // server said battery).
+  // The light switch: auto (by the site's clock) or day, evening, night by hand; without current the emergency light.
   const MODES = ['auto', 'day', 'evening', 'night'];
   let mode = MODES.includes(Rack.store.get('hall-light')) ? Rack.store.get('hall-light') : 'auto';
   function lamp() {
@@ -231,9 +219,7 @@
   function dead() { return upsUnit() ? dying(state) : !fed(state); }
   const dying = (r) => !fed(r) && r.charge !== null && r.charge <= 0;
 
-  // The neighbour racks in the hall (data-rack on .nb in templates/aisle.html) are the row's racks: their lamps go dark
-  // when that rack is off by its UPS's button or its battery is empty (the charge counted by the clock), or, for a
-  // rack without a UPS, without current.
+  // The neighbour racks in the hall (.nb[data-rack]) go dark when that rack is off or its battery is empty.
   function neighbours() {
     const now = Date.now();
     document.querySelectorAll('.hall .nb[data-rack]').forEach((nb) => {
@@ -376,9 +362,7 @@
   }
 
   // ---------- the UPS's self-test ----------
-  // The test button: the UPS beeps, the LCD runs the battery down and back, the hall light blinks three times (the
-  // load went to the battery for a moment). The rack stays on. Without current, off or with an empty battery the UPS
-  // refuses on its LCD.
+  // It beeps, the LCD runs the battery down and back, the hall light blinks; refused without current or charge.
   function wireTest() {
     const b = upsUnit()?.querySelector('.utest');
     if (!b || b.dataset.wired) return;
@@ -437,9 +421,7 @@
   });
 
   // ---------- the hall's breaker ----------
-  // The switch on the wall by the socket: the current in all the row's sockets. Off: every UPS on battery (each rack
-  // with its own charge, counted up to now); on: they charge. The template's (hidden without JS), shown and wired once
-  // in each room.
+  // The current in all the row's sockets: off, every UPS on battery; on, they charge.
   let lever = null;
   function breaker() {
     const b = room.querySelector(':scope > button.breaker');
@@ -496,9 +478,7 @@
     return pts;
   }
 
-  // The UPS's cord: plugged into the UPS's inlet (outlet: the fixed end here, out of the bottom of the plug that sits in
-  // it, which update draws), the plug at the other end in the wall socket left of the rack or, without room, on the
-  // floor (socket). The socket and its "220 V" label are drawn with it.
+  // The UPS's cord: from the UPS's inlet (outlet) to the wall socket left of the rack or, without room, the floor.
   function mainsAnchors(ups) {
     const R = room.getBoundingClientRect();
     const rk = document.getElementById('rack').getBoundingClientRect();
@@ -513,10 +493,8 @@
     return { wall, s: { x: ox, y: oy - 6 }, o };
   }
 
-  // A cable's rope where its socket s and outlet o are now. A new one (n links of len in all, plugged or not) rests
-  // between them; one already hanging moves with its outlet, as it hangs (the physics takes it to its socket if that
-  // moved otherwise). Laid anew at every layout, as it was, a plugged cable jumped to its resting curve and swung back
-  // into the shape its physics had found, on every htmx refresh.
+  // A cable's rope between its socket s and outlet o. A new one rests between them; one already hanging moves with its
+  // outlet, so an htmx refresh does not make a plugged cable jump and swing.
   function place(key, s, o, n, len, plugged) {
     let r = ropes.get(key);
     if (!r) {
@@ -655,10 +633,9 @@
   }
 
   // ---------- the cable tester ----------
-  // The mouse over a plug lights its whole cable. Only a class on the cable already drawn (data-cord) changes:
-  // anything drawn anew on hover took the grab zone from under the press (Chrome sends pointerover to the new circle
-  // right before pointerdown), so the plug could not be grabbed and the glow stuck. Hence the target of every mouse
-  // move, not pointerover and pointerout.
+  // The mouse over a plug lights its cable: only a class changes. Drawing anything anew on hover takes the grab zone from
+  // under the press (Chrome sends pointerover to the new element right before pointerdown), so read the target of every
+  // mouse move instead of pointerover/out.
   Rack.tester('#power .hit', () => !!hand?.held, (k) => {
     probing = k;
     svg?.querySelectorAll('g[data-cord]').forEach((g) => g.classList.toggle('probe', g.dataset.cord === k));
@@ -703,10 +680,8 @@
   // with the units a frame or two later and jerk.
   document.addEventListener('rack:laidout', relayout);
 
-  // htmx swapped a unit (a poll every 30-60 s, a guestbook post) or brought out a drawer: the new element takes the
-  // power state at once, in the same task as the insertion, so no click falls between them and the unit does not
-  // flash. On settle htmx gives the new element its class from the response (it keeps the old one until then):
-  // again. Dark units keep polling: turned on, the screen has fresh data at once.
+  // htmx swapped a unit or brought a drawer: it takes the power state at once, in the same task, so it does not flash;
+  // again on settle, when htmx gives it the server's class. Dark units keep polling.
   const again = () => { if (svg) ensureDom(); };
   document.addEventListener('htmx:afterSwap', again);
   document.addEventListener('htmx:afterSettle', again);

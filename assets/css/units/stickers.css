@@ -9,11 +9,8 @@
 a.b88:hover, a.b88:focus-visible { transform: translateY(-2px); }
 @media (prefers-reduced-motion: reduce) { .b88 { transition: none; } }
 
-/* A narrow wall (phone): the first three rows show, the other buttons behind the "show all" key under them. The wall
-   has floor((width + 4) / 92) columns: a button of 88 and a gap of 4. The key is a <details> without content: it works
-   without JS, CSS reads its [open] with :has(). Without :has() the key is hidden and everything shows. A wall of 6
-   columns or wider has no key and shows everything. The unit's height changes, so app.js lays the rack out and
-   redraws the cables in the same frame (it watches [open] of .more). */
+/* A narrow wall shows three rows (floor((width + 4) / 92) columns), the rest behind "show all": a <details>
+   without content, read by :has([open]); without :has() everything shows. app.js re-lays the rack when it opens. */
 .wall { container: wall / inline-size; width: 100%; }
 .more { display: none; flex: 1 0 100%; margin-top: 4px; }
 .more > summary { list-style: none; width: max-content; }
@@ -45,8 +42,7 @@ a.b88:hover, a.b88:focus-visible { transform: translateY(-2px); }
 
 /* My buttons, each with its code to copy. */
 .mine-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
-/* One code at a time (the details share a name): it opens as a line under all the buttons, the whole width of the
-   unit, which grows by that line; app.js lays the rack out again when it opens or closes. */
+/* One code at a time (the details share a name), as a line under all the buttons; app.js re-lays the rack. */
 .mine .items { display: flex; flex-wrap: wrap; gap: 10px 14px; position: relative; }
 .mine .items:has(details[open]) { padding-bottom: 34px; }
 .mine .item { display: grid; grid-template-columns: 88px; gap: 4px; justify-items: start; width: 88px; }

@@ -17,8 +17,8 @@
 .status-col { flex: 0 1 230px; display: grid; gap: 8px; align-content: start; min-width: 0; }
 .lcd.two { font-size: 22px; }
 .srv .note { right: 6%; bottom: 12px; transform: rotate(4deg); }
-/* Avatars from Telegram: a square that swipes, without JS too (scroll-snap); with JS a remote under it, the keys ‹ ›,
-   an LCD counter and a row of lamps as on a KVM switch: the chosen photo's lamp is lit. */
+/* Avatars from Telegram: a square that swipes (scroll-snap); with JS a remote under it with keys, a counter
+   and a lamp per photo. */
 .album { width: 176px; flex: none; align-self: flex-start; display: grid; gap: 8px; }
 .photo.gallery { width: 100%; height: auto; background: var(--void); }
 .gallery .slides {
@@ -42,7 +42,7 @@
   .gal-leds { gap: 5px; }
 }
 
-/* Favourite colours on the LCD: squares framed in the screen's colour (black on a dark LCD would not show otherwise). */
+/* Favourite colours on the LCD: squares framed in the screen's colour. */
 .lcd .swatches { display: inline-flex; gap: 6px; vertical-align: middle; padding-top: 3px; }
 .lcd .swatches i { width: 18px; height: 18px; border-radius: 2px; background: var(--c); box-shadow: 0 0 0 1.5px var(--lcd), 0 0 6px color-mix(in srgb, var(--lcd) 40%, transparent); }
 /* The asset tag sticker: a white label with a barcode, the PGP key's fingerprint printed on it. */

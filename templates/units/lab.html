@@ -1,5 +1,4 @@
-{{/* The /lab rack: the real Proxmox host. Data: .Lab (site-api reads Proxmox's API with a read-only token every 30 s).
-     By name only the containers of content/lab.yaml (the tag and the IDs); other projects on the same host as one number. */}}
+{{/* The /lab rack: the Proxmox host and the containers named in content/lab.yaml; other guests only as a count. */}}
 
 {{/* The host: CPU, memory, uptime, how many guests run. */}}
 {{define "unit-pve"}}
@@ -22,8 +21,7 @@
 </section>
 {{end}}
 
-{{/* The containers: a unit each, a lamp, the ID, the name, CPU and memory; at the end how many others.
-     CPU is the share of the container's own cores (as Proxmox shows "0.4% of 2 CPUs"), .CPUText with two decimals. */}}
+{{/* A unit per container; CPU is the share of its own cores, as Proxmox shows it. */}}
 {{define "unit-guests"}}
 {{with .Lab}}{{if .OK}}
 {{range .Guests}}

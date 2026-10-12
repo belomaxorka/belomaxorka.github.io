@@ -1,15 +1,8 @@
-// The units' declarations (assets/js/rack.js) are what the scripts go by, so a unit that forgets one silently works
-// without power or network: this check fails CI instead.
+// Fails CI for a unit (class "u ...") that forgets a declaration the scripts go by (assets/js/rack.js): live data
+// (hx-*, data-live) without data-net, data-host or data-role; a declaration without data-key; a key used twice; an
+// unknown value; data-feed with a source site-api does not know; data-host naming no unit.
 //
 //   node tools/check-units.mjs [templates]
-//
-// For every unit in the templates (an element with class "u ..."):
-//   - one that shows live data (hx-get, hx-post, hx-trigger, data-live inside it) says how it gets it: data-net, or
-//     data-host (it runs on another unit), or data-role (the rack's infrastructure);
-//   - one with any declaration has a data-key, and no two units in one template share a key;
-//   - data-net is lan or wan, data-role switch, router or ups, data-live lamps, bar, text or image, data-news empty
-//     or markup, data-vlan mgmt, data-feed names at least one source and only sources site-api knows (FEEDS);
-//   - data-host names a unit that exists.
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -19,9 +12,7 @@ const files = (function walk(d) {
 })(dir).filter((f) => !/[\\/]lite[\\/]/.test(f)); // the light version has no scripts and no units of this kind
 
 const NET = ['lan', 'wan'], ROLE = ['switch', 'router', 'ups'], LIVE = ['lamps', 'bar', 'text', 'image'], NEWS = ['', 'markup'], VLAN = ['mgmt'];
-// The sources data-feed can name: site-api's, as its live stream names them (its /healthz names up to the dash:
-// koito-week is koito; site-api's TestEverySourceIsListed keeps that list), and the server's own work: site (it serves
-// the pages) and guestbook. A name not here would get no packets.
+// The sources data-feed can name: those of site-api's live stream (its TestEverySourceIsListed), plus site and guestbook.
 const FEEDS = ['gatus', 'koito', 'proxmox', 'telegram', 'ups', 'wakapi', 'webring', 'site', 'guestbook'];
 const attr = (tag, name) => { const m = tag.match(new RegExp(`\\s${name}(?:="([^"]*)")?(?=[\\s>{])`)); return m ? m[1] ?? '' : null; };
 const unitTag = /<([a-z]+)\s[^>]*class="u[ "][^>]*>/g;

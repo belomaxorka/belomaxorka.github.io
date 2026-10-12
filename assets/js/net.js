@@ -1,34 +1,17 @@
-// The rack's network: the units' links and the patch cords that pull out like the power plugs (assets/js/power.js).
-//
-// A unit is online while its cord is in its port and the switch and the router run. Otherwise it is offline: "link
-// lost / no internet" on its screens, the lamps of its network card and port dark, and the cover, the VU meter and the
-// monitoring lamps too (assets/css/units/network.css); its drawer shows the same error instead of the details, and it
-// is not refreshed: its htmx polls and the drawer's load are cancelled, and once the link is back it refreshes once if
-// it missed something. The causes:
-//   - a pulled cord: drag the plug out of a unit's network card and the cord leaves the jack, comes out of the
-//     organiser and hangs; only that unit loses its link. The router's LAN or WAN (on the other racks the uplink to
-//     R1): the whole rack loses the internet. Bring the plug to the jack (or tap it) and it goes back in; the link
-//     comes up a couple of seconds later, as a real card negotiates it, the lamps of its port and card blinking amber
-//     meanwhile (not when the rack loads or arrives: those cables are plugged in as they are drawn);
-//   - the rack arrived from the next one (assets/js/aisle.js): while the cables are drawn the units are offline, each
-//     comes online when its cord's plug reaches the port. Without animation, all at once;
-//   - the switch or the router without power (power.js), or, for a rack without a router, the rack that feeds it.
-// The ring's cords from the patch panel do not pull out: their jacks are the ring's links, and the ring always works.
-// app.js draws the cabling (cables): it asks here which cords are pulled (Rack.pulled), draws those without their tail
-// and hands all the cords over with rack:laidout. The pulled ones are the visitor's only (localStorage, for half an
-// hour), per rack. A cord hidden at this width (phone: no network cards) counts as plugged in; a card that found no
-// free port on the switch (rack:laidout's loose) has no link. A unit running on another (a container on the host) has
-// its host's link. A rack without a router gets its internet through its uplink from the row's first rack, so that
-// rack's router, cords and power count too. Without JS none of this.
+// The rack's network: the units' links and the patch cords that pull out like the power plugs (power.js).
+// A unit is online while its cord is in and the switch and the router run; otherwise its screens say "link lost" or
+// "no internet", its lamps go dark and it is not refreshed (it catches up once back). A pulled cord hangs; brought back
+// (or tapped) it goes in and the link comes up after a couple of seconds. While a rack's cables are drawn its units are
+// offline. The router's LAN or WAN (the uplink on other racks) takes the whole rack's internet; the ring's cords do not
+// pull out. app.js draws the cords and asks Rack.pulled() which are out; the state is the visitor's (localStorage, half
+// an hour, per rack).
 (() => {
   const store = Rack.toyStore('rack-net', () => ({})); // for Rack.TOY_TTL (rack.js)
   const saved = store.get();
   const out = saved.out && typeof saved.out === 'object' ? saved.out : {}; // 'home/mgmt' -> 1: the cord is pulled
   const save = () => store.set({ out });
 
-  // How much of a cord hangs once let go, and how much can come out of the organiser while it is pulled (px). A
-  // network card's cord hangs over the vertical organiser, where nothing is pressed; LAN and WAN over the router
-  // (decoration); the uplink short: the mgmt buttons are right under the brush.
+  // How much of a cord hangs once let go, and how much can come out of the organiser while pulled (px).
   const HANG = { nic: 100, lan: 46, wan: 44, uplink: 26 };
   const REACH = { nic: 170, lan: 150, wan: 130, uplink: 130 };
   const N = 10; // links in the rope
@@ -53,14 +36,10 @@
   const down = (k) => pulled(k) || boot || waiting.has(k) || linking.has(k);
   const unitOf = Rack.unitOf;
 
-  // Every unit's place on the network, from the rack's topology (rack.js): one place for every cause.
-  //   A link (the rack's network): the switch is on and the unit's cord is in its port (a card with no free port has
-  //   none; on a phone the cards are not drawn and count as plugged in); a guest has its host's link while its host is on.
-  //   The internet: through the router (on, its LAN in the switch, its WAN in) or, on a rack without one, through the
-  //   uplink to the rack that feeds the row, which needs its own power, switch, router and cords (feeds).
-  // A unit without a link is .unlinked; one that needs the internet (data-net="wan") and has a link but no internet is
-  // .nonet; the rack without internet is .nonet too. The router shows what it misses (.nowan, .nolan), and a port's lamp
-  // is lit while its cord is in, the switch is on and the unit at its end is on (for the uplink's SFP, the far switch).
+  // Every unit's place on the network, from the rack's topology (rack.js), one place for every cause. A link: the switch
+  // is on and the cord is in (on a phone the cards are not drawn and count as plugged in; a guest has its host's). The
+  // internet: through the router or, without one, the uplink to the rack that feeds the row (feeds). No link: .unlinked;
+  // a wan unit with a link but no internet, and the rack without internet: .nonet. The router shows .nowan and .nolan.
   let feedTimer = 0;
   function sync() {
     const body = document.getElementById('rack-body'), rk = document.getElementById('rack');
@@ -106,9 +85,8 @@
     });
   }
 
-  // The rack that feeds this one its internet (the switch's data-uplink, the row's first rack): it has power, its switch
-  // and router are plugged in and its LAN and WAN cords are in; for the uplink fibre's link (link), its power and its
-  // switch are enough. Its battery can run out while we are elsewhere: then ask again in a while.
+  // The rack that feeds this one its internet (the switch's data-uplink): power, switch, router and its cords; for the
+  // uplink fibre's link its power and switch are enough. Its battery drains while we are away: ask again in a while.
   function feeds(tor, link) {
     const id = tor?.dataset.uplink;
     if (!id || id === here()) return true;
@@ -123,10 +101,7 @@
     return u.matches('[data-net]') && (u.classList.contains('unlinked') || u.classList.contains('nonet'));
   }
 
-  // An offline unit is not refreshed: its htmx poll (media, monitor, log) is cancelled, so no new track behind the
-  // caption and no new LCD palette (it comes with the media). Its drawer (the request comes from the handle, app.js)
-  // does not load: it comes out empty with the same error as the screens (network.css) and loads when the link is
-  // back. The guestbook's form does not go either: below.
+  // An offline unit is not refreshed: its htmx polls and its drawer's load are cancelled; the drawer shows the error.
   const missed = new Set();
   document.addEventListener('htmx:beforeRequest', (e) => {
     const t = e.target;
@@ -145,10 +120,8 @@
     if (handle) empty(handle); else missed.add(u);
   });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); });
-  // Without a link the guestbook does not post: the form of an offline unit (KVM) does not go, neither through htmx nor
-  // as a plain POST (caught first, in the capture phase). Above the form, why, as on the screens: the KVM has no link
-  // or the switch has no power, "link lost"; the rack has no internet or the router no power, "no internet". What was
-  // written and drawn stays; once the link is back the notice goes (sync) and it can be sent again.
+  // Without a link the guestbook does not post (htmx or a plain POST, caught in the capture phase); the notice above the
+  // form says why, and what was written stays.
   document.addEventListener('submit', (e) => {
     const f = e.target, u = f instanceof HTMLFormElement ? f.closest('#rack-body > .u') : null;
     if (!u || !offline(u)) return;
@@ -272,9 +245,7 @@
   }
 
   // ---------- the cable tester ----------
-  // The mouse over a plug: the whole cord glows and the lamps of its switch port and of the unit's network card blink
-  // fast, as with a tester at the other end (only with a link). A finger cannot hover, so phones have no tester.
-  // app.js redraws the cords on every layout: the glow is set again (relayout).
+  // The mouse over a plug: the cord glows and its port's and card's lamps blink fast (with a link only).
   Rack.tester('#net .hit', () => !!hand?.held, (k) => probe(k));
   let probed = null;
   function probe(key) {
@@ -289,8 +260,7 @@
   }
 
   // ---------- drawing ----------
-  // Cords that are in are drawn by app.js: here their plugs only have an invisible grab zone. A pulled cord hangs.
-  // Each is drawn once and then only moved: a frame changes attributes, not elements.
+  // Plugged cords are app.js's (here only their grab zones); a pulled cord hangs. Drawn once, then only moved.
   function forget() {
     for (const v of views.values()) v.g.remove();
     views.clear();

@@ -1,7 +1,5 @@
-{{/* Monitoring is Gatus. Refreshed through htmx (/fragments/monitor). The LCD turns through the summary (without JS the
-     first line shows): how many are up and how fast; the uptime over a day, a week and a month as Gatus counts it (every
-     check weighs the same; "since" while Gatus has counted for less than a month); the last outage. The check's time
-     only when Gatus has not answered for long (.Stale); otherwise it is always "just now". */}}
+{{/* Monitoring is Gatus, refreshed through htmx. The LCD cycles through the summary (without JS, its first
+     line); the check time shows only when Gatus has been silent for long (.Stale). */}}
 {{define "unit-monitor"}}
 <section class="u mon" style="--h:2" aria-label="{{t "mon.aria"}}" id="unit-monitor" data-key="mon" data-power data-net="wan" data-feed="gatus"
   hx-get="/fragments/monitor" hx-trigger="every 120s, fresh" hx-swap="outerHTML">
@@ -23,11 +21,9 @@
 </section>
 {{end}}
 
-{{/* In the rack (content/racks.yaml) the unit gets the whole page and takes .Status from it. */}}
 {{define "slot-monitor"}}{{template "unit-monitor" .Status}}{{end}}
 
-{{/* Monitoring pulled out: the last 50 checks of each lamp as bars (the height is the latency, red did not answer).
-     Data: the whole page; .Status.Lamps with .History, .MaxMs and .Day (the uptime over 24 h, when .HasDay). */}}
+{{/* Pulled out: the last 50 results of each check as bars (height: latency, red: failed). */}}
 {{define "detail-monitor"}}
 <div class="detail mon-history">
   <p class="silk">gatus · {{t "mon.history"}}</p>

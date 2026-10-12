@@ -1,13 +1,9 @@
-{{/* The server with my name. Data: .Age, .DaysToBirthday (-1: no birthday given), .Photos (avatars from Telegram,
-     newest first, each .Src about 640 px, .Small about 320 and .N, its place from 1), .Data, content/profile.yaml (the
-     tapes under the name). */}}
+{{/* The server with my name: avatars from Telegram (.Photos), the age, the tapes from content/profile.yaml. */}}
 {{define "unit-server"}}
 <section class="u srv" style="--h:4" aria-labelledby="who" data-key="srv" data-power data-net="wan" data-feed="site telegram">
   <div class="face">
     {{with .Photos}}{{$n := len .}}
-    {{/* The remote under the photo: keys, an LCD counter (read out when it changes) and a lamp per photo, the current
-         one lit; more than 12 lamps would not fit under the photo. Without JS there is none: the strip swipes. Each
-         photo comes in two sizes: the screen takes the one its density needs for 176 px (128 on a phone). */}}
+    {{/* The photo remote: keys, a counter and a lamp per photo (at most 12); without JS the strip swipes. */}}
     <div class="album" x-data="gallery({{$n}})" role="region" aria-roledescription="carousel" aria-label="{{t "me.photos"}}">
       <div class="photo gallery">
         <div class="slides" x-ref="slides" tabindex="0" @scroll.debounce.80ms="sync()">
@@ -57,5 +53,4 @@
 </section>
 {{end}}
 
-{{/* In the rack (content/racks.yaml) the unit gets the whole page and takes .Profile from it. */}}
 {{define "slot-server"}}{{template "unit-server" .Profile}}{{end}}

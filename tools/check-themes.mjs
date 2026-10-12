@@ -1,12 +1,7 @@
-// The theme is one switch in tokens.css: --light (0 dark, 1 light) with the keywords that go with it, set by the
-// system's choice (@media (prefers-color-scheme: light)) or by the visitor's (:root[data-theme]); every value that
-// differs between the themes is written once with both, through --light. This check keeps it so:
-//   - no other stylesheet asks for the theme itself (prefers-color-scheme, [data-theme]): it would be a second copy
-//     of a theme's values, the kind that drifts;
-//   - the switch's two light rules (the system's, the picked one) set the same, and so do its two dark ones (the
-//     default and the picked one).
+// The theme is one switch in tokens.css (--light, set by the system or by :root[data-theme]). This check fails when
+// another stylesheet asks for the theme itself, or when the switch's two light (or two dark) rules disagree.
 //
-//   node tools/check-themes.mjs assets/css     (CI runs it before a deploy; exit 1 says what is wrong)
+//   node tools/check-themes.mjs assets/css
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, join } from 'node:path';
 

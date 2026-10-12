@@ -1,10 +1,6 @@
-{{/* The rack's network bay: under the patch panel the brush organiser, a 24-port switch and, on the home rack, the
-     router. The switch's ports: the top row odd (1, 3, 5, 7: the ring from the patch panel), the bottom row even (the
-     units' network cards, the router). assets/js/app.js decides which ports are taken when it draws the cables; lit
-     are the ones with a link (assets/js/net.js), blinking when data really went through the port
-     (assets/js/live.js); without JS only the power lamp is lit. The SFP+ cages too: a rack without the router gets its
-     uplink fibre in the first one. All of it is decoration: aria-hidden, nothing to click. The router's cords pull out
-     (net.js): without WAN or LAN its LCD says data-nowan or data-nolan and that side's lamp goes dark. */}}
+{{/* The network bay: the brush organiser, a 24-port switch and, on the home rack, the router. Odd ports on top
+     take the ring from the patch panel, even ones the units' cards; app.js picks the ports, net.js and live.js
+     light them. Decoration: aria-hidden. */}}
 
 {{define "unit-brush"}}
 <div class="u brush" style="--h:1" aria-hidden="true"><div class="face"><span class="slot"></span><span class="silk">cable mgmt</span></div></div>
@@ -21,12 +17,8 @@
 </div>
 {{end}}
 
-{{/* The router. Besides WAN and LAN, the site's spare ways in (content/uplinks.yaml, all but https itself): jacks that
-     are links, like the ring on the patch panel, the tape the caption (port), the address in the hint. The lamp is
-     the Gatus check named in check: lit, the way in works; red, it does not; dark without the router's WAN or LAN
-     (net.js), like the monitoring lamps without a link; it blinks when the check runs, as they do. A way without check (Tor, Yggdrasil: Gatus is in neither
-     network) has no lamp. The link to the light version is the "http" port, hidden among
-     the ports. The rest of the router is decoration. */}}
+{{/* The router: WAN, LAN and the site's other ways in (content/uplinks.yaml) as jacks; a lamp is the Gatus check
+     named in check, none without one. The "http" port links to the light version. */}}
 {{define "unit-router"}}
 <div class="u rtr" style="--h:1" data-key="rtr" data-power data-role="router">
   <div class="face">

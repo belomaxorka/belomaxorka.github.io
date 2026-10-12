@@ -1,15 +1,7 @@
-{{/* The light version: the same rack for old browsers (Netscape, IE, Lynx, Dillo), without CSS or scripts, HTML 4.01
-     Transitional of 1999 (strict 3.2 cannot colour table cells, and the racks cannot be drawn without that; Netscape 3
-     and IE 3 know these attributes too). The page passes the W3C validator: <font> wraps text only, tables and forms
-     never go inside it (the f and f-end templates).
-     site-api renders it on lite.belomaxorka.dev (over http too: old browsers cannot do today's TLS) from the same page
-     (web.Page) as the rack: the same units in the same order (content/racks.yaml), each with its lite-<name> template
-     below. Data and texts are shared (content/, i18n/, the live sources): change them and both versions change. The
-     markup is its own: a unit without lite-<name> does not vanish silently, it gets a line "only in the full rack
-     for now" until it has a template. Only decoration has none on purpose: organisers, the switch, blanks. Colours as
-     bgcolor/color attributes, the font in every cell (old browsers do not inherit it into tables). No packets, lamps
-     or live updates: the page is a snapshot at the time of the request. Without a DTD link in the DOCTYPE today's
-     browsers render it in quirks mode, as browsers did then. */}}
+{{/* The light version on lite.belomaxorka.dev (http too): the same racks for old browsers, HTML 4.01
+     Transitional without CSS or scripts, a lite-<name> template per unit (a unit without one gets a "full rack
+     only" line). <font> wraps text only, never tables or forms, so the page validates; no DTD link, so browsers
+     use quirks mode. */}}
 {{define "lite" -}}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -81,8 +73,7 @@ best viewed with any browser</font></td></tr>
 {{define "lite-patch"}}{{template "lite-silk" (t "ring.panel")}}
 {{with .Ring}}{{template "f"}}<a href="{{.PrevURL}}">← {{or .PrevName (t "ring.prev")}}</a> · <a href="{{.Home}}">otoring</a> · <a href="{{.RandomURL}}">{{t "ring.random"}}</a> · <a href="{{.NextURL}}">{{or .NextName (t "ring.next")}} →</a>{{template "f-end"}}{{end}}{{end}}
 
-{{/* The router: the ways into the site, the main one and the spare uplinks (content/uplinks.yaml). The lamp is the
-     Gatus check named in check: green works, red does not, dark Gatus does not know it; a way without check, none. */}}
+{{/* The router: the ways into the site (content/uplinks.yaml); a lamp is the Gatus check named in check. */}}
 {{define "lite-router"}}{{template "lite-silk" (print "opnsense · " (t "net.router") " · " (t "lite.uplinks"))}}
 <table border="0" cellspacing="0" cellpadding="2">
 {{range .Content.uplinks}}{{$u := .}}{{$st := "off"}}{{range $.Status.Lamps}}{{if eq .Name $u.check}}{{$st = .State}}{{end}}{{end}}<tr><td valign="top">{{if .check}}{{template "lite-led" $st}}{{end}}</td><td valign="top">{{template "f"}}<b>{{.name}}</b>{{template "f-end"}}</td><td valign="top">{{template "f"}}<a href="{{.url}}">{{.url}}</a>{{if eq .id "lite"}} <font color="#ffc53d">← {{t "lite.here"}}</font>{{end}}{{template "f-end"}}<br><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8">{{loc .note}}</font></td></tr>

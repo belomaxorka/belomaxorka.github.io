@@ -1,23 +1,15 @@
-{{/* The page's frame. site-api renders it (Go html/template); its data is described in site-api's README.
-     On the onion address (.Onion) the rack is dark from the start: Tor Browser tells every site "light theme" (against
-     fingerprinting), so the real one is unknown, and the rack is meant to be dark. A choice with the button
-     (assets/js/theme.js) wins. */}}
+{{/* The page's frame. On the onion address (.Onion) the rack starts dark: Tor Browser always reports a light theme. */}}
 {{define "layout" -}}
 <!doctype html>
 <html lang="{{lang}}"{{if .Onion}} data-theme="dark"{{end}} data-lcd="cover" data-tz="{{.TZ}}" data-racks="{{range .Racks}}{{.Path}} {{end}}">
 <head>
 <meta charset="utf-8">
-{{/* What the page may load: only its own scripts (Alpine is the CSP build, without eval; no inline scripts and no
-     onclick=), its own styles and style attributes, images from anywhere over https (Koito's covers, 88x31 buttons).
-     The rest (frame-ancestors, base-uri, form-action) site-api sends as a header. */}}
+{{/* Only the site's own scripts (Alpine's CSP build: no eval, no inline scripts or handlers) and styles, images
+     over https. site-api sends frame-ancestors, base-uri and form-action as a header. */}}
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-{{- /* For search engines and link previews. The page has one address for both languages (the language is a cookie,
-     ?lang=ru only sets it); crawlers come without the cookie and see English: canonical is the rack's address without
-     a query, and there is no hreflang (no separate addresses). A pulled-out unit (?open=...) and a stub rack are
-     noindex. The preview image and the description are one for the whole site (assets/og/site.png,
-     tools/og/make.mjs; i18n meta.desc): a new rack needs nothing here. The title is each rack's own, from its
-     rack.<id> captions. */ -}}
+{{- /* One address for both languages (the language is a cookie), so canonical is the rack's address and there is
+     no hreflang. Pulled-out units and stub racks are noindex. */ -}}
 {{- $home := eq .Rack.Path "/"}}
 {{- $title := t "meta.title.home"}}{{if not $home}}{{$title = t "meta.title" (t (print "rack." .Rack.ID)) (t (print "rack." .Rack.ID ".sub"))}}{{end}}
 {{- $desc := t "meta.desc"}}

@@ -3,10 +3,8 @@
 #   path  - the page's address; the first rack must be "/" (the home page has the otoring ring on top);
 #   units - the units from top to bottom: a name is a template in templates/units/*.html with {{define "unit-<name>"}};
 #   stub  - the rack is still being mounted: blanks instead of units.
-# A new unit in a rack is a line here (and a lite-<name> template for the light version, templates/lite); a new rack
-# is a block here and two captions in i18n, no Go: rack.<id> and rack.<id>.sub. The description and the preview image
-# are one for all racks (meta.desc, assets/og/site.png). A rack gets into /sitemap.xml by itself; a stub does not, and
-# it is noindex.
+# A new unit is a line here and a lite-<name> template; a new rack is a block here and rack.<id>, rack.<id>.sub in
+# both i18n files.
 - id: home
   path: /
   units: [patch, brush, tor, brush, router, mgmt, server, media, monitor, syslog, switch, donate, kvm, buttons, blank, ups]

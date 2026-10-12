@@ -1,14 +1,6 @@
-// The server room's sound (WebAudio, all synthesised, no files). Off by default: the "sound" toggle on mgmt, the
-// choice remembered (localStorage). Browsers allow sound only after a press, and the toggle is that press.
-//   - the fans' hum: filtered noise, the louder the more units run; the rack goes dark, it fades; it boots, they spin
-//     up. The neighbour racks in the hall hum too (quieter, far off) while alive, so the hall is not silent when this
-//     rack is dark;
-//   - the UPS on battery beeps (a couple of short beeps every 4 s), the self-test on rack:beep (power.js);
-//   - clicks: power plugs and RJ45 (rack:plug from power.js, rack:link from net.js), the breaker, the light switch,
-//     the UPS's buttons, keys, RESET;
-//   - a boot as on real hardware: the fans roar at full speed for a couple of seconds and calm down, one short POST
-//     beep ("all fine"): the server after RESET, the whole rack after the UPS's button or the battery;
-//   - a background tab pauses the sound.
+// The server room's sound (WebAudio, synthesised, no files). Off by default; the mgmt toggle is the press browsers
+// require. Fans hum with the running units (the neighbours quieter), the UPS beeps on battery and for its self-test,
+// plugs, cords and switches click, a boot roars and beeps once. A background tab pauses it.
 (() => {
   const KEY = 'sound';
   let on = Rack.store.get(KEY) === 'on';

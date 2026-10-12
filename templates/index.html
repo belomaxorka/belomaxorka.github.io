@@ -1,8 +1,5 @@
-{{/* The page is one rack of the row (content/racks.yaml): the aisle with its signs above, the hall around, the units
-     from top to bottom. {{unit "name" $}} draws a unit: the template templates/units/<name>.html. A unit with a
-     detail-<name> template pulls out: under it a drawer that htmx fills (/fragments/unit/<name>) or, without JS, the
-     page ?open=<name>. --cam is where in the row the camera stands (the rack's number): the hall's ceiling and floor
-     are shifted by it (assets/css/hall.css). */}}
+{{/* One rack of the row (content/racks.yaml): the aisle, the hall, the units from top to bottom. A unit with a
+     detail-<name> template pulls out into a drawer (htmx, or ?open=<name> without JS). --cam shifts the hall (hall.css). */}}
 {{define "page"}}
 <div class="room" id="room" data-rack="{{.Rack.ID}}" data-light="{{template "light" .}}" style="--cam:{{.Rack.N}}">
   {{template "hall" .}}
@@ -24,8 +21,7 @@
     <div class="foot"></div>
   </div>
   <svg class="cables" id="cables" aria-hidden="true" data-uplink="{{t "cable.uplink"}}" data-uplink-r1="{{t "cable.uplink_r1"}}" data-power="{{t "cable.power"}}"></svg>
-  {{/* The hall's controls on the wall: the breaker of the row's sockets (placed by the UPS's socket), the light switch
-       and the torch (assets/js/power.js, live.js). Without JS they can do nothing, so they are hidden until it shows them. */}}
+  {{/* The hall's breaker, light switch and torch (power.js, live.js): hidden until JS shows them. */}}
   <button class="breaker" type="button" hidden aria-pressed="true" aria-label="{{t "cable.breaker_aria"}}"><span class="box"><i class="handle"></i></span><span class="lbl">{{t "cable.breaker"}}</span></button>
   <button class="lightsw" type="button" hidden data-labels="{{t "hall.light_modes"}}" data-aria="{{t "hall.light_aria"}}"><span class="plate"><i class="rocker"></i></span><span class="lbl"></span></button>
   <button class="torch" type="button" hidden aria-pressed="false" data-take="{{t "hall.torch_take"}}" data-back="{{t "hall.torch_back"}}"><span class="shell"><i class="lens"></i></span><span class="lbl">{{t "hall.torch"}}</span></button>
@@ -43,9 +39,8 @@
 <div class="u blank free" style="--h:4" aria-hidden="true"><div class="face"></div></div>
 {{end}}
 
-{{/* A pulled-out unit: the details from detail-<name> and the "push back" handle. Data: the whole page, .Open is the
-     unit's name. data-nolink and data-nonet: what the drawer shows instead of the details when the unit is offline
-     (assets/js/net.js). */}}
+{{/* A pulled-out unit: detail-<name> and the "push back" handle; data-nolink and data-nonet are shown instead
+     while the unit is offline (net.js). */}}
 {{define "drawer"}}
 <div class="drawer open" id="drawer-{{.Open}}" x-data="drawer" @keydown.escape="shut()">
   <div class="slide" data-nolink="{{t "net.lost"}}" data-nonet="{{t "net.nointernet"}}">

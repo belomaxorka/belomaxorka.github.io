@@ -1,6 +1,5 @@
-/* Units that pull out: the handle on the left ear and a drawer with the details under the unit (templates/index.html
-   -> drawer, detail-<name> in units/). The drawer slides out by itself (@starting-style); without JS it comes pulled
-   out already (?open=<unit>). */
+/* Units that pull out: the handle on the left ear and a drawer with the details under the unit. It slides
+   out by itself (@starting-style); without JS it comes pulled out (?open=<unit>). */
 .u > .pull {
   position: absolute; z-index: 3; left: 0; top: 50%; translate: 0 -50%;
   width: var(--ear); height: min(52px, 78%); display: grid; place-items: center; cursor: pointer;
@@ -53,8 +52,7 @@
 .media-week li a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; }
 .media-week li a:hover { text-decoration: underline; }
 .media-week li small { grid-column: 2; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-/* The counter is a small LCD: the cover's colours can be anything (a paper screen in the dark theme, a black one in
-   the light), so the LCD's text stands only on the LCD's background. */
+/* The counter is a small LCD: its text stands only on the LCD's own background, whatever the cover's colours. */
 .media-week li b {
   grid-column: 3; grid-row: 1 / span 2; font: 400 18px/1 var(--f-lcd); color: var(--lcd);
   background: var(--lcd-bg); padding: 3px 6px 2px; border-radius: 2px; box-shadow: inset 0 0 0 1px var(--edge);

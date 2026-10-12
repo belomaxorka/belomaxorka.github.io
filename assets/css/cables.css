@@ -5,14 +5,13 @@
 .cables .outlet-hole { fill: var(--hole); }
 /* The fibre's entry into the yellow duct on the ceiling (app.js, fiber). */
 .cables .inlet { fill: #202328; stroke: #000b; stroke-width: 1.5; stroke-linejoin: round; }
-/* The patch cords that pull out (assets/js/net.js): pulled ones hang over the cabling, under the power cables; the
-   plugs have invisible zones to grab them by. */
+/* Patch cords that pull out (net.js): pulled ones hang over the cabling, under the power cables. */
 .cables.net { z-index: 5; }
 .cables.net .hit { fill: transparent; pointer-events: auto; cursor: grab; touch-action: manipulation; -webkit-touch-callout: none; user-select: none; }
 .cables.net .hit:active { cursor: grabbing; }
 
-/* The rack has arrived (assets/js/aisle.js -> app.js, .draw): the cords are drawn one by one from their jacks, the
-   plugs seat in the ports once the cord reaches them. --i is the wire's number, --k its plug (0 at the start, 1 at the end). */
+/* The rack has arrived (aisle.js -> app.js, .draw): the cords are drawn one by one; --i is the wire's number,
+   --k its plug (0 at the start, 1 at the end). */
 @media (prefers-reduced-motion: no-preference) {
   .cables.draw > g path[pathLength] {
     stroke-dasharray: 100 100;
@@ -27,16 +26,14 @@
 @keyframes cable-plug { from { opacity: 0; transform: scale(.3); } }
 .cables .lbl.small { font-size: 16px; }
 
-/* The cable tester (net.js, power.js): the mouse over a plug, the cord glows and the lamps of its port and network
-   card blink fast, as with a tester at the other end. Without animation, only the glow. */
+/* The cable tester (net.js, power.js): a hovered plug's cord glows and its port's and card's lamps blink. */
 .cables g.probe { filter: brightness(1.35) drop-shadow(0 0 4px rgba(255, 255, 255, .5)); }
 @media (prefers-reduced-motion: no-preference) {
   :is(.tp, .sfp-port).link.probe .led, .nic.probe .led { animation: probe-blink .14s steps(2, jump-none) infinite !important; }
 }
 @keyframes probe-blink { 50% { opacity: .15; } }
 
-/* Live guests (live.js): a new guest's cord is drawn from the patch panel to the switch; a packet is a light dot
-   running along the cords (a visit, a guestbook entry). */
+/* Live guests (live.js): a new guest's cord from the patch panel to the switch; packets are dots along the cords. */
 @media (prefers-reduced-motion: no-preference) {
   .cables > g.fresh path { stroke-dasharray: 100 100; animation: cable-draw .7s cubic-bezier(.45, 0, .2, 1) both; }
 }

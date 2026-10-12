@@ -6,8 +6,8 @@ body {
   color: var(--ink);
   font: 400 15px/1.5 var(--f-text);
 }
-/* Links in running text: the text's own colour and a thin, fainter underline that fills in on hover. Links that are
-   parts of the hardware (ports, keys, signs, LCDs) set their own look. */
+/* Links in running text: the text's colour and a faint underline; hardware links (ports, keys, signs) style
+   themselves. */
 a {
   color: inherit; text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: .2em;
   text-decoration-color: color-mix(in srgb, currentColor 45%, transparent); transition: text-decoration-color .15s;

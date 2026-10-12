@@ -1,6 +1,4 @@
-{{/* The patch panel is the otoring webring. Jacks 1-4 are the ring: plain links with taped captions that work without
-     JS, the neighbours' names from /{slug}/data. The other jacks are decoration (a CSS counter draws the numbers).
-     Short patch cords run from jacks 1-4 through the brush organiser into the switch (assets/js/app.js, cables). */}}
+{{/* The patch panel is the otoring webring: jacks 1-4 are plain links to the neighbours, the rest decoration. */}}
 {{define "unit-patch"}}
 <nav class="u patch" style="--h:1" aria-label="{{t "ring.aria"}}">
   <div class="face">
@@ -16,5 +14,4 @@
 </nav>
 {{end}}
 
-{{/* In the rack (content/racks.yaml) the unit gets the whole page and takes .Ring from it. */}}
 {{define "slot-patch"}}{{template "unit-patch" .Ring}}{{end}}

@@ -22,10 +22,9 @@
 </section>
 {{end}}
 
-{{/* In the rack (content/racks.yaml) the unit gets the whole page and takes .Music from it. */}}
 {{define "slot-media"}}{{template "unit-media" .Music}}{{end}}
 
-{{/* The media server pulled out: the week in Koito. Data: the whole page; .Week, the numbers and the tops (refreshed every 5 minutes). */}}
+{{/* Pulled out: the week in Koito (.Week). */}}
 {{define "detail-media"}}
 <div class="detail media-week">
   <p class="silk">koito · {{t "week.title"}}</p>

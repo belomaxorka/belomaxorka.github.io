@@ -4,8 +4,7 @@
 #          offers the onion address), lite is "you are here" in the light version;
 #   port - the tape on the router's jack (no port, no jack: that is https itself); name the caption; url the address;
 #          note what it is for (a string or {en, ru}); check the Gatus check (infra gatus/config.yaml) that lights
-#          the way's lamp. Tor and Yggdrasil have none: Gatus on the VDS is in neither network, so no lamp.
-# Where they come from: CT120 uplinks (Tor and Yggdrasil) and lite.belomaxorka.dev (Caddy, http without a redirect), infra/uplinks.
+#          the way's lamp (none for Tor and Yggdrasil).
 - id: web
   check: belomaxorka.dev
   name: https

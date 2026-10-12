@@ -1,28 +1,20 @@
-// What the rack's scripts share. Loaded before them (templates/layout.html), it only defines window.Rack.
-//
-// The scripts also talk through events on document:
-//   rack:layout   (anyone → app.js)     lay the rack out again now: a drawer opened, a cord was pulled, the canvas opened
-//   rack:laidout  (app.js → all)        the rack is laid out; detail.cords — the network cords app.js drew, detail.loose
-//                                       — units whose card found no free port, detail.cards — false when the cards are
-//                                       not drawn at this width (a phone: they count as plugged in)
-//   rack:swap     (aisle.js → all)      another rack is in the room, not shown yet; detail.quiet — it comes without animation
-//   rack:landed   (aisle.js → all)      it has arrived; detail.dir — 1 forward, -1 back
-//   rack:drawing  (app.js → net.js)     the cords are being drawn in; detail — { lag, step } in ms, or null: all at once
-//   rack:unit     (power.js → unit)     a unit went dark or booted (bubbles from the unit; detail.key, detail.on)
+// What the rack's scripts share (window.Rack); loaded before them. They also talk through events on document:
+//   rack:layout   (any → app.js)        lay the rack out again
+//   rack:laidout  (app.js → all)        laid out; detail.cords, .loose (cards without a free port), .cards (drawn here)
+//   rack:swap     (aisle.js → all)      another rack is in the room; detail.quiet: no animation
+//   rack:landed   (aisle.js → all)      it has arrived; detail.dir: 1 forward, -1 back
+//   rack:drawing  (app.js → net.js)     the cords are being drawn; detail: { lag, step } in ms, or null
+//   rack:unit     (power.js → unit)     a unit went dark or booted; detail.key, detail.on
 //   rack:power    (power.js → all)      the whole rack went dark or came back; detail.on, detail.why
 //   rack:plug     (power.js → all)      a power plug out or in; detail.key, detail.on
 //   rack:link     (net.js → all)        a network cord out or in; detail.key, detail.on
 //   rack:reset    (toys.js → power.js)  RESET on a unit; detail.key
-//   rack:beep     (power.js → sound.js) the UPS beeps; detail.n times
-//   rack:mains    (power.js → net.js)   the hall's breaker moved: the row's sockets lost or got their current
+//   rack:beep     (power.js → sound.js) the UPS beeps; detail.n
+//   rack:mains    (power.js → net.js)   the hall's breaker moved
 //   rack:net      (net.js → all)        the rack lost or got the internet; detail.on
-// net.js answers Rack.pulled() for app.js: which cords of this rack are out; power.js answers Rack.rackPower(id) for
-// net.js: whether another rack of the row has power (the row's first rack feeds the others their internet).
 window.Rack = (() => {
   // ---------- what every script needs ----------
-  // store: the visitor's choices in localStorage, which can be missing or refuse (a private window, blocked site
-  // data): a read then gives null (json: def), a write is dropped. theme.js, before the first paint and before this
-  // file, reads the theme and the LCD colour itself.
+  // store: localStorage that may be missing or refuse (a private window): reads give null, writes are dropped.
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch { /* no storage: forgotten */ } },
@@ -38,9 +30,7 @@ window.Rack = (() => {
   const drawerURL = (name) => '/fragments/unit/' + encodeURIComponent(name) + '?rack=' + encodeURIComponent(here());
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
-  // tween(ms, frame, done) calls frame(k) on every animation frame for ms, k going from 0 to 1 and easing out
-  // (cubic), the last call with 1, then done(); it returns stop(), after which neither is called. A frame's time can
-  // be from before the call: k never goes below 0. The aisle's rise to the top and the gallery's glide go by it.
+  // tween(ms, frame, done): frame(k) every animation frame, k from 0 to 1 easing out (cubic), then done(); returns stop().
   function tween(ms, frame, done) {
     const t0 = performance.now();
     let raf = 0;
@@ -55,9 +45,7 @@ window.Rack = (() => {
   }
 
   // ---------- the toys' memory ----------
-  // The toys (power plugs, network cords, the UPS, fallen stickers) remember what a visitor did for a while: a
-  // reload or a walk to another rack and back finds them as they were. Not for good: a visitor who comes back
-  // later finds the rack running, not dark and unclickable because of what someone did on this device last week.
+  // Plugs, cords, the UPS and fallen stickers stay as the visitor left them for a while (TOY_TTL), then the rack runs again.
   const TOY_TTL = 30 * 60 * 1000; // after the last change
 
   // toyStore(key, empty) keeps one object in localStorage with the time it was saved; get() returns empty() when
@@ -73,27 +61,18 @@ window.Rack = (() => {
   }
 
   // ---------- units ----------
-  // A unit says what it is in its template (templates/units/*.html), and the scripts read it from there; nothing lists
-  // units by name. The rack works like the real thing: power runs wall -> UPS -> PDU -> each unit with its own supply;
-  // the network runs unit -> its cord -> the switch -> the router -> the internet, and a rack without a router
-  // reaches it through its uplink to the row's first rack.
-  //   data-key="srv"          its name on the rack: its plug and its cord in the toys' memory, what the scripts call it;
-  //   data-power              its own power supply: a cable from the PDU (power.js);
-  //   data-net="lan|wan"      a network card: a cord to the switch (app.js, net.js). lan: it needs the rack's network
-  //                           only; wan: the internet too. Without it the unit is offline (.unlinked: no link, .nonet:
-  //                           no internet), and its screens and live elements say so;
-  //   data-host="pve"         it runs on another unit (a container on the Proxmox host): no supply or cord of its own,
-  //                           it is on while the host is and has the network while the host does;
-  //   data-role="switch|router|ups"   the rack's infrastructure (the switch's data-uplink: the rack it uplinks to);
-  //   data-feed="koito gatus"  the server's data sources it shows ("site": it serves the pages, "guestbook": the
-  //                           guestbook): where their packets go (live.js), in through the WAN when site-api says a
-  //                           source is outside the home network, from the server otherwise;
-  //   data-vlan="mgmt"        on the management network: a purple cord;
-  //   data-live="lamps|bar|text|image" on an element inside: live data, dark while the unit cannot get it
-  //                           (assets/css/units/network.css);
-  //   data-news (="markup")   on the element whose text (markup) changes when new data comes: then a packet runs to it.
-  // Units without data-key (patch panels, organisers, blanks, button walls) are passive. tools/check-units.mjs
-  // fails CI for a unit that shows live data without saying how it gets it.
+  // A unit says what it is in its template; nothing lists units by name. Power: wall -> UPS -> PDU -> unit; network:
+  // unit -> cord -> switch -> router -> internet (a rack without a router through its uplink to the row's first rack).
+  //   data-key="srv"         its name: its plug and cord in the toys' memory
+  //   data-power             its own power supply: a cable from the PDU (power.js)
+  //   data-net="lan|wan"     a network card and a cord to the switch; wan needs the internet too (.unlinked, .nonet)
+  //   data-host="pve"        runs on another unit: on and online while its host is
+  //   data-role="switch|router|ups"  the rack's infrastructure (the switch's data-uplink: the rack it uplinks to)
+  //   data-feed="koito ..."  the server's sources it shows: where their packets go (live.js)
+  //   data-vlan="mgmt"       a purple cord
+  //   data-live="lamps|bar|text|image"  live data inside, dark while the unit cannot get it
+  //   data-news(="markup")   the element whose text (or markup) changes with new data: a packet runs to it
+  // Units without data-key are passive; tools/check-units.mjs fails CI for a unit with live data and no declaration.
   const keyOf = (u) => u?.dataset.key || '';
   const unitOf = (body, k) => (body && k ? body.querySelector(`:scope > .u[data-key="${CSS.escape(k)}"]`) : null);
   // units(body, filter): the active units of a rack, top to bottom; filter narrows them ('[data-power]', '[data-net]').
@@ -116,12 +95,9 @@ window.Rack = (() => {
     return n;
   }
 
-  // ---------- hanging cables (power.js: the PDU's cables, net.js: pulled network cords) ----------
-  // A cable is a rope of points (Verlet): pts[0] is the plug, the last point is fixed where the cable comes from.
-  // seg is one link's length; floor and right keep it in the room.
-  // stepRope moves it one frame. end — the fixed point; seat — the socket the plug sits in, if it does; hold — where a
-  // hand pulls the plug, if it does (the plug follows, no further than reach from end); damp — how fast it calms
-  // down. Returns how much it moved.
+  // ---------- hanging cables (power.js: power cables, net.js: pulled cords) ----------
+  // A cable is a Verlet rope: pts[0] is the plug, the last point is fixed. stepRope moves it one frame: end is the fixed
+  // point, seat the socket the plug sits in, hold where a hand pulls it (no further than reach), damp the calming.
   function stepRope(r, { end, seat = null, hold = null, reach = Infinity, damp = 0.985 }) {
     const g = 0.42; // gravity, px per frame²
     const last = r.pts.length - 1;
@@ -202,22 +178,13 @@ window.Rack = (() => {
     return { wake() { calm = 0; if (!raf) raf = requestAnimationFrame(tick); } };
   }
 
-  // hand lets a mouse or a finger take a plug in an SVG layer by its grab zone (an element with data-key):
-  //   take(key) — whether it can be taken, and what to remember about it (was, given back to the others);
-  //   pull(key) — the hand moved more than 6 px: the plug comes out;
-  //   drop(key, was) — let go after a pull; tap(key, was) — let go without one;
-  //   moved() — after every move, to wake the drawing.
-  // hand.held is { key, x, y } in the room's coordinates while a plug is held, null otherwise; hand.of(key) is that
-  // for the plug key only.
-  // A finger lands on a plug as often to scroll past it as to take it: a finger takes a plug only after holding it
-  // still for HOLD ms (a short vibration says so). Moving first is a scroll, and the browser scrolls; a quick tap still
-  // toggles the plug. While a finger has a plug, the page does not scroll under it: its touchmoves are cancelled, on the
-  // layer (so the browser asks before scrolling a touch that starts on a plug) and on the touched element itself (a
-  // plug drawn anew when it comes out leaves the old one out of the page, and the layer would not hear of them).
-  // A touch on a plug never ends in a click: on its release the plug is gone from under the finger, and the click would
-  // land on whatever is there now (a hanging plug put back over the router's links opened a link). Only the pointer that
-  // took the plug moves it and lets it go: another finger tapping elsewhere meanwhile is not a tap on the plug. The
-  // vibration only after the page has had a tap (Chrome blocks it before, with a warning in the console).
+  // hand lets a mouse or a finger take a plug (an element with data-key) in an SVG layer:
+  //   take(key) → what to remember, or nothing; pull(key) after 6 px; drop(key, was) after a pull; tap(key, was) without
+  //   one; moved() after every move. hand.held is { key, x, y } while a plug is held; hand.of(key) the same for key.
+  // A finger takes a plug only after holding still for HOLD ms (moving first is a scroll); while it holds one, its
+  // touchmoves are cancelled on the layer and on the touched element (a plug drawn anew leaves the old one detached).
+  // The release never becomes a click (the plug is gone, the click would land on what is under it), and only the pointer
+  // that took the plug moves it. Vibration only after the page has had a tap (Chrome blocks it before).
   const HOLD = 350, SLOP = 10;
   function hand(layer, room, { take, pull, drop, tap, moved }) {
     const h = { held: null, of: (key) => (h.held?.key === key ? h.held : null) };
@@ -294,11 +261,8 @@ window.Rack = (() => {
     return h;
   }
 
-  // tester(selector, busy, show) is the cable tester: the mouse over a plug (an element with data-key matching
-  // selector) lights its cable; show(key) whenever the plug under the mouse changes, show(null) when it leaves one.
-  // It looks at the target of every mouse move, not at pointerover and pointerout: a grab zone can be drawn anew
-  // under the pointer (a cord pulled or put back, another rack), and one that is gone gets no pointerout. Nothing
-  // while busy() (a hand holds a plug).
+  // tester(selector, busy, show): the mouse over a plug lights its cable; show(key), show(null) on leaving. It reads the
+  // target of every mouse move, not pointerover/out: a grab zone drawn anew under the pointer gets no pointerout.
   function tester(selector, busy, show) {
     let cur = null;
     addEventListener('pointermove', (e) => {

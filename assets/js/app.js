@@ -116,10 +116,8 @@
     Alpine.data('gallery', (n) => ({
       i: 0,
       n,
-      // The keys glide the strip themselves (Rack.tween): from where it is to the slide, the snap off on the way. The
-      // browser's smooth scroll, restarted by quick taps with the snap on, could stop short of the slide; and read
-      // halfway (a slow phone's frames are longer than sync's debounce) the scroll position made the next tap count
-      // from a slide passing by. While it glides (aim) the position says nothing about i. A finger or a wheel takes over.
+      // The keys glide the strip themselves (Rack.tween), with the snap off: the browser's smooth scroll, restarted by
+      // quick taps, stops short. While it glides (aim) the scroll position says nothing about i.
       aim: null,
       stop: null,
       init() {
@@ -173,9 +171,8 @@
       close() { this.$refs.dlg.close(); },
     }));
 
-    // A unit that pulls out: the handle on its left ear. Without JS it is a link to ?open=<unit> (the page with the
-    // unit pulled out); with JS htmx loads the drawer under the unit (/fragments/unit/<unit>) and a second press pushes
-    // it back. The request comes from the handle, so net.js knows whose drawer it is (offline: the drawer shows the error).
+    // A unit that pulls out: the handle on its left ear. Without JS a link to ?open=<unit>; with JS htmx loads the drawer
+    // (the request comes from the handle, so net.js knows whose drawer it is).
     Alpine.data('pull', () => ({
       toggle() {
         const el = this.$el, name = el.dataset.unit, box = document.getElementById('drawer-' + name);
@@ -254,11 +251,9 @@
   }
 
   // ---------- network cables ----------
-  // Structured cabling: short patch cords from the ring's jacks on the patch panel through the brush organiser into
-  // the switch's top row; each unit's network card into the left vertical organiser, up along it to the switch's
-  // bottom row; the router (on the home rack) into the switch, its WAN as yellow fibre up through the roof; on the
-  // other racks fibre runs from the switch's SFP towards R1. One SVG over the room that clicks pass through. The power
-  // cables are power.js's.
+  // Patch cords from the ring's jacks through the brush into the switch's top row; each unit's card up the left organiser
+  // to the bottom row; the router's WAN as fibre through the roof (other racks: fibre from the switch's SFP). One SVG
+  // over the room; clicks pass through.
   const RING = ['#e0b93a', '#3a7bd5', '#e0b93a', '#e0b93a'];
   const GUEST = '#c9ccd2';  // the cords of the guests online (assets/js/live.js)
   let drawnGuests = 0;      // how many are drawn already: a new cord is pulled in, the others just stay
@@ -300,10 +295,8 @@
       body.prepend(vm);
     }
     const units = Rack.units(body, '[data-net]');
-    // The screens of units on the network know what to show without it (CSS: network.css): "no link", and "no internet"
-    // for the ones that need it (data-net="wan"); a unit on the rack's network only (lan) has nothing to say about the
-    // internet. Every htmx update brings the unit anew, so the captions are set on every layout. The photo counter
-    // under the avatars (.gal-ctl) is not a network screen: the photos are local, and the text would not fit.
+    // Offline captions for units on the network (network.css): "no link", and "no internet" for wan ones. htmx brings
+    // units anew, so they are set on every layout. The photo counter (.gal-ctl) is not a network screen.
     units.forEach(u => u.querySelectorAll('.lcd, .screen').forEach(d => {
       if (d.closest('.gal-ctl')) return;
       d.dataset.nolink = body.dataset.nolink || '';
@@ -332,18 +325,14 @@
     return Math.min(.85, Math.max(.15, (lo + hi) / 2));
   }
 
-  // The rack's cords for assets/js/net.js (it gets them with rack:laidout): each with its key, its switch port (net.js
-  // lights its lamp while there is a link) and its wire's number in the SVG (to know when the plug reaches the port as
-  // the cable is drawn). The ones that can be pulled also have their jack, their tail (the curve from the plug to where
-  // the organiser holds the cord, where a pulled one hangs from) and where to grab them. cords.loose: the units whose
-  // network card found no free port on the switch; cords.cards: whether the cards are drawn at this width.
+  // The rack's cords for net.js (rack:laidout): key, switch port and wire number; pullable ones also their jack, tail and
+  // grab point. cords.loose: units whose card found no free port; cords.cards: whether cards are drawn at this width.
   function cables() {
     const live = document.getElementById('cables');
     const room = document.getElementById('room');
     if (!live || !room) return [];
-    // Drawn into a copy off the page and put in place once at the end: every change to the live SVG between two
-    // reads of the geometry made the browser recompute the whole room's style (its :has() rules) for the next read,
-    // and while a drawer slides this runs every frame.
+    // Drawn into a copy off the page and put in place at the end: changing the live SVG between geometry reads makes the
+    // browser restyle the whole room (its :has() rules), and while a drawer slides this runs every frame.
     const svg = live.cloneNode(false);
     const R = room.getBoundingClientRect();
     const cords = route(svg, R);
@@ -400,10 +389,8 @@
       cords.push({ key: 'ring' + (i + 1), type: 'ring', port: t, wire: wireNo() });
     });
 
-    // Guests online (assets/js/live.js sets data-guests on <html>): a cord for each other guest, from a free patch panel
-    // jack (5, 6, ...) to a free port of the switch's top row (9, 11, ...), as many as fit at this width (on a phone the
-    // free jacks are hidden, so no guests). A new one's cord is pulled in (.fresh). The others come over the internet:
-    // none while the rack has none (net.js, rack:net).
+    // Guests online (data-guests on <html>, live.js): a cord per other guest from a free patch panel jack to a free port of
+    // the switch's top row, as many as fit (none on a phone, none without the internet). A new one is .fresh.
     const guests = Rack.reached() ? +document.documentElement.dataset.guests || 0 : 0;
     const spare = [...rack.querySelectorAll('.patch .pp-free .jack')].filter(j => j.offsetParent).map(box);
     let g = 0;
@@ -429,10 +416,8 @@
     const vmEl = rack.querySelector('#rack-body > .vm');
     // The brush under the switch, if it is on screen (a phone has none: network.css).
     const lowEl = tor.nextElementSibling?.classList.contains('brush') && tor.nextElementSibling.offsetParent ? tor.nextElementSibling : null;
-    // Above the rack, into the yellow duct on the ceiling: the entry point on its axis (the .mark lines in the hall,
-    // hall.css) ~40 px high, above the aisle signs; along the ceiling to it and into the duct through an entry turned
-    // along the duct. No ceiling (light theme) or the duct below the rack's roof: straight up. The tail runs from the
-    // jack to the brush: a pulled fibre hangs from it.
+    // Up into the yellow duct on the ceiling: the entry on its axis (the .mark lines, hall.css); without a ceiling (light
+    // theme) or with the duct below the roof, straight up. The tail runs from the jack to the brush.
     const fiber = (key, from, color, label, port = null) => {
       if (!vmEl || !vmEl.offsetParent) return;
       const v = box(vmEl), x = v.x + v.w - 4;
@@ -503,11 +488,8 @@
     return cords;
   }
 
-  // The rack changed height (a unit went dark and something in it moved, an htmx update came, the canvas opened, a
-  // drawer slides out): redraw the cables, or they stay where they were. The observer runs after layout and before
-  // paint, so the cables (these and power.js's) move in the same frame as the units, not a frame later, which would
-  // make them jerk on every change. The units themselves (snap changes heights) a frame later, so the observer does
-  // not loop. A new rack after a swap gets its own observer.
+  // The rack changed height: redraw the cables. The observer runs after layout and before paint, so the cables move in
+  // the same frame as the units; snap changes heights a frame later, so it does not loop. Each rack gets its own.
   let watched = null;
   // Laid out: the cables are in place. The cords go to net.js; power.js redraws the power cables.
   const laidout = (cords) => document.dispatchEvent(new CustomEvent('rack:laidout', { detail: { cords, loose: cords.loose || [], cards: cords.cards !== false } }));
@@ -527,14 +509,11 @@
   if (document.fonts) document.fonts.ready.then(later);
   let resizeTimer;
   addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(layout, 120); });
-  // htmx settles a swapped unit by giving it the attributes of the server's markup, its style among them: the
-  // min-height snap() gave it is gone, and until the next layout the unit has its own height, the page is shorter and
-  // a visitor at its bottom is scrolled up (every refresh of the log or the monitor moved the page by up to 38 px). So
-  // the units snap again at once, in the same task, before anything is laid out or painted; the cables next frame.
+  // htmx settles a swapped unit with the server's attributes, style included, dropping snap()'s min-height: the page
+  // would shrink for a frame and scroll a visitor at its bottom. So snap again at once; the cables next frame.
   document.addEventListener('htmx:afterSettle', () => { snap(); later(); });
-  // A poll whose answer is the unit's last answer again is not swapped: nothing on the unit would change, and each
-  // swap lays the whole rack out (the log was swapped every 30 s for the host's CPU figures it does not show). The
-  // lamps on the way still blink (live.js: an answer without news).
+  // A poll whose answer equals the unit's last one is not swapped: every swap lays the whole rack out. The lamps on the
+  // way still blink (live.js).
   const answers = new Map(); // unit id -> its last answer
   document.addEventListener('htmx:beforeSwap', (e) => {
     const t = e.detail.target;
@@ -553,9 +532,8 @@
   });
   // An explicit request (the canvas opened, a drawer came out): now, before this frame is painted.
   document.addEventListener('rack:layout', layout);
-  // A <details> that changes the unit's height opened or closed (the wall's "show all", a button's code; stickers.html).
-  // On close the rack keeps its height (snap holds the unit's min-height) and the resize observer stays quiet, so lay
-  // out here. A MutationObserver runs before the paint; the toggle event comes a frame later, with the unit empty.
+  // A <details> that changes the unit's height (the wall's "show all", a button's code): on close snap keeps the height
+  // and the resize observer stays quiet, so lay out here (a MutationObserver runs before the paint).
   new MutationObserver((recs) => {
     if (recs.some((r) => r.target.classList?.contains('more') || r.target.getAttribute?.('name') === 'b88-code')) layout();
   }).observe(document, { subtree: true, attributeFilter: ['open'] });

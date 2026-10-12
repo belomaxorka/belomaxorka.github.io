@@ -1,12 +1,6 @@
-// The rack's toys, which nothing else needs: easter eggs and small buttons "like on real hardware".
-//   - the BIOS on the KVM: the Konami code (up up down down left right left right B A) or five quick taps on the
-//     "kvm · guestbook" caption, a BIOS Setup screen over the console. Three settings change the rack: a rainbow on
-//     the LEDs ("20% cooler"), steady light instead of blinking, a POST screen when the server restarts. The arrows
-//     choose, Enter or space change, Esc leaves. The choice is remembered.
-//   - RESET on the server: a hole for a paper clip; the server restarts (power.js turns it off and boots it), POST
-//     runs on its LCD.
-//   - UID on the server: "find me", the blue LED blinks until pressed again.
-// A dark unit is inert (power.js): its buttons do not press, the BIOS of a KVM without power does not open.
+// The rack's toys: the BIOS on the KVM (the Konami code or five quick taps on its caption: rainbow LEDs, steady light,
+// POST on restart), RESET on the server (a hole for a paper clip) and UID (the blue "find me" LED). A dark unit is
+// inert: its toys do not work.
 (() => {
   const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
   const opts = Object.assign({ rainbow: false, steady: false, logo: true }, Rack.store.json('bios', {}));
@@ -18,8 +12,7 @@
   apply();
 
   // ---------- BIOS ----------
-  // Caught before everyone (capture on window): left and right also move to the next rack (aisle.js); once up up down
-  // down are typed they go to the code, not the aisle, or the whole rack would leave in the middle of the code.
+  // Caught first (capture on window): once up up down down is typed, left and right go to the code, not the aisle.
   let typed = 0;
   addEventListener('keydown', (e) => {
     const t = e.target;

@@ -25,11 +25,9 @@
   new MutationObserver(paint).observe(r, { attributes: true, attributeFilter: ['data-theme'] });
 })();
 
-// The move between the row's racks when the page does load anew (View Transitions between pages,
-// assets/css/aisle.css): forward along the row the rack leaves to the left, back to the right. Usually
-// assets/js/aisle.js swaps the rack without a reload; the rest comes here: back in the history to an address it did
-// not load, a load after an error. The racks' order is <html data-racks>. Anything else (the same rack, a pulled-out
-// unit, the admin page) has no animation. Here and not in a deferred script: pagereveal comes before the first paint.
+// View Transitions between the row's racks when a page does load anew (usually aisle.js swaps without a reload):
+// forward the rack leaves to the left, back to the right; anything else has no animation. Here, not in a deferred
+// script: pagereveal comes before the first paint.
 (function () {
   var order = (document.documentElement.dataset.racks || '').trim().split(/\s+/);
   function dir(from, to) {
