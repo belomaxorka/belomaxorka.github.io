@@ -21,7 +21,7 @@
     <div class="screen" id="guestbook" x-data="lightbox" data-nosignal="{{t "kvm.nosignal"}}">
       {{range .Entries}}
       <article class="e" id="gb{{.ID}}">
-        <span class="m">{{or .Name (t "gb.anon")}} · #{{.ID}} · {{stamp .At}}</span>
+        <span class="m">{{or .Name (t "gb.anon")}} · #{{.ID}} · {{date .At}} · {{clock .At}}</span>
         {{with .Text}}<p class="txt">{{.}}</p>{{end}}
         {{with .Reply}}<p class="rep">{{.}}</p>{{end}}
         {{with .Drawing}}<a class="pic" href="{{.}}" target="_blank" rel="noopener" @click.prevent="show($el)"><img src="{{.}}" alt="{{t "gb.drawing_alt"}}" loading="lazy"></a>{{end}}
