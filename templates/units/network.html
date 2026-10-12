@@ -10,7 +10,7 @@
 {{end}}
 
 {{define "unit-tor"}}
-<div class="u tor" style="--h:1" aria-hidden="true">
+<div class="u tor" style="--h:1" aria-hidden="true" data-key="tor" data-power data-role="switch"{{with index .Racks 0}} data-uplink="{{.ID}}"{{if .Stub}} data-uplink-noups{{end}}{{end}}>
   <div class="face">
     <div class="tor-id"><span class="brand">switch</span><span class="silk">24 × 1g · 2 × sfp+</span></div>
     <div class="tor-ports">{{range $i := seq 24}}<span class="tp" data-port="{{$i}}"><i class="led"></i><i class="jack"></i></span>{{end}}</div>
@@ -26,7 +26,7 @@
      (net.js), like the monitoring lamps without a link. The link to the light version is the "http" port, hidden among
      the ports. The rest of the router is decoration. */}}
 {{define "unit-router"}}
-<div class="u rtr" style="--h:1">
+<div class="u rtr" style="--h:1" data-key="rtr" data-power data-role="router">
   <div class="face">
     <div class="tor-id" aria-hidden="true"><span class="brand">opnsense</span><span class="silk">{{t "net.router"}}</span></div>
     <div class="rtr-ports">

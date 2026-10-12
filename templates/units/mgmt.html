@@ -1,7 +1,7 @@
 {{/* Management: the sections, the language (plain links that work without JS) and the toggles for the screens and the
      theme (useless without JS, so hidden until Alpine starts). */}}
 {{define "unit-mgmt"}}
-<div class="u mgmt" style="--h:1">
+<div class="u mgmt" style="--h:1" data-key="mgmt" data-power data-net="wan">
   <div class="face">
     <nav class="ports" aria-label="{{t "nav.aria"}}">
       {{range .Content.nav}}{{if and .needs (not $.HasCV)}}<span class="key off" title="{{t "soon"}}">{{t .name}}</span>{{else}}<a class="key" href="{{.link}}"{{ext .link}}>{{t .name}}</a>{{end}}

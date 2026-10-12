@@ -5,7 +5,7 @@
      A line is marked with data-kind (not data-src: html/template takes *src* for a URL and encodes the value).
      The list scrolls, and the scroll survives the htmx refresh every minute (/fragments/syslog). */}}
 {{define "unit-syslog"}}
-<section class="u log" style="--h:5" aria-label="{{t "log.aria"}}" id="unit-syslog"
+<section class="u log" style="--h:5" aria-label="{{t "log.aria"}}" id="unit-syslog" data-key="log" data-power data-net="wan"
   hx-get="/fragments/syslog" hx-trigger="every 120s, fresh" hx-swap="outerHTML">
   <div class="face">
     <div class="bar">

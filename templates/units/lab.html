@@ -3,7 +3,7 @@
 
 {{/* The host: CPU, memory, uptime, how many guests run. */}}
 {{define "unit-pve"}}
-<section class="u pve" style="--h:3" aria-labelledby="pve-h">
+<section class="u pve" style="--h:3" aria-labelledby="pve-h" data-key="pve" data-power data-net="lan">
   <div class="face">
     <div class="ident">
       <span class="silk">proxmox ve · {{t "lab.host"}}</span>
@@ -11,8 +11,8 @@
     </div>
     {{with .Lab}}{{if .OK}}
     <div class="meters">
-      <span class="meter{{if ge .Node.CPU 80}} hot{{end}}" style="--p: {{.Node.CPU}}"><span class="silk">cpu · {{.Node.Cores}}</span><i></i><b>{{.Node.CPUText}}%</b></span>
-      <span class="meter{{if ge .Node.Mem 85}} hot{{end}}" style="--p: {{.Node.Mem}}"><span class="silk">ram</span><i></i><b>{{printf "%.1f" .Node.MemGiB}} / {{printf "%.0f" .Node.MaxGiB}} {{t "lab.gib"}}</b></span>
+      <span class="meter{{if ge .Node.CPU 80}} hot{{end}}" data-live="bar" style="--p: {{.Node.CPU}}"><span class="silk">cpu · {{.Node.Cores}}</span><i></i><b>{{.Node.CPUText}}%</b></span>
+      <span class="meter{{if ge .Node.Mem 85}} hot{{end}}" data-live="bar" style="--p: {{.Node.Mem}}"><span class="silk">ram</span><i></i><b>{{printf "%.1f" .Node.MemGiB}} / {{printf "%.0f" .Node.MaxGiB}} {{t "lab.gib"}}</b></span>
     </div>
     <div class="lcd two">{{t "lab.guests_up" .Up .Total}}<br><span class="d">{{t "lab.uptime" (uptime .Node.Uptime)}} · {{ago .Checked}}</span></div>
     {{else}}
@@ -27,15 +27,15 @@
 {{define "unit-guests"}}
 {{with .Lab}}{{if .OK}}
 {{range .Guests}}
-<section class="u ct{{if not .Running}} down{{end}}" style="--h:1" data-power="ct{{.ID}}" aria-label="{{.Type}} {{.ID}} {{.Name}}">
+<section class="u ct{{if not .Running}} down{{end}}" style="--h:1" data-key="ct{{.ID}}" data-host="pve" data-net="lan" aria-label="{{.Type}} {{.ID}} {{.Name}}">
   <div class="face">
     <i class="led{{if not .Running}} err{{end}}" aria-hidden="true"></i>
     <span class="tape{{if eq .Type "qemu"}} b{{end}}">{{if eq .Type "qemu"}}vm{{else}}ct{{end}}{{.ID}}</span>
     <span class="name">{{.Name}}</span>
     {{if .Running}}
-    <span class="meter{{if ge .CPU 80}} hot{{end}}" style="--p: {{.CPU}}" title="{{t "lab.cpu_title" .Cores}}"><span class="silk">cpu · {{.Cores}}</span><i></i><b>{{.CPUText}}%</b></span>
-    <span class="meter{{if ge .Mem 85}} hot{{end}}" style="--p: {{.Mem}}"><span class="silk">ram</span><i></i><b>{{.MemMiB}} / {{.MaxMiB}} {{t "lab.mib"}}</b></span>
-    <span class="up silk">{{t "lab.uptime" (uptime .Uptime)}}</span>
+    <span class="meter{{if ge .CPU 80}} hot{{end}}" data-live="bar" style="--p: {{.CPU}}" title="{{t "lab.cpu_title" .Cores}}"><span class="silk">cpu · {{.Cores}}</span><i></i><b>{{.CPUText}}%</b></span>
+    <span class="meter{{if ge .Mem 85}} hot{{end}}" data-live="bar" style="--p: {{.Mem}}"><span class="silk">ram</span><i></i><b>{{.MemMiB}} / {{.MaxMiB}} {{t "lab.mib"}}</b></span>
+    <span class="up silk" data-live="text">{{t "lab.uptime" (uptime .Uptime)}}</span>
     {{else}}
     <span class="up silk off">{{t "lab.stopped"}}</span>
     {{end}}

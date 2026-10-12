@@ -3,7 +3,7 @@
      data-nolink or data-nonet above it (assets/js/net.js). Entries show after moderation.
      Data: .Enabled, .Entries (ID, Name, Text, Reply, At, Drawing), .Status, .Stamp. */}}
 {{define "unit-kvm"}}
-<section class="u kvm" style="--h:5" aria-labelledby="gbh" id="unit-kvm">
+<section class="u kvm" style="--h:5" aria-labelledby="gbh" id="unit-kvm" data-key="kvm" data-power data-net="wan">
   {{/* An easter egg (assets/js/toys.js): the Konami code or five taps on the caption, BIOS Setup over the console. */}}
   <div class="bios" hidden role="dialog" aria-label="{{t "bios.title"}}">
     <p class="b-title">{{t "bios.title"}}</p>

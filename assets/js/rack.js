@@ -2,7 +2,9 @@
 //
 // The scripts also talk through events on document:
 //   rack:layout   (anyone → app.js)     lay the rack out again now: a drawer opened, a cord was pulled, the canvas opened
-//   rack:laidout  (app.js → all)        the rack is laid out; detail.cords — the network cords app.js drew
+//   rack:laidout  (app.js → all)        the rack is laid out; detail.cords — the network cords app.js drew, detail.loose
+//                                       — units whose card found no free port, detail.cards — false when the cards are
+//                                       not drawn at this width (a phone: they count as plugged in)
 //   rack:swap     (aisle.js → all)      another rack is in the room, not shown yet; detail.quiet — it comes without animation
 //   rack:landed   (aisle.js → all)      it has arrived; detail.dir — 1 forward, -1 back
 //   rack:drawing  (app.js → net.js)     the cords are being drawn in; detail — { lag, step } in ms, or null: all at once
@@ -12,7 +14,9 @@
 //   rack:link     (net.js → all)        a network cord out or in; detail.key, detail.on
 //   rack:reset    (toys.js → power.js)  RESET on a unit; detail.key
 //   rack:beep     (power.js → sound.js) the UPS beeps; detail.n times
-// and net.js answers Rack.pulled() for app.js: which cords of this rack are out.
+//   rack:mains    (power.js → net.js)   the hall's breaker moved: the row's sockets lost or got their current
+// net.js answers Rack.pulled() for app.js: which cords of this rack are out; power.js answers Rack.rackPower(id) for
+// net.js: whether another rack of the row has power (the row's first rack feeds the others their internet).
 window.Rack = (() => {
   // ---------- the toys' memory ----------
   // The toys (power plugs, network cords, the UPS, fallen stickers) remember what a visitor did for a while: a
@@ -38,14 +42,29 @@ window.Rack = (() => {
   }
 
   // ---------- units ----------
-  // Units with a power plug (their cables to the PDU, power.js) and, of those, the ones with a network card (their
-  // cords to the switch, app.js and net.js): the switch and the router are the network itself. Patch panels and
-  // blanks are passive. Several units of one kind (the containers on /lab) tell themselves apart by data-power.
-  const POWERED = ['tor', 'rtr', 'mgmt', 'srv', 'media', 'mon', 'log', 'sw', 'kvm', 'pve'];
-  const WIRED = POWERED.filter((k) => k !== 'tor' && k !== 'rtr');
-  const keyOf = (u, kinds = POWERED) => u.dataset.power || kinds.find((k) => u.classList.contains(k));
-  const unitOf = (body, k) => body.querySelector(`:scope > .u[data-power="${CSS.escape(k)}"]`) ||
-    body.querySelector(`:scope > .u.${CSS.escape(k)}`);
+  // A unit says what it is in its template (templates/units/*.html), and the scripts read it from there; nothing lists
+  // units by name. The rack works like the real thing: power runs wall -> UPS -> PDU -> each unit with its own supply;
+  // the network runs unit -> its cord -> the switch -> the router -> the internet, and a rack without a router
+  // reaches it through its uplink to the row's first rack.
+  //   data-key="srv"          its name on the rack: its plug and its cord in the toys' memory, what the scripts call it;
+  //   data-power              its own power supply: a cable from the PDU (power.js);
+  //   data-net="lan|wan"      a network card: a cord to the switch (app.js, net.js). lan: it needs the rack's network
+  //                           only; wan: the internet too. Without it the unit is offline (.unlinked: no link, .nonet:
+  //                           no internet), and its screens and live elements say so;
+  //   data-host="pve"         it runs on another unit (a container on the Proxmox host): no supply or cord of its own,
+  //                           it is on while the host is and has the network while the host does;
+  //   data-role="switch|router|ups"   the rack's infrastructure (the switch's data-uplink: the rack it uplinks to);
+  //   data-live="lamps|bar|text|image" on an element inside: live data, dark while the unit cannot get it
+  //                           (assets/css/units/network.css).
+  // Units without data-key (patch panels, organisers, blanks, button walls) are passive. docs/tools/check-units.mjs
+  // fails CI for a unit that shows live data without saying how it gets it.
+  const keyOf = (u) => u?.dataset.key || '';
+  const unitOf = (body, k) => (body && k ? body.querySelector(`:scope > .u[data-key="${CSS.escape(k)}"]`) : null);
+  // units(body, filter): the active units of a rack, top to bottom; filter narrows them ('[data-power]', '[data-net]').
+  const units = (body, filter = '') => (body ? [...body.querySelectorAll(`:scope > .u[data-key]${filter}`)] : []);
+  const roleOf = (body, role) => body?.querySelector(`:scope > .u[data-role="${role}"]`) || null;
+  const hostOf = (body, u) => (u?.dataset.host ? unitOf(body, u.dataset.host) : null);
+  const guestsOf = (body, k) => units(body, `[data-host="${CSS.escape(k)}"]`);
 
   // ---------- SVG ----------
   const NS = 'http://www.w3.org/2000/svg';
@@ -184,5 +203,9 @@ window.Rack = (() => {
     return h;
   }
 
-  return { TOY_TTL, toyStore, POWERED, WIRED, keyOf, unitOf, svg, stepRope, ropePath, cord, setCord, loop, hand, pulled: () => new Set() };
+  return {
+    TOY_TTL, toyStore, keyOf, unitOf, units, roleOf, hostOf, guestsOf, svg, stepRope, ropePath, cord, setCord, loop, hand,
+    pulled: () => new Set(), // net.js: which cords of this rack are out
+    rackPower: () => ({ on: true, unplugged: {}, draining: false }), // power.js: another rack's power (net.js, R1 for the row)
+  };
 })();

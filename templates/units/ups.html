@@ -1,7 +1,7 @@
 {{/* The UPS is the site's footer. The real UPS behind the rack: charge, load and runtime from NUT (.UPS).
      The UPS's cord can be pulled out of the socket (assets/js/power.js): then the LCD shows its own battery, the captions data-*. */}}
 {{define "unit-ups"}}
-<footer class="u ups" style="--h:2">
+<footer class="u ups" style="--h:2" data-key="ups" data-role="ups">
   <div class="face">
     <button class="pwr" type="button" hidden aria-label="{{t "ups.power"}}" title="{{t "ups.power"}}">{{template "icon" "power"}}</button>
     <button class="utest" type="button" hidden aria-label="{{t "ups.test_aria"}}" title="{{t "ups.test_aria"}}">test</button>

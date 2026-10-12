@@ -1,4 +1,5 @@
-// The rack's power. Every active unit has its own cable from the vertical PDU on the right rail. A plug can be pulled
+// The rack's power. Every unit with its own supply (data-power, rack.js) has a cable from the vertical PDU on the right
+// rail; a unit that runs on another (data-host: a container on the Proxmox host) is on while its host is. A plug can be pulled
 // out with a mouse or a finger: the cable hangs and swings (a Verlet rope) and the unit goes dark. Bring the plug to
 // its inlet (or tap it) and it goes back in, the unit lights up. The UPS's button turns the whole rack off and boots it
 // again. The UPS's own cord comes out of the wall socket too: the UPS goes on battery (red light in the hall, the LCD
@@ -60,8 +61,10 @@
 
   const keyOf = (u) => Rack.keyOf(u);
   const el = Rack.svg;
-  const units = () => [...document.querySelectorAll('#rack-body > .u')].filter(keyOf);
-  const unitBy = (k) => units().find((u) => keyOf(u) === k);
+  const body = () => document.getElementById('rack-body');
+  const units = () => Rack.units(body(), '[data-power]');                   // the ones with a supply, a plug and a cable
+  const powers = () => Rack.units(body(), ':is([data-power], [data-host])'); // and the ones running on them: all that can be dark
+  const unitBy = (k) => Rack.unitOf(body(), k);
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
   const held = (r) => (hand?.held?.key === r.key ? hand.held : null);
 
@@ -84,7 +87,12 @@
   }
 
   // ---------- units: inlets and light ----------
-  function powered(k) { return !state.off && !state.unplugged[k] && !dead(); }
+  // A unit with a supply has power while the UPS gives it and its plug is in; a guest while its host is on and done booting.
+  function powered(k) {
+    const h = unitBy(k)?.dataset.host;
+    if (h) return powered(h) && !queued.has(h);
+    return !state.off && !state.unplugged[k] && !dead();
+  }
 
   // A dark unit cannot be pressed either: inert on it and on its pulled-out drawer, so no click, hover or focus (Tab
   // skips it) and screen readers do not see it. One place for every cause: a plug, the UPS's button, the battery.
@@ -129,11 +137,27 @@
     t.focus({ preventScroll: true });
   }
 
+  // A host's guests follow it: dark with it at once; when it is back they start one after another, as a host starts its
+  // containers once it has booted.
+  function guests(k, boot) {
+    Rack.guestsOf(body(), k).forEach((g, i) => {
+      const gk = keyOf(g);
+      if (!boot || !powered(k) || queued.has(k)) { paint(g, gk, false); return; }
+      queued.add(gk);
+      paint(g, gk, false);
+      setTimeout(() => {
+        queued.delete(gk);
+        const cur = unitBy(gk);
+        if (cur) paint(cur, gk, true);
+      }, reduce.matches ? 0 : 700 + 160 * i);
+    });
+  }
+
   // Boot from top to bottom, unit after unit. Until its turn a unit stays dark and cannot be pressed, even if someone
   // else redraws it (the layout, an htmx response). Swapped by htmx: the new element boots.
   const queued = new Set();
   function bootAll() {
-    units().forEach((u, i) => {
+    powers().forEach((u, i) => {
       const k = keyOf(u);
       if (u.classList.contains('off')) queued.add(k);
       setTimeout(() => {
@@ -169,8 +193,8 @@
         u.appendChild(s);
       }
       u.classList.add('has-psu'); // after htmx too: on settle it restores the unit's class from the response
-      paint(u, keyOf(u), false);
     });
+    powers().forEach((u) => paint(u, keyOf(u), false));
     const rack = document.getElementById('rack');
     if (rack) rack.classList.toggle('powered-off', state.off || dead());
     wireButton();
@@ -198,8 +222,8 @@
     if (lightReal === null) lightReal = room.dataset.light;
     return mode === 'auto' || lightReal === 'battery' ? lightReal : mode;
   }
-  const upsUnit = () => document.querySelector('#rack-body > .ups');
-  const upsLcd = () => document.querySelector('#rack-body > .ups .lcd');
+  const upsUnit = () => Rack.roleOf(body(), 'ups');
+  const upsLcd = () => upsUnit()?.querySelector('.lcd');
   const full = () => { const v = parseInt(upsLcd()?.dataset.charge, 10); return v > 0 ? v : 100; };
   // The battery is empty, or the rack has no UPS at all (the row's blank racks): then it lives only while the socket has current.
   function dead() { return upsUnit() ? dying(state) : !fed(state); }
@@ -250,7 +274,7 @@
     // The battery is empty: everything goes dark; power is back: the units boot from top to bottom. Report only a
     // change the visitor sees, not the state the page opened with.
     if (isDead !== wasDead) {
-      if (isDead) units().forEach((u) => paint(u, keyOf(u), false));
+      if (isDead) powers().forEach((u) => paint(u, keyOf(u), false));
       else bootAll();
       if (wasDead !== null && !state.off) dark(!isDead, 'battery');
       wasDead = isDead;
@@ -296,7 +320,7 @@
 
   // ---------- the UPS's button ----------
   function wireButton() {
-    const b = document.querySelector('.ups .pwr');
+    const b = upsUnit()?.querySelector('.pwr');
     if (!b || b.dataset.wired) return;
     b.dataset.wired = '1';
     b.hidden = false;
@@ -309,7 +333,7 @@
       document.getElementById('rack').classList.toggle('powered-off', state.off || dead());
       if (wasOn !== (!state.off && !dead())) dark(!wasOn, 'button');
       if (state.off) {
-        units().forEach((u) => paint(u, keyOf(u), false));
+        powers().forEach((u) => paint(u, keyOf(u), false));
         return;
       }
       bootAll();
@@ -348,7 +372,7 @@
   // load went to the battery for a moment). The rack stays on. Without current, off or with an empty battery the UPS
   // refuses on its LCD.
   function wireTest() {
-    const b = document.querySelector('.ups .utest');
+    const b = upsUnit()?.querySelector('.utest');
     if (!b || b.dataset.wired) return;
     b.dataset.wired = '1';
     b.hidden = false;
@@ -396,16 +420,18 @@
   }
 
   // ---------- a unit's restart (RESET on the server, assets/js/toys.js) ----------
-  // The unit goes dark as without power and boots after a couple of seconds; the rest of the rack runs on.
+  // The unit goes dark as without power and boots after a couple of seconds, its guests after it; the rest runs on.
   document.addEventListener('rack:reset', (e) => {
     const k = e.detail?.key, u = k && unitBy(k);
     if (!u || !powered(k) || queued.has(k)) return;
     queued.add(k);
     paint(u, k, false);
+    guests(k, false);
     setTimeout(() => {
       queued.delete(k);
       const cur = unitBy(k);
       if (cur) paint(cur, k, true);
+      guests(k, true);
     }, reduce.matches ? 300 : 1600);
   });
 
@@ -431,6 +457,7 @@
       save();
       showBreaker();
       runBattery();
+      document.dispatchEvent(new Event('rack:mains'));
     });
     room.appendChild(lever);
     showBreaker();
@@ -657,6 +684,7 @@
     save();
     const u = unitBy(r.key);
     if (u) paint(u, r.key, false);
+    guests(r.key, false);
   }
 
   function plug(r) {
@@ -667,7 +695,18 @@
     save();
     const u = unitBy(r.key);
     if (u) paint(u, r.key, true);
+    guests(r.key, true);
   }
+
+  // Another rack of the row (net.js: the first rack feeds the others their internet): whether its UPS gives power (noups:
+  // a rack without one lives off the socket) and which plugs are out; draining: alive on battery, so ask again later.
+  Rack.rackPower = (id, noups) => {
+    if (id === stateId && state) return { on: !state.off && !dead(), unplugged: { ...state.unplugged }, draining: !fed(state) && !dead() };
+    const r = rackState(id);
+    settle(r, Date.now());
+    const on = !r.off && !(noups ? !fed(r) : dying(r));
+    return { on, unplugged: { ...r.unplugged }, draining: on && !fed(r) };
+  };
 
   // app.js lays the rack out; the cables right after it and in the same frame (draw in relayout), or they catch up
   // with the units a frame or two later and jerk.

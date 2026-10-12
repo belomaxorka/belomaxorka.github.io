@@ -170,25 +170,26 @@
     setTimeout(() => led.classList.remove('tx'), 90);
   }
 
-  // The rack is online: it has internet, the switch and the router are on.
+  // The rack is online: it has the internet (net.js: the switch, the router or the uplink, the rack feeding it) and power.
   function up() {
-    const rack = document.getElementById('rack'), body = document.getElementById('rack-body');
-    return !!rack && !!body && !rack.classList.contains('nonet') && !rack.classList.contains('powered-off') &&
-      !body.querySelector(':scope > .u.tor.off, :scope > .u.rtr.off');
+    const rack = document.getElementById('rack');
+    return !!rack && !rack.classList.contains('nonet') && !rack.classList.contains('powered-off');
   }
 
   // The way to the unit target: from outside along the fibre (the router's WAN or the switch's uplink; both drawn from
   // the jack to the ceiling, so against their direction), along the router's LAN into the switch (with it), from the
   // switch along the unit's cord (against it: the cord runs from its network card). Legs are [path, direction, the
   // lamps that blink when the packet reaches the leg's end]: the router's WAN; the LAN port and the unit's port on the
-  // switch; the unit's network card and extra (selectors of its lamps). The unit is not on this rack: no way, the data
-  // went elsewhere.
+  // switch; the unit's network card and extra (selectors of its lamps). A unit running on another (a container) is
+  // reached through its host's cord. The unit is not on this rack: no way, the data went elsewhere.
   function route(target, extra = []) {
     if (!up()) return null;
     const body = document.getElementById('rack-body');
-    const fiber = cord('wan') || cord('uplink'), nic = cord(target), unit = nic && unitOf(body, target);
+    const via = unitOf(body, target)?.dataset.host || target;
+    const fiber = cord('wan') || cord('uplink'), nic = cord(via), unit = nic && unitOf(body, via);
     if (!fiber || !path(fiber) || !unit) return null;
-    const legs = [[path(fiber), -1, [body.querySelector(':scope > .u.rtr:not(.nowan) .led.wan')]]];
+    const rtr = Rack.roleOf(body, 'router');
+    const legs = [[path(fiber), -1, [rtr && !rtr.classList.contains('nowan') ? rtr.querySelector('.led.wan') : null]]];
     const lan = cord('lan');
     if (lan && path(lan)) legs.push([path(lan), 1, [port(lan)]]);
     legs[legs.length - 1][2].push(port(nic));
@@ -303,14 +304,14 @@
   // LCD text (the track), the log's first line, the monitoring lamps' state. Nothing new, or not a poll: the lamps on
   // the way to the unit just blink.
   const SIG = { media: '.lcd', log: 'ol li', mon: '.matrix' };
-  const keyOf = (u) => u && Rack.keyOf(u, Rack.WIRED);
+  const keyOf = (u) => (u?.matches('[data-net]') ? Rack.keyOf(u) : '');
   document.addEventListener('htmx:beforeSwap', (e) => {
     const t = e.detail.target, elt = e.detail.requestConfig?.elt || e.detail.elt;
     if (!(elt instanceof Element)) return;
     const unit = elt.closest('#rack-body > .u') || elt.closest('#rack-body > .drawer')?.previousElementSibling;
     const target = keyOf(unit);
     if (!target) return;
-    const key = t === unit && t.hasAttribute('hx-get') && e.detail.shouldSwap && Object.keys(SIG).find((k) => t.classList.contains(k));
+    const key = t === unit && t.hasAttribute('hx-get') && e.detail.shouldSwap && t.dataset.key in SIG && t.dataset.key;
     if (key) {
       const sel = SIG[key];
       const now = t.querySelector(sel), next = new DOMParser().parseFromString(e.detail.serverResponse, 'text/html').querySelector(sel);

@@ -239,7 +239,7 @@
   const GUEST = '#c9ccd2';  // the cords of the guests online (assets/js/live.js)
   let drawnGuests = 0;      // how many are drawn already: a new cord is pulled in, the others just stay
   const DATA = '#3a7bd5', MGMT = '#9b6bd6', LAN = '#3daa63', FIBER = '#e8c21a', UPFIBER = '#2bb3c0';
-  const keyOf = (u) => Rack.keyOf(u, Rack.WIRED); // units with a network card (rack.js)
+  const keyOf = Rack.keyOf;
   const el = Rack.svg;
 
   function cable(svg, d, color, w) {
@@ -265,27 +265,28 @@
   const xy = (p) => `${p.x} ${p.y}`;
 
   // The units' network cards and the vertical organiser: decoration that exists only with JS (like the power inlets).
+  // A card on every unit on the network (data-net, rack.js) but the guests: they use their host's.
   function wire() {
     const body = document.getElementById('rack-body');
-    if (!body || !body.querySelector(':scope > .tor')) return [];
+    if (!body || !Rack.roleOf(body, 'switch')) return [];
     if (!body.querySelector(':scope > .vm')) {
       const vm = document.createElement('div');
       vm.className = 'vm';
       vm.setAttribute('aria-hidden', 'true');
       body.prepend(vm);
     }
-    const units = [...body.querySelectorAll(':scope > .u')].filter(keyOf);
-    // The screens of connected units know what to show without a link (CSS: network.css, "no link"). Every htmx update
-    // brings the unit anew, so the captions are set on every layout. The photo counter under the avatars (.gal-ctl) is
-    // not a network screen: the photos are local, and the text would not fit. The Proxmox host and the containers
-    // (/lab) talk to the LAN only: without a link "link lost", and they have nothing to show for "no internet".
+    const units = Rack.units(body, '[data-net]');
+    // The screens of units on the network know what to show without it (CSS: network.css): "no link", and "no internet"
+    // for the ones that need it (data-net="wan"); a unit on the rack's network only (lan) has nothing to say about the
+    // internet. Every htmx update brings the unit anew, so the captions are set on every layout. The photo counter
+    // under the avatars (.gal-ctl) is not a network screen: the photos are local, and the text would not fit.
     units.forEach(u => u.querySelectorAll('.lcd, .screen').forEach(d => {
       if (d.closest('.gal-ctl')) return;
       d.dataset.nolink = body.dataset.nolink || '';
-      if (u.matches('.pve, .ct')) delete d.dataset.nonet;
-      else d.dataset.nonet = body.dataset.nonet || '';
+      if (u.dataset.net === 'wan') d.dataset.nonet = body.dataset.nonet || '';
+      else delete d.dataset.nonet;
     }));
-    units.forEach((u) => {
+    units.filter((u) => !u.dataset.host).forEach((u) => {
       // The class every time: htmx, swapping the unit, restores its class from the response on settle.
       u.classList.add('has-nic');
       if (u.querySelector(':scope > .nic')) return;
@@ -311,7 +312,7 @@
   // lights its lamp while there is a link) and its wire's number in the SVG (to know when the plug reaches the port as
   // the cable is drawn). The ones that can be pulled also have their jack, their tail (the curve from the plug to where
   // the organiser holds the cord, where a pulled one hangs from) and where to grab them. cords.loose: the units whose
-  // network card found no free port on the switch.
+  // network card found no free port on the switch; cords.cards: whether the cards are drawn at this width.
   function cables() {
     const live = document.getElementById('cables');
     const room = document.getElementById('room');
@@ -325,7 +326,7 @@
     live.setAttribute('viewBox', `0 0 ${R.width} ${R.height}`);
     live.replaceChildren(...svg.childNodes);
     // The ports' lamps are net.js's: lit for the cords with a link.
-    document.querySelectorAll('#rack-body > .tor .tp.link').forEach(t => t.classList.remove('link'));
+    Rack.roleOf(document.getElementById('rack-body'), 'switch')?.querySelectorAll('.tp.link').forEach(t => t.classList.remove('link'));
     return cords;
   }
 
@@ -333,12 +334,13 @@
   function route(svg, R) {
     const cords = [];
     cords.loose = [];
+    cords.cards = false;
     const box = (node) => {
       const b = node.getBoundingClientRect();
       return { x: b.left - R.left, y: b.top - R.top, r: b.right - R.left, b: b.bottom - R.top, cx: b.left - R.left + b.width / 2, cy: b.top - R.top + b.height / 2, w: b.width, h: b.height };
     };
     const rack = document.getElementById('rack');
-    const tor = rack?.querySelector('#rack-body > .tor');
+    const tor = Rack.roleOf(document.getElementById('rack-body'), 'switch');
     if (!rack || !tor) return cords;
     const cap = box(rack.querySelector('.cap'));
     const port = (n) => tor.querySelector(`.tp[data-port="${n - 1}"]`);
@@ -428,7 +430,7 @@
     };
 
     // The router: LAN -> the last port of the bottom row, WAN as fibre to the trays.
-    const rtr = rack.querySelector('#rack-body > .rtr');
+    const rtr = Rack.roleOf(document.getElementById('rack-body'), 'router');
     let next = 2; // bottom row: even ports in order
     const bottom = () => { while (next <= 24 && (used.has(next) || !port(next)?.offsetParent)) next += 2; return next <= 24 ? next : 0; };
     if (rtr) {
@@ -453,6 +455,7 @@
     // Network cards: left into the vertical organiser, up along it to the switch, under it right to the port.
     const vm = rack.querySelector('#rack-body > .vm');
     if (!vm || !vm.offsetParent) return cords;
+    cords.cards = true;
     const lane = box(vm);
     const nics = [...rack.querySelectorAll('#rack-body > .u > .nic')];
     // Across through the brush organiser under the switch (if there is one), otherwise right under the switch.
@@ -481,7 +484,7 @@
   // not loop. A new rack after a swap gets its own observer.
   let watched = null;
   // Laid out: the cables are in place. The cords go to net.js; power.js redraws the power cables.
-  const laidout = (cords) => document.dispatchEvent(new CustomEvent('rack:laidout', { detail: { cords, loose: cords.loose || [] } }));
+  const laidout = (cords) => document.dispatchEvent(new CustomEvent('rack:laidout', { detail: { cords, loose: cords.loose || [], cards: cords.cards !== false } }));
   const ro = window.ResizeObserver ? new ResizeObserver(() => {
     laidout(cables()); later();
   }) : null;

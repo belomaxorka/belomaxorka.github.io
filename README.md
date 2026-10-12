@@ -31,7 +31,8 @@ works with JavaScript off. On top of that, [htmx](https://htmx.org) refreshes th
   `/88x31/infra.gif`
 - `assets/css/`: plain CSS split by component; `site.css` lists them as `@import`s and site-api joins
   them into one file
-- `assets/js/`: `rack.js` (shared by the rest: cable physics, the toys' memory, the list of `rack:*` events),
+- `assets/js/`: `rack.js` (shared by the rest: what the units declare about themselves, cable physics, the toys'
+  memory, the list of `rack:*` events),
   `app.js` (Alpine components, unit heights, rail numbers, the network cables), `power.js` and `net.js` (power plugs
   and network cords to pull), `aisle.js` (walking along the row), `live.js` (guests online, packets), the toys
 - `assets/vendor/`: htmx 2.0.4 and the CSP build of Alpine.js 3.17.4, self-hosted
@@ -64,6 +65,22 @@ Push, and site-api picks the change up by itself:
   in CI, and on the server the previous version keeps running
 - the profile, contacts, buttons, donations: `content/*.yaml`; every text: `i18n/en.json` and `i18n/ru.json`
 - the meme wall of the infrastructure page: a picture dropped into `content/memes/`
+
+## Adding a unit
+
+A unit is a template in `templates/units/` whose root element says what it is; the scripts go by that, not by names
+(the reference is at the top of `assets/js/rack.js`):
+
+- `data-key="name"`, and `data-power` if it has its own power supply: it gets a power cable from the PDU and goes dark
+  when its plug is pulled, the UPS is off or its battery empty;
+- `data-net="lan"` or `"wan"` if it is on the network: it gets a network card and a cord to the switch, and is offline
+  without a link (lan) or also without the internet (wan); its screens say which;
+- `data-host="key"` instead, if it runs on another unit (like a container on the host): no cables of its own, it is on
+  and online while its host is;
+- `data-live="lamps|bar|text|image"` on what shows live data: it goes dark while the unit is offline.
+
+Then a line in `content/racks.yaml` and a `lite-<name>` template for the light version. CI
+(`docs/tools/check-units.mjs`) refuses a unit that shows live data without saying how it gets it.
 
 ## Deploy
 

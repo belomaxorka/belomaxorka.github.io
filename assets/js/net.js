@@ -10,12 +10,14 @@
 //     R1): the whole rack loses the internet. Bring the plug to the jack (or tap it) and it goes back in;
 //   - the rack arrived from the next one (assets/js/aisle.js): while the cables are drawn the units are offline, each
 //     comes online when its cord's plug reaches the port. Without animation, all at once;
-//   - the switch or the router without power (power.js; CSS then darkens the screens and lamps by itself).
+//   - the switch or the router without power (power.js), or, for a rack without a router, the rack that feeds it.
 // The ring's cords from the patch panel do not pull out: their jacks are the ring's links, and the ring always works.
 // app.js draws the cabling (cables): it asks here which cords are pulled (Rack.pulled), draws those without their tail
 // and hands all the cords over with rack:laidout. The pulled ones are the visitor's only (localStorage, for half an
 // hour), per rack. A cord hidden at this width (phone: no network cards) counts as plugged in; a card that found no
-// free port on the switch (rack:laidout's loose) has no link. Without JS none of this.
+// free port on the switch (rack:laidout's loose) has no link. A unit running on another (a container on the host) has
+// its host's link. A rack without a router gets its internet through its uplink from the row's first rack, so that
+// rack's router, cords and power count too. Without JS none of this.
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const store = Rack.toyStore('rack-net', () => ({})); // for Rack.TOY_TTL (rack.js)
@@ -30,7 +32,7 @@
   const REACH = { nic: 170, lan: 150, wan: 130, uplink: 130 };
   const N = 10; // links in the rope
 
-  let rack = '', cords = [], loose = [], room = null, svg = null, hand = null;
+  let rack = '', cords = [], loose = [], cards = true, room = null, svg = null, hand = null;
   const ropes = new Map(); // a pulled cord's key → its rope (rack.js): points[0] the plug, the last where the organizer holds it
   const views = new Map(); // cord key → what is drawn for it: a grab zone while it is in, the hanging cord when it is out
   const here = () => document.getElementById('room')?.dataset.rack || '';
@@ -48,27 +50,40 @@
   const down = (k) => pulled(k) || boot || waiting.has(k);
   const unitOf = Rack.unitOf;
 
-  // The port lamps, units without a link (.unlinked), the router without WAN or LAN, the rack without internet (.nonet):
-  // one place for every cause. A port's lamp is lit when its cord is in, there is a link and the unit at its end is on.
+  // Every unit's place on the network, from the rack's topology (rack.js): one place for every cause.
+  //   A link (the rack's network): the switch is on and the unit's cord is in its port (a card with no free port has
+  //   none; on a phone the cards are not drawn and count as plugged in); a guest has its host's link while its host is on.
+  //   The internet: through the router (on, its LAN in the switch, its WAN in) or, on a rack without one, through the
+  //   uplink to the rack that feeds the row, which needs its own power, switch, router and cords (feeds).
+  // A unit without a link is .unlinked; one that needs the internet (data-net="wan") and has a link but no internet is
+  // .nonet; the rack without internet is .nonet too. The router shows what it misses (.nowan, .nolan), and a port's lamp
+  // is lit while its cord is in, the switch is on and the unit at its end is on.
+  let feedTimer = 0;
   function sync() {
     const body = document.getElementById('rack-body'), rk = document.getElementById('rack');
     if (!body || !rk) return;
-    const rtr = body.querySelector(':scope > .u.rtr');
-    const lost = new Set();
+    const on = (u) => !!u && !u.classList.contains('off');
+    const tor = Rack.roleOf(body, 'switch'), rtr = Rack.roleOf(body, 'router');
+    const cut = (k) => has(k) && down(k);
+    const switchUp = on(tor);
+    const internet = switchUp && (rtr ? on(rtr) && !cut('lan') && !cut('wan') : !has('uplink') || (!cut('uplink') && feeds(tor)));
+    const linked = (u) => switchUp && !loose.includes(Rack.keyOf(u)) && (!cards || (has(Rack.keyOf(u)) && !down(Rack.keyOf(u))));
+    for (const u of Rack.units(body, '[data-net]')) {
+      const host = Rack.hostOf(body, u);
+      const link = u.dataset.host ? on(host) && linked(host) : linked(u);
+      u.classList.toggle('unlinked', !link);
+      u.classList.toggle('nonet', link && u.dataset.net === 'wan' && !internet);
+    }
     for (const c of cords) {
       const u = c.type === 'nic' ? unitOf(body, c.key) : c.type === 'lan' ? rtr : null;
-      if (c.type === 'nic' && u && down(c.key)) lost.add(u);
-      c.port?.classList.toggle('link', !down(c.key) && !u?.classList.contains('off'));
+      c.port?.classList.toggle('link', switchUp && !down(c.key) && !u?.classList.contains('off'));
     }
-    for (const k of loose) { const u = unitOf(body, k); if (u) lost.add(u); }
-    body.querySelectorAll(':scope > .u').forEach((u) => u.classList.toggle('unlinked', lost.has(u)));
-    const cut = (k) => has(k) && down(k);
     if (rtr) {
       // The router's LAN goes to the switch: the switch without power means no link on LAN, as with a pulled cord.
       rtr.classList.toggle('nowan', cut('wan'));
-      rtr.classList.toggle('nolan', cut('lan') || !!body.querySelector(':scope > .u.tor.off'));
+      rtr.classList.toggle('nolan', cut('lan') || !switchUp);
     }
-    rk.classList.toggle('nonet', cut('lan') || cut('wan') || cut('uplink'));
+    rk.classList.toggle('nonet', !internet);
     // The link is back: who missed an update refreshes, the empty drawers load.
     for (const u of missed) {
       if (!u.isConnected) missed.delete(u);
@@ -83,12 +98,21 @@
     });
   }
 
-  // Offline: no link of its own, the switch or the router without power, no internet for the rack (as the screens say).
+  // The rack that feeds this one its internet (the switch's data-uplink, the row's first rack): it has power, its switch
+  // and router are plugged in and its LAN and WAN cords are in. Its battery can run out while we are elsewhere: then ask
+  // again in a while.
+  function feeds(tor) {
+    const id = tor?.dataset.uplink;
+    if (!id || id === here()) return true;
+    const p = Rack.rackPower(id, 'uplinkNoups' in tor.dataset);
+    clearTimeout(feedTimer);
+    if (p.draining) feedTimer = setTimeout(sync, 2000);
+    return p.on && !p.unplugged.tor && !p.unplugged.rtr && !out[id + '/lan'] && !out[id + '/wan'];
+  }
+
+  // Offline: a unit on the network without a link, or without the internet it needs (as its screens say).
   function offline(u) {
-    if (!u.classList.contains('has-nic')) return false;
-    const rk = u.closest('.rack');
-    return u.classList.contains('unlinked') ||
-      !!rk && (rk.classList.contains('nonet') || !!rk.querySelector('#rack-body > .u.tor.off, #rack-body > .u.rtr.off'));
+    return u.matches('[data-net]') && (u.classList.contains('unlinked') || u.classList.contains('nonet'));
   }
 
   // An offline unit is not refreshed: its htmx poll (media, monitor, log) is cancelled, so no new track behind the
@@ -122,7 +146,7 @@
     if (!u || !offline(u)) return;
     e.preventDefault();
     e.stopImmediatePropagation();
-    const cut = u.classList.contains('unlinked') || !!u.closest('.rack')?.querySelector('#rack-body > .u.tor.off');
+    const cut = u.classList.contains('unlinked');
     let p = f.previousElementSibling;
     if (!p?.classList.contains('gb-status')) {
       p = document.createElement('p');
@@ -171,6 +195,7 @@
     if (id !== rack) { ropes.clear(); forget(); rack = id; }
     cords = e.detail?.cords || [];
     loose = e.detail?.loose || [];
+    cards = e.detail?.cards !== false;
     room = document.getElementById('room');
     if (!room) return;
     svg = document.getElementById('net');
@@ -368,6 +393,8 @@
   // A unit went dark or booted (power.js): its port's lamp; the switch or the router back, the missed updates.
   // A unit going dark says so before it is .off, so after power.js is done (before the paint).
   document.addEventListener('rack:unit', () => queueMicrotask(sync));
+  // The hall's breaker: the rack feeding the row may be on battery now.
+  document.addEventListener('rack:mains', sync);
   // A new rack (aisle.js): it is moving, so the cables will be drawn, and until then nothing has a link.
   document.addEventListener('rack:swap', (e) => {
     timers.forEach(clearTimeout);
