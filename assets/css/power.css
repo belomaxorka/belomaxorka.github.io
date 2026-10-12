@@ -111,6 +111,8 @@
 }
 .lightsw:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 @media (max-width: 760px) { .lightsw { top: 30px; left: 12px; } }
+/* A phone: the hall hardly shows around the rack, the light would have nothing to light. */
+@media (max-width: 560px) { .lightsw { display: none; } }
 
 /* The torch on the hall's wall (assets/js/live.js), next to the light switch. Taken: an empty hook hangs there. */
 .torch {
@@ -130,6 +132,8 @@
 .torch[aria-pressed="true"] .shell { opacity: .18; }
 .torch:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 @media (max-width: 760px) { .torch { top: 36px; left: 46px; } }
+/* A touch screen has no cursor for the spot to follow (a finger scrolls): no torch to take; the others' spots still shine. */
+@media (hover: none) { .torch { display: none; } }
 
 /* The light spots: my torch following the cursor and the other guests' torches on this rack. Always visible, brightest at night. */
 .beam {

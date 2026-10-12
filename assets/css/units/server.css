@@ -35,7 +35,9 @@
 .gal-leds { grid-column: 1 / -1; display: flex; justify-content: center; gap: 7px; padding-top: 1px; }
 .gal-leds .led { width: 6px; height: 6px; }
 @media (prefers-reduced-motion: no-preference) { .gal-leds .led { transition: background-color .2s, box-shadow .2s; } }
+/* A phone: the name and the words about me first, the photos and the LCD under them. */
 @media (max-width: 560px) {
+  .ident { order: -1; }
   .photo { width: 84px; }
   .album { width: 128px; }
   .gal-leds { gap: 5px; }

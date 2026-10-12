@@ -24,6 +24,12 @@
 }
 .brush .slot::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #2a2d32 0 1px, transparent 1px 3px); }
 .brush .slot::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #000; }
+/* A phone has no height to spare above the server: no brushes there (the cords go straight), and the patch panel's
+   rows closer, a unit lower. */
+@media (max-width: 560px) {
+  .u.brush { display: none; }
+  .patch .face { row-gap: 8px; }
+}
 
 /* ---------- switch ---------- */
 .tor .face, .rtr .face { gap: 16px; }

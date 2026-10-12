@@ -436,7 +436,8 @@
     // Fibre (the router's WAN or the switch's uplink): up into the brush under the switch, left along it into the
     // vertical organiser, up along it through the roof entry to the trays. Data runs on the left, power on the right.
     const vmEl = rack.querySelector('#rack-body > .vm');
-    const lowEl = tor.nextElementSibling?.classList.contains('brush') ? tor.nextElementSibling : null;
+    // The brush under the switch, if it is on screen (a phone has none: network.css).
+    const lowEl = tor.nextElementSibling?.classList.contains('brush') && tor.nextElementSibling.offsetParent ? tor.nextElementSibling : null;
     // Above the rack, into the yellow duct on the ceiling: the entry point on its axis (the .mark lines in the hall,
     // hall.css) ~40 px high, above the aisle signs; along the ceiling to it and into the duct through an entry turned
     // along the duct. No ceiling (light theme) or the duct below the rack's roof: straight up. The tail runs from the
@@ -493,7 +494,7 @@
     const lane = box(vm);
     const nics = [...rack.querySelectorAll('#rack-body > .u > .nic')];
     // Across through the brush organiser under the switch (if there is one), otherwise right under the switch.
-    const low = tor.nextElementSibling?.classList.contains('brush') ? box(tor.nextElementSibling) : null;
+    const low = lowEl ? box(lowEl) : null;
     const yBase = low ? low.cy - 6 : box(tor).b + 6;
     nics.forEach((nic, i) => {
       const u = nic.parentElement, n = bottom();
