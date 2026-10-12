@@ -14,7 +14,8 @@
 // The ring's cords from the patch panel do not pull out: their jacks are the ring's links, and the ring always works.
 // app.js draws the cabling (cables): it asks here which cords are pulled (Rack.pulled), draws those without their tail
 // and hands all the cords over with rack:laidout. The pulled ones are the visitor's only (localStorage, for half an
-// hour), per rack. A cord hidden at this width (phone: no network cards) counts as plugged in. Without JS none of this.
+// hour), per rack. A cord hidden at this width (phone: no network cards) counts as plugged in; a card that found no
+// free port on the switch (rack:laidout's loose) has no link. Without JS none of this.
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const store = Rack.toyStore('rack-net', () => ({})); // for Rack.TOY_TTL (rack.js)
@@ -29,7 +30,7 @@
   const REACH = { nic: 170, lan: 150, wan: 130, uplink: 130 };
   const N = 10; // links in the rope
 
-  let rack = '', cords = [], room = null, svg = null, hand = null;
+  let rack = '', cords = [], loose = [], room = null, svg = null, hand = null;
   const ropes = new Map(); // a pulled cord's key → its rope (rack.js): points[0] the plug, the last where the organizer holds it
   const views = new Map(); // cord key → what is drawn for it: a grab zone while it is in, the hanging cord when it is out
   const here = () => document.getElementById('room')?.dataset.rack || '';
@@ -59,6 +60,7 @@
       if (c.type === 'nic' && u && down(c.key)) lost.add(u);
       c.port?.classList.toggle('link', !down(c.key) && !u?.classList.contains('off'));
     }
+    for (const k of loose) { const u = unitOf(body, k); if (u) lost.add(u); }
     body.querySelectorAll(':scope > .u').forEach((u) => u.classList.toggle('unlinked', lost.has(u)));
     const cut = (k) => has(k) && down(k);
     if (rtr) {
@@ -168,6 +170,7 @@
     const id = here();
     if (id !== rack) { ropes.clear(); forget(); rack = id; }
     cords = e.detail?.cords || [];
+    loose = e.detail?.loose || [];
     room = document.getElementById('room');
     if (!room) return;
     svg = document.getElementById('net');

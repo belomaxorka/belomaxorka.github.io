@@ -310,7 +310,8 @@
   // The rack's cords for assets/js/net.js (it gets them with rack:laidout): each with its key, its switch port (net.js
   // lights its lamp while there is a link) and its wire's number in the SVG (to know when the plug reaches the port as
   // the cable is drawn). The ones that can be pulled also have their jack, their tail (the curve from the plug to where
-  // the organiser holds the cord, where a pulled one hangs from) and where to grab them.
+  // the organiser holds the cord, where a pulled one hangs from) and where to grab them. cords.loose: the units whose
+  // network card found no free port on the switch.
   function cables() {
     const live = document.getElementById('cables');
     const room = document.getElementById('room');
@@ -331,6 +332,7 @@
   // route draws the rack's cables into svg (R: the room's box) and returns the cords; it only reads the page.
   function route(svg, R) {
     const cords = [];
+    cords.loose = [];
     const box = (node) => {
       const b = node.getBoundingClientRect();
       return { x: b.left - R.left, y: b.top - R.top, r: b.right - R.left, b: b.bottom - R.top, cx: b.left - R.left + b.width / 2, cy: b.top - R.top + b.height / 2, w: b.width, h: b.height };
@@ -457,10 +459,10 @@
     const low = tor.nextElementSibling?.classList.contains('brush') ? box(tor.nextElementSibling) : null;
     const yBase = low ? low.cy - 6 : box(tor).b + 6;
     nics.forEach((nic, i) => {
-      const n = bottom();
-      if (!n) return;
+      const u = nic.parentElement, n = bottom();
+      if (!n) { cords.loose.push(keyOf(u)); return; }
       used.add(n);
-      const u = nic.parentElement, j = box(nic.querySelector('.jack')), p = box(port(n).querySelector('.jack'));
+      const j = box(nic.querySelector('.jack')), p = box(port(n).querySelector('.jack'));
       const x = lane.x + 4 + (i % 6) * 2.2;              // the cords side by side in the organiser, not on top of each other
       const y = yBase + (i % 6) * 2.4;                   // and across, each in its own lane
       const color = u.classList.contains('mgmt') ? MGMT : DATA;
@@ -479,7 +481,7 @@
   // not loop. A new rack after a swap gets its own observer.
   let watched = null;
   // Laid out: the cables are in place. The cords go to net.js; power.js redraws the power cables.
-  const laidout = (cords) => document.dispatchEvent(new CustomEvent('rack:laidout', { detail: { cords } }));
+  const laidout = (cords) => document.dispatchEvent(new CustomEvent('rack:laidout', { detail: { cords, loose: cords.loose || [] } }));
   const ro = window.ResizeObserver ? new ResizeObserver(() => {
     laidout(cables()); later();
   }) : null;
