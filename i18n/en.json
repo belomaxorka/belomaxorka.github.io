@@ -57,10 +57,8 @@
 
   "nav.aria": "sections",
   "nav.blog": "blog",
-  "nav.cv": "cv.pdf",
   "nav.status": "status",
   "nav.git": "git",
-  "soon": "soon",
   "lang.aria": "language",
   "lcd.cover": "screens: cover",
   "lcd.amber": "screens: amber",

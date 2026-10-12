@@ -2,7 +2,7 @@
 #   name: the label (a string or {en, ru}); link: where the port leads; copy: a name the port copies instead (an
 #   account with no public link, like Discord's); without either the port is dark.
 #   tape: empty, r, b; led: empty (green), warn, off; title: the hint on hover;
-#   needs: cv: live only when cv.pdf is at the site's root; me: true: my own profile, rel="me" and in the JSON-LD sameAs.
+#   me: true: my own profile, rel="me" and in the JSON-LD sameAs.
 - name: telegram
   link: https://t.me/belomaxorka
   tape: b
@@ -13,7 +13,3 @@
   link: mailto:ascouted@gmail.com
   tape: r
   title: ascouted@gmail.com
-- name: {en: cv.pdf, ru: резюме.pdf}
-  link: /cv.pdf
-  needs: cv
-  title: {en: soon, ru: скоро}

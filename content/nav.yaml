@@ -1,11 +1,7 @@
 # Keys of the management unit and the light version's menu, in this order.
-#   name — i18n key of the caption; link — a name in links.yaml or an address of the site; needs: cv — a live key
-#   only while the site has /cv.pdf, a dimmed one ("soon") otherwise.
+#   name — i18n key of the caption; link — a name in links.yaml or an address of the site.
 - name: nav.blog
   link: blog
-- name: nav.cv
-  link: /cv.pdf
-  needs: cv
 - name: nav.status
   link: status
 - name: nav.git

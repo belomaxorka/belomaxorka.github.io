@@ -90,7 +90,7 @@ best viewed with any browser</font></td></tr>
 
 {{/* Management: the sections. */}}
 {{define "lite-mgmt"}}{{template "lite-silk" (t "nav.aria")}}
-{{template "f"}}{{$sep := ""}}{{range .Content.nav}}{{if or (not .needs) $.HasCV}}{{$sep}}[<a href="{{or (index $.Content.links .link) .link}}">{{t .name}}</a>]{{$sep = " "}}{{end}}{{end}}{{template "f-end"}}{{end}}
+{{template "f"}}{{$sep := ""}}{{range .Content.nav}}{{$sep}}[<a href="{{or (index $.Content.links .link) .link}}">{{t .name}}</a>]{{$sep = " "}}{{end}}{{template "f-end"}}{{end}}
 
 {{/* The server with my name: a photo, who I am, the LCD, the PGP fingerprint. */}}
 {{define "lite-server"}}{{with .Profile}}
@@ -128,7 +128,7 @@ best viewed with any browser</font></td></tr>
 
 {{/* The contacts switch. */}}
 {{define "lite-switch"}}{{template "lite-silk" (t "sw.title")}}
-{{template "f"}}{{range .Content.contacts}}{{if and .link (or (not .needs) $.HasCV)}}{{template "lite-led" (or .led "")}}&nbsp;<a href="{{.link}}">{{loc .name}}</a>{{else if .copy}}{{template "lite-led" (or .led "")}}&nbsp;{{loc .name}} <tt>{{.copy}}</tt>{{else}}{{template "lite-led" "off"}}&nbsp;<font color="#9aa0a8">{{loc .name}}</font>{{end}} &nbsp; {{end}}{{template "f-end"}}{{end}}
+{{template "f"}}{{range .Content.contacts}}{{if .link}}{{template "lite-led" (or .led "")}}&nbsp;<a href="{{.link}}">{{loc .name}}</a>{{else if .copy}}{{template "lite-led" (or .led "")}}&nbsp;{{loc .name}} <tt>{{.copy}}</tt>{{else}}{{template "lite-led" "off"}}&nbsp;<font color="#9aa0a8">{{loc .name}}</font>{{end}} &nbsp; {{end}}{{template "f-end"}}{{end}}
 
 {{/* Donations: the wallets' addresses. */}}
 {{define "lite-donate"}}{{template "lite-silk" (print (t "donate.title") " · " (t "donate.hint"))}}
