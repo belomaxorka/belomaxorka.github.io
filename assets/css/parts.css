@@ -19,8 +19,8 @@
 .led.off { background: var(--led-off); box-shadow: inset 0 1px 1px #0006; }
 .leds { display: flex; gap: 12px; flex-wrap: wrap; }
 .leds span { display: inline-flex; align-items: center; gap: 5px; }
-/* The activity lamps (switch ports, network cards, the router's wan, the server's net and hdd) do not blink on a
-   timer: only when something really went through them, live.js setting .tx for a moment. While nothing goes on the
+/* The activity lamps (switch ports, network cards, the router's wan and lan, the server's net and hdd) blink when
+   something went through them, real or the background chatter, live.js setting .tx for a moment. Between blinks the
    link lamp is steady and hdd is off. */
 .led.hdd { background: var(--led-off); box-shadow: inset 0 1px 1px #0006; }
 .led.tx { opacity: .15; }

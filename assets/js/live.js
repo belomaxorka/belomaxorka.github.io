@@ -12,14 +12,17 @@
 //     a packet runs to that unit (on other racks through the uplink into the switch), and the unit changes only when
 //     it has arrived;
 //   - the activity lamps (the router's WAN and LAN, the switch's ports and SFP, the network cards, the server's net and
-//     hdd) blink only when something really went through them; with nothing going on they are steady;
+//     hdd) blink when something really went through them;
+//   - and, besides, the background chatter every network has: dim packets now and then, the ports flickering, the
+//     server's disk at work. It stands for nothing site-api did and refreshes nothing; its packets are dimmer than
+//     the real ones, which carry the data the units show;
 //   - torches: one hangs on the hall's wall by the light switch. Take it (that is the consent) and a spot of light
 //     follows the cursor, and where it shines (as fractions of the rack's width and height, nothing else) the other
 //     guests of this rack see; hang it back and it is off. Others' torches are such spots too; a guest gone or 15 s
 //     without news, they go out.
 // No packets without the rack's internet, the switch or the router; a packet does not reach a unit without a link.
-// Without animation (prefers-reduced-motion), in a background tab and with "steady light" in the BIOS there are no
-// packets or blinks; the guests' cords stay. Without JS, nothing.
+// Without animation (prefers-reduced-motion) and in a background tab there are no packets or blinks; with "steady
+// light" in the BIOS the lamps do not blink (the packets still run); the guests' cords stay. Without JS, nothing.
 (() => {
   if (!window.EventSource) return;
   const { motion, here } = Rack;
@@ -212,9 +215,9 @@
     return travel(route(target));
   }
 
-  // travel sends a packet along legs ([path, direction, lamps to blink at the leg's end], ...); returns how long it
-  // will run (ms), 0 when it does not.
-  function travel(legs) {
+  // travel sends a packet along legs ([path, direction, lamps to blink at the leg's end], ...), a dim one for the
+  // background chatter (bg); returns how long it will run (ms), 0 when it does not.
+  function travel(legs, bg) {
     if (!motion() || document.hidden || !legs || !legs.length) return 0;
     const room = document.getElementById('room'), cab = document.getElementById('cables');
     if (!room || !cab) return 0;
@@ -224,7 +227,7 @@
     }
     svg.setAttribute('viewBox', cab.getAttribute('viewBox') || '');
     const total = legs.reduce((s, [p]) => s + Math.max(260, p.getTotalLength() * 1.1), 0);
-    const dot = Rack.svg('circle', { r: 3.6, class: 'packet' }, svg);
+    const dot = Rack.svg('circle', { r: bg ? 2.4 : 3.6, class: bg ? 'packet bg' : 'packet' }, svg);
     let leg = 0, t0 = performance.now();
     const step = (now) => {
       const [p, dir, leds] = legs[leg];
@@ -244,10 +247,11 @@
   }
 
   // ---------- the server's work (act) ----------
-  // lan is the way from one unit of this rack to another through the switch: out along the first's cord (drawn from
-  // its network card to the switch), in along the second's.
-  function lan(from, to) {
-    if (!up()) return null;
+  // hop is the way from one unit of this rack to another through the switch: out along the first's cord (drawn from
+  // its network card to the switch), in along the second's; none without a link at either end. lan is the server's way
+  // to fetch: the rack must be online.
+  const lan = (from, to) => (up() ? hop(from, to) : null);
+  function hop(from, to) {
     const body = document.getElementById('rack-body');
     const a = cord(from), b = cord(to), ua = a && unitOf(body, from), ub = b && unitOf(body, to);
     if (!path(a) || !path(b) || !ua || !ub || [ua, ub].some((u) => u.classList.contains('off') || u.classList.contains('unlinked'))) return null;
@@ -303,6 +307,56 @@
       if (!u || Rack.live(u)) flash(el.matches('i') ? el : el.querySelector('.led')); // an offline monitor hears of no check
     });
   }
+
+  // ---------- the background chatter ----------
+  // What every network does besides the real work above: a dim packet now and then (from the internet to a unit that
+  // uses it, or from one unit to another), the ports flickering, the server's disk at work. Nothing from outside without
+  // the internet, nothing to a unit without power or a link, and, as for the real ones, no packets or blinks without
+  // animation or in a background tab, no blinks with steady lamps (travel, flash).
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  // every(min, max, fn): fn again and again, between min and max ms apart.
+  function every(min, max, fn) {
+    const next = () => setTimeout(() => { fn(); next(); }, min + Math.random() * (max - min));
+    next();
+  }
+  // The units that can talk now: their cord in a port with a link, on and linked.
+  function talkers() {
+    const body = document.getElementById('rack-body');
+    return cords.filter((c) => c.type === 'nic' && port(c)).map((c) => unitOf(body, c.key))
+      .filter((u) => u && !u.classList.contains('off') && !u.classList.contains('unlinked'));
+  }
+  // The lamps at both ends of a cord with a link: its port on the switch and the unit's (ends), the router's LAN, the
+  // router's WAN for the fibre while the rack is online; the ring's and the guests' cords lead outside, so only then.
+  function both(c) {
+    const body = document.getElementById('rack-body'), rtr = Rack.roleOf(body, 'router');
+    if (c.type === 'wan') return up() ? [rtr?.querySelector('.led.wan')] : [];
+    if (!port(c) || ((c.type === 'ring' || c.type === 'guest') && !up())) return [];
+    const u = c.type === 'nic' && unitOf(body, c.key);
+    return [port(c), ...(u ? ends(u) : []), c.type === 'lan' ? rtr?.querySelector('.led.lan') : null];
+  }
+  every(1200, 3600, () => {
+    const units = talkers();
+    if (!units.length) return;
+    const to = pick(units), others = units.filter((u) => u !== to);
+    if (to.dataset.net === 'wan' && up() && (!others.length || Math.random() < 0.5)) {
+      travel(route(Rack.keyOf(to)), true);
+    } else if (others.length) {
+      const from = pick(others);
+      ends(from).forEach(flash);
+      travel(hop(Rack.keyOf(from), Rack.keyOf(to)), true);
+    }
+  });
+  every(250, 900, () => {
+    const busy = cords.map(both).filter((l) => l.length);
+    if (busy.length) pick(busy).forEach(flash);
+  });
+  // The server's disk: short bursts, while it has power.
+  every(250, 1500, () => {
+    const srv = unitOf(document.getElementById('rack-body'), site());
+    const hdd = srv && !srv.classList.contains('off') ? srv.querySelector('.led.hdd') : null;
+    if (!hdd) return;
+    for (let i = 0, n = 1 + Math.floor(Math.random() * 4); i < n; i++) setTimeout(() => flash(hdd), i * (110 + Math.random() * 60));
+  });
 
   // An answer to a unit's request came (an htmx poll, the drawer, a form in the drawer). A poll with something new: a
   // packet to the unit, and the swap when it arrives (swap:...ms). What is new, each unit says (data-news on the element

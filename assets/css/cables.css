@@ -42,4 +42,6 @@
 }
 .cables.packets { z-index: 5; }
 .cables .packet { fill: #fff; filter: drop-shadow(0 0 4px #8ecbff) drop-shadow(0 0 2px #fff); transition: opacity .3s; }
+/* The background chatter's packets (live.js): smaller and dimmer, so the real ones, which carry data, stand out. */
+.cables .packet.bg { opacity: .75; filter: drop-shadow(0 0 2px #8ecbff) drop-shadow(0 0 1px #fff); }
 .cables .packet.done { opacity: 0; }

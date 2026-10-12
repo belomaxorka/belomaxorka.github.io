@@ -74,10 +74,13 @@ Push, and site-api picks the change up by itself:
 
 - The data is real: site-api reads the live sources (Koito, Gatus, Proxmox, NUT, Telegram, Wakapi, the webring) and
   the page refreshes units as soon as their source has something new.
-- The lamps and packets are real events: each blink or packet stands for something site-api did (a request served, a
-  source fetched, a file written, a Gatus check that ran), sent once a second over the live stream. Where they run is
-  the rack's topology: a source from outside the home network (site-api tells which, from its address) comes in
-  through the WAN, one from inside comes from the server, to the units that show it (`data-feed`).
+- The bright packets and the blinks along their way are real events: each stands for something site-api did (a
+  request served, a source fetched, a file written, a Gatus check that ran), sent once a second over the live stream.
+  Where they run is the rack's topology: a source from outside the home network (site-api tells which, from its
+  address) comes in through the WAN, one from inside comes from the server, to the units that show it (`data-feed`).
+  Besides them the page plays the background chatter every network has (`live.js`): dim packets to any unit, ports
+  and network cards flickering, the server's disk at work; it stands for nothing and refreshes nothing, by the same
+  rules of power, links and the internet.
 - The toys (plugs, cords, the UPS, the breaker) are simulated for each visitor and change nothing on the server; the
   page then behaves as the rack would, by one rule (`Rack.live`, `Rack.reached` in `assets/js/rack.js`): a unit
   without power or a link gets nothing (no data, no blinks, its screen stands still and says why), a rack without the
