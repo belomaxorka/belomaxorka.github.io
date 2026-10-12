@@ -37,8 +37,11 @@
 .lcd .d { color: var(--lcd-dim); }
 .lcd a { text-decoration: none; }
 .lcd a:hover { text-decoration: underline; }
-.lcd .msgs { list-style: none; margin: 0; padding: 0; }
-.lcd .msgs li:not(.on) { display: none; }
+/* Messages that take turns (cycle, app.js) lie on top of each other and only the current one shows: the screen is as
+   tall and wide as its longest message, whatever the messages are, so it never jumps as they change, offline too. */
+.lcd .msgs { list-style: none; margin: 0; padding: 0; display: grid; }
+.lcd .msgs > li { grid-area: 1 / 1; }
+.lcd .msgs li:not(.on) { visibility: hidden; }
 
 .key {
   font: 600 12px/1 var(--f-silk); letter-spacing: .08em; text-transform: uppercase;

@@ -90,7 +90,9 @@
       rtr.classList.toggle('nowan', cut('wan'));
       rtr.classList.toggle('nolan', cut('lan') || !switchUp);
     }
+    const had = !rk.classList.contains('nonet');
     rk.classList.toggle('nonet', !internet);
+    if (had !== internet) document.dispatchEvent(new CustomEvent('rack:net', { detail: { on: internet } }));
     // The link is back: who missed an update refreshes, the empty drawers load.
     for (const u of missed) {
       if (!u.isConnected) missed.delete(u);

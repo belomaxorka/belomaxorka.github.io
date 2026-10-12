@@ -15,6 +15,7 @@
 //   rack:reset    (toys.js → power.js)  RESET on a unit; detail.key
 //   rack:beep     (power.js → sound.js) the UPS beeps; detail.n times
 //   rack:mains    (power.js → net.js)   the hall's breaker moved: the row's sockets lost or got their current
+//   rack:net      (net.js → all)        the rack lost or got the internet; detail.on
 // net.js answers Rack.pulled() for app.js: which cords of this rack are out; power.js answers Rack.rackPower(id) for
 // net.js: whether another rack of the row has power (the row's first rack feeds the others their internet).
 window.Rack = (() => {
@@ -63,6 +64,11 @@ window.Rack = (() => {
   // units(body, filter): the active units of a rack, top to bottom; filter narrows them ('[data-power]', '[data-net]').
   const units = (body, filter = '') => (body ? [...body.querySelectorAll(`:scope > .u[data-key]${filter}`)] : []);
   const roleOf = (body, role) => body?.querySelector(`:scope > .u[data-role="${role}"]`) || null;
+  // The one rule for everything that changes on its own (data, blinks, packets, cycling screens, other visitors):
+  //   live(u):   the unit gets its data now: it has power and is online (net.js marks .unlinked and .nonet);
+  //   reached(): anything from outside reaches this rack now: it has power and the internet (net.js marks #rack .nonet).
+  const live = (u) => !!u && !u.classList.contains('off') && !u.classList.contains('unlinked') && !u.classList.contains('nonet');
+  const reached = () => { const r = document.getElementById('rack'); return !!r && !r.classList.contains('nonet') && !r.classList.contains('powered-off'); };
   const hostOf = (body, u) => (u?.dataset.host ? unitOf(body, u.dataset.host) : null);
   const guestsOf = (body, k) => units(body, `[data-host="${CSS.escape(k)}"]`);
 
@@ -204,7 +210,8 @@ window.Rack = (() => {
   }
 
   return {
-    TOY_TTL, toyStore, keyOf, unitOf, units, roleOf, hostOf, guestsOf, svg, stepRope, ropePath, cord, setCord, loop, hand,
+    TOY_TTL, toyStore, keyOf, unitOf, units, roleOf, hostOf, guestsOf, live, reached, svg, stepRope, ropePath, cord, setCord,
+    loop, hand,
     pulled: () => new Set(), // net.js: which cords of this rack are out
     rackPower: () => ({ on: true, unplugged: {}, draining: false }), // power.js: another rack's power (net.js, R1 for the row)
   };

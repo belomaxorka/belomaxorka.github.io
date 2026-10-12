@@ -50,6 +50,7 @@
         if (items.length < 2 || !motion()) return;
         let i = 0;
         this.timer = setInterval(() => {
+          if (!Rack.live(this.$root.closest('.u'))) return; // no power or offline: nothing new on the screen
           items[i].classList.remove('on');
           i = (i + 1) % items.length;
           items[i].classList.add('on');
@@ -378,8 +379,9 @@
 
     // Guests online (assets/js/live.js sets data-guests on <html>): a cord for each other guest, from a free patch panel
     // jack (5, 6, ...) to a free port of the switch's top row (9, 11, ...), as many as fit at this width (on a phone the
-    // free jacks are hidden, so no guests). A new one's cord is pulled in (.fresh).
-    const guests = +document.documentElement.dataset.guests || 0;
+    // free jacks are hidden, so no guests). A new one's cord is pulled in (.fresh). The others come over the internet:
+    // none while the rack has none (net.js, rack:net).
+    const guests = Rack.reached() ? +document.documentElement.dataset.guests || 0 : 0;
     const spare = [...rack.querySelectorAll('.patch .pp-free .jack')].filter(j => j.offsetParent).map(box);
     let g = 0;
     for (let n = 9; g < guests && g < spare.length; g++, n += 2) {
@@ -520,6 +522,8 @@
     if (recs.some((r) => r.target.classList?.contains('more') || r.target.getAttribute?.('name') === 'b88-code')) layout();
   }).observe(document, { subtree: true, attributeFilter: ['open'] });
 
+  // The rack lost or got the internet (net.js): the other visitors' cords go or come.
+  document.addEventListener('rack:net', later);
   // The rack was swapped without a reload (assets/js/aisle.js): lay it out at once, before it is shown.
   document.addEventListener('rack:swap', layout);
   // It has arrived: the cables in place, drawn from the jack to the router, plugs seated in the ports (cables.css, .draw).

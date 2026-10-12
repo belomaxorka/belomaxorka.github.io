@@ -33,7 +33,7 @@
     // Every event came from the server along this stream: the lamps on the way to it blink. A broadcast (a guest came
     // or left, a visit, a guestbook entry) reached the guests too: their ports blink.
     es.addEventListener('hello', (e) => { try { token = JSON.parse(e.data).token || ''; } catch {} pulse('srv', NET); });
-    es.addEventListener('beam', (e) => { try { spot(JSON.parse(e.data)); } catch {} pulse('srv', NET); });
+    es.addEventListener('beam', (e) => { try { if (Rack.reached()) spot(JSON.parse(e.data)); } catch {} pulse('srv', NET); });
     es.addEventListener('beam-off', (e) => { try { gone(JSON.parse(e.data).id); } catch {} pulse('srv', NET); });
     es.addEventListener('online', (e) => {
       let n = 0;
@@ -127,6 +127,8 @@
     const now = Date.now();
     spots.forEach((s, id) => { if (now - s.t > 15000) gone(id); });
   }, 250);
+  // The rack lost the internet: the other visitors' torches go out (they come back with their next move).
+  document.addEventListener('rack:net', (e) => { if (!e.detail?.on) [...spots.keys()].forEach(gone); });
   // Another's torch on this rack: a spot in the room; on another rack: remove it.
   function spot(b) {
     if (!b?.id) return;
@@ -171,10 +173,7 @@
   }
 
   // The rack is online: it has the internet (net.js: the switch, the router or the uplink, the rack feeding it) and power.
-  function up() {
-    const rack = document.getElementById('rack');
-    return !!rack && !rack.classList.contains('nonet') && !rack.classList.contains('powered-off');
-  }
+  const up = Rack.reached;
 
   // The way to the unit target: from outside along the fibre (the router's WAN or the switch's uplink; both drawn from
   // the jack to the ceiling, so against their direction), along the router's LAN into the switch (with it), from the
@@ -287,8 +286,9 @@
       const ms = travel(there);
       if (ms && cord('srv')) setTimeout(() => travel(lan(to, 'srv', NET)), ms + 120);
     }
-    // A state file written: the server's disk lamp.
-    if (a.d > 0) blinks([body.querySelector(':scope > .u.srv .led.hdd')], a.d);
+    // A state file written: the server's disk lamp, while the server is online (the writes follow what reaches it).
+    const srv = Rack.unitOf(body, 'srv');
+    if (a.d > 0 && Rack.live(srv)) blinks([srv.querySelector('.led.hdd')], a.d);
     // The checks Gatus ran: each lamp blinks with the others' real spacing (they arrive together, every 30 s).
     const first = Math.min(...(a.c || []).map((c) => c.t));
     for (const c of a.c || []) setTimeout(() => checked(c.n), Math.min(30000, c.t - first));
@@ -296,7 +296,10 @@
 
   // A monitoring check ran: its lamp on the monitoring unit and on the neighbour racks, which show the same checks.
   function checked(name) {
-    document.querySelectorAll(`[data-check="${CSS.escape(name)}"]`).forEach((el) => flash(el.matches('i') ? el : el.querySelector('.led')));
+    document.querySelectorAll(`[data-check="${CSS.escape(name)}"]`).forEach((el) => {
+      const u = el.closest('#rack-body > .u');
+      if (!u || Rack.live(u)) flash(el.matches('i') ? el : el.querySelector('.led')); // an offline monitor hears of no check
+    });
   }
 
   // An answer to a unit's request came (an htmx poll, the drawer, a form in the drawer). A poll with something new: a
