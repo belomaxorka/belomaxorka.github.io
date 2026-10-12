@@ -15,7 +15,7 @@
   const PLUG = '#1b1d20';
   const MAINS = '#26292e';       // the UPS's cord
   const DRAIN = 90, CHARGE = 30; // seconds to drain and to charge the battery (fast, so it shows)
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const { here, dist, motion } = Rack;
 
   // { racks: { <rack id>: { off, unplugged, mains, charge, at } }, breaker, breakerAt }, for Rack.TOY_TTL (rack.js).
   const store = Rack.toyStore('rack-power', () => ({}));
@@ -47,7 +47,6 @@
     if (fed(r) && r.charge >= 100) r.charge = null;
     r.at = now;
   }
-  const here = () => document.getElementById('room')?.dataset.rack || '';
   let state = null, stateId = null; // the power of the rack in the room now (useRack)
   // The UPS's real LCD and hall light (from site-api) before the battery simulation replaces them; the battery's
   // timer; whether the rack was dead at the last look (null: not looked yet). Reset by useRack for each rack.
@@ -65,8 +64,7 @@
   const units = () => Rack.units(body(), '[data-power]');                   // the ones with a supply, a plug and a cable
   const powers = () => Rack.units(body(), ':is([data-power], [data-host])'); // and the ones running on them: all that can be dark
   const unitBy = (k) => Rack.unitOf(body(), k);
-  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-  const held = (r) => (hand?.held?.key === r.key ? hand.held : null);
+  const held = (r) => hand?.of(r.key) || null;
 
   // Another rack in the room (or the page just opened): its power, counted up to now. The previous rack's battery is
   // counted and saved, its timer stopped; the ropes are built anew from the new state.
@@ -149,7 +147,7 @@
         queued.delete(gk);
         const cur = unitBy(gk);
         if (cur) paint(cur, gk, true);
-      }, reduce.matches ? 0 : 700 + 160 * i);
+      }, motion() ? 700 + 160 * i : 0);
     });
   }
 
@@ -164,7 +162,7 @@
         queued.delete(k);
         const cur = u.isConnected ? u : unitBy(k);
         if (cur) paint(cur, k, true);
-      }, reduce.matches ? 0 : 110 * i);
+      }, motion() ? 110 * i : 0);
     });
   }
 
@@ -217,7 +215,7 @@
   // night by hand. While the sockets have current; without it the emergency light is on, and so with a real one (the
   // server said battery).
   const MODES = ['auto', 'day', 'evening', 'night'];
-  let mode = (() => { try { const m = localStorage.getItem('hall-light'); return MODES.includes(m) ? m : 'auto'; } catch { return 'auto'; } })();
+  let mode = MODES.includes(Rack.store.get('hall-light')) ? Rack.store.get('hall-light') : 'auto';
   function lamp() {
     if (lightReal === null) lightReal = room.dataset.light;
     return mode === 'auto' || lightReal === 'battery' ? lightReal : mode;
@@ -241,24 +239,42 @@
     });
   }
 
+  // The UPS's real LCD (site-api's, from NUT) is kept before the simulation or the self-test writes on it, and put
+  // back when they are done; on a new rack (rack:swap) its own.
+  function keepReal(lcd) {
+    if (lcdReal !== null) return;
+    lcdReal = [...lcd.childNodes].map((n) => n.cloneNode(true));
+    alarmReal = lcd.classList.contains('alarm');
+  }
+  function restoreReal(lcd) {
+    lcd.replaceChildren(...lcdReal.map((n) => n.cloneNode(true)));
+    lcd.classList.toggle('alarm', alarmReal);
+  }
+  // The battery on the LCD: five segments for pc %, the empty ones .e; low, red.
+  function batt(pc, low) {
+    const bars = document.createElement('span');
+    bars.className = 'batt' + (low ? ' low' : '');
+    bars.setAttribute('aria-hidden', 'true');
+    for (let i = 0; i < 5; i++) {
+      const b = document.createElement('i');
+      if (i >= Math.ceil(pc / 20)) b.className = 'e';
+      bars.appendChild(b);
+    }
+    return bars;
+  }
+
   // A rack without a UPS (the row's blank racks) lives off one too: hall light and units as everywhere, only no LCD.
   function battery() {
     const lcd = upsLcd();
     if (!room || testing) return;
     // The real LCD and light, until the simulation replaces them; on a new rack (rack:swap) again.
     if (lightReal === null) lightReal = room.dataset.light;
-    if (lcd && lcdReal === null) {
-      lcdReal = [...lcd.childNodes].map((n) => n.cloneNode(true));
-      alarmReal = lcd.classList.contains('alarm');
-    }
+    if (lcd) keepReal(lcd);
     const rack = document.getElementById('rack');
     if (fed(state) && (state.charge === null || state.charge >= full())) {
       if (state.charge !== null) { state.charge = null; save(); }
       clearInterval(timer); timer = 0;
-      if (lcd) {
-        lcd.replaceChildren(...lcdReal.map((n) => n.cloneNode(true)));
-        lcd.classList.toggle('alarm', alarmReal);
-      }
+      if (lcd) restoreReal(lcd);
       room.dataset.light = lamp();
       upsUnit()?.classList.remove('off');
       rack?.classList.toggle('powered-off', state.off);
@@ -285,21 +301,13 @@
   function screen(lcd, isDead) {
     lcd.classList.toggle('alarm', !fed(state) && !isDead);
     const pc = Math.round(state.charge), d = lcd.dataset;
-    const bars = document.createElement('span');
-    bars.className = 'batt' + (pc <= 20 ? ' low' : '');
-    bars.setAttribute('aria-hidden', 'true');
-    for (let i = 0; i < 5; i++) {
-      const b = document.createElement('i');
-      if (i >= Math.ceil(pc / 20)) b.className = 'e';
-      bars.appendChild(b);
-    }
     const text = document.createElement('span');
     text.append((fed(state) ? d.charging : d.battery) + ' · ' + pc + '%', document.createElement('br'));
     const sub = document.createElement('span');
     sub.className = 'd';
     sub.textContent = fed(state) ? d.mains : (d.left || '%d').replace('%d', Math.ceil(state.charge / 100 * DRAIN));
     text.append(sub);
-    lcd.replaceChildren(bars, text);
+    lcd.replaceChildren(batt(pc, pc <= 20), text);
   }
 
   function runBattery() {
@@ -341,23 +349,19 @@
   }
 
   // ---------- the light switch ----------
+  // The template's switch (hidden: without JS it can do nothing), shown and wired once in each room.
   let sw = null;
   function switcher() {
-    if (sw?.isConnected) return;
-    const d = document.getElementById('cables')?.dataset || {};
-    sw = document.createElement('button');
-    sw.type = 'button';
-    sw.className = 'lightsw';
-    sw.innerHTML = '<span class="plate"><i class="rocker"></i></span><span class="lbl"></span>';
+    const b = room.querySelector(':scope > button.lightsw');
+    if (!b || b === sw) return;
+    sw = b;
+    sw.hidden = false;
     sw.addEventListener('click', () => {
       mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
-      try { localStorage.setItem('hall-light', mode); } catch {}
+      Rack.store.set('hall-light', mode);
       showSwitch();
       if (fed(state) && !dead()) room.dataset.light = lamp();
     });
-    sw.dataset.labels = d.lightModes || 'auto,day,evening,night';
-    sw.dataset.aria = d.lightAria || 'hall lights';
-    room.appendChild(sw);
     showSwitch();
   }
   function showSwitch() {
@@ -390,30 +394,23 @@
       return;
     }
     testing = true;
-    if (lcdReal === null) { lcdReal = [...lcd.childNodes].map((n) => n.cloneNode(true)); alarmReal = lcd.classList.contains('alarm'); }
+    keepReal(lcd);
     beep(1);
-    const steps = [100, 80, 60, 40, 60, 80, 100], tick = reduce.matches ? 0 : 420;
+    const steps = [100, 80, 60, 40, 60, 80, 100], tick = motion() ? 420 : 0;
     steps.forEach((pc, i) => setTimeout(() => {
       if (!lcd.isConnected) return;
-      const bars = document.createElement('span');
-      bars.className = 'batt';
-      bars.setAttribute('aria-hidden', 'true');
-      for (let j = 0; j < 5; j++) { const c = document.createElement('i'); if (j >= Math.ceil(pc / 20)) c.className = 'e'; bars.appendChild(c); }
       const text = document.createElement('span');
       text.append(lcd.dataset.test || 'self test', document.createElement('br'), Object.assign(document.createElement('span'), { className: 'd', textContent: pc + '%' }));
-      lcd.replaceChildren(bars, text);
+      lcd.replaceChildren(batt(pc, false), text);
     }, i * tick));
-    if (!reduce.matches) [0, 1, 2].forEach((i) => {
+    if (motion()) [0, 1, 2].forEach((i) => {
       setTimeout(() => { room.dataset.light = 'battery'; }, 300 + i * 500);
       setTimeout(() => { room.dataset.light = lamp(); }, 480 + i * 500);
     });
     setTimeout(() => {
       testing = false;
       beep(1);
-      if (lcd.isConnected) {
-        lcd.replaceChildren(...lcdReal.map((n) => n.cloneNode(true)));
-        lcd.classList.toggle('alarm', alarmReal);
-      }
+      if (lcd.isConnected) restoreReal(lcd);
       room.dataset.light = lamp();
       runBattery();
     }, steps.length * tick + 300);
@@ -432,22 +429,19 @@
       const cur = unitBy(k);
       if (cur) paint(cur, k, true);
       guests(k, true);
-    }, reduce.matches ? 300 : 1600);
+    }, motion() ? 1600 : 300);
   });
 
   // ---------- the hall's breaker ----------
   // The switch on the wall by the socket: the current in all the row's sockets. Off: every UPS on battery (each rack
-  // with its own charge, counted up to now); on: they charge. The captions are data-* on #cables (i18n).
+  // with its own charge, counted up to now); on: they charge. The template's (hidden without JS), shown and wired once
+  // in each room.
   let lever = null;
   function breaker() {
-    if (lever?.isConnected) return;
-    const d = document.getElementById('cables')?.dataset || {};
-    lever = document.createElement('button');
-    lever.type = 'button';
-    lever.className = 'breaker';
-    lever.setAttribute('aria-label', d.breakerAria || 'hall power');
-    lever.innerHTML = '<span class="box"><i class="handle"></i></span><span class="lbl"></span>';
-    lever.querySelector('.lbl').textContent = d.breaker || 'hall';
+    const b = room.querySelector(':scope > button.breaker');
+    if (!b || b === lever) return;
+    lever = b;
+    lever.hidden = false;
     lever.addEventListener('click', () => {
       const now = Date.now();
       for (const id in all.racks) settle(all.racks[id], now);
@@ -459,7 +453,6 @@
       runBattery();
       document.dispatchEvent(new Event('rack:mains'));
     });
-    room.appendChild(lever);
     showBreaker();
   }
   function showBreaker() {
@@ -513,6 +506,23 @@
     return { wall, s: { x: ox, y: oy - 6 }, o: { x: x0 + railW + 46, y: u.bottom - R.top - 6 } };
   }
 
+  // A cable's rope where its socket s and outlet o are now. A new one (n links of len in all, plugged or not) rests
+  // between them; one plugged in is laid between them anew; a pulled or held one moves with its outlet.
+  function place(key, s, o, n, len, plugged) {
+    let r = ropes.get(key);
+    if (!r) {
+      r = { key, mains: key === 'mains', n, len, seg: len / n, socket: s, outlet: o, pts: rest(s, o, len, n), plugged };
+      ropes.set(key, r);
+      return r;
+    }
+    const dx = o.x - r.outlet.x, dy = o.y - r.outlet.y;
+    r.socket = s;
+    r.outlet = o;
+    if (r.plugged && !held(r)) r.pts = rest(s, o, r.len, r.n);
+    else r.pts.forEach((p) => { p.x += dx; p.y += dy; p.px += dx; p.py += dy; });
+    return r;
+  }
+
   function relayout() {
     if (!ensureDom()) return;
     // Every measurement first, then the writes: a write between two of them would make the browser recompute the
@@ -526,41 +536,14 @@
     if (ups) {
       seen.add('mains');
       const { wall, s, o } = mainsAt;
-      let r = ropes.get('mains');
-      if (!r) {
-        const len = dist(s, o) * 1.25 + 40;
-        r = { key: 'mains', mains: true, n: 14, len, seg: len / 14, socket: s, outlet: o, pts: rest(s, o, len, 14), plugged: state.mains };
-        ropes.set('mains', r);
-      } else {
-        const dx = o.x - r.outlet.x, dy = o.y - r.outlet.y;
-        r.socket = s;
-        r.outlet = o;
-        if (r.plugged && !held(r)) r.pts = rest(s, o, r.len, r.n);
-        else r.pts.forEach((p) => { p.x += dx; p.y += dy; p.px += dx; p.py += dy; });
-      }
-      r.wall = wall;
+      place('mains', s, o, 14, dist(s, o) * 1.25 + 40, state.mains).wall = wall;
     }
     if (!fed(state) || state.charge !== null) runBattery();
     placeBreaker(mainsAt);
     placed.forEach(([u, { s, o }]) => {
       const k = keyOf(u);
       seen.add(k);
-      let r = ropes.get(k);
-      if (!r) {
-        const len = Math.max(60, dist(s, o) * 1.6);
-        r = { key: k, n: 12, len, seg: len / 12, socket: s, outlet: o, pts: rest(s, o, len, 12) };
-        r.plugged = !state.unplugged[k];
-        ropes.set(k, r);
-      } else {
-        const dx = o.x - r.outlet.x, dy = o.y - r.outlet.y;
-        r.socket = s;
-        r.outlet = o;
-        if (r.plugged && !held(r)) {
-          r.pts = rest(s, o, r.len, r.n);
-        } else {
-          r.pts.forEach((p) => { p.x += dx; p.y += dy; p.px += dx; p.py += dy; });
-        }
-      }
+      place(k, s, o, 12, Math.max(60, dist(s, o) * 1.6), !state.unplugged[k]);
     });
     for (const [k, r] of ropes) if (!seen.has(k)) { r.view?.g.remove(); ropes.delete(k); }
     // The room's floor and walls: a pulled plug lands on the raised floor instead of flying off the page.
@@ -573,7 +556,7 @@
 
   // The rack arrived from the next one (assets/js/aisle.js): the cables keep moving the way it came and swing.
   function swing(dir) {
-    if (reduce.matches) return;
+    if (!motion()) return;
     for (const r of ropes.values()) {
       if (held(r)) continue;
       const n = r.pts.length - 1;
@@ -590,7 +573,7 @@
   function step(r) {
     return Rack.stepRope(r, {
       end: r.outlet, seat: r.plugged ? r.socket : null, hold: held(r), reach: r.len * 0.97,
-      damp: reduce.matches ? 0.8 : 0.985, // without animations it calms down at once
+      damp: motion() ? 0.985 : 0.8, // without animations it calms down at once
     });
   }
 
@@ -665,13 +648,10 @@
   // anything drawn anew on hover took the grab zone from under the press (Chrome sends pointerover to the new circle
   // right before pointerdown), so the plug could not be grabbed and the glow stuck. Hence the target of every mouse
   // move, not pointerover and pointerout.
-  addEventListener('pointermove', (e) => {
-    if (e.pointerType !== 'mouse' || hand?.held || !svg) return;
-    const k = (e.target instanceof Element && e.target.closest('#power .hit')?.dataset.key) || null;
-    if (k === probing) return;
+  Rack.tester('#power .hit', () => !!hand?.held, (k) => {
     probing = k;
-    svg.querySelectorAll('g[data-cord]').forEach((g) => g.classList.toggle('probe', g.dataset.cord === k));
-  }, { passive: true });
+    svg?.querySelectorAll('g[data-cord]').forEach((g) => g.classList.toggle('probe', g.dataset.cord === k));
+  });
 
   // Who else follows the plugs (assets/js/sticker.js): an event for each pulled and plugged one.
   const told = (key, on) => document.dispatchEvent(new CustomEvent('rack:plug', { detail: { key, on } }));

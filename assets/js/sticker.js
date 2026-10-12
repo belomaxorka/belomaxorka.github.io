@@ -6,7 +6,7 @@
 // it back. Where they lie is the visitor's only (localStorage, for half an hour), per rack: every rack has the UPS's
 // sticker. Without JS the stickers simply stay on.
 (() => {
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const { motion } = Rack;
   // Rack → sticker key → { fx: the centre's x as a share of the room's width, dy: height spread, rot }, for
   // Rack.TOY_TTL (rack.js).
   const store = Rack.toyStore('stickers-fallen', () => ({}));
@@ -17,7 +17,7 @@
   const room = () => document.getElementById('room');
   // This rack's fallen stickers; shown, the rack whose stickers are in the room now (for a rack swap).
   let shown = '';
-  const fallen = () => { shown = room()?.dataset.rack || ''; return (all[shown] ||= {}); };
+  const fallen = () => { shown = Rack.here(); return (all[shown] ||= {}); };
   const sticker = (key) => document.querySelector(`[data-sticker="${key}"]`);
   // The centre of a lying sticker: on the raised floor under the rack.
   const floorY = (r, h, dy) => r.offsetHeight - 72 - h / 2 + dy;
@@ -71,7 +71,7 @@
     place(s);
     const land = floorY(R, s.h, s.dy);
     const dir = Math.random() < 0.5 ? -1 : 1;
-    if (reduce.matches) {
+    if (!motion()) {
       s.y = land; s.rot = dir * 8; place(s); settle(key, s);
       return;
     }
@@ -126,7 +126,7 @@
       delete fallen()[key];
       keep();
     };
-    if (!src || !R || reduce.matches || !src.offsetParent) return done();
+    if (!src || !R || !motion() || !src.offsetParent) return done();
     const rr = R.getBoundingClientRect(), b = src.getBoundingClientRect();
     s.el.classList.remove('on-floor');
     s.el.classList.add('returning');
@@ -165,7 +165,7 @@
   // All at once, but not in chorus: each with its own delay.
   function fallAll() {
     [...document.querySelectorAll('[data-sticker]')].forEach((el, i) => {
-      setTimeout(() => fall(el.dataset.sticker), reduce.matches ? 0 : i * 280 + Math.random() * 250);
+      setTimeout(() => fall(el.dataset.sticker), motion() ? i * 280 + Math.random() * 250 : 0);
     });
   }
 

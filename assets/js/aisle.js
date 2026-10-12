@@ -11,7 +11,6 @@
 (() => {
   const root = document.documentElement;
   const order = (root.dataset.racks || '').trim().split(/\s+/);
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const $ = (sel) => document.querySelector(sel);
   const indexOf = (path) => order.indexOf(path);
   const pathOf = (a) => new URL(a.getAttribute('href'), location.href).pathname;
@@ -123,31 +122,24 @@
     if (via?.classList.contains('step')) via.classList.add('pending');
   }
 
-  // Up to the aisle: the camera rises first, then moves. By hand, not behavior: 'smooth', so it is the same in every
-  // browser and we know when it ends.
-  let rising = null; // { raf, done }
+  // Up to the aisle: the camera rises first, then moves. By hand (Rack.tween), not behavior: 'smooth', so it is the
+  // same in every browser and we know when it ends. A new rise ends the one before at once.
+  let rising = null; // { stop, done }
   function toTop() {
-    if (rising) { cancelAnimationFrame(rising.raf); rising.done(); rising = null; }
+    if (rising) { rising.stop(); rising.done(); rising = null; }
     const y0 = scrollY;
     if (y0 < 1) return Promise.resolve();
-    if (reduce.matches) { scrollTo(0, 0); return Promise.resolve(); }
-    const ms = Math.min(420, 160 + y0 / 8), t0 = performance.now();
+    if (!Rack.motion()) { scrollTo(0, 0); return Promise.resolve(); }
     return new Promise((done) => {
-      const me = rising = { done, raf: 0 };
-      const frame = (now) => {
-        const k = Math.min(1, (now - t0) / ms);
-        scrollTo(0, y0 * (1 - k) ** 3);
-        if (k < 1 && rising === me) me.raf = requestAnimationFrame(frame);
-        else { if (rising === me) rising = null; done(); }
-      };
-      me.raf = requestAnimationFrame(frame);
+      const me = rising = { done };
+      me.stop = Rack.tween(Math.min(420, 160 + y0 / 8), (k) => scrollTo(0, y0 * (1 - k)), () => { if (rising === me) rising = null; done(); });
     });
   }
 
   function reveal(url) {
     const el = url.hash && document.getElementById(decodeURIComponent(url.hash.slice(1)));
-    if (el) el.scrollIntoView({ behavior: reduce.matches ? 'auto' : 'smooth' });
-    else if (scrollY > 0) scrollTo({ top: 0, behavior: reduce.matches ? 'auto' : 'smooth' });
+    if (el) el.scrollIntoView({ behavior: Rack.motion() ? 'smooth' : 'auto' });
+    else if (scrollY > 0) scrollTo({ top: 0, behavior: Rack.motion() ? 'smooth' : 'auto' });
   }
 
   // ---------- swapping the room ----------
@@ -207,7 +199,7 @@
 
   function hop(doc, from, to, url) {
     const dir = Math.sign(to - from), focus = focusOf();
-    if (reduce.matches || !dir || !$('#rack')) {
+    if (!Rack.motion() || !dir || !$('#rack')) {
       swap(doc, true);
       settle(from, focus, url);
       document.dispatchEvent(new CustomEvent('rack:landed', { detail: { dir, quiet: true } }));

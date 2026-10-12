@@ -2,13 +2,7 @@
 // the browser: the Alpine components, the units' heights, the rail numbers and the network cables.
 (() => {
   const root = document.documentElement;
-  const store = {
-    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
-    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
-  };
-  const motion = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // The drawer of a unit for the rack on screen (a unit can stand on more than one rack).
-  const drawerURL = (name) => '/fragments/unit/' + encodeURIComponent(name) + '?rack=' + encodeURIComponent(document.getElementById('room')?.dataset.rack || '');
+  const { store, motion, drawerURL } = Rack;
   const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : !matchMedia('(prefers-color-scheme: light)').matches;
 
   // ---------- Alpine ----------

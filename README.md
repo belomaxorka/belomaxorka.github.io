@@ -31,8 +31,10 @@ works with JavaScript off. On top of that, [htmx](https://htmx.org) refreshes th
   `/88x31/infra.gif`
 - `assets/css/`: plain CSS split by component; `site.css` lists them as `@import`s and site-api joins
   them into one file
-- `assets/js/`: `rack.js` (shared by the rest: what the units declare about themselves, cable physics, the toys'
-  memory, the list of `rack:*` events),
+- `assets/js/`: `rack.js` (shared by the rest: what the units declare about themselves, cable physics, the hand that
+  takes a plug, the cable tester, the toys' memory and the visitor's settings in localStorage, reduced motion, the
+  animation the aisle and the avatars glide by, the list of `rack:*` events; `theme.js` reads the theme itself, before
+  the first paint),
   `app.js` (Alpine components, unit heights, rail numbers, the network cables), `power.js` and `net.js` (power plugs
   and network cords to pull), `aisle.js` (walking along the row), `live.js` (guests online, packets), the toys
 - `assets/vendor/`: htmx 2.0.4 and the CSP build of Alpine.js 3.17.4, self-hosted

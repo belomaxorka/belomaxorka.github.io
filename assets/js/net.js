@@ -21,7 +21,6 @@
 // its host's link. A rack without a router gets its internet through its uplink from the row's first rack, so that
 // rack's router, cords and power count too. Without JS none of this.
 (() => {
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const store = Rack.toyStore('rack-net', () => ({})); // for Rack.TOY_TTL (rack.js)
   const saved = store.get();
   const out = saved.out && typeof saved.out === 'object' ? saved.out : {}; // 'home/mgmt' -> 1: the cord is pulled
@@ -37,13 +36,12 @@
   let rack = '', cords = [], loose = [], cards = true, room = null, svg = null, hand = null;
   const ropes = new Map(); // a pulled cord's key → its rope (rack.js): points[0] the plug, the last where the organizer holds it
   const views = new Map(); // cord key → what is drawn for it: a grab zone while it is in, the hanging cord when it is out
-  const here = () => document.getElementById('room')?.dataset.rack || '';
+  const { here, dist, motion } = Rack;
   const has = (k) => cords.some((c) => c.key === k);
   const pulled = (k) => !!out[here() + '/' + k] && has(k);
-  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
   const el = Rack.svg;
-  const held = (r) => (hand?.held?.key === r.key ? hand.held : null);
+  const held = (r) => hand?.of(r.key) || null;
 
   // ---------- links ----------
   // The rack has arrived: boot, the cables have not started drawing yet and nothing has a link; then waiting, whose plug is not in yet.
@@ -193,8 +191,7 @@
     const handle = d.previousElementSibling?.querySelector(':scope > .pull[data-unit]');
     if (!handle || !window.htmx) return;
     delete d.dataset.later;
-    const rack = document.getElementById('room')?.dataset.rack || '';
-    htmx.ajax('GET', '/fragments/unit/' + encodeURIComponent(handle.dataset.unit) + '?rack=' + encodeURIComponent(rack), { source: handle, target: d.querySelector(':scope > .slide'), swap: 'outerHTML', select: '.slide' });
+    htmx.ajax('GET', Rack.drawerURL(handle.dataset.unit), { source: handle, target: d.querySelector(':scope > .slide'), swap: 'outerHTML', select: '.slide' });
   }
 
   // ---------- cords ----------
@@ -268,22 +265,16 @@
     // The length: pulled, the cord comes out of the organizer as far as the hand needs (up to REACH); let go, it
     // goes back until it hangs at HANG.
     const want = h ? Math.min(REACH[r.type], Math.max(HANG[r.type], dist(h, r.anchor) * 1.1)) : HANG[r.type];
-    const ds = (want / N - r.seg) * (reduce.matches ? 1 : h ? 0.3 : 0.08);
+    const ds = (want / N - r.seg) * (motion() ? (h ? 0.3 : 0.08) : 1);
     r.seg += ds;
-    return Math.abs(ds) * N + Rack.stepRope(r, { end: r.anchor, hold: h, reach: r.seg * N * 0.97, damp: reduce.matches ? 0.8 : 0.985 });
+    return Math.abs(ds) * N + Rack.stepRope(r, { end: r.anchor, hold: h, reach: r.seg * N * 0.97, damp: motion() ? 0.985 : 0.8 });
   }
 
   // ---------- the cable tester ----------
   // The mouse over a plug: the whole cord glows and the lamps of its switch port and of the unit's network card blink
   // fast, as with a tester at the other end (only with a link). A finger cannot hover, so phones have no tester.
   // app.js redraws the cords on every layout: the glow is set again (relayout).
-  // The target is looked up on every mouse move, not by pointerover/pointerout: a grab zone can be replaced under the
-  // pointer (a cord pulled or put back, another rack), and the zone that is gone gets no pointerout (power.js does the same).
-  addEventListener('pointermove', (e) => {
-    if (e.pointerType !== 'mouse' || hand?.held) return;
-    const k = (e.target instanceof Element && e.target.closest('#net .hit')?.dataset.key) || null;
-    if (k !== probed) probe(k);
-  }, { passive: true });
+  Rack.tester('#net .hit', () => !!hand?.held, (k) => probe(k));
   let probed = null;
   function probe(key) {
     document.querySelectorAll('#cables > g.probe, #rack .probe').forEach((n) => n.classList.remove('probe'));
@@ -415,7 +406,7 @@
     waiting.clear();
     linking.forEach(clearTimeout);
     linking.clear();
-    boot = !!e.detail && !e.detail.quiet && !reduce.matches;
+    boot = !!e.detail && !e.detail.quiet && motion();
     sync();
   });
   // The cables are being drawn (app.js): each unit comes online when its cord's plug reaches the port. Not drawn (the

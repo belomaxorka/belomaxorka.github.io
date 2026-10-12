@@ -9,11 +9,7 @@
 // A dark unit is inert (power.js): its buttons do not press, the BIOS of a KVM without power does not open.
 (() => {
   const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-  const store = {
-    get() { try { return JSON.parse(localStorage.getItem('bios') || '{}'); } catch { return {}; } },
-    set(v) { try { localStorage.setItem('bios', JSON.stringify(v)); } catch {} },
-  };
-  const opts = Object.assign({ rainbow: false, steady: false, logo: true }, store.get());
+  const opts = Object.assign({ rainbow: false, steady: false, logo: true }, Rack.store.json('bios', {}));
   const root = document.documentElement;
   const apply = () => {
     root.classList.toggle('rainbow', !!opts.rainbow);
@@ -81,7 +77,7 @@
   }
   function flip(b) {
     opts[b.dataset.opt] = !opts[b.dataset.opt];
-    store.set(opts);
+    Rack.store.setJSON('bios', opts);
     apply();
     paint();
   }

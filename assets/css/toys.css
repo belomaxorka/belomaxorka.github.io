@@ -7,7 +7,6 @@
   background: #0000a8; color: #c0c0c0; box-shadow: inset 0 0 0 2px #5555ff, 0 0 24px #0008;
   font: 400 15px/1.35 ui-monospace, "Cascadia Mono", Consolas, monospace; text-transform: uppercase;
 }
-.bios[hidden] { display: none; }
 .bios p { margin: 0; }
 .bios .b-title { text-align: center; color: #fff; background: #00a8a8; margin: -10px -14px 6px; padding: 3px; }
 .bios .b-tabs { color: #a8a8ff; letter-spacing: .08em; word-spacing: 1.2em; }
@@ -42,7 +41,6 @@
   width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; cursor: crosshair;
   background: #050506; box-shadow: inset 0 1px 2px #000, 0 0 0 2px var(--panel-hi);
 }
-.srv .rst[hidden] { display: none; }
 /* POST on the server's LCD after RESET (over the frames, like the "no link" notice). */
 .u .lcd.post { position: relative; }
 .u .lcd.post > * { visibility: hidden; }

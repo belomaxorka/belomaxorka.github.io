@@ -59,9 +59,10 @@
 .fallen-sticker.returning { transition: transform .7s cubic-bezier(.3, .7, .3, 1); }
 
 /* The hall's breaker (power.js): a grey box on the wall by the socket with a switch in it. Up: current in the row's
-   sockets; down: every UPS on battery. A real button: Tab, space, aria-pressed. */
+   sockets; down: every UPS on battery. A real button: Tab, space, aria-pressed. It and the light switch and the torch
+   stand over the cable layers, which the scripts add to the room after them (z-index 7). */
 .breaker {
-  position: absolute; z-index: 6; display: grid; justify-items: center; gap: 4px;
+  position: absolute; z-index: 7; display: grid; justify-items: center; gap: 4px;
   padding: 0; border: 0; background: none; cursor: pointer; color: var(--dim);
   font: 600 10px/1 var(--f-silk); letter-spacing: .14em; text-transform: uppercase;
 }
@@ -92,7 +93,7 @@
 
 /* The light switch by the exit sign (power.js): a key on the wall, its caption the mode: auto, day, evening, night. */
 .lightsw {
-  position: absolute; z-index: 6; top: 40px; left: 22px; display: grid; justify-items: center; gap: 3px;
+  position: absolute; z-index: 7; top: 40px; left: 22px; display: grid; justify-items: center; gap: 3px;
   padding: 0; border: 0; background: none; cursor: pointer; color: var(--dim);
   font: 600 9px/1 var(--f-silk); letter-spacing: .12em; text-transform: uppercase;
 }
@@ -116,7 +117,7 @@
 
 /* The torch on the hall's wall (assets/js/live.js), next to the light switch. Taken: an empty hook hangs there. */
 .torch {
-  position: absolute; z-index: 6; top: 46px; left: 60px; display: grid; justify-items: center; gap: 3px;
+  position: absolute; z-index: 7; top: 46px; left: 60px; display: grid; justify-items: center; gap: 3px;
   padding: 0; border: 0; background: none; cursor: pointer; color: var(--dim);
   font: 600 9px/1 var(--f-silk); letter-spacing: .12em; text-transform: uppercase;
 }

@@ -11,7 +11,7 @@
 //   - a background tab pauses the sound.
 (() => {
   const KEY = 'sound';
-  let on = (() => { try { return localStorage.getItem(KEY) === 'on'; } catch { return false; } })();
+  let on = Rack.store.get(KEY) === 'on';
   let ctx = null, master = null, hum = null, humGain = null, timer = 0, lastBeep = 0, surgeUntil = 0, rebooting = false;
 
   function start() {
@@ -101,7 +101,7 @@
 
   function set(v) {
     on = v;
-    try { localStorage.setItem(KEY, on ? 'on' : 'off'); } catch {}
+    Rack.store.set(KEY, on ? 'on' : 'off');
     if (on) { start(); clearInterval(timer); timer = setInterval(poll, 500); poll(); click(1800, { vol: 0.25 }); }
     else { clearInterval(timer); timer = 0; if (humGain) humGain.gain.setTargetAtTime(0, ctx.currentTime, 0.2); }
     show();

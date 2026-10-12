@@ -22,7 +22,7 @@
 // packets or blinks; the guests' cords stay. Without JS, nothing.
 (() => {
   if (!window.EventSource) return;
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const { motion, here } = Rack;
   const root = document.documentElement;
   let cords = [], token = '';
 
@@ -64,25 +64,19 @@
   else connect();
 
   // ---------- torches ----------
-  const here = () => document.getElementById('room')?.dataset.rack || '';
   const rackBox = () => document.getElementById('rack')?.getBoundingClientRect();
   const spots = new Map(); // a guest's id -> { el, t: when the last one came }
   let taken = false, mine = null, sent = 0, pending = null, hook = null;
 
-  // The torch on the wall: a button in the room under the light switch (the captions are data-* on #cables).
+  // The torch on the wall: the template's button in the room by the light switch (hidden without JS), shown and wired
+  // once in each room.
   function torch() {
     const room = document.getElementById('room');
-    if (!room || hook?.isConnected) return;
-    const d = document.getElementById('cables')?.dataset || {};
-    hook = document.createElement('button');
-    hook.type = 'button';
-    hook.className = 'torch';
-    hook.innerHTML = '<span class="shell"><i class="lens"></i></span><span class="lbl"></span>';
-    hook.querySelector('.lbl').textContent = d.torch || 'torch';
-    hook.dataset.take = d.torchTake || 'take the torch';
-    hook.dataset.back = d.torchBack || 'hang the torch back';
+    const b = room?.querySelector(':scope > button.torch');
+    if (!b || b === hook) return;
+    hook = b;
+    hook.hidden = false;
     hook.addEventListener('click', () => take(!taken));
-    room.appendChild(hook);
     show();
     // Others' torch spots stayed in the old room (a swap between racks): spot() draws them anew in the new one.
     spots.forEach((s) => s.el.remove());
@@ -172,7 +166,7 @@
 
   // A blink: data went through the lamp. No more often than it can go dark and light again.
   function flash(led) {
-    if (!led || reduce.matches || document.hidden || root.classList.contains('steady') || led.classList.contains('tx')) return;
+    if (!led || !motion() || document.hidden || root.classList.contains('steady') || led.classList.contains('tx')) return;
     led.classList.add('tx');
     setTimeout(() => led.classList.remove('tx'), 90);
   }
@@ -221,7 +215,7 @@
   // travel sends a packet along legs ([path, direction, lamps to blink at the leg's end], ...); returns how long it
   // will run (ms), 0 when it does not.
   function travel(legs) {
-    if (reduce.matches || document.hidden || !legs || !legs.length) return 0;
+    if (!motion() || document.hidden || !legs || !legs.length) return 0;
     const room = document.getElementById('room'), cab = document.getElementById('cables');
     if (!room || !cab) return 0;
     let svg = document.getElementById('packets');

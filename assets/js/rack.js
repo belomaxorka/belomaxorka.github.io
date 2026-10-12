@@ -19,6 +19,41 @@
 // net.js answers Rack.pulled() for app.js: which cords of this rack are out; power.js answers Rack.rackPower(id) for
 // net.js: whether another rack of the row has power (the row's first rack feeds the others their internet).
 window.Rack = (() => {
+  // ---------- what every script needs ----------
+  // store: the visitor's choices in localStorage, which can be missing or refuse (a private window, blocked site
+  // data): a read then gives null (json: def), a write is dropped. theme.js, before the first paint and before this
+  // file, reads the theme and the LCD colour itself.
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch { /* no storage: forgotten */ } },
+    json(k, def) { try { return JSON.parse(store.get(k)) ?? def; } catch { return def; } },
+    setJSON(k, v) { store.set(k, JSON.stringify(v)); },
+  };
+  // motion(): the visitor has not asked for reduced motion (asked each time: it can change while the page is open).
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const motion = () => !reduced.matches;
+  // here(): the rack in the room now; the aisle swaps it without a reload.
+  const here = () => document.getElementById('room')?.dataset.rack || '';
+  // drawerURL(unit): the unit pulled out, for the rack on screen (a unit can stand on more than one rack).
+  const drawerURL = (name) => '/fragments/unit/' + encodeURIComponent(name) + '?rack=' + encodeURIComponent(here());
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+
+  // tween(ms, frame, done) calls frame(k) on every animation frame for ms, k going from 0 to 1 and easing out
+  // (cubic), the last call with 1, then done(); it returns stop(), after which neither is called. A frame's time can
+  // be from before the call: k never goes below 0. The aisle's rise to the top and the gallery's glide go by it.
+  function tween(ms, frame, done) {
+    const t0 = performance.now();
+    let raf = 0;
+    const step = (now) => {
+      const k = Math.max(0, Math.min(1, (now - t0) / ms));
+      frame(1 - (1 - k) ** 3);
+      if (k < 1) raf = requestAnimationFrame(step);
+      else { raf = 0; done?.(); }
+    };
+    raf = requestAnimationFrame(step);
+    return () => { cancelAnimationFrame(raf); raf = 0; };
+  }
+
   // ---------- the toys' memory ----------
   // The toys (power plugs, network cords, the UPS, fallen stickers) remember what a visitor did for a while: a
   // reload or a walk to another rack and back finds them as they were. Not for good: a visitor who comes back
@@ -30,15 +65,10 @@ window.Rack = (() => {
   function toyStore(key, empty) {
     return {
       get() {
-        try {
-          const s = JSON.parse(localStorage.getItem(key) || 'null');
-          if (s && typeof s.at === 'number' && Date.now() - s.at < TOY_TTL && s.v && typeof s.v === 'object') return s.v;
-        } catch { /* no storage, or not ours */ }
-        return empty();
+        const s = store.json(key, null);
+        return s && typeof s.at === 'number' && Date.now() - s.at < TOY_TTL && s.v && typeof s.v === 'object' ? s.v : empty();
       },
-      set(v) {
-        try { localStorage.setItem(key, JSON.stringify({ at: Date.now(), v })); } catch { /* no storage: the toys forget */ }
-      },
+      set(v) { store.setJSON(key, { at: Date.now(), v }); },
     };
   }
 
@@ -177,7 +207,8 @@ window.Rack = (() => {
   //   pull(key) — the hand moved more than 6 px: the plug comes out;
   //   drop(key, was) — let go after a pull; tap(key, was) — let go without one;
   //   moved() — after every move, to wake the drawing.
-  // hand.held is { key, x, y } in the room's coordinates while a plug is held, null otherwise.
+  // hand.held is { key, x, y } in the room's coordinates while a plug is held, null otherwise; hand.of(key) is that
+  // for the plug key only.
   // A finger lands on a plug as often to scroll past it as to take it: a finger takes a plug only after holding it
   // still for HOLD ms (a short vibration says so). Moving first is a scroll, and the browser scrolls; a quick tap still
   // toggles the plug. While a finger has a plug, the page does not scroll under it: its touchmoves are cancelled, on the
@@ -189,7 +220,7 @@ window.Rack = (() => {
   // vibration only after the page has had a tap (Chrome blocks it before, with a warning in the console).
   const HOLD = 350, SLOP = 10;
   function hand(layer, room, { take, pull, drop, tap, moved }) {
-    const h = { held: null };
+    const h = { held: null, of: (key) => (h.held?.key === key ? h.held : null) };
     let wait = null;   // a finger on a plug, not long enough yet: { id, from, timer, move, up, cancel }
     let touched = null; // the element a finger is on
     const block = (e) => { if (h.held && e.cancelable) e.preventDefault(); };
@@ -263,9 +294,24 @@ window.Rack = (() => {
     return h;
   }
 
+  // tester(selector, busy, show) is the cable tester: the mouse over a plug (an element with data-key matching
+  // selector) lights its cable; show(key) whenever the plug under the mouse changes, show(null) when it leaves one.
+  // It looks at the target of every mouse move, not at pointerover and pointerout: a grab zone can be drawn anew
+  // under the pointer (a cord pulled or put back, another rack), and one that is gone gets no pointerout. Nothing
+  // while busy() (a hand holds a plug).
+  function tester(selector, busy, show) {
+    let cur = null;
+    addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse' || busy()) return;
+      const k = (e.target instanceof Element && e.target.closest(selector)?.dataset.key) || null;
+      if (k !== cur) show(cur = k);
+    }, { passive: true });
+  }
+
   return {
+    store, motion, here, drawerURL, dist, tween,
     TOY_TTL, toyStore, keyOf, unitOf, units, roleOf, hostOf, guestsOf, live, reached, svg, stepRope, ropePath, cord, setCord,
-    loop, hand,
+    loop, hand, tester,
     pulled: () => new Set(), // net.js: which cords of this rack are out
     rackPower: () => ({ on: true, unplugged: {}, draining: false }), // power.js: another rack's power (net.js, R1 for the row)
   };

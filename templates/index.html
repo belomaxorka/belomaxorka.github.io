@@ -23,7 +23,12 @@
     </div>
     <div class="foot"></div>
   </div>
-  <svg class="cables" id="cables" aria-hidden="true" data-uplink="{{t "cable.uplink"}}" data-uplink-r1="{{t "cable.uplink_r1"}}" data-power="{{t "cable.power"}}" data-breaker="{{t "cable.breaker"}}" data-breaker-aria="{{t "cable.breaker_aria"}}" data-light-modes="{{t "hall.light_modes"}}" data-light-aria="{{t "hall.light_aria"}}" data-torch="{{t "hall.torch"}}" data-torch-take="{{t "hall.torch_take"}}" data-torch-back="{{t "hall.torch_back"}}"></svg>
+  <svg class="cables" id="cables" aria-hidden="true" data-uplink="{{t "cable.uplink"}}" data-uplink-r1="{{t "cable.uplink_r1"}}" data-power="{{t "cable.power"}}"></svg>
+  {{/* The hall's controls on the wall: the breaker of the row's sockets (placed by the UPS's socket), the light switch
+       and the torch (assets/js/power.js, live.js). Without JS they can do nothing, so they are hidden until it shows them. */}}
+  <button class="breaker" type="button" hidden aria-pressed="true" aria-label="{{t "cable.breaker_aria"}}"><span class="box"><i class="handle"></i></span><span class="lbl">{{t "cable.breaker"}}</span></button>
+  <button class="lightsw" type="button" hidden data-labels="{{t "hall.light_modes"}}" data-aria="{{t "hall.light_aria"}}"><span class="plate"><i class="rocker"></i></span><span class="lbl"></span></button>
+  <button class="torch" type="button" hidden aria-pressed="false" data-take="{{t "hall.torch_take"}}" data-back="{{t "hall.torch_back"}}"><span class="shell"><i class="lens"></i></span><span class="lbl">{{t "hall.torch"}}</span></button>
 </div>
 {{end}}
 
