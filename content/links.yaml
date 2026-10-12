@@ -1,7 +1,6 @@
 # The addresses the templates link to, by name: one place to change one. Templates read them as .Content.links.<name>
 # (or (content).links.<name> where their data is not the page), and nav.yaml names them. The site's own address is
 # site-api's PUBLIC_URL (.URL), not here.
-blog: https://blog.belomaxorka.dev
 status: https://status.belomaxorka.dev
 git: https://git.belomaxorka.dev/belomaxorka
 source: https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev
