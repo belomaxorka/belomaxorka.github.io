@@ -16,7 +16,7 @@
 .intro { margin: 0; max-width: 60ch; color: var(--ink); }
 .intro a { color: var(--accent); }
 .status-col { flex: 0 1 230px; display: grid; gap: 8px; align-content: start; min-width: 0; }
-.lcd.two { font-size: 22px; min-height: 58px; }
+.lcd.two { font-size: 22px; }
 .srv .note { right: 6%; bottom: 12px; transform: rotate(4deg); }
 /* Avatars from Telegram: a square that swipes, without JS too (scroll-snap); with JS a remote under it, the keys ‹ ›,
    an LCD counter and a row of lamps as on a KVM switch: the chosen photo's lamp is lit. */
