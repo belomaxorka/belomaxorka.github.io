@@ -1,22 +1,25 @@
-{{/* The server with my name. Data: .Age, .DaysToBirthday (-1: no birthday given), .Avatars (avatars from Telegram,
-     newest first), .Data, content/profile.yaml (the tapes under the name). */}}
+{{/* The server with my name. Data: .Age, .DaysToBirthday (-1: no birthday given), .Photos (avatars from Telegram,
+     newest first, each .Src about 640 px, .Small about 320 and .N, its place from 1), .Data, content/profile.yaml (the
+     tapes under the name). */}}
 {{define "unit-server"}}
 <section class="u srv" style="--h:4" aria-labelledby="who" data-key="srv" data-power data-net="wan" data-feed="site telegram">
   <div class="face">
-    {{with .Avatars}}
-    {{/* The remote under the photo: keys, an LCD counter and a lamp per photo (the current one lit). Without JS there is none: it swipes. */}}
-    <div class="album" x-data="gallery" role="region" aria-roledescription="carousel" aria-label="{{t "me.photos"}}">
+    {{with .Photos}}{{$n := len .}}
+    {{/* The remote under the photo: keys, an LCD counter (read out when it changes) and a lamp per photo, the current
+         one lit; more than 12 lamps would not fit under the photo. Without JS there is none: the strip swipes. Each
+         photo comes in two sizes: the screen takes the one its density needs for 176 px (128 on a phone). */}}
+    <div class="album" x-data="gallery({{$n}})" role="region" aria-roledescription="carousel" aria-label="{{t "me.photos"}}">
       <div class="photo gallery">
         <div class="slides" x-ref="slides" tabindex="0" @scroll.debounce.80ms="sync()">
-          {{range $i, $src := .}}<img src="{{$src}}" alt="{{t "me.avatar"}}" width="640" height="640" decoding="async"{{if $i}} loading="lazy"{{end}}>{{end}}
+          {{range .}}<img src="{{.Src}}"{{if ne .Small .Src}} srcset="{{.Small}} 320w, {{.Src}} 640w" sizes="(max-width: 560px) 128px, 176px"{{end}} alt="{{t "me.avatar_n" .N $n}}" width="640" height="640" decoding="async"{{if gt .N 1}} loading="lazy"{{end}}>{{end}}
         </div>
       </div>
-      {{if gt (len .) 1}}
+      {{if gt $n 1}}
       <div class="gal-ctl" hidden :hidden="false">
         <button class="key" type="button" @click="go(-1)" aria-label="{{t "me.prev"}}">{{template "icon" "prev"}}</button>
-        <span class="lcd"><span x-text="i + 1">1</span>/{{len .}}</span>
+        <span class="lcd" aria-live="polite" aria-atomic="true"><span x-text="i + 1">1</span>/{{$n}}</span>
         <button class="key" type="button" @click="go(1)" aria-label="{{t "me.next"}}">{{template "icon" "next"}}</button>
-        {{if le (len .) 12}}<span class="gal-leds" x-ref="leds" aria-hidden="true">{{range $i, $_ := .}}<i class="led{{if $i}} off{{end}}"></i>{{end}}</span>{{end}}
+        {{if le $n 12}}<span class="gal-leds" x-ref="leds" aria-hidden="true">{{range .}}<i class="led{{if gt .N 1}} off{{end}}"></i>{{end}}</span>{{end}}
       </div>
       {{end}}
     </div>

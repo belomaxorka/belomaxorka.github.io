@@ -95,7 +95,7 @@ best viewed with any browser</font></td></tr>
 {{/* The server with my name: a photo, who I am, the LCD, the PGP fingerprint. */}}
 {{define "lite-server"}}{{with .Profile}}
 <table border="0" cellspacing="0" cellpadding="0" width="100%"><tr>
-{{with .Avatars}}<td valign="top" width="170"><img src="{{index . 0}}" width="160" height="160" alt="{{t "me.avatar"}}" border="0"></td>{{end}}
+{{with .Photos}}<td valign="top" width="170"><img src="{{(index . 0).Small}}" width="160" height="160" alt="{{t "me.avatar"}}" border="0"></td>{{end}}
 <td valign="top">
 <font face="Verdana,Arial,Helvetica,sans-serif" size="5" color="#ffffff"><b>belomaxorka</b></font><br>
 <font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8">{{t "me.sub"}}</font><br><br>

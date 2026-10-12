@@ -29,7 +29,6 @@
 .gallery .slides:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .gallery img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: center; }
 .gal-ctl { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 6px; }
-.gal-ctl[hidden] { display: none; }
 .gal-ctl .key { padding: 0; width: 34px; min-height: 28px; justify-content: center; font-size: 15px; }
 .gal-ctl .lcd { font-size: 18px; padding: 4px 6px; text-align: center; white-space: nowrap; }
 .gal-leds { grid-column: 1 / -1; display: flex; justify-content: center; gap: 7px; padding-top: 1px; }

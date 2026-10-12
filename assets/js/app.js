@@ -111,17 +111,18 @@
       },
     }));
 
-    // Avatars: they scroll without JS too (scroll-snap); here the arrows, the counter and the wrap-around.
-    Alpine.data('gallery', () => ({
+    // Avatars: they scroll without JS too (scroll-snap); here the arrows, the counter and the wrap-around. n: how many
+    // photos there are (the template knows).
+    Alpine.data('gallery', (n) => ({
       i: 0,
-      n: 1,
-      // The keys glide the strip themselves: from where it is to the slide, easing out, the snap off on the way. The
+      n,
+      // The keys glide the strip themselves (Rack.tween): from where it is to the slide, the snap off on the way. The
       // browser's smooth scroll, restarted by quick taps with the snap on, could stop short of the slide; and read
       // halfway (a slow phone's frames are longer than sync's debounce) the scroll position made the next tap count
       // from a slide passing by. While it glides (aim) the position says nothing about i. A finger or a wheel takes over.
       aim: null,
+      stop: null,
       init() {
-        this.n = this.$refs.slides.children.length;
         ['pointerdown', 'wheel'].forEach((t) => this.$refs.slides.addEventListener(t, () => this.halt(), { passive: true }));
       },
       sync() {
@@ -137,21 +138,17 @@
       },
       glide(x) {
         const s = this.$refs.slides;
-        cancelAnimationFrame(this.raf);
+        this.stop?.(); // a tap during a glide: on from where the strip is, the snap still off
         if (!motion()) { this.halt(); s.scrollLeft = x; return; }
         this.aim = x;
         s.style.scrollSnapType = 'none';
-        const from = s.scrollLeft, t0 = performance.now();
-        const dur = 260 + Math.min(240, (Math.abs(x - from) / s.clientWidth) * 60);
-        const step = (now) => {
-          const k = Math.max(0, Math.min(1, (now - t0) / dur)); // a frame's time can be from before the tap
-          s.scrollLeft = from + (x - from) * (1 - (1 - k) ** 3);
-          if (k < 1) this.raf = requestAnimationFrame(step); else this.halt();
-        };
-        this.raf = requestAnimationFrame(step);
+        const from = s.scrollLeft;
+        const ms = 260 + Math.min(240, (Math.abs(x - from) / s.clientWidth) * 60);
+        this.stop = Rack.tween(ms, (k) => { s.scrollLeft = from + (x - from) * k; }, () => this.halt());
       },
       halt() {
-        cancelAnimationFrame(this.raf);
+        this.stop?.();
+        this.stop = null;
         this.$refs.slides.style.scrollSnapType = '';
         this.aim = null;
       },

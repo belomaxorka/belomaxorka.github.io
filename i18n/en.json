@@ -74,6 +74,7 @@
   "me.photo": "photo goes here",
   "me.photos": "my telegram avatars",
   "me.avatar": "avatar",
+  "me.avatar_n": "avatar %d of %d",
   "me.prev": "previous photo",
   "me.next": "next photo",
   "me.sub": "roman kelesidis · full-stack web developer",
