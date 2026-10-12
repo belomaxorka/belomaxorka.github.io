@@ -47,6 +47,7 @@
       <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led hdd"></i>hdd</span><span><i class="led net"></i>net</span><span><i class="led uid"></i><button class="uid" type="button" hidden aria-pressed="false" title="{{t "srv.uid"}}">uid</button></span><button class="rst" type="button" hidden aria-label="{{t "srv.reset"}}" title="{{t "srv.reset"}}"></button></div>
       {{/* The asset tag sticker: the full PGP fingerprint, printed, so it shows without power too and can be selected. */}}
       {{with .Data.pgp}}<div class="asset-tag"><span class="silk">pgp · {{t "me.pgp"}}</span><code translate="no">{{.}}</code><i class="bars" aria-hidden="true"></i></div>{{end}}
+      {{with .Data.age}}<div class="asset-tag age"><span class="silk">age · {{t "me.age"}}</span><code translate="no">{{.}}</code></div>{{end}}
     </div>
   </div>
   <div class="note" data-sticker="srv" data-back="{{t "note.back"}}">{{th "note.dont"}}</div>

@@ -101,6 +101,7 @@
   "bios.blinking": "blinking",
   "bios.steady": "steady",
   "bios.help": "↑↓ select · enter change ·",
+  "me.age": "public key",
   "me.pgp": "key fingerprint",
   "lcd.lab": "homelab & net",
   "lcd.lab2": "proxmox, devops",

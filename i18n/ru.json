@@ -101,6 +101,7 @@
   "bios.blinking": "blinking",
   "bios.steady": "steady",
   "bios.help": "↑↓ выбор · enter сменить ·",
+  "me.age": "открытый ключ",
   "me.pgp": "отпечаток ключа",
   "lcd.lab": "домашняя лаба",
   "lcd.lab2": "сети, devops",

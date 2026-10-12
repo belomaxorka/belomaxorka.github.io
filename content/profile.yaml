@@ -17,6 +17,9 @@ person:
 #   fingerprint: the key itself (it holds an e-mail address) is not published.
 colors: ["#000", "#fff", "#a062de", "#62a0de"]
 pgp: "139C 8E4A 1A2B 4823 3AE3 EFEF D815 7C4D 4C4C 6DB4"
+# age - the public key for age (age-encryption.org): anyone can encrypt a file to me with it. A second sticker under
+#   the PGP one. The private key never leaves my machine.
+age: "age17qp94tl4mxjecknypsjzdezu43fwlsllselhraewmdhfjyw84ynsk94609"
 tapes:
   - - {t: me.pronouns}
     - {age: true}

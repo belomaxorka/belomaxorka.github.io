@@ -9,6 +9,9 @@
   me: true
 - name: discord
   copy: belomaxorka
+- name: steam
+  link: https://steamcommunity.com/id/wour/
+  me: true
 - name: {en: mail, ru: почта}
   link: mailto:ascouted@gmail.com
   tape: r
