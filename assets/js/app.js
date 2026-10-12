@@ -121,13 +121,45 @@
     Alpine.data('gallery', () => ({
       i: 0,
       n: 1,
-      init() { this.n = this.$refs.slides.children.length; },
-      sync() { const s = this.$refs.slides; this.i = Math.round(s.scrollLeft / s.clientWidth); this.light(); },
-      go(d) {
+      // The keys glide the strip themselves: from where it is to the slide, easing out, the snap off on the way. The
+      // browser's smooth scroll, restarted by quick taps with the snap on, could stop short of the slide; and read
+      // halfway (a slow phone's frames are longer than sync's debounce) the scroll position made the next tap count
+      // from a slide passing by. While it glides (aim) the position says nothing about i. A finger or a wheel takes over.
+      aim: null,
+      init() {
+        this.n = this.$refs.slides.children.length;
+        ['pointerdown', 'wheel'].forEach((t) => this.$refs.slides.addEventListener(t, () => this.halt(), { passive: true }));
+      },
+      sync() {
+        if (this.aim !== null) return;
         const s = this.$refs.slides;
-        this.i = (this.i + d + this.n) % this.n;
-        s.scrollTo({ left: this.i * s.clientWidth, behavior: motion() ? 'smooth' : 'auto' });
+        this.i = Math.round(s.scrollLeft / s.clientWidth);
         this.light();
+      },
+      go(d) {
+        this.i = (this.i + d + this.n) % this.n;
+        this.light();
+        this.glide(this.i * this.$refs.slides.clientWidth);
+      },
+      glide(x) {
+        const s = this.$refs.slides;
+        cancelAnimationFrame(this.raf);
+        if (!motion()) { this.halt(); s.scrollLeft = x; return; }
+        this.aim = x;
+        s.style.scrollSnapType = 'none';
+        const from = s.scrollLeft, t0 = performance.now();
+        const dur = 260 + Math.min(240, (Math.abs(x - from) / s.clientWidth) * 60);
+        const step = (now) => {
+          const k = Math.max(0, Math.min(1, (now - t0) / dur)); // a frame's time can be from before the tap
+          s.scrollLeft = from + (x - from) * (1 - (1 - k) ** 3);
+          if (k < 1) this.raf = requestAnimationFrame(step); else this.halt();
+        };
+        this.raf = requestAnimationFrame(step);
+      },
+      halt() {
+        cancelAnimationFrame(this.raf);
+        this.$refs.slides.style.scrollSnapType = '';
+        this.aim = null;
       },
       // The lamps under the photo: the one of the photo on screen is lit.
       light() { [...(this.$refs.leds?.children || [])].forEach((l, k) => l.classList.toggle('off', k !== this.i)); },
