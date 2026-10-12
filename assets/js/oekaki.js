@@ -23,9 +23,8 @@ document.addEventListener('alpine:init', () => {
 
     init() {
       // Besides the base palette, the rack's colours: the LCD (it changes with the track's cover) and the accent.
-      const cs = getComputedStyle(document.documentElement);
-      const rack = ['--lcd', '--accent'].map((v) => cs.getPropertyValue(v).trim()).filter((c) => /^#[0-9a-f]{6}$/i.test(c));
-      this.colors = [...new Set([...BASE, ...rack.map((c) => c.toLowerCase())])];
+      const rack = ['--lcd', '--accent'].map((v) => this.hex(v)).filter(Boolean);
+      this.colors = [...new Set([...BASE, ...rack])];
       const c = this.$refs.pad;
       c.width = W; c.height = H;
       this.g = c.getContext('2d', { willReadFrequently: true });
@@ -61,6 +60,19 @@ document.addEventListener('alpine:init', () => {
         this.commit();
       }
       this.setFull(false);
+    },
+
+    // A colour token of the rack as #rrggbb (the swatches and the colour input take that), as the browser works it out
+    // on an element: a token is a mix of its two themes' colours (tokens.css) and the LCD's a registered property,
+    // so the stylesheet's text is no hex. null when it is not a colour.
+    hex(token) {
+      const probe = document.createElement('i');
+      probe.style.color = `var(${token})`;
+      this.$root.append(probe);
+      const c = getComputedStyle(probe).color;
+      probe.remove();
+      const n = (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number).map((x) => (c.startsWith('color(') ? x * 255 : x));
+      return n.length === 3 ? '#' + n.map((x) => Math.round(x).toString(16).padStart(2, '0')).join('') : null;
     },
 
     // ---------- buttons ----------
