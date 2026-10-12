@@ -14,7 +14,6 @@
 .name { font: 700 clamp(28px, 5.4vw, 48px)/0.95 var(--f-silk); letter-spacing: .02em; margin: 0; text-wrap: balance; }
 .name small { display: block; font: 500 11px/1.4 var(--f-silk); letter-spacing: .18em; color: var(--dim); text-transform: uppercase; margin-top: 6px; }
 .intro { margin: 0; max-width: 60ch; color: var(--ink); }
-.intro a { color: var(--accent); }
 .status-col { flex: 0 1 230px; display: grid; gap: 8px; align-content: start; min-width: 0; }
 .lcd.two { font-size: 22px; }
 .srv .note { right: 6%; bottom: 12px; transform: rotate(4deg); }

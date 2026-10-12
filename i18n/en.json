@@ -172,7 +172,6 @@
 
   "gb.title": "kvm · guestbook",
   "gb.message": "message",
-  "gb.placeholder": "hello from 2026",
   "gb.moderated": "pre-moderated",
   "gb.anon": "anonymous",
   "gb.none": "no entries yet. be the first!",

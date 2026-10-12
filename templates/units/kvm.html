@@ -49,7 +49,7 @@
       <label class="hp" aria-hidden="true">website <input name="website" tabindex="-1" autocomplete="off"></label>
       <div class="fields">
         <input id="gb-name" name="name" maxlength="32" placeholder="{{t "gb.name_ph"}}" autocomplete="nickname" aria-label="{{t "gb.name"}}">
-        <textarea id="gb-text" name="text" maxlength="600" placeholder="{{t "gb.placeholder"}}" aria-label="{{t "gb.message"}}"></textarea>
+        <textarea id="gb-text" name="text" maxlength="600" aria-label="{{t "gb.message"}}"></textarea>
       </div>
       <div class="keys">
         <button class="key" type="button" hidden :hidden="false" @click="toggle" :aria-pressed="open">{{template "icon" "pen"}} {{t "gb.draw"}}</button>

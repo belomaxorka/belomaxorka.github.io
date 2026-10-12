@@ -18,7 +18,6 @@
   padding: 6px 10px 8px; transform: rotate(-4deg); box-shadow: 0 6px 12px -6px #000c;
 }
 .ups .meta { display: grid; gap: 4px; font-size: 13px; color: var(--dim); }
-.ups .meta a { color: var(--accent); }
 .ups .meta b { color: var(--ink); font-weight: 600; }
 @media (max-width: 560px) {
   .ups .lcd { font-size: 18px; padding-right: 10px; }
