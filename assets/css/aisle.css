@@ -21,6 +21,12 @@
 .aisle .step i { font: 400 28px/1 var(--f-text); font-style: normal; color: var(--ink); }
 .aisle a.step:hover, .aisle .signs a:hover { color: var(--ink); }
 .aisle .step.end { visibility: hidden; }
+/* The hall's light switch and torch hang in the top right corner (power.css, up to 133px from the edge): where the
+   row's arrow would reach them, the aisle keeps clear. A phone without a mouse has neither. */
+@media (max-width: 1300px) { .aisle { padding-right: 140px; } }
+@media (max-width: 760px) { .aisle { padding-right: 130px; } }
+@media (max-width: 560px) { .aisle { padding-right: 0; } }
+@media (max-width: 560px) and (hover: hover) { .aisle { padding-right: 70px; } }
 @media (max-width: 560px) {
   .aisle { gap: 4px; margin-bottom: 8px; }
   .aisle .signs { gap: 5px; }

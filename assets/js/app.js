@@ -437,7 +437,13 @@
         const p = (a, b) => `${(j.cx + a * ux + b * vx).toFixed(1)} ${(j.cy + a * uy + b * vy).toFixed(1)}`;
         el('path', { d: `M${p(-1, -1)} L${p(1, -1)} L${p(1, 1)} L${p(-1, 1)} Z`, class: 'inlet' }, svg);
       }
-      if (label) el('text', { x: x + 10, y: cap.y - 5, class: 'lbl small' }, svg).textContent = label;
+      if (label) {
+        // Clear of the row's arrow back: on a narrow screen it stands right over the rack's corner, where this goes.
+        const arrow = document.querySelector('#aisle .step.prev:not(.end) i');
+        const a = arrow && box(arrow);
+        const lx = a && a.b > cap.y - 30 && a.x < x + 100 ? Math.max(x + 10, a.r + 6) : x + 10;
+        el('text', { x: lx, y: cap.y - 5, class: 'lbl small' }, svg).textContent = label;
+      }
     };
 
     // The router: LAN -> the last port of the bottom row, WAN as fibre to the trays.

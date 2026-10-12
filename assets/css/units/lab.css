@@ -26,12 +26,21 @@
 .ct.others .face { display: flex; justify-content: center; }
 .ct.others .hand { font: 600 18px/1.1 var(--f-hand); color: var(--dim); }
 
-@media (max-width: 760px) {
+/* Up to 960px the host's meters and a guest's two meters do not fit beside the rest (they ran into the names and
+   the LCD): one under the other. */
+@media (max-width: 960px) {
   .pve .face { grid-template-columns: minmax(0, 1fr); }
   .ct .face { grid-template-columns: auto 56px minmax(0, 1fr) auto; row-gap: 6px; padding-block: 8px; }
   .ct .meter { grid-column: 2 / -1; }
   .ct .up { grid-column: 4; grid-row: 1; }
   .ct .up.off { grid-column: 4; }
+  /* The host's two meters on one grid: the values as wide as the widest (9em does not fit a phone), the bars level. */
+  .pve .meters { grid-template-columns: auto minmax(40px, 1fr) auto; column-gap: 8px; }
+  .pve .meter { grid-column: 1 / -1; grid-template-columns: 64px minmax(40px, 1fr) auto; grid-template-columns: subgrid; }
+}
+/* A phone: the uptime takes a line of its own, or it squeezes the guest's name out. */
+@media (max-width: 400px) {
+  .ct .up, .ct .up.off { grid-column: 2 / -1; grid-row: auto; text-align: left; }
 }
 
 /* Without power (assets/js/power.js) the bars go dark with the unit. */

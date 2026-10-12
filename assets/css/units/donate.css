@@ -13,5 +13,6 @@
 .wallets .key { min-height: 28px; padding: 6px 10px; }
 @media (max-width: 760px) {
   .wallets li { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .wallets .coins { white-space: normal; } /* "TRX · USDT TRC-20" wraps rather than run under the copy key */
   .wallets .addr { grid-column: 1 / -1; grid-row: 2; font-size: 13.5px; letter-spacing: 0; }
 }
