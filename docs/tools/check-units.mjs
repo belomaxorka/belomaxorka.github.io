@@ -8,7 +8,7 @@
 //     data-host (it runs on another unit), or data-role (the rack's infrastructure);
 //   - one with any declaration has a data-key, and no two units in one template share a key;
 //   - data-net is lan or wan, data-role switch, router or ups, data-live lamps, bar, text or image, data-news empty
-//     or markup, data-vlan mgmt, data-feed names at least one source;
+//     or markup, data-vlan mgmt, data-feed names at least one source and only sources site-api knows (FEEDS);
 //   - data-host names a unit that exists.
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
@@ -19,12 +19,18 @@ const files = (function walk(d) {
 })(dir).filter((f) => !/[\\/]lite[\\/]/.test(f)); // the light version has no scripts and no units of this kind
 
 const NET = ['lan', 'wan'], ROLE = ['switch', 'router', 'ups'], LIVE = ['lamps', 'bar', 'text', 'image'], NEWS = ['', 'markup'], VLAN = ['mgmt'];
+// The sources data-feed can name: site-api's, as its live stream names them (its /healthz names up to the dash:
+// koito-week is koito; site-api's TestEverySourceIsListed keeps that list), and the server's own work: site (it serves
+// the pages) and guestbook. A name not here would get no packets.
+const FEEDS = ['gatus', 'koito', 'proxmox', 'telegram', 'ups', 'wakapi', 'webring', 'site', 'guestbook'];
 const attr = (tag, name) => { const m = tag.match(new RegExp(`\\s${name}(?:="([^"]*)")?(?=[\\s>{])`)); return m ? m[1] ?? '' : null; };
 const unitTag = /<([a-z]+)\s[^>]*class="u[ "][^>]*>/g;
 
 const problems = [], keys = new Map(), hosts = [];
 for (const f of files) {
-  const src = readFileSync(f, 'utf8').replace(/\{\{\/\*[\s\S]*?\*\/\}\}/g, ''); // template comments
+  let src = readFileSync(f, 'utf8').replace(/\{\{\/\*[\s\S]*?\*\/\}\}/g, ''); // template comments
+  // A template's own constants ({{$feed := "koito gatus"}}) stand where they are used.
+  for (const [, name, value] of src.matchAll(/\{\{-?\s*\$(\w+) := "([^"]*)"\s*-?\}\}/g)) src = src.replaceAll(`{{$${name}}}`, value);
   const tags = [...src.matchAll(unitTag)];
   tags.forEach((m, i) => {
     const tag = m[0], body = src.slice(m.index + tag.length, i + 1 < tags.length ? tags[i + 1].index : src.length);
@@ -39,6 +45,7 @@ for (const f of files) {
     const vlan = attr(tag, 'data-vlan'), feed = attr(tag, 'data-feed');
     if (vlan !== null && !VLAN.includes(vlan)) problems.push(`${where} data-vlan="${vlan}": ${VLAN.join(', ')}`);
     if (feed !== null && !feed.trim()) problems.push(`${where} data-feed names no source`);
+    for (const name of (feed || '').split(/\s+/).filter(Boolean)) if (!FEEDS.includes(name)) problems.push(`${where} data-feed "${name}": ${FEEDS.join(', ')}`);
     if (feed !== null && net === null && host === null) problems.push(`${where} data-feed without data-net or data-host: the data could not reach it`);
     for (const n of (tag + body).matchAll(/\sdata-news(?:="([^"]*)")?(?=[\s>{])/g)) {
       if (!NEWS.includes(n[1] ?? '')) problems.push(`${where} data-news="${n[1]}": empty or markup`);

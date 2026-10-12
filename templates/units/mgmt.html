@@ -4,7 +4,7 @@
 <div class="u mgmt" style="--h:1" data-key="mgmt" data-power data-net="wan" data-vlan="mgmt">
   <div class="face">
     <nav class="ports" aria-label="{{t "nav.aria"}}">
-      {{range .Content.nav}}{{if and .needs (not $.HasCV)}}<span class="key off" title="{{t "soon"}}">{{t .name}}</span>{{else}}<a class="key" href="{{.link}}"{{ext .link}}>{{t .name}}</a>{{end}}
+      {{range .Content.nav}}{{$href := or (index $.Content.links .link) .link}}{{if and .needs (not $.HasCV)}}<span class="key off" title="{{t "soon"}}">{{t .name}}</span>{{else}}<a class="key" href="{{$href}}"{{ext $href}}>{{t .name}}</a>{{end}}
       {{end}}
     </nav>
     <div class="ports">

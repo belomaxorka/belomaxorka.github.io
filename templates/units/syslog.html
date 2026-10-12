@@ -5,12 +5,13 @@
      A line is marked with data-kind (not data-src: html/template takes *src* for a URL and encodes the value).
      The list scrolls, and the scroll survives the htmx refresh every minute (/fragments/syslog). */}}
 {{define "unit-syslog"}}
-<section class="u log" style="--h:5" aria-label="{{t "log.aria"}}" id="unit-syslog" data-key="log" data-power data-net="wan" data-feed="koito gatus proxmox wakapi"
+{{- $feed := "koito gatus ups proxmox wakapi"}}
+<section class="u log" style="--h:5" aria-label="{{t "log.aria"}}" id="unit-syslog" data-key="log" data-power data-net="wan" data-feed="{{$feed}}"
   hx-get="/fragments/syslog" hx-trigger="every 120s, fresh" hx-swap="outerHTML">
   <div class="face">
     <div class="bar">
-      <span class="silk">syslog · koito, gatus, ups, proxmox, wakapi</span>
-      <a class="key" href="https://blog.belomaxorka.dev"{{ext "https://blog.belomaxorka.dev"}}>{{t "log.blog"}}</a>
+      <span class="silk">syslog · {{$feed}}</span>
+      {{with (content).links.blog}}<a class="key" href="{{.}}"{{ext .}}>{{t "log.blog"}}</a>{{end}}
     </div>
     <div class="lcd">
       {{if .}}<ol tabindex="0" aria-label="{{t "log.aria"}}">

@@ -18,8 +18,8 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="belomaxorka infrastructure">
 <meta property="og:description" content="{{t "infra.desc"}}">
-<meta property="og:url" content="https://infra.belomaxorka.dev/">
-<meta property="og:image" content="https://infra.belomaxorka.dev{{asset "og/infra.png"}}">
+<meta property="og:url" content="{{.Content.links.infra}}/">
+<meta property="og:image" content="{{.Content.links.infra}}{{asset "og/infra.png"}}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="{{t "infra.og_alt"}}">
@@ -78,15 +78,16 @@
 <h1>belomaxorka infrastructure</h1>
 <div><small>{{th "infra.now"}}</small></div>
 <footer>
-  <a href="https://status.belomaxorka.dev"{{ext "https://status.belomaxorka.dev"}}>{{t "infra.status"}}</a>
+  {{- $l := .Content.links}}{{$src := print $l.source "/src/branch/main/templates/infra.html"}}
+  <a href="{{$l.status}}"{{ext $l.status}}>{{t "infra.status"}}</a>
   //
-  <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev/src/branch/main/templates/infra.html"{{ext "https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev/src/branch/main/templates/infra.html"}}>{{t "infra.source"}}</a>
+  <a href="{{$src}}"{{ext $src}}>{{t "infra.source"}}</a>
   //
-  <a href="https://belomaxorka.dev"{{ext "https://belomaxorka.dev"}}>belomaxorka.dev</a>
+  <a href="{{.URL}}"{{ext .URL}}>belomaxorka.dev</a>
   //
   {{- range langs}}{{if ne . lang}} <a href="?lang={{.}}" hreflang="{{.}}" lang="{{.}}">{{.}}</a>{{end}}{{end}}
 </footer>
-{{- $code := `<a href="https://infra.belomaxorka.dev"><img src="https://belomaxorka.dev/88x31/infra.gif" width="88" height="31" alt="hosted on belomaxorka infrastructure"></a>`}}
+{{- $code := printf `<a href="%s"><img src="%s/88x31/infra.gif" width="88" height="31" alt="hosted on belomaxorka infrastructure"></a>` .Content.links.infra .URL}}
 <div class="badge">
   <img src="/88x31/infra.gif" width="88" height="31" alt="hosted on belomaxorka infrastructure">
   <details><summary>{{t "infra.badge"}}</summary><input readonly value="{{$code}}" aria-label="{{t "infra.badge"}}"></details>

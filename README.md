@@ -23,8 +23,8 @@ works with JavaScript off. On top of that, [htmx](https://htmx.org) refreshes th
 
 - `templates/`: `layout.html` and `index.html`, one component per rack unit in `templates/units/`, the light version
   (HTML 4.01 for old browsers, `lite.belomaxorka.dev`) in `templates/lite/`
-- `content/*.yaml`: what the page lists (racks, contacts, buttons, donations, lamps, the profile, the hardware's names);
-  edit and push, no code
+- `content/*.yaml`: what the page lists (racks, contacts, buttons, donations, lamps, the profile, the hardware's names,
+  the addresses the templates link to in `links.yaml`); edit and push, no code
 - `templates/infra.html`: [infra.belomaxorka.dev](https://infra.belomaxorka.dev), where «hosted on belomaxorka
   infrastructure» leads: a joke page in the genre of stupid.fish technologies (a wall of homelab memes: drop a
   picture into `content/memes/` and push; site-api lists, shrinks and pages them, `/m/{id}` shows one) and a live fastfetch of the Proxmox host at `/fetch`; its 88x31 is
@@ -65,7 +65,9 @@ Push, and site-api picks the change up by itself:
 - racks: `content/racks.yaml` (which racks, at which addresses, which units in which order); a new rack also needs
   `rack.<id>` and `rack.<id>.sub` in both i18n files. A unit without a template in `templates/units/` fails the check
   in CI, and on the server the previous version keeps running
-- the profile, contacts, buttons, donations: `content/*.yaml`; every text: `i18n/en.json` and `i18n/ru.json`
+- the profile, contacts, buttons, donations: `content/*.yaml`; every text: `i18n/en.json` and `i18n/ru.json` (CI fails
+  on a key a page asks for that a dictionary lacks, or that only English has); an address the templates link to:
+  `content/links.yaml`
 - the meme wall of the infrastructure page: a picture dropped into `content/memes/`
 
 ## Real and simulated
@@ -94,8 +96,9 @@ A unit is a template in `templates/units/` whose root element says what it is; t
 - `data-host="key"` instead, if it runs on another unit (like a container on the host): no cables of its own, it is on
   and online while its host is;
 - `data-live="lamps|bar|text|image"` on what shows live data: it goes dark while the unit is offline;
-- `data-feed="source ..."` for the server's sources it shows (packets go there), `data-news` on what changes with new
-  data.
+- `data-feed="source ..."` for the server's sources it shows (packets go there: koito, gatus, proxmox, ups, wakapi,
+  webring, telegram, and the server's own site and guestbook; CI refuses another name), `data-news` on what changes
+  with new data.
 
 Then a line in `content/racks.yaml` and a `lite-<name>` template for the light version. CI
 (`docs/tools/check-units.mjs`) refuses a unit that shows live data without saying how it gets it.

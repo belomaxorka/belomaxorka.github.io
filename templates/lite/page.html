@@ -90,7 +90,7 @@ best viewed with any browser</font></td></tr>
 
 {{/* Management: the sections. */}}
 {{define "lite-mgmt"}}{{template "lite-silk" (t "nav.aria")}}
-{{template "f"}}{{$sep := ""}}{{range .Content.nav}}{{if or (not .needs) $.HasCV}}{{$sep}}[<a href="{{.link}}">{{t .name}}</a>]{{$sep = " "}}{{end}}{{end}}{{template "f-end"}}{{end}}
+{{template "f"}}{{$sep := ""}}{{range .Content.nav}}{{if or (not .needs) $.HasCV}}{{$sep}}[<a href="{{or (index $.Content.links .link) .link}}">{{t .name}}</a>]{{$sep = " "}}{{end}}{{end}}{{template "f-end"}}{{end}}
 
 {{/* The server with my name: a photo, who I am, the LCD, the PGP fingerprint. */}}
 {{define "lite-server"}}{{with .Profile}}
@@ -162,8 +162,8 @@ best viewed with any browser</font></td></tr>
 {{/* The UPS is the footer: charge, load, the counter, the sources. */}}
 {{define "lite-ups"}}{{template "lite-silk" (print (t "ups.label") " · " .Content.hardware.ups.label)}}{{with .UPS}}
 {{template "lite-lcd-open"}}{{if .OK}}{{if .OnBattery}}{{t "ups.battery"}}{{else}}{{t "ups.mains"}}{{end}} · {{.Charge}}% · {{t "ups.load" .Load}} · {{t "ups.runtime" .RuntimeMin}}{{else}}{{t "ups.online"}} · {{t "ups.nodata"}}{{end}}{{template "lite-lcd-close"}}{{end}}
-<br><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8"><b>hosted on <a href="https://infra.belomaxorka.dev/">belomaxorka infrastructure</a></b>{{with .Visits}}{{if .OK}} · {{t "visits" (num .Views) (num .Visitors)}}{{end}}{{end}}<br>
-{{t "ups.updated" (date .Updated)}} · {{t "ups.sources"}} <a href="https://git.belomaxorka.dev/belomaxorka/belomaxorka.dev">{{t "ups.site"}}</a>, <a href="https://git.belomaxorka.dev/belomaxorka/site-api">site-api</a></font>{{end}}
+<br><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8"><b>hosted on <a href="{{.Content.links.infra}}/">belomaxorka infrastructure</a></b>{{with .Visits}}{{if .OK}} · {{t "visits" (num .Views) (num .Visitors)}}{{end}}{{end}}<br>
+{{t "ups.updated" (date .Updated)}} · {{t "ups.sources"}} <a href="{{.Content.links.source}}">{{t "ups.site"}}</a>, <a href="{{.Content.links.api}}">site-api</a></font>{{end}}
 
 {{/* /lab: the Proxmox host and the containers. */}}
 {{define "lite-pve"}}{{template "lite-silk" (print "proxmox ve · " (t "lab.host"))}}{{with .Lab}}
