@@ -65,6 +65,13 @@
 .u:is(.has-nic, [data-host]) .face { padding-left: 38px; }
 /* Without power or without a link (.unlinked, assets/js/net.js) the card's lamp is dark. net.js lights the switch ports' lamps. */
 .u.off .nic .led, .u.unlinked .nic .led { background: var(--led-off); box-shadow: none; animation: none; }
+/* A cord just plugged back in (.linking, net.js): the link is being negotiated for a couple of seconds, the lamps of its
+   port and card blink amber. */
+.tp.linking .led, .u.linking .nic .led { background: var(--led-warn); box-shadow: 0 0 5px var(--led-warn); }
+@media (prefers-reduced-motion: no-preference) {
+  .tp.linking .led, .u.linking .nic .led { animation: linking .5s steps(2, jump-none) infinite; }
+}
+@keyframes linking { 50% { opacity: .2; } }
 .vm {
   position: absolute; z-index: 0; top: 0; bottom: 0; left: -22px; width: 20px; border-radius: 3px;
   background: repeating-linear-gradient(#1a1c20 0 9px, #0d0e10 9px 22px);

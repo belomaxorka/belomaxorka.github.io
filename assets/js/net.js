@@ -7,7 +7,9 @@
 // it missed something. The causes:
 //   - a pulled cord: drag the plug out of a unit's network card and the cord leaves the jack, comes out of the
 //     organiser and hangs; only that unit loses its link. The router's LAN or WAN (on the other racks the uplink to
-//     R1): the whole rack loses the internet. Bring the plug to the jack (or tap it) and it goes back in;
+//     R1): the whole rack loses the internet. Bring the plug to the jack (or tap it) and it goes back in; the link
+//     comes up a couple of seconds later, as a real card negotiates it, the lamps of its port and card blinking amber
+//     meanwhile (not when the rack loads or arrives: those cables are plugged in as they are drawn);
 //   - the rack arrived from the next one (assets/js/aisle.js): while the cables are drawn the units are offline, each
 //     comes online when its cord's plug reaches the port. Without animation, all at once;
 //   - the switch or the router without power (power.js), or, for a rack without a router, the rack that feeds it.
@@ -47,7 +49,10 @@
   // The rack has arrived: boot, the cables have not started drawing yet and nothing has a link; then waiting, whose plug is not in yet.
   let boot = false, timers = [];
   const waiting = new Set();
-  const down = (k) => pulled(k) || boot || waiting.has(k);
+  // Plugged back in by hand: the link is negotiated for LINK_UP ms (cord key -> its timer).
+  const LINK_UP = 2000;
+  const linking = new Map();
+  const down = (k) => pulled(k) || boot || waiting.has(k) || linking.has(k);
   const unitOf = Rack.unitOf;
 
   // Every unit's place on the network, from the rack's topology (rack.js): one place for every cause.
@@ -73,10 +78,12 @@
       const link = u.dataset.host ? on(host) && linked(host) : linked(u);
       u.classList.toggle('unlinked', !link);
       u.classList.toggle('nonet', link && u.dataset.net === 'wan' && !internet);
+      u.classList.toggle('linking', switchUp && on(u) && linking.has(Rack.keyOf(u)));
     }
     for (const c of cords) {
       const u = c.type === 'nic' ? unitOf(body, c.key) : c.type === 'lan' ? rtr : null;
       c.port?.classList.toggle('link', switchUp && !down(c.key) && !u?.classList.contains('off'));
+      c.port?.classList.toggle('linking', switchUp && linking.has(c.key) && !u?.classList.contains('off'));
     }
     if (rtr) {
       // The router's LAN goes to the switch: the switch without power means no link on LAN, as with a pulled cord.
@@ -363,6 +370,8 @@
   function pull(k) {
     const c = cords.find((x) => x.key === k);
     if (!c) return;
+    clearTimeout(linking.get(k));
+    linking.delete(k);
     out[here() + '/' + k] = 1;
     save();
     ropes.set(k, fresh(c));
@@ -375,6 +384,8 @@
     save();
     ropes.delete(k);
     told(k, true);
+    clearTimeout(linking.get(k));
+    linking.set(k, setTimeout(() => { linking.delete(k); sync(); }, LINK_UP));
     document.dispatchEvent(new Event('rack:layout'));
   }
 
@@ -400,6 +411,8 @@
     timers.forEach(clearTimeout);
     timers = [];
     waiting.clear();
+    linking.forEach(clearTimeout);
+    linking.clear();
     boot = !!e.detail && !e.detail.quiet && !reduce.matches;
     sync();
   });
