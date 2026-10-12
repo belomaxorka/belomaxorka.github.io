@@ -164,15 +164,10 @@
 }
 .hall .vent { inset: 0; background: radial-gradient(50% 100% at 50% 100%, color-mix(in srgb, var(--cold) calc(var(--cold-a) * 100%), transparent), transparent); }
 
-/* ---------- light ----------
-   In the light theme the evening keeps the day's lamps and the night and the battery the day's cold light and
-   neighbours: the hall by day is lit by daylight too. */
-.room[data-light="evening"] .hall { --lamp: color-mix(in srgb, #fffaf0 var(--L), #ffd9a8); --lamp-on: .7; filter: brightness(.85); }
-.room[data-light="night"] .hall {
-  --lamp-on: 0; --cold-a: calc(.12 * var(--light) + .35 * (1 - var(--light)));
-  --nb-dim: calc(.97 * var(--light) + .45 * (1 - var(--light))); filter: brightness(.75);
-}
-.room[data-light="battery"] .hall { --lamp-on: 0; --cold-a: calc(.12 * var(--light) + .1 * (1 - var(--light))); }
+/* ---------- light: the same in either theme ---------- */
+.room[data-light="evening"] .hall { --lamp: #ffd9a8; --lamp-on: .7; filter: brightness(.85); }
+.room[data-light="night"] .hall { --lamp-on: 0; --cold-a: .35; --nb-dim: .45; filter: brightness(.75); }
+.room[data-light="battery"] .hall { --lamp-on: 0; --cold-a: .1; }
 .room[data-light="battery"] .hall::after {
   content: ""; position: absolute; inset: 0;
   background: radial-gradient(70% 60% at 50% 0, #ff2a1a40, transparent 70%), #ff1a0a14;
