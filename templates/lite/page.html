@@ -82,10 +82,10 @@ best viewed with any browser</font></td></tr>
 {{with .Ring}}{{template "f"}}<a href="{{.PrevURL}}">← {{or .PrevName (t "ring.prev")}}</a> · <a href="{{.Home}}">otoring</a> · <a href="{{.RandomURL}}">{{t "ring.random"}}</a> · <a href="{{.NextURL}}">{{or .NextName (t "ring.next")}} →</a>{{template "f-end"}}{{end}}{{end}}
 
 {{/* The router: the ways into the site, the main one and the spare uplinks (content/uplinks.yaml). The lamp is the
-     Gatus check named in check: green works, red does not, dark Gatus does not know it. */}}
+     Gatus check named in check: green works, red does not, dark Gatus does not know it; a way without check, none. */}}
 {{define "lite-router"}}{{template "lite-silk" (print "opnsense · " (t "net.router") " · " (t "lite.uplinks"))}}
 <table border="0" cellspacing="0" cellpadding="2">
-{{range .Content.uplinks}}{{$u := .}}{{$st := "off"}}{{range $.Status.Lamps}}{{if eq .Name $u.check}}{{$st = .State}}{{end}}{{end}}<tr><td valign="top">{{template "lite-led" $st}}</td><td valign="top">{{template "f"}}<b>{{.name}}</b>{{template "f-end"}}</td><td valign="top">{{template "f"}}<a href="{{.url}}">{{.url}}</a>{{if eq .id "lite"}} <font color="#ffc53d">← {{t "lite.here"}}</font>{{end}}{{template "f-end"}}<br><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8">{{loc .note}}</font></td></tr>
+{{range .Content.uplinks}}{{$u := .}}{{$st := "off"}}{{range $.Status.Lamps}}{{if eq .Name $u.check}}{{$st = .State}}{{end}}{{end}}<tr><td valign="top">{{if .check}}{{template "lite-led" $st}}{{end}}</td><td valign="top">{{template "f"}}<b>{{.name}}</b>{{template "f-end"}}</td><td valign="top">{{template "f"}}<a href="{{.url}}">{{.url}}</a>{{if eq .id "lite"}} <font color="#ffc53d">← {{t "lite.here"}}</font>{{end}}{{template "f-end"}}<br><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8">{{loc .note}}</font></td></tr>
 {{end}}</table>{{end}}
 
 {{/* Management: the sections. */}}

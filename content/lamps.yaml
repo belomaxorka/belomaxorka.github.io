@@ -4,8 +4,6 @@
 labels:
   belomaxorka.dev: site
   Site (light, http): lite
-  Site (Tor): tor
-  Site (Yggdrasil): ygg
   Blog: blog
   Infra page: infra
   Site API: api

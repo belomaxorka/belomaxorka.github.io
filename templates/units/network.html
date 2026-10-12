@@ -23,7 +23,8 @@
 {{/* The router. Besides WAN and LAN, the site's spare ways in (content/uplinks.yaml, all but https itself): jacks that
      are links, like the ring on the patch panel, the tape the caption (port), the address in the hint. The lamp is
      the Gatus check named in check: lit, the way in works; red, it does not; dark without the router's WAN or LAN
-     (net.js), like the monitoring lamps without a link. The link to the light version is the "http" port, hidden among
+     (net.js), like the monitoring lamps without a link. A way without check (Tor, Yggdrasil: Gatus is in neither
+     network) has no lamp. The link to the light version is the "http" port, hidden among
      the ports. The rest of the router is decoration. */}}
 {{define "unit-router"}}
 <div class="u rtr" style="--h:1" data-key="rtr" data-power data-role="router">
@@ -33,7 +34,7 @@
       <span class="silk" aria-hidden="true">wan</span><i class="jack wan" data-port="wan" aria-hidden="true"></i><span class="silk" aria-hidden="true">lan</span><i class="jack" data-port="lan" aria-hidden="true"></i>
       <nav class="uplinks" aria-label="{{t "net.uplinks"}}">
         {{- range .Content.uplinks}}{{if .port}}{{$u := .}}{{$st := "off"}}{{range $.Status.Lamps}}{{if eq .Name $u.check}}{{$st = .State}}{{end}}{{end}}
-        <a class="port up" href="{{.url}}"{{ext .url}} title="{{.name}} · {{.url}}" data-uplink="{{.id}}"><i class="jack"></i><span class="tape{{if eq .id "tor"}} r{{else if eq .id "ygg"}} b{{end}}">{{.port}}</span><i class="led{{with $st}} {{.}}{{end}}"></i></a>
+        <a class="port up" href="{{.url}}"{{ext .url}} title="{{.name}} · {{.url}}" data-uplink="{{.id}}"><i class="jack"></i><span class="tape{{if eq .id "tor"}} r{{else if eq .id "ygg"}} b{{end}}">{{.port}}</span>{{if .check}}<i class="led{{with $st}} {{.}}{{end}}"></i>{{end}}</a>
         {{- end}}{{end}}
       </nav>
     </div>
