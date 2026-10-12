@@ -117,7 +117,7 @@ best viewed with any browser</font></td></tr>
 
 {{/* Monitoring is Gatus: the lamps and the summary. */}}
 {{define "lite-monitor"}}{{template "lite-silk" (t "mon.aria")}}{{with .Status}}
-{{if .OK}}{{template "lite-lcd-open"}}{{t "mon.up" .Up .Total}} · {{if .Down}}{{t "mon.down" (join .Down ", ")}}{{else if .Slow}}{{t "mon.slow" .Slow .SlowMs}}{{else}}{{t "mon.fast" .AvgMs}}{{end}}{{if .Span}}<br>{{t "mon.uptime_all" .Uptime}} · {{t "mon.span" (uptime .Span)}}{{end}}{{template "lite-lcd-close"}}
+{{if .OK}}{{template "lite-lcd-open"}}{{t "mon.up" .Up .Total}} · {{if .Down}}{{t "mon.down" (join .Down ", ")}}{{else if .Slow}}{{t "mon.slow" .Slow .SlowMs}}{{else}}{{t "mon.fast" .AvgMs}}{{end}}{{if .HasUptime}}<br>{{t "mon.uptime_day" .Day}} · {{t "mon.uptime_long" .Week .Month}}{{if not .Since.IsZero}} · {{t "mon.since" (stamp .Since)}}{{end}}{{end}}{{template "lite-lcd-close"}}
 <br>{{template "f"}}{{range .Lamps}}{{template "lite-led" .State}}&nbsp;{{.Label}} &nbsp; {{end}}{{template "f-end"}}
 {{else}}{{template "lite-lcd-open"}}{{t "mon.silent"}} · {{t "mon.unavailable"}}{{template "lite-lcd-close"}}{{end}}{{end}}{{end}}
 
