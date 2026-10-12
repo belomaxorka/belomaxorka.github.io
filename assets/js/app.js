@@ -527,11 +527,25 @@
   if (document.fonts) document.fonts.ready.then(later);
   let resizeTimer;
   addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(layout, 120); });
-  document.addEventListener('htmx:afterSettle', later);
+  // htmx settles a swapped unit by giving it the attributes of the server's markup, its style among them: the
+  // min-height snap() gave it is gone, and until the next layout the unit has its own height, the page is shorter and
+  // a visitor at its bottom is scrolled up (every refresh of the log or the monitor moved the page by up to 38 px). So
+  // the units snap again at once, in the same task, before anything is laid out or painted; the cables next frame.
+  document.addEventListener('htmx:afterSettle', () => { snap(); later(); });
+  // A poll whose answer is the unit's last answer again is not swapped: nothing on the unit would change, and each
+  // swap lays the whole rack out (the log was swapped every 30 s for the host's CPU figures it does not show). The
+  // lamps on the way still blink (live.js: an answer without news).
+  const answers = new Map(); // unit id -> its last answer
+  document.addEventListener('htmx:beforeSwap', (e) => {
+    const t = e.detail.target;
+    if (!e.detail.shouldSwap || !t?.id?.startsWith('unit-') || e.detail.requestConfig?.verb !== 'get') return;
+    if (answers.get(t.id) === e.detail.serverResponse) e.detail.shouldSwap = false;
+    answers.set(t.id, e.detail.serverResponse);
+  });
   // The log comes whole every minute: keep the list's scroll position.
   let logScroll = 0;
   document.addEventListener('htmx:beforeSwap', (e) => {
-    if (e.detail.target?.id === 'unit-syslog') logScroll = e.detail.target.querySelector('ol')?.scrollTop || 0;
+    if (e.detail.shouldSwap && e.detail.target?.id === 'unit-syslog') logScroll = e.detail.target.querySelector('ol')?.scrollTop || 0;
   });
   document.addEventListener('htmx:afterSettle', () => {
     const ol = document.querySelector('#unit-syslog ol');
