@@ -14,7 +14,7 @@
     <div class="lcd"{{if .OK}} x-data="cycle(4500)"{{end}}>
       {{if .OK}}<ul class="msgs">
         <li class="on">{{t "mon.up" .Up .Total}}<br><span class="d">{{if .Down}}{{t "mon.down" (join .Down ", ")}}{{else if .Slow}}{{t "mon.slow" .Slow .SlowMs}}{{else}}{{t "mon.fast" .AvgMs}}{{end}}{{if .Stale}}<br>gatus · {{ago .Checked}}{{end}}</span></li>
-        {{if .HasUptime}}<li>{{t "mon.uptime_day" .Day}}<br><span class="d">{{t "mon.uptime_long" .Week .Month}}{{if not .Since.IsZero}}<br>{{t "mon.since" (stamp .Since)}}{{end}}</span></li>{{end}}
+        {{if .HasUptime}}<li>{{t "mon.uptime_day" .Day}}<br><span class="d">{{t "mon.uptime_week" .Week}}<br>{{t "mon.uptime_month" .Month}}{{if not .Since.IsZero}}<br>{{t "mon.since" (stamp .Since)}}{{end}}</span></li>{{end}}
         <li>{{with .Last}}{{if .Open}}{{t "mon.out_now" .Label}}<br><span class="d">{{t "mon.out_for" (uptime .Dur)}}</span>{{else}}{{t "mon.last"}}<br><span class="d">{{.Label}} · {{uptime .Dur}}<br>{{ago .Down}}</span>{{end}}{{else}}{{t "mon.none"}}<br><span class="d">{{t "mon.none2"}}</span>{{end}}</li>
       </ul>
       {{else}}{{t "mon.silent"}}<br><span class="d">{{t "mon.unavailable"}}</span>{{end}}
