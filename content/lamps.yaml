@@ -17,11 +17,7 @@ labels:
   Gists (Opengist): gist
   Coding stats (Wakapi): waka
   Analytics (Umami): stats
-  Notifications (ntfy): ntfy
   Scrobbles (Koito): fm
   Status page: status
-  Proxmox: proxmox
-  Backup server (PBS): pbs
   Reverse proxy (Caddy): caddy
   i2pd router: i2pd
-  i2pd console: i2p ui
