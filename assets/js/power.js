@@ -346,6 +346,12 @@
     if (!b || b === sw) return;
     sw = b;
     sw.hidden = false;
+    // Every mode's caption, stacked: the switch is as wide as the longest one, so it does not move as they change.
+    sw.querySelector('.lbl').replaceChildren(...sw.dataset.labels.split(',').map((n) => {
+      const s = document.createElement('span');
+      s.textContent = n;
+      return s;
+    }));
     sw.addEventListener('click', () => {
       mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
       Rack.store.set('hall-light', mode);
@@ -355,8 +361,8 @@
     showSwitch();
   }
   function showSwitch() {
-    const names = sw.dataset.labels.split(','), name = names[MODES.indexOf(mode)] || mode;
-    sw.querySelector('.lbl').textContent = name;
+    const names = sw.dataset.labels.split(','), i = MODES.indexOf(mode), name = names[i] || mode;
+    sw.querySelectorAll('.lbl > span').forEach((s, k) => s.classList.toggle('on', k === i));
     sw.dataset.mode = mode;
     sw.setAttribute('aria-label', sw.dataset.aria + ': ' + name);
   }

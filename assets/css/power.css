@@ -109,14 +109,18 @@
   content: ""; position: absolute; right: 3px; top: 3px; width: 4px; height: 4px; border-radius: 50%;
   background: var(--led-ok); box-shadow: 0 0 4px var(--led-ok);
 }
+.lightsw .lbl { display: grid; text-align: center; }
+.lightsw .lbl > span { grid-area: 1 / 1; visibility: hidden; }
+.lightsw .lbl > span.on { visibility: visible; }
 .lightsw:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 @media (max-width: 760px) { .lightsw { top: 30px; left: 12px; } }
 /* A phone: the hall hardly shows around the rack, the light would have nothing to light. */
 @media (max-width: 560px) { .lightsw { display: none; } }
 
-/* The torch (live.js); taken, an empty hook hangs there. */
+/* The torch (live.js); taken, an empty hook hangs there. Right of the light switch with room for its longest caption
+   ("evening": the switch is 46px wide). */
 .torch {
-  position: absolute; z-index: 7; top: 46px; left: 60px; display: grid; justify-items: center; gap: 3px;
+  position: absolute; z-index: 7; top: 46px; left: 82px; display: grid; justify-items: center; gap: 3px;
   padding: 0; border: 0; background: none; cursor: pointer; color: var(--dim);
   font: 600 9px/1 var(--f-silk); letter-spacing: .12em; text-transform: uppercase;
 }
@@ -131,7 +135,7 @@
 .torch .lens { position: absolute; left: -2px; right: -2px; top: -1px; height: 7px; border-radius: 3px; background: radial-gradient(#fff6d8, #c9b37a); box-shadow: 0 0 0 1px #0006; }
 .torch[aria-pressed="true"] .shell { opacity: .18; }
 .torch:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-@media (max-width: 760px) { .torch { top: 36px; left: 46px; } }
+@media (max-width: 760px) { .torch { top: 36px; left: 72px; } }
 /* A touch screen has no cursor to follow: no torch; the others' spots still shine. */
 @media (hover: none) { .torch { display: none; } }
 
