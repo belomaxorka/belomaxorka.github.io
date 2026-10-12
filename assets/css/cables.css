@@ -8,7 +8,7 @@
 /* The patch cords that pull out (assets/js/net.js): pulled ones hang over the cabling, under the power cables; the
    plugs have invisible zones to grab them by. */
 .cables.net { z-index: 5; }
-.cables.net .hit { fill: transparent; pointer-events: auto; cursor: grab; touch-action: none; }
+.cables.net .hit { fill: transparent; pointer-events: auto; cursor: grab; touch-action: manipulation; -webkit-touch-callout: none; user-select: none; }
 .cables.net .hit:active { cursor: grabbing; }
 
 /* The rack has arrived (assets/js/aisle.js -> app.js, .draw): the cords are drawn one by one from their jacks, the

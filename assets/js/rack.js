@@ -178,8 +178,27 @@ window.Rack = (() => {
   //   drop(key, was) — let go after a pull; tap(key, was) — let go without one;
   //   moved() — after every move, to wake the drawing.
   // hand.held is { key, x, y } in the room's coordinates while a plug is held, null otherwise.
+  // A finger lands on a plug as often to scroll past it as to take it: a finger takes a plug only after holding it
+  // still for HOLD ms (a short vibration says so). Moving first is a scroll, and the browser scrolls; a quick tap still
+  // toggles the plug. While a finger has a plug, the page does not scroll under it: its touchmoves are cancelled, on the
+  // layer (so the browser asks before scrolling a touch that starts on a plug) and on the touched element itself (a
+  // plug drawn anew when it comes out leaves the old one out of the page, and the layer would not hear of them).
+  const HOLD = 350, SLOP = 10;
   function hand(layer, room, { take, pull, drop, tap, moved }) {
     const h = { held: null };
+    let wait = null;   // a finger on a plug, not long enough yet: { from, timer, move, up, cancel }
+    let touched = null; // the element a finger is on
+    const block = (e) => { if (h.held && e.cancelable) e.preventDefault(); };
+    const unwait = () => {
+      if (!wait) return;
+      clearTimeout(wait.timer);
+      removeEventListener('pointermove', wait.move);
+      removeEventListener('pointerup', wait.up);
+      removeEventListener('pointercancel', wait.cancel);
+      wait = null;
+    };
+    layer.addEventListener('touchmove', block, { passive: false });
+    layer.addEventListener('contextmenu', (e) => { if (wait || h.held) e.preventDefault(); });
     const local = (e) => { const R = room().getBoundingClientRect(); return { x: e.clientX - R.left, y: e.clientY - R.top }; };
     const move = (e) => {
       const d = h.held;
@@ -190,6 +209,8 @@ window.Rack = (() => {
       moved();
     };
     const release = () => {
+      touched?.removeEventListener('touchmove', block);
+      touched = null;
       removeEventListener('pointermove', move);
       removeEventListener('pointerup', release);
       removeEventListener('pointercancel', release);
@@ -199,17 +220,31 @@ window.Rack = (() => {
       h.held = null;
       moved();
     };
-    layer.addEventListener('pointerdown', (e) => {
-      const key = e.target?.dataset?.key;
-      const was = key && take(key);
-      if (was === undefined || was === false) return;
-      e.preventDefault();
-      const at = local(e);
+    const grab = (key, was, at) => {
       h.held = { key, ...at, from: at, was, moved: false };
       addEventListener('pointermove', move);
       addEventListener('pointerup', release);
       addEventListener('pointercancel', release);
       moved();
+    };
+    layer.addEventListener('pointerdown', (e) => {
+      const key = e.target?.dataset?.key;
+      const was = key && take(key);
+      if (was === undefined || was === false) return;
+      const at = local(e);
+      if (e.pointerType !== 'touch') { e.preventDefault(); grab(key, was, at); return; }
+      unwait();
+      touched?.removeEventListener('touchmove', block);
+      touched = e.target;
+      touched.addEventListener('touchmove', block, { passive: false });
+      const w = wait = { from: { x: e.clientX, y: e.clientY } };
+      w.move = (m) => { if (Math.hypot(m.clientX - w.from.x, m.clientY - w.from.y) > SLOP) unwait(); }; // a scroll
+      w.up = () => { unwait(); tap(key, was); moved(); };                                             // a quick tap
+      w.cancel = unwait;                                                                              // the browser scrolls
+      w.timer = setTimeout(() => { unwait(); navigator.vibrate?.(12); grab(key, was, at); }, HOLD);
+      addEventListener('pointermove', w.move);
+      addEventListener('pointerup', w.up);
+      addEventListener('pointercancel', w.cancel);
     });
     return h;
   }
