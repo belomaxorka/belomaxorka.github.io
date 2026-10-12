@@ -29,6 +29,10 @@
       {{else}}
       <p class="empty">{{if .Enabled}}{{t "gb.none"}}{{else}}{{t "gb.off"}}{{end}}</p>
       {{end}}
+      {{- /* Older entries, 20 a page: every entry stays until the owner deletes it. Plain links: a full load. */}}
+      {{if or .Before .Older}}<nav class="gb-pages" aria-label="{{t "gb.pages"}}">
+        {{- if .Before}}<a href="?gbo=0#guestbook">← {{t "gb.newest"}}</a>{{end}}
+        {{- with .Older}}<a class="older" href="?gbo={{.}}#guestbook">{{t "gb.older"}} →</a>{{end}}</nav>{{end}}
       <dialog class="lightbox" x-ref="dlg" @click.self="close()" @keydown.arrow-left.prevent="step(-1)" @keydown.arrow-right.prevent="step(1)" aria-label="{{t "gb.drawing_alt"}}">
         <img x-ref="img" alt="{{t "gb.drawing_alt"}}">
         <div class="lb-bar">

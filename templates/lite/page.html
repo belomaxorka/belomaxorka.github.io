@@ -130,6 +130,7 @@ best viewed with any browser</font></td></tr>
 {{template "lite-lcd-open"}}{{range .Entries}}<font color="#a07a2a">{{or .Name (t "gb.anon")}} · #{{.ID}} · {{stamp .At}}</font><br>
 {{with .Text}}{{.}}<br>{{end}}{{with .Reply}}<font color="#8ab4ff">» {{.}}</font><br>{{end}}{{with .Drawing}}<a href="{{.}}"><font color="#ffd27a">{{t "lite.drawing"}}</font></a><br>{{end}}<br>
 {{else}}{{if .Enabled}}{{t "gb.none"}}{{else}}{{t "gb.off"}}{{end}}{{end}}{{template "lite-lcd-close"}}
+{{if or .Before .Older}}{{template "f"}}{{if .Before}}<a href="?gbo=0#guestbook">&laquo; {{t "gb.newest"}}</a>{{end}} {{with .Older}}<a href="?gbo={{.}}#guestbook">{{t "gb.older"}} &raquo;</a>{{end}}{{template "f-end"}}<br>{{end}}
 {{if .Enabled}}<br>
 {{with .Status}}{{template "f"}}<font color="{{if eq . "sent"}}#3fd16b{{else}}#ff4d4d{{end}}"><b>{{t (printf "gb.%s" .)}}</b></font>{{template "f-end"}}<br><br>{{end}}
 <form method="post" action="/guestbook">
