@@ -1,7 +1,7 @@
 // Screenshots and checks of a page in headless Chrome over CDP, without dependencies (Node 22+: WebSocket built in).
 // Headless Chrome's window does not get narrower than ~500px, so Emulation.setDeviceMetricsOverride sets the width.
 //
-//   node docs/tools/shot.mjs http://127.0.0.1:8099/ [--sizes 390x844,1366x768] [--out shots] [--full]
+//   node tools/shot.mjs http://127.0.0.1:8099/ [--sizes 390x844,1366x768] [--out shots] [--full]
 //        [--dark] [--light] [--reduced] [--nojs] [--wait 1500] [--eval "js expression"] [--chrome path]
 //        [--clip x,y,w,h[,scale]]   - only this piece of the page (coordinates from the document's top), enlarged
 //

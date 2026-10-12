@@ -6,7 +6,7 @@
 //   - the switch's two light rules (the system's, the picked one) set the same, and so do its two dark ones (the
 //     default and the picked one).
 //
-//   node docs/tools/check-themes.mjs assets/css     (CI runs it before a deploy; exit 1 says what is wrong)
+//   node tools/check-themes.mjs assets/css     (CI runs it before a deploy; exit 1 says what is wrong)
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, join } from 'node:path';
 

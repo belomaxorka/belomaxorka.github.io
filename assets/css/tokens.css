@@ -3,7 +3,7 @@
    below by the system's choice or by the visitor's (data-theme on <html>: the theme key, assets/js/theme.js; over
    Tor the page comes dark). A value the themes do not share is written once, with both: a colour as
    color-mix(in srgb, LIGHT var(--L), DARK), a number as calc(LIGHT * var(--light) + DARK * (1 - var(--light))).
-   docs/tools/check-themes.mjs (CI) keeps the switch here: no other stylesheet asks for the theme itself.
+   tools/check-themes.mjs (CI) keeps the switch here: no other stylesheet asks for the theme itself.
    The LCD colours come in -d/-l pairs: site-api puts the pair from the track's cover into <style id="cover-palette">.
    The cover's pair does not have to follow the theme: a black cover gives a black screen with white text in the light
    theme too, a white one a paper screen in the dark. So --lcd goes only on the background, --lcd-bg, not the panel. */

@@ -16,7 +16,7 @@
      ?lang=ru only sets it); crawlers come without the cookie and see English: canonical is the rack's address without
      a query, and there is no hreflang (no separate addresses). A pulled-out unit (?open=...) and a stub rack are
      noindex. The preview image and the description are one for the whole site (assets/og/site.png,
-     docs/tools/og/make.mjs; i18n meta.desc): a new rack needs nothing here. The title is each rack's own, from its
+     tools/og/make.mjs; i18n meta.desc): a new rack needs nothing here. The title is each rack's own, from its
      rack.<id> captions. */ -}}
 {{- $home := eq .Rack.Path "/"}}
 {{- $title := t "meta.title.home"}}{{if not $home}}{{$title = t "meta.title" (t (print "rack." .Rack.ID)) (t (print "rack." .Rack.ID ".sub"))}}{{end}}

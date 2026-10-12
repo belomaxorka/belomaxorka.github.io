@@ -268,7 +268,7 @@
   "uptime.m": "%d min",
   "uptime.hm": "%dh %dm",
   "uptime.dh": "%dd %dh",
-  "infra.desc": "belomaxorka infrastructure: a homelab on proxmox in a closet, behind a ups. the servers smoke.",
+  "infra.desc": "belomaxorka infrastructure: a homelab on proxmox in a closet, behind a ups.",
   "infra.wall": "a wall of homelab memes",
   "infra.og_alt": "a wall of homelab memes above the title belomaxorka infrastructure",
   "infra.meme_alt": "a meme",

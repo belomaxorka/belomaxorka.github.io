@@ -1,11 +1,6 @@
-{{/* infra.belomaxorka.dev: "hosted on belomaxorka infrastructure" on the site leads here. A joke in the genre of
-     stupid.fish technologies (teidesu): instead of their video, a grid of memes about "hosting as we know it", a Times
-     heading, status // source, the 88x31 button. Just the pictures: no captions, no viewer, nothing to click on them.
-     They are content/memes/ (jpg, png, gif, webp): drop a file in and push, nothing else names it. site-api orders
-     them by the date in the file name, newest first (Telegram's photo_2026-10-12_02-11-28.jpg, or
-     2026-02-20_anything.jpg; without a date, by name, after the dated ones), crops them square without EXIF and pages
-     them by 24. site-api renders "/" with the infra template and "/fetch" with infra-fetch (the host's live data from
-     Proxmox, the UPS from NUT, Gatus). No scripts. The 88x31 button is /88x31/infra.gif (docs/tools/make_88x31.py). */}}
+{{/* infra.belomaxorka.dev, where "hosted on belomaxorka infrastructure" leads: a grid of homelab memes, the links and
+     the 88x31 button. The pictures are content/memes/ (jpg, png, gif, webp), newest first by the date in the file
+     name (photo_2026-10-12_02-11-28.jpg or 2026-02-20_name.jpg); site-api crops them square and pages them by 24. */}}
 {{define "infra" -}}
 <!doctype html>
 <html lang="{{lang}}">
@@ -52,7 +47,6 @@
   @media (max-width: 540px) { h1 { font-size: 2rem; } }
 </style>
 </head>
-<!-- 0LvRjtCx0L7Qv9GL0YLQvdC+0Lkg0LLQsNGA0LLQsNGA0LUg0L3QsCDQsdCw0LfQsNGA0LUg0L3QvtGBINC+0YLQvtGA0LLQsNC70Lg= -->
 <body>
 {{- with .Gallery}}{{if .Items}}
 <ul class="wall" aria-label="{{t "infra.wall"}}">
@@ -80,78 +74,6 @@
   <img src="/88x31/infra.gif" width="88" height="31" alt="hosted on belomaxorka infrastructure">
   <details><summary>{{t "infra.badge"}}</summary><input readonly value="{{$code}}" aria-label="{{t "infra.badge"}}"></details>
 </div>
-</body>
-</html>
-{{- end}}
-
-{{define "ff-pct"}}<span class="{{if ge . 80}}r{{else if ge . 50}}y{{else}}g{{end}}">{{.}}%</span>{{end}}
-{{define "ff-batt"}}<span class="{{if ge . 50}}g{{else if ge . 20}}y{{else}}r{{end}}">{{.}}%</span>{{end}}
-{{define "ff-colors"}}{{if .}}<s class="k2"></s><s class="r2"></s><s class="g2"></s><s class="y2"></s><s class="b2"></s><s class="m2"></s><s class="c2"></s><s class="w2"></s>{{else}}<s class="k"></s><s class="r"></s><s class="g"></s><s class="y"></s><s class="b"></s><s class="m"></s><s class="c"></s><s class="w"></s>{{end}}{{end}}
-
-{{/* stupid.fish's "now with a better server!" leads to their server's fastfetch; here it is live: Proxmox, the UPS, Gatus.
-     The page above no longer links to it: only its address, /fetch, leads here. */}}
-{{define "infra-fetch" -}}
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>fastfetch · belomaxorka infrastructure</title>
-<link rel="icon" href="/favicon.ico">
-<meta name="theme-color" content="#1e1e2e">
-<style>
-  :root {
-    font-family: ui-monospace, "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace; font-size: 12px; line-height: 1.15;
-    background: #1e1e2e; color: #cdd6f4; color-scheme: dark;
-  }
-  body { margin: 8px; }
-  pre { margin: 0; font: inherit; overflow-x: auto; }
-  .o, i { color: #fab387; font-style: normal; font-weight: 700; }
-  .o { font-weight: 400; }
-  b.o { font-weight: 700; }
-  .sh { color: #a6e3a1; }
-  a { color: #89b4fa; }
-  span.g { color: #a6e3a1; } span.y { color: #f9e2af; } span.r { color: #f38ba8; }
-  s { display: inline-block; width: 3ch; height: 1.15em; vertical-align: top; text-decoration: none; }
-  s.k { background: #45475a; } s.r { background: #f38ba8; } s.g { background: #a6e3a1; } s.y { background: #f9e2af; }
-  s.b { background: #89b4fa; } s.m { background: #f5c2e7; } s.c { background: #94e2d5; } s.w { background: #a6adc8; }
-  s.k2 { background: #585b70; } s.r2 { background: #f47799; } s.g2 { background: #89d88b; } s.y2 { background: #ebd391; }
-  s.b2 { background: #74a8fc; } s.m2 { background: #f2aede; } s.c2 { background: #6ad7ca; } s.w2 { background: #bac2de; }
-  .caret { display: inline-block; width: 2px; background: #cdd6f4; animation: blink 1s infinite; }
-  @keyframes blink { 0%, 50%, 100% { opacity: 1; } 75% { opacity: 0; } }
-  @media (prefers-reduced-motion: reduce) { .caret { animation: none; } }
-</style>
-</head>
-<body>
-<pre>
-<span class="sh">&gt; </span>fastfetch{{if .Lab.OK}}{{$n := .Lab.Node}}
-         .://:`              `://:.            <b class="o">root</b>@<b class="o">{{$n.Name}}</b>
-       `hMMMMMMd/          /dMMMMMMh`          ----------------
-        `sMMMMMMMd:      :mMMMMMMMs`           <i>OS</i>: Proxmox VE{{with $n.PVE}} {{.}}{{end}} x86_64
-`<b class="o">-/+oo+/:`</b>.yMMMMMMMh-  -hMMMMMMMy.`<b class="o">:/+oo+/-`</b>   <i>Host</i>: {{with $.Content.hardware}}{{or .host "unknown"}}{{else}}unknown{{end}}
-`<b class="o">:oooooooo/`</b>-hMMMMMMMyyMMMMMMMh-`<b class="o">/oooooooo:`</b>   <i>Kernel</i>: Linux{{with $n.Kernel}} {{.}}{{end}}
-  `<b class="o">/oooooooo:`</b>:mMMMMMMMMMMMMm:`<b class="o">:oooooooo/</b>`     <i>Uptime</i>: {{uptime $n.Uptime}}
-    <b class="o">./ooooooo+-</b> +NMMMMMMMMN+ <b class="o">-+ooooooo/.</b>       <i>Guests</i>: {{.Lab.Up}} running, {{.Lab.Total}} total (pct)
-      <b class="o">.+ooooooo+-</b>`oNMMMMNo`<b class="o">-+ooooooo+.</b>         <i>Shell</i>: bash 5.2.37
-        <b class="o">-+ooooooo/.`</b>sMMs`<b class="o">./ooooooo+-</b>           <i>CPU</i>: {{or $n.CPUModel "unknown"}} ({{$n.Cores}}){{with $n.GHz}} @ {{.}} GHz{{end}}
-          <b class="o">:oooooooo/`</b>..`<b class="o">/oooooooo:</b>             <i>GPU</i>: none (it's a server)
-          <b class="o">:oooooooo/`</b>..`<b class="o">/oooooooo:</b>             <i>Memory</i>: {{printf "%.2f" $n.MemGiB}} GiB / {{printf "%.2f" $n.MaxGiB}} GiB ({{template "ff-pct" $n.Mem}})
-        <b class="o">-+ooooooo/.`</b>sMMs`<b class="o">./ooooooo+-</b>           <i>Swap</i>: {{if $n.MaxSwapGiB}}{{printf "%.2f" $n.SwapGiB}} GiB / {{printf "%.2f" $n.MaxSwapGiB}} GiB ({{template "ff-pct" $n.Swap}}){{else}}Disabled{{end}}
-      <b class="o">.+ooooooo+-</b>`oNMMMMNo`<b class="o">-+ooooooo+.</b>         <i>Disk (/)</i>: {{if $n.MaxRootGiB}}{{printf "%.2f" $n.RootGiB}} GiB / {{printf "%.2f" $n.MaxRootGiB}} GiB ({{template "ff-pct" $n.Root}}){{else}}unknown{{end}}
-    <b class="o">./ooooooo+-</b> +NMMMMMMMMN+ <b class="o">-+ooooooo/.</b>       <i>Load</i>: {{with index $n.Load 0}}{{.}}, {{index $n.Load 1}}, {{index $n.Load 2}}{{else}}unknown{{end}}
-  `<b class="o">/oooooooo:`</b>:mMMMMMMMMMMMMm:`<b class="o">:oooooooo/</b>`     <i>Battery{{with $.Content.hardware}}{{with .ups}}{{with .model}} ({{.}}){{end}}{{end}}{{end}}</i>: {{with .UPS}}{{if .OK}}{{template "ff-batt" .Charge}} [{{if .OnBattery}}Discharging{{else if .Charging}}Charging{{else}}AC Connected{{end}}]{{else}}unknown{{end}}{{end}}
-`<b class="o">:oooooooo/`</b>-hMMMMMMMyyMMMMMMMh-`<b class="o">/oooooooo:`</b>   <i>Monitoring</i>: {{with .Status}}{{if .OK}}<span class="{{if eq .Up .Total}}g{{else}}r{{end}}">{{.Up}}/{{.Total}}</span> checks up (Gatus){{else}}unknown{{end}}{{end}}
-`<b class="o">-/+oo+/:`</b>.yMMMMMMMh-  -hMMMMMMMy.`<b class="o">:/+oo+/-`</b>   <i>Smoke detector</i>: disabled
-        `sMMMMMMMm:      :dMMMMMMMs`           <i>Locale</i>: ru_RU.UTF-8
-       `hMMMMMMd/          /dMMMMMMh`
-         `://:`              `://:`            {{template "ff-colors" 0}}
-                                               {{template "ff-colors" 1}}
-{{else}}
-fastfetch: the host is not answering. probably on a smoke break, try again in a minute
-{{end}}
-<span class="sh">&gt; </span><a href="/">cd ..</a><span class="caret">&nbsp;</span>
-</pre>
 </body>
 </html>
 {{- end}}

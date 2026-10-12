@@ -268,7 +268,7 @@
   "uptime.m": "%d мин",
   "uptime.hm": "%d ч %d мин",
   "uptime.dh": "%d д %d ч",
-  "infra.desc": "belomaxorka infrastructure: хоумлаб на proxmox в шкафу, за ибп. серверы курят.",
+  "infra.desc": "belomaxorka infrastructure: хоумлаб на proxmox в шкафу, за ибп.",
   "infra.wall": "стена мемов про хоумлаб",
   "infra.og_alt": "стена мемов про хоумлаб над заголовком belomaxorka infrastructure",
   "infra.meme_alt": "мем",

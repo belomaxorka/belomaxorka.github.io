@@ -1,5 +1,3 @@
-# The real hardware the pages name, in one place (NUT's driver only reports "1000" for the UPS).
+# The UPS's name on its unit (NUT's driver only reports "1000").
 ups:
-  label: cbr 1000 va   # silkscreen on the UPS unit
-  model: CBR ESN-1KT   # the model itself (fastfetch's Battery line)
-host: ASUS PRIME Z390-A # the Proxmox host's board (fastfetch's Host line)
+  label: cbr 1000 va

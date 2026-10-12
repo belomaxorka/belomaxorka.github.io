@@ -1,7 +1,7 @@
 // The units' declarations (assets/js/rack.js) are what the scripts go by, so a unit that forgets one silently works
 // without power or network: this check fails CI instead.
 //
-//   node docs/tools/check-units.mjs [templates]
+//   node tools/check-units.mjs [templates]
 //
 // For every unit in the templates (an element with class "u ..."):
 //   - one that shows live data (hx-get, hx-post, hx-trigger, data-live inside it) says how it gets it: data-net, or

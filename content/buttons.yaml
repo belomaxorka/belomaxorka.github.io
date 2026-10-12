@@ -183,9 +183,6 @@ people:
     link: https://inu.vesperlinux.org/
 
 sites:
-  - title: stupid.fish
-    image: stupid-fish.png
-    link: https://stupid.fish
   - title: Hosted on Senko Digital
     image: senko-digital.png
     link: https://senko.digital/

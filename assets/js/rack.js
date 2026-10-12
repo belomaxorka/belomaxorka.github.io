@@ -92,7 +92,7 @@ window.Rack = (() => {
   //   data-live="lamps|bar|text|image" on an element inside: live data, dark while the unit cannot get it
   //                           (assets/css/units/network.css);
   //   data-news (="markup")   on the element whose text (markup) changes when new data comes: then a packet runs to it.
-  // Units without data-key (patch panels, organisers, blanks, button walls) are passive. docs/tools/check-units.mjs
+  // Units without data-key (patch panels, organisers, blanks, button walls) are passive. tools/check-units.mjs
   // fails CI for a unit that shows live data without saying how it gets it.
   const keyOf = (u) => u?.dataset.key || '';
   const unitOf = (body, k) => (body && k ? body.querySelector(`:scope > .u[data-key="${CSS.escape(k)}"]`) : null);

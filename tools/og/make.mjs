@@ -1,7 +1,7 @@
 // The link preview image (og:image): one for the whole site, a 1200x630 PNG in assets/og/site.png. No dependencies
-// (Node 22+ and Chrome, like docs/tools/shot.mjs):
+// (Node 22+ and Chrome, like tools/shot.mjs):
 //
-//   node docs/tools/og/make.mjs [--chrome path]
+//   node tools/og/make.mjs [--chrome path]
 //
 // Serves the repository's root locally for a minute (card.html takes the site's fonts, colours and i18n), shoots
 // card.html with shot.mjs and repacks the PNG into a 256-colour palette (pack.mjs), so the preview weighs under
@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { pack } from './pack.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const root = resolve(here, '../../..');
+const root = resolve(here, '../..');
 const args = process.argv.slice(2);
 const opt = (k) => { const i = args.indexOf('--' + k); return i < 0 ? undefined : args[i + 1]; };
 
@@ -34,7 +34,7 @@ const base = `http://127.0.0.1:${server.address().port}`;
 
 const tmp = mkdtempSync(join(tmpdir(), 'og-'));
 try {
-  const shot = ['docs/tools/shot.mjs', `${base}/docs/tools/og/card.html`, '--sizes', '1200x630', '--out', tmp, '--name', 'site', '--wait', '1500'];
+  const shot = ['tools/shot.mjs', `${base}/tools/og/card.html`, '--sizes', '1200x630', '--out', tmp, '--name', 'site', '--wait', '1500'];
   if (opt('chrome')) shot.push('--chrome', opt('chrome'));
   // Asynchronously: the server above lives in this process and must answer Chrome while the shot is taken.
   // shot.mjs exits with 1 when the page's console had errors: then no picture is written.
