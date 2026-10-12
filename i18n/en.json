@@ -132,7 +132,7 @@
   "mon.uptime_day": "uptime 24h: %.2f%%",
   "mon.uptime_week": "7d: %.2f%%",
   "mon.uptime_month": "30d: %.2f%%",
-  "mon.since": "counting since %s",
+  "mon.since": "since %s",
   "mon.last": "last outage",
   "mon.out_now": "%s is down",
   "mon.out_for": "for %s now",
