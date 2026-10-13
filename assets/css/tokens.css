@@ -49,12 +49,14 @@
   --tape-ink: #f3f1ec;
   --note-bg: #fff07a;
   --note-fg: #3b331c;
-  /* The KVM's screen: a dark CRT; in light a paper-white monitor, green like the LCDs but light, for reading. */
-  --crt: color-mix(in srgb, #dde2cf var(--L), #0c100d);
-  --crt-ink: color-mix(in srgb, #1e2a1b var(--L), #dfe7dd);
-  --crt-dim: color-mix(in srgb, #56634f var(--L), #9fb09c);
-  --crt-faint: color-mix(in srgb, #7d8775 var(--L), #3d4a3f);
-  --crt-rule: color-mix(in srgb, #1e2a1b2e var(--L), #ffffff1f);
+  /* The KVM's screen in the LCDs' colours (the cover's, changing with them): the palette keeps its text at contrast 7,
+     the dim one at 4.5, whichever way round it is (a white cover makes a light screen in the dark theme, a black one
+     a dark screen in the light theme), so the screen takes them as they are. */
+  --crt: var(--lcd-bg);
+  --crt-ink: var(--lcd);
+  --crt-dim: var(--lcd-dim);
+  --crt-faint: color-mix(in srgb, var(--lcd-dim) 60%, var(--crt));
+  --crt-rule: color-mix(in srgb, var(--lcd-dim) 30%, transparent);
   --crt-shade: color-mix(in srgb, #3a40302e var(--L), #00000099);
   /* The sign of the rack we are at, lit: white in the dark hall, in the light one the accent. */
   --sign-on: color-mix(in srgb, #7438bb var(--L), #f1efe8);
