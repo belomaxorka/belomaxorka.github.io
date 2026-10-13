@@ -13,9 +13,9 @@
       <span class="meter{{if ge .Node.CPU 80}} hot{{end}}" data-live="bar" style="--p: {{.Node.CPU}}"><span class="silk">cpu · {{.Node.Cores}}</span><i></i><b>{{.Node.CPUText}}%</b></span>
       <span class="meter{{if ge .Node.Mem 85}} hot{{end}}" data-live="bar" style="--p: {{.Node.Mem}}"><span class="silk">ram</span><i></i><b>{{printf "%.1f" .Node.MemGiB}} / {{printf "%.0f" .Node.MaxGiB}} {{t "lab.gib"}}</b></span>
     </div>
-    <div class="lcd two">{{t "lab.guests_up" .Up .Total}}<br><span class="d">{{t "lab.uptime" (uptime .Node.Uptime)}} · {{ago .Checked}}</span></div>
+    <div class="lcd two" data-post="{{t "lab.post"}}">{{t "lab.guests_up" .Up .Total}}<br><span class="d">{{t "lab.uptime" (uptime .Node.Uptime)}} · {{ago .Checked}}</span></div>
     {{else}}
-    <div class="lcd two">{{t "lab.silent"}}<br><span class="d">{{t "lab.silent2"}}</span></div>
+    <div class="lcd two" data-post="{{t "lab.post"}}">{{t "lab.silent"}}<br><span class="d">{{t "lab.silent2"}}</span></div>
     {{end}}{{end}}
   </div>
 </section>
@@ -33,7 +33,7 @@
     {{if .Running}}
     <span class="meter{{if ge .CPU 80}} hot{{end}}" data-live="bar" style="--p: {{.CPU}}" title="{{t "lab.cpu_title" .Cores}}"><span class="silk">cpu · {{.Cores}}</span><i></i><b>{{.CPUText}}%</b></span>
     <span class="meter{{if ge .Mem 85}} hot{{end}}" data-live="bar" style="--p: {{.Mem}}"><span class="silk">ram</span><i></i><b>{{.MemMiB}} / {{.MaxMiB}} {{t "lab.mib"}}</b></span>
-    <span class="up silk" data-live="text">{{t "lab.uptime" (uptime .Uptime)}}</span>
+    <span class="up silk" data-live="text" data-post="{{if eq .Type "qemu"}}{{t "lab.post_vm"}}{{else}}{{t "lab.post_ct"}}{{end}}">{{t "lab.uptime" (uptime .Uptime)}}</span>
     {{else}}
     <span class="up silk off">{{t "lab.stopped"}}</span>
     {{end}}

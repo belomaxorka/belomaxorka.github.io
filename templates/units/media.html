@@ -5,7 +5,7 @@
   <a class="pull" href="?open=media" data-unit="media" x-data="pull" @click.prevent="toggle" title="{{t "drawer.pull"}}" aria-label="{{t "drawer.pull"}}: {{t "media.aria"}}"><i></i></a>
   <div class="face">
     {{if .Cover}}<img class="tray" data-live="image" src="{{.Cover}}" width="300" height="300" alt="{{t "media.cover"}}{{with .Album}}: {{.}}{{end}}">{{else}}<div class="tray empty" role="img" aria-label="{{t "media.nocover"}}"></div>{{end}}
-    <div class="lcd" data-news>
+    <div class="lcd" data-news data-post="{{t "media.post"}}">
       {{if .OK}}
       <span class="d">{{if .Playing}}{{template "icon" "play"}} {{t "media.playing"}}{{else}}{{template "icon" "stop"}} {{t "media.last" (ago .At)}}{{end}}</span><br>
       <a href="{{.Link}}"{{ext .Link}}>{{.Track}}</a><br>

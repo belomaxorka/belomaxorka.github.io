@@ -6,10 +6,10 @@
   <a class="pull" href="?open=monitor" data-unit="monitor" x-data="pull" @click.prevent="toggle" title="{{t "drawer.pull"}}" aria-label="{{t "drawer.pull"}}: {{t "mon.aria"}}"><i></i></a>
   <div class="face">
     <div class="matrix" data-live="lamps" data-news="markup" style="--cols: {{.Cols}}">
-      {{range .Lamps}}<div class="cell" data-check="{{.Name}}" title="{{.Name}} · {{if eq .State "err"}}{{t "mon.notresponding"}}{{else}}{{.Ms}} {{t "ms"}}{{end}}"><i class="led {{.State}}"></i><span class="silk">{{.Label}}</span></div>
+      {{range $i, $_ := .Lamps}}<div class="cell" data-check="{{.Name}}" style="--i: {{$i}}" title="{{.Name}} · {{if eq .State "err"}}{{t "mon.notresponding"}}{{else}}{{.Ms}} {{t "ms"}}{{end}}"><i class="led {{.State}}"></i><span class="silk">{{.Label}}</span></div>
       {{end}}
     </div>
-    <div class="lcd"{{if .OK}} x-data="cycle(4500)"{{end}}>
+    <div class="lcd"{{if .OK}} x-data="cycle(4500)"{{end}} data-post="{{t "mon.post"}}">
       {{if .OK}}<ul class="msgs">
         <li class="on">{{t "mon.up" .Up .Total}}<br><span class="d">{{if .Down}}{{t "mon.down" (join .Down ", ")}}{{else if .Slow}}{{t "mon.slow" .Slow .SlowMs}}{{else}}{{t "mon.fast" .AvgMs}}{{end}}{{if .Stale}}<br>gatus · {{ago .Checked}}{{end}}</span></li>
         {{if .HasUptime}}<li>{{t "mon.uptime_day" .Day}}<br><span class="d">{{t "mon.uptime_week" .Week}}<br>{{t "mon.uptime_month" .Month}}{{if not .Since.IsZero}}<br>{{t "mon.since" (stamp .Since)}}{{end}}</span></li>{{end}}

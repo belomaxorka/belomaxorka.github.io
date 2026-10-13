@@ -9,7 +9,7 @@
     <div class="bar">
       <span class="silk">syslog · {{join (fields $feed) " · "}}</span>
     </div>
-    <div class="lcd">
+    <div class="lcd" data-post="{{t "log.post"}}">
       {{if .}}<ol tabindex="0" aria-label="{{t "log.aria"}}">
         {{range .}}<li data-news data-kind="{{if eq .Src "♪"}}music{{else}}{{.Src}}{{end}}" class="{{if .What}}ev {{end}}{{.State}}"><span class="d">{{stamp .At}}</span><span class="src">{{.Src}}</span><span>{{if .What}}{{if .URL}}<a href="{{.URL}}"{{ext .URL}}>{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}</a>{{else}}{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}{{end}}{{else}}{{if .Now}}{{t "log.now"}} {{end}}{{if .URL}}<a href="{{.URL}}"{{ext .URL}}>{{.Text}}</a>{{else}}{{.Text}}{{end}}{{end}}</span></li>
         {{end}}

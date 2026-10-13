@@ -10,8 +10,8 @@
 <div class="u tor" style="--h:1" aria-hidden="true" data-key="tor" data-power data-role="switch"{{with index .Racks 0}} data-uplink="{{.ID}}"{{if .Stub}} data-uplink-noups{{end}}{{end}}>
   <div class="face">
     <div class="tor-id"><span class="brand">switch</span><span class="silk">24 × 1g · 2 × sfp+</span></div>
-    <div class="tor-ports">{{range $i := seq 24}}<span class="tp" data-port="{{$i}}"><i class="led"></i><i class="jack"></i></span>{{end}}</div>
-    <div class="tor-sfp"><span class="silk">sfp+</span><span class="sfp-port"><i class="led"></i><i class="sfp" data-port="sfp1"></i></span><span class="sfp-port"><i class="led"></i><i class="sfp" data-port="sfp2"></i></span></div>
+    <div class="tor-ports">{{range $i := seq 24}}<span class="tp" data-port="{{$i}}" style="--i: {{$i}}"><i class="led"></i><i class="jack"></i></span>{{end}}</div>
+    <div class="tor-sfp"><span class="silk">sfp+</span><span class="sfp-port" style="--i: 25"><i class="led"></i><i class="sfp" data-port="sfp1"></i></span><span class="sfp-port" style="--i: 26"><i class="led"></i><i class="sfp" data-port="sfp2"></i></span></div>
     <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led"></i>sys</span></div>
   </div>
 </div>
@@ -31,7 +31,7 @@
         {{- end}}{{end}}
       </nav>
     </div>
-    <span class="lcd" aria-hidden="true" data-nowan="{{t "net.router_nowan"}}" data-nolan="{{t "net.router_nolan"}}">{{t "net.router_lcd"}}</span>
+    <span class="lcd" aria-hidden="true" data-post="{{t "net.router_post"}}" data-nowan="{{t "net.router_nowan"}}" data-nolan="{{t "net.router_nolan"}}">{{t "net.router_lcd"}}</span>
     <div class="leds silk" aria-hidden="true"><span><i class="led pwr"></i>pwr</span><span><i class="led wan"></i>wan</span><span><i class="led lan"></i>lan</span></div>
   </div>
 </div>

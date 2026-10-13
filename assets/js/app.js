@@ -61,6 +61,7 @@
           for (let i = 0; i < 14; i++) {
             const s = document.createElement('i');
             if (i >= 12) s.className = 'e'; else if (i >= 9) s.className = 'w';
+            s.style.setProperty('--i', i); // its place, for the test at power-up (toys.css)
             r.appendChild(s);
           }
         });

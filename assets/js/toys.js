@@ -107,13 +107,46 @@
       uid.setAttribute('aria-pressed', String(on));
     }
   });
-  // A unit boots from dark (RESET, its plug back in, the rack's power back): POST on its screen (the LCD with
-  // data-post; unless the BIOS turned it off), then the usual frames.
+
+  // ---------- POST ----------
+  // A unit boots from dark (RESET, its plug back in, the rack's power back): unless the BIOS turned it off, the unit is
+  // .posting for a while (its lamp test, CSS) and each screen with data-post shows its boot over what it holds, frame by
+  // frame: "|" between the frames, a frame starting with a new line adds to the one before, a screen with fewer frames
+  // stays on its last. An htmx refresh swaps the unit meanwhile: the boot goes on on the new one.
+  const FRAME = 700;
+  const posts = new Map(); // unit key → { i: frame, timers }
+  const frames = (s) => s.split('|').reduce((a, f) => [...a, f.startsWith('\n') && a.length ? a.at(-1) + f : f], []);
+  function show(k) {
+    const u = Rack.unitOf(document.getElementById('rack-body'), k), p = posts.get(k);
+    if (!u) return;
+    u.classList.toggle('posting', !!p);
+    u.querySelectorAll('[data-post]').forEach((s) => {
+      if (!p) { s.classList.remove('post'); delete s.dataset.frame; return; }
+      if (!s.classList.contains('post')) s.scrollTop = 0; // the frames are over the top of a screen that scrolls
+      const f = frames(s.dataset.post);
+      s.classList.add('post');
+      s.dataset.frame = f[Math.min(p.i, f.length - 1)];
+    });
+  }
+  function stop(k) {
+    posts.get(k)?.timers.forEach(clearTimeout);
+    posts.delete(k);
+    show(k);
+  }
   document.addEventListener('rack:unit', (e) => {
-    if (!opts.logo || !e.detail?.on) return;
-    const lcd = e.target.querySelector?.('.lcd[data-post]');
-    if (!lcd) return;
-    lcd.classList.add('post');
-    setTimeout(() => lcd.classList.remove('post'), 2200);
+    const k = e.detail?.key;
+    if (!k) return;
+    stop(k);
+    if (!opts.logo || !e.detail.on) return;
+    const n = Math.max(3, ...[...e.target.querySelectorAll('[data-post]')].map((s) => frames(s.dataset.post).length));
+    const p = { i: 0, timers: [] };
+    posts.set(k, p);
+    for (let i = 1; i < n; i++) p.timers.push(setTimeout(() => { p.i = i; show(k); }, i * FRAME));
+    p.timers.push(setTimeout(() => stop(k), n * FRAME));
+    show(k);
   });
+  // htmx gives a swapped unit its class from the response on settle: the boot again after both.
+  const again = () => posts.forEach((_, k) => show(k));
+  document.addEventListener('htmx:afterSwap', again);
+  document.addEventListener('htmx:afterSettle', again);
 })();

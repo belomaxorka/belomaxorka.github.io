@@ -95,28 +95,29 @@
 
 /* ---------- offline ----------
    net.js marks every unit on the network: .unlinked (no link: "link lost", "no internet") or .nonet (a link
-   but no internet). The data stays in the markup, hidden; without power a unit says "no signal" (power.css). */
-.u:is(.unlinked, .nonet):not(.off) :is(.lcd, .screen)[data-nolink] { position: relative; }
-.u:is(.unlinked, .nonet):not(.off) :is(.lcd, .screen)[data-nolink] * { visibility: hidden; }
-.u:is(.unlinked, .nonet):not(.off) .lcd[data-nolink] { color: transparent; text-shadow: none; }
+   but no internet). The data stays in the markup, hidden; without power a unit says "no signal" (power.css), booting
+   it shows its boot first (toys.css). */
+.u:is(.unlinked, .nonet):not(.off, .posting) :is(.lcd, .screen)[data-nolink] { position: relative; }
+.u:is(.unlinked, .nonet):not(.off, .posting) :is(.lcd, .screen)[data-nolink] * { visibility: hidden; }
+.u:is(.unlinked, .nonet):not(.off, .posting) .lcd[data-nolink] { color: transparent; text-shadow: none; }
 /* The notice over the screen, not in the flow: otherwise the screen grows, the units below move and the cables stay. */
-.u:is(.unlinked, .nonet):not(.off) :is(.lcd, .screen)[data-nolink]::after {
+.u:is(.unlinked, .nonet):not(.off, .posting) :is(.lcd, .screen)[data-nolink]::after {
   content: attr(data-nonet); position: absolute; inset: 0; display: grid; place-content: center; text-align: center;
   white-space: pre-line; font: 400 20px/1.05 var(--f-lcd); letter-spacing: .06em;
   color: var(--lcd); text-shadow: 0 0 6px color-mix(in srgb, var(--lcd) 45%, transparent);
 }
 /* Without a link: two lines; a unit on the rack's network only (no data-nonet): one. */
-.u.unlinked:not(.off) :is(.lcd, .screen)[data-nolink]::after { content: attr(data-nolink) "\A" attr(data-nonet); }
-.u.unlinked:not(.off) :is(.lcd, .screen)[data-nolink]:not([data-nonet])::after { content: attr(data-nolink); }
-.u:is(.unlinked, .nonet):not(.off) .screen[data-nolink]::after { color: #9fb09c; text-shadow: none; }
+.u.unlinked:not(.off, .posting) :is(.lcd, .screen)[data-nolink]::after { content: attr(data-nolink) "\A" attr(data-nonet); }
+.u.unlinked:not(.off, .posting) :is(.lcd, .screen)[data-nolink]:not([data-nonet])::after { content: attr(data-nolink); }
+.u:is(.unlinked, .nonet):not(.off, .posting) .screen[data-nolink]::after { color: #9fb09c; text-shadow: none; }
 @media (prefers-reduced-motion: no-preference) {
-  .u:is(.unlinked, .nonet):not(.off) :is(.lcd, .screen)[data-nolink]::after { animation: nolink 1.6s steps(2, jump-none) infinite; }
+  .u:is(.unlinked, .nonet):not(.off, .posting) :is(.lcd, .screen)[data-nolink]::after { animation: nolink 1.6s steps(2, jump-none) infinite; }
 }
 @keyframes nolink { 50% { opacity: .35; } }
 /* Live data (data-live) goes dark offline: lamps and bars off, texts gone, the picture's tray empty. */
-.u:is(.unlinked, .nonet):not(.off) :is([data-live~="lamps"], [data-live~="bar"]) i { background: var(--led-off); box-shadow: none; animation: none; }
-.u:is(.unlinked, .nonet):not(.off) :is([data-live~="text"], [data-live~="bar"] b) { color: transparent; text-shadow: none; }
-.u:is(.unlinked, .nonet):not(.off) [data-live~="image"] {
+.u:is(.unlinked, .nonet):not(.off, .posting) :is([data-live~="lamps"], [data-live~="bar"]) i { background: var(--led-off); box-shadow: none; animation: none; }
+.u:is(.unlinked, .nonet):not(.off, .posting) :is([data-live~="text"], [data-live~="bar"] b) { color: transparent; text-shadow: none; }
+.u:is(.unlinked, .nonet):not(.off, .posting) [data-live~="image"] {
   object-position: 200px 0; background: repeating-linear-gradient(135deg, var(--void) 0 6px, var(--panel) 6px 12px);
 }
 /* The link lamps (the network card's and the unit's own net lamp) say only whether there is a link. */
@@ -140,13 +141,13 @@
 .drawer[data-later] .slide { min-height: calc(var(--U) * 2); }
 
 /* The router without WAN or LAN (net.js): "no link" on its LCD, the WAN lamp dark. */
-.rtr:is(.nowan, .nolan):not(.off) .lcd { position: relative; color: transparent; text-shadow: none; }
-.rtr:is(.nowan, .nolan):not(.off) .lcd::after {
+.rtr:is(.nowan, .nolan):not(.off, .posting) .lcd { position: relative; color: transparent; text-shadow: none; }
+.rtr:is(.nowan, .nolan):not(.off, .posting) .lcd::after {
   content: attr(data-nolan); position: absolute; inset: 0; display: grid; place-content: center; font: inherit;
   white-space: nowrap; color: var(--lcd); text-shadow: 0 0 6px color-mix(in srgb, var(--lcd) 45%, transparent);
 }
-.rtr.nowan:not(.off) .lcd::after { content: attr(data-nowan); }
+.rtr.nowan:not(.off, .posting) .lcd::after { content: attr(data-nowan); }
 .rtr.nowan .led.wan, .rtr.nolan .led.lan { background: var(--led-off); box-shadow: none; animation: none; }
 @media (prefers-reduced-motion: no-preference) {
-  .rtr:is(.nowan, .nolan):not(.off) .lcd::after { animation: nolink 1.6s steps(2, jump-none) infinite; }
+  .rtr:is(.nowan, .nolan):not(.off, .posting) .lcd::after { animation: nolink 1.6s steps(2, jump-none) infinite; }
 }
