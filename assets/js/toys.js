@@ -94,13 +94,11 @@
   const reveal = () => document.querySelectorAll('#rack-body > .u button.uid[hidden], #rack-body > .u .rst[hidden]').forEach((b) => { b.hidden = false; });
   document.addEventListener('rack:laidout', reveal);
   document.addEventListener('DOMContentLoaded', reveal);
-  let posting = ''; // the unit reset, until it boots with POST on its screen
   document.addEventListener('click', (e) => {
     const t = e.target instanceof Element ? e.target : null;
     const rst = t?.closest('#rack-body > .u .rst'), uid = t?.closest('#rack-body > .u button.uid');
     if (rst) {
       const key = Rack.keyOf(rst.closest('#rack-body > .u'));
-      posting = opts.logo ? key : '';
       document.dispatchEvent(new CustomEvent('rack:reset', { detail: { key } }));
     }
     if (uid) {
@@ -109,10 +107,10 @@
       uid.setAttribute('aria-pressed', String(on));
     }
   });
-  // The unit booted after RESET: POST on its screen (the LCD with data-post; unless the BIOS turned it off), then the usual frames.
+  // A unit boots from dark (RESET, its plug back in, the rack's power back): POST on its screen (the LCD with
+  // data-post; unless the BIOS turned it off), then the usual frames.
   document.addEventListener('rack:unit', (e) => {
-    if (!posting || e.detail?.key !== posting || !e.detail.on) return;
-    posting = '';
+    if (!opts.logo || !e.detail?.on) return;
     const lcd = e.target.querySelector?.('.lcd[data-post]');
     if (!lcd) return;
     lcd.classList.add('post');
