@@ -273,6 +273,7 @@
   "ago.minutes": ["minute", "minutes"],
   "ago.hours": ["hour", "hours"],
   "ago.yesterday": "yesterday",
+  "uptime.s": "%d s",
   "uptime.m": "%d min",
   "uptime.hm": "%dh %dm",
   "uptime.dh": "%dd %dh",

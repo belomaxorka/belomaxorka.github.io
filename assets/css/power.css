@@ -29,7 +29,7 @@
 .u.off .screen > * { visibility: hidden; }
 .u.off .screen::after {
   content: attr(data-nosignal); position: absolute; inset: 0; display: grid; place-items: center;
-  font: 500 12px/1 var(--f-silk); letter-spacing: .2em; text-transform: uppercase; color: #3d4a3f;
+  font: 500 12px/1 var(--f-silk); letter-spacing: .2em; text-transform: uppercase; color: var(--crt-faint);
 }
 @media (prefers-reduced-motion: no-preference) {
   .u .face, .u > .pull, .drawer .slide { transition: filter .25s; }

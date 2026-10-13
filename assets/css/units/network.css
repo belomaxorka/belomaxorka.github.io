@@ -109,7 +109,7 @@
 /* Without a link: two lines; a unit on the rack's network only (no data-nonet): one. */
 .u.unlinked:not(.off, .posting) :is(.lcd, .screen)[data-nolink]::after { content: attr(data-nolink) "\A" attr(data-nonet); }
 .u.unlinked:not(.off, .posting) :is(.lcd, .screen)[data-nolink]:not([data-nonet])::after { content: attr(data-nolink); }
-.u:is(.unlinked, .nonet):not(.off, .posting) .screen[data-nolink]::after { color: #9fb09c; text-shadow: none; }
+.u:is(.unlinked, .nonet):not(.off, .posting) .screen[data-nolink]::after { color: var(--crt-dim); text-shadow: none; }
 @media (prefers-reduced-motion: no-preference) {
   .u:is(.unlinked, .nonet):not(.off, .posting) :is(.lcd, .screen)[data-nolink]::after { animation: nolink 1.6s steps(2, jump-none) infinite; }
 }

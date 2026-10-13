@@ -273,6 +273,7 @@
   "ago.minutes": ["минуту", "минуты", "минут"],
   "ago.hours": ["час", "часа", "часов"],
   "ago.yesterday": "вчера",
+  "uptime.s": "%d с",
   "uptime.m": "%d мин",
   "uptime.hm": "%d ч %d мин",
   "uptime.dh": "%d д %d ч",

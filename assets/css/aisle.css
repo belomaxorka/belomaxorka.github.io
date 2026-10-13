@@ -42,9 +42,9 @@
 }
 .aisle { padding-top: 34px; }
 .aisle .signs a[aria-current] {
-  background: #f1efe8; color: #15171a; box-shadow: 0 0 22px -2px #f1efe8aa;
+  background: var(--sign-on); color: var(--sign-on-ink); box-shadow: 0 0 22px -2px color-mix(in srgb, var(--sign-on) 67%, transparent);
 }
-.aisle .signs a[aria-current] b { color: #15171a; }
+.aisle .signs a[aria-current] b { color: var(--sign-on-ink); }
 
 /* ---------- the move between pages: without JS and on a plain load ---------- */
 @media (prefers-reduced-motion: no-preference) {
@@ -171,7 +171,7 @@ html.hop-wait, html.hop-wait a { cursor: progress; }
   38% { filter: brightness(.6); }
   55%, 100% { filter: none; }
 }
-@keyframes sign-off { from { background: #f1efe8; color: #15171a; box-shadow: 0 0 22px -2px #f1efe8aa; } }
+@keyframes sign-off { from { background: var(--sign-on); color: var(--sign-on-ink); box-shadow: 0 0 22px -2px color-mix(in srgb, var(--sign-on) 67%, transparent); } }
 @keyframes sign-wait { 50% { box-shadow: inset 0 0 0 1px var(--accent), 0 0 16px -4px var(--accent); color: var(--ink); } }
 @keyframes step-in { from { opacity: 0; transform: translateX(calc(var(--hop-s, 1) * 18px)); } }
 @keyframes step-nudge { to { transform: translateX(4px); } }

@@ -54,7 +54,7 @@
 }
 .u .lcd.post::after { font-size: min(18px, 1em); }
 .rtr .lcd.post::after { white-space: pre; }
-.kvm .screen.post::after { font: 400 19px/1.2 var(--f-lcd); letter-spacing: .04em; color: #dfe7dd; text-shadow: 0 0 6px #dfe7dd55; }
+.kvm .screen.post::after { font: 400 19px/1.2 var(--f-lcd); letter-spacing: .04em; color: var(--crt-ink); text-shadow: 0 0 6px color-mix(in srgb, var(--crt-ink) 33%, transparent); }
 /* A guest's uptime: the frames grow out of its right edge (a phone: its left), in amber. */
 .ct .up.post { overflow: visible; }
 .ct .up.post::after { left: auto; width: max-content; color: var(--led-warn); text-shadow: none; }

@@ -7,6 +7,9 @@
   link: https://t.me/belomaxorka
   tape: b
   me: true
+- name: github
+  link: https://github.com/belomaxorka
+  me: true
 - name: discord
   copy: belomaxorka
 - name: steam
