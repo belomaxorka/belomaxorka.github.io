@@ -65,12 +65,17 @@
 .port:hover .tape { filter: brightness(1.25); }
 .port .led { width: 6px; height: 6px; }
 .port.off .tape { opacity: .55; }
-/* A port that copies a name (switch.html): the tape is as wide as the longer of the name and ✓, so nothing
-   moves. */
+/* A port that copies a name (switch.html): its tape is as wide as its label, like the others'. A click sticks a tape
+   with the name (and ✓ once copied) over it, wider, out of the flow, so nothing moves. */
 button.port { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
-.tape.swap { display: inline-grid; text-align: center; }
-.tape.swap > span { grid-area: 1 / 1; }
-.tape.swap > .alt, .tape.swap .alt > i, .port.shown .tape.swap > :first-child { visibility: hidden; }
+.port.shown { position: relative; z-index: 1; }
+.tape.swap { position: relative; }
+.tape.swap > .alt {
+  position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%) rotate(1deg);
+  padding: inherit; border-radius: inherit; background: inherit; white-space: nowrap;
+  box-shadow: 0 2px 4px #0009;
+}
+.tape.swap > .alt, .tape.swap .alt > i { visibility: hidden; }
 .port.shown .tape.swap > .alt, .port.copied .tape.swap .alt > i { visibility: visible; }
 .tape.swap .alt > i { font-style: normal; }
 
