@@ -232,10 +232,15 @@
     if (!body) return;
     const U = parseFloat(getComputedStyle(body).getPropertyValue('--U'));
     const units = [...body.querySelectorAll(':scope > .u, :scope > .drawer.open')];
+    // Measured, the units are their own height and the page is shorter for a moment: at its bottom the browser would
+    // scroll the visitor up by that much, and not every browser puts them back. So the room keeps its height meanwhile.
+    const room = body.closest('.room');
+    if (room) room.style.minHeight = room.offsetHeight + 'px';
     // Clear, measure, then write: a write between two measurements would make each one lay the page out again.
     units.forEach(u => { u.style.minHeight = ''; });
     const heights = units.map(u => Math.ceil((u.offsetHeight - 1) / U));
     units.forEach((u, i) => { if (!u.classList.contains('closing')) u.style.minHeight = heights[i] * U + 'px'; });
+    if (room) room.style.minHeight = '';
     const total = heights.reduce((a, n) => a + n, 0);
     body.querySelectorAll('.rail').forEach(rail => {
       if (rail.dataset.n === `${total}x${U}`) return;
@@ -516,9 +521,17 @@
   if (document.fonts) document.fonts.ready.then(later);
   let resizeTimer;
   addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(layout, 120); });
-  // htmx settles a swapped unit with the server's attributes, style included, dropping snap()'s min-height: the page
-  // would shrink for a frame and scroll a visitor at its bottom. So snap again at once; the cables next frame.
-  document.addEventListener('htmx:afterSettle', () => { snap(); later(); });
+  // htmx settles a swapped unit with the server's attributes: its style loses snap()'s min-height, so the page would be
+  // shorter for whoever measures it first (and a visitor at its bottom scrolled up); its class loses the card's and the
+  // inlet's insets (wire() here, power.js), so the unit is not its real width either. So the old unit's height back at
+  // once (the first settled element may be an out-of-band one, the palette), and snap once every handler has given the
+  // classes back, before the paint; the cables next frame.
+  document.addEventListener('htmx:afterSettle', (e) => {
+    const was = e.detail.target, now = was?.id && document.getElementById(was.id);
+    if (now && now !== was && !now.style.minHeight) now.style.minHeight = was.style.minHeight;
+    queueMicrotask(() => { wire(); snap(); });
+    later();
+  });
   // A poll whose answer equals the unit's last one is not swapped: every swap lays the whole rack out. The lamps on the
   // way still blink (live.js).
   const answers = new Map(); // unit id -> its last answer
