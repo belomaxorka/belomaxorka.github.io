@@ -16,9 +16,10 @@
 .intro { margin: 0; max-width: 60ch; color: var(--ink); }
 .status-col { flex: 0 1 230px; display: grid; gap: 8px; align-content: start; min-width: 0; }
 .lcd.two { font-size: 22px; }
-.srv .note { right: 6%; bottom: 12px; transform: rotate(4deg); }
-/* The note hangs under the asset tags: where it shows (wider than 760px), the column keeps room for it. */
-@media (min-width: 761px) { .srv .status-col { padding-bottom: 76px; } }
+/* The left column: the album (or the photo) and, at its foot, the note; in the flow, so it overlaps nothing whatever
+   wraps. Narrower than 761px (parts.css) the note is not shown. */
+.srv .col { display: flex; flex-direction: column; gap: 14px; flex: none; align-self: stretch; }
+.srv .note { position: relative; margin-top: auto; align-self: flex-start; max-width: 176px; transform: rotate(-4deg); }
 /* Avatars from Telegram: a square that swipes (scroll-snap); with JS a remote under it with keys, a counter
    and a lamp per photo. */
 .album { width: 176px; flex: none; align-self: flex-start; display: grid; gap: 8px; }
