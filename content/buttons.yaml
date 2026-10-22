@@ -208,6 +208,9 @@ sites:
   - title: "Linux Now! 2.0"
     image: linux-now.gif
     link: https://kernel.org/
+  - title: "LinuX 2.0"
+    image: linux2.gif
+    link: https://kernel.org/
   - title: Powered by NixOS
     image: nixos.png
     link: https://nixos.org/
@@ -282,6 +285,9 @@ sites:
   - title: "Get ICQ Now!"
     image: icq.gif
     link: https://web.archive.org/web/19990208013834/http://www.icq.com/
+  - title: "Tired of Skype? Discord"
+    image: discord.gif
+    link: https://discord.com/
   - title: Matrix
     image: matrix.webp
     link: https://matrix.org/
@@ -345,6 +351,9 @@ sites:
   - title: MySQL
     image: mysql.gif
     link: https://www.mysql.com/
+  - title: Visual Studio Code
+    image: vscode.gif
+    link: https://code.visualstudio.com/
   - title: Made with Notepad++
     image: notepad-plus-plus.gif
     link: https://notepad-plus-plus.org/
