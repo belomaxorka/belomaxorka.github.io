@@ -1,7 +1,7 @@
 /* The activity unit: a lamp a day, seven to a column, as on a front panel; where the row is narrow the oldest
    weeks go out of view on the left. Booting, every lamp blinks: a lamp test. */
 .act .face { gap: 8px 18px; padding-block: 10px; }
-.act-id { display: grid; gap: 4px; justify-items: start; flex: none; }
+.act-id { display: grid; gap: 4px; justify-items: start; flex: 0 1 auto; min-width: 0; }
 .act-wall { display: flex; justify-content: flex-end; overflow: hidden; flex: 1 1 200px; min-width: 0; }
 .act-grid { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 5px); grid-auto-columns: 5px; gap: 2px; flex: none; }
 .act-grid b { display: block; border-radius: 1px; background: var(--hole); }
@@ -10,6 +10,5 @@
 .act-grid b.l2 { background: color-mix(in srgb, var(--led-ok) 60%, var(--hole)); }
 .act-grid b.l3 { background: color-mix(in srgb, var(--led-ok) 85%, var(--hole)); }
 .act-grid b.l4 { background: var(--led-ok); box-shadow: 0 0 4px var(--led-ok); }
-.act-meta { white-space: nowrap; }
 @media (prefers-reduced-motion: no-preference) { .act.posting .act-grid b { animation: act-post .5s steps(1) infinite; } }
 @keyframes act-post { 50% { background: var(--led-ok); } }
