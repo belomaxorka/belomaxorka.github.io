@@ -7,7 +7,7 @@
 # both i18n files.
 - id: home
   path: /
-  units: [patch, brush, tor, brush, router, mgmt, server, media, monitor, syslog, switch, donate, kvm, buttons, blank, ups]
+  units: [patch, brush, tor, brush, router, mgmt, server, media, monitor, syslog, tokens, switch, donate, kvm, buttons, blank, ups]
 
 - id: lab
   path: /lab

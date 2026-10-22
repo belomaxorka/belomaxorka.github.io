@@ -117,6 +117,10 @@ best viewed with any browser</font></td></tr>
 {{template "lite-lcd-open"}}{{with .Syslog}}{{range .}}<font color="#a07a2a">{{stamp .At}} {{.Src}}</font> {{if .What}}{{if .URL}}<a href="{{.URL}}"><font color="#ffd27a">{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}</font></a>{{else}}{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}{{end}}{{else}}{{if .Now}}{{t "log.now"}} {{end}}{{if .URL}}<a href="{{.URL}}"><font color="#ffd27a">{{.Text}}</font></a>{{else}}{{.Text}}{{end}}{{end}}<br>
 {{end}}{{else}}{{t "log.quiet"}}{{end}}{{template "lite-lcd-close"}}{{end}}
 
+{{/* The token meter. */}}
+{{define "lite-tokens"}}{{template "lite-silk" (print (t "tok.title") " · " (t "tok.sub"))}}{{with .Tokens}}
+{{template "lite-lcd-open"}}{{if .OK}}{{t "tok.today"}} {{.TodayText}} · {{t "tok.month"}} {{.MonthText}} · {{t "tok.all"}} {{.AllText}} · {{t "tok.bill" .CostAllText}}{{else}}{{t "tok.nodata"}}{{end}}{{template "lite-lcd-close"}}{{end}}{{end}}
+
 {{/* The contacts switch. */}}
 {{define "lite-switch"}}{{template "lite-silk" (t "sw.title")}}
 {{template "f"}}{{range .Content.contacts}}{{if .link}}{{template "lite-led" (or .led "")}}&nbsp;<a href="{{.link}}">{{loc .name}}</a>{{else if .copy}}{{template "lite-led" (or .led "")}}&nbsp;{{loc .name}} <tt>{{.copy}}</tt>{{else}}{{template "lite-led" "off"}}&nbsp;<font color="#9aa0a8">{{loc .name}}</font>{{end}} &nbsp; {{end}}{{template "f-end"}}{{end}}

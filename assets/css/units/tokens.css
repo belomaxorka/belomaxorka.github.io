@@ -1,0 +1,7 @@
+/* The token meter: three counts on an LCD, the bill in silkscreen beside them; stale when the machines are quiet. */
+.tokens .face { gap: 8px 18px; padding-block: 10px; }
+.tok-id { display: grid; gap: 4px; flex: none; }
+.tok-lcd { display: flex; flex-wrap: wrap; gap: 2px 18px; font-size: 19px; }
+.tok-lcd > span { white-space: nowrap; }
+.tok-lcd.stale { color: var(--lcd-dim); }
+.tok-bill { white-space: nowrap; }
