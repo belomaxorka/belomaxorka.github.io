@@ -129,10 +129,6 @@ best viewed with any browser</font></td></tr>
 {{define "lite-switch"}}{{template "lite-silk" (t "sw.title")}}
 {{template "f"}}{{range .Content.contacts}}{{if .link}}{{template "lite-led" (or .led "")}}&nbsp;<a href="{{.link}}">{{loc .name}}</a>{{else if .copy}}{{template "lite-led" (or .led "")}}&nbsp;{{loc .name}} <tt>{{.copy}}</tt>{{else}}{{template "lite-led" "off"}}&nbsp;<font color="#9aa0a8">{{loc .name}}</font>{{end}} &nbsp; {{end}}{{template "f-end"}}{{end}}
 
-{{/* Donations: the wallets' addresses. */}}
-{{define "lite-donate"}}{{template "lite-silk" (print (t "donate.title") " · " (t "donate.hint"))}}
-{{template "f"}}{{range .Content.donate}}<b>{{.chain}}</b> <font size="1" color="#9aa0a8">{{.coins}}</font><br><tt>{{.address}}</tt><br>{{end}}{{template "f-end"}}{{end}}
-
 {{/* The KVM is the guestbook: the entries and the form (a plain POST, as on the rack without JS). */}}
 {{define "lite-kvm"}}<a name="guestbook"></a>{{template "lite-silk" (print (t "gb.title") " · " (t "gb.moderated"))}}{{with .Guestbook}}
 {{template "lite-lcd-open"}}{{range .Entries}}<font color="#a07a2a">{{or .Name (t "gb.anon")}} · #{{.ID}} · {{date .At}} · {{clock .At}}</font><br>
