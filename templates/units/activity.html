@@ -1,11 +1,15 @@
-{{/* The activity unit: my year on GitHub's contribution calendar (.Activity, public, no token): a lamp a day in
-     columns of seven as on a front panel, the year's total, the days in a row and the last push. */}}
+{{/* The activity unit: my year on GitHub's contribution calendar (.Activity, public, no token): a cell a day in
+     columns of seven on an LCD, in the cover's colours like every screen, the year's total, the days in a row and the
+     last push. */}}
 {{define "unit-activity"}}
-<section class="u act" style="--h:1" aria-labelledby="act-h" data-key="act" data-power data-net="wan">
+<section class="u act" style="--h:2" aria-labelledby="act-h" data-key="act" data-power data-net="wan">
   <div class="face">
-    <div class="act-id"><span class="tape b" id="act-h">{{t "act.title"}}</span><span class="silk">{{if .OK}}{{t "act.year" .TotalText}}{{else}}{{t "act.nodata"}}{{end}}</span></div>
-    <div class="act-wall"><div class="act-grid" role="img" aria-label="{{if .OK}}{{t "act.year" .TotalText}}{{else}}{{t "act.nodata"}}{{end}}">{{range .Weeks}}{{range .}}{{if ge .Level 0}}<b class="l{{.Level}}" title="{{.Date}} · {{.Count}}"></b>{{else}}<b class="n"></b>{{end}}{{end}}{{end}}</div></div>
-    <span class="silk act-meta">{{if .OK}}{{t "act.streak" .Streak}}{{with .Push.Repo}} · {{t "act.push" . (ago $.Push.At)}}{{end}}{{end}}</span>
+    <div class="act-head">
+      <span class="tape b" id="act-h">{{t "act.title"}}</span>
+      <span class="silk">{{if .OK}}{{t "act.year" .TotalText}}{{else}}{{t "act.nodata"}}{{end}}</span>
+      <span class="silk act-meta">{{if .OK}}{{t "act.streak" .Streak}}{{with .Push.Repo}} · {{t "act.push" . (ago $.Push.At)}}{{end}}{{end}}</span>
+    </div>
+    <div class="lcd act-wall"><div class="act-view"><div class="act-grid" role="img" aria-label="{{if .OK}}{{t "act.year" .TotalText}}{{else}}{{t "act.nodata"}}{{end}}">{{range .Weeks}}{{range .}}{{if ge .Level 0}}<b class="l{{.Level}}" title="{{.Date}} · {{.Count}}"></b>{{else}}<b class="n"></b>{{end}}{{end}}{{end}}</div></div></div>
   </div>
 </section>
 {{end}}
