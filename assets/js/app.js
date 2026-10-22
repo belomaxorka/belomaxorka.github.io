@@ -398,7 +398,8 @@
     // Guests online (data-guests on <html>, live.js): a cord per other guest from a free patch panel jack to a free port of
     // the switch's top row, as many as fit (none on a phone, none without the internet). A new one is .fresh.
     const guests = Rack.reached() ? +document.documentElement.dataset.guests || 0 : 0;
-    const spare = [...rack.querySelectorAll('.patch .pp-free .jack')].filter(j => j.offsetParent).map(box);
+    const free = rack.querySelector('.patch .pp-free');
+    const spare = free && free.offsetParent ? [...free.querySelectorAll('.jack')].filter(j => j.offsetParent).map(box).filter(j => j.b <= box(free).b) : [];
     let g = 0;
     for (let n = 9; g < guests && g < spare.length; g++, n += 2) {
       const t = port(n);

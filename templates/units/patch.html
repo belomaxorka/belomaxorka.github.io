@@ -4,10 +4,10 @@
   <div class="face">
     <div class="pp-id"><span class="brand">cat6 · 24p</span><span class="silk">{{t "ring.panel"}}</span></div>
     <div class="pp-ports">
-      <a class="port ring" href="{{.PrevURL}}"{{ext .PrevURL "prev"}}><span class="pn"></span><i class="jack"></i><span class="tape">← {{or .PrevName (t "ring.prev")}}</span></a>
+      <a class="port ring" href="{{.PrevURL}}"{{ext .PrevURL "prev"}}{{with .PrevName}} title="{{.}}"{{end}}><span class="pn"></span><i class="jack"></i><span class="tape">← <span class="nm">{{or .PrevName (t "ring.prev")}}</span></span></a>
       <a class="port ring" href="{{.Home}}"{{ext .Home}}><span class="pn"></span><i class="jack"></i><span class="tape b">otoring</span>{{if .Joined}}<i class="led"></i>{{else}}<i class="led warn" title="{{t "ring.pending"}}"></i>{{end}}</a>
       <a class="port ring" href="{{.RandomURL}}"{{ext .RandomURL}}><span class="pn"></span><i class="jack"></i><span class="tape">{{t "ring.random"}}</span></a>
-      <a class="port ring" href="{{.NextURL}}"{{ext .NextURL "next"}}><span class="pn"></span><i class="jack"></i><span class="tape">{{or .NextName (t "ring.next")}} →</span></a>
+      <a class="port ring" href="{{.NextURL}}"{{ext .NextURL "next"}}{{with .NextName}} title="{{.}}"{{end}}><span class="pn"></span><i class="jack"></i><span class="tape"><span class="nm">{{or .NextName (t "ring.next")}}</span> →</span></a>
       <span class="pp-free" aria-hidden="true">{{range seq 12}}<span class="port"><span class="pn"></span><i class="jack"></i></span>{{end}}</span>
     </div>
   </div>
