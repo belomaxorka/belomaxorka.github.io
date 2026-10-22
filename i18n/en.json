@@ -257,7 +257,7 @@
   "ups.site": "site",
   "ups.label": "ups",
   "tok.title": "tokens --wasted",
-  "tok.post": "meter · mounting the ledger…|reading the days…\n[===...]|adding up what claude burned\n[======]",
+  "tok.post": "meter · mounting the ledger…|reading the days… [===...]|adding up what claude burned [======]",
   "tok.today": "today",
   "tok.month": "this month",
   "tok.all": "all time",
