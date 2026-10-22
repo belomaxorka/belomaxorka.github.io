@@ -13,7 +13,7 @@ const files = (function walk(d) {
 
 const NET = ['lan', 'wan'], ROLE = ['switch', 'router', 'ups'], LIVE = ['lamps', 'bar', 'text', 'image'], NEWS = ['', 'markup'], VLAN = ['mgmt'];
 // The sources data-feed can name: those of site-api's live stream (its TestEverySourceIsListed), plus site and guestbook.
-const FEEDS = ['gatus', 'koito', 'proxmox', 'telegram', 'ups', 'wakapi', 'webring', 'site', 'guestbook'];
+const FEEDS = ['gatus', 'github', 'koito', 'proxmox', 'telegram', 'ups', 'wakapi', 'webring', 'site', 'guestbook'];
 const attr = (tag, name) => { const m = tag.match(new RegExp(`\\s${name}(?:="([^"]*)")?(?=[\\s>{])`)); return m ? m[1] ?? '' : null; };
 const unitTag = /<([a-z]+)\s[^>]*class="u[ "][^>]*>/g;
 

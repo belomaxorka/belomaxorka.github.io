@@ -117,6 +117,10 @@ best viewed with any browser</font></td></tr>
 {{template "lite-lcd-open"}}{{with .Syslog}}{{range .}}<font color="#a07a2a">{{stamp .At}} {{.Src}}</font> {{if .What}}{{if .URL}}<a href="{{.URL}}"><font color="#ffd27a">{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}</font></a>{{else}}{{t (print "log.ev." .What) .Subject .N (uptime .Dur)}}{{end}}{{else}}{{if .Now}}{{t "log.now"}} {{end}}{{if .URL}}<a href="{{.URL}}"><font color="#ffd27a">{{.Text}}</font></a>{{else}}{{.Text}}{{end}}{{end}}<br>
 {{end}}{{else}}{{t "log.quiet"}}{{end}}{{template "lite-lcd-close"}}{{end}}
 
+{{/* The activity unit. */}}
+{{define "lite-activity"}}{{template "lite-silk" (t "act.title")}}{{with .Activity}}
+{{template "lite-lcd-open"}}{{if .OK}}{{t "act.year" .TotalText}} · {{t "act.streak" .Streak}}{{if .Push.Repo}} · {{t "act.push" .Push.Repo (ago .Push.At)}}{{end}}{{else}}{{t "act.nodata"}}{{end}}{{template "lite-lcd-close"}}{{end}}{{end}}
+
 {{/* The token meter. */}}
 {{define "lite-tokens"}}{{template "lite-silk" (t "tok.title")}}{{with .Tokens}}
 {{template "lite-lcd-open"}}{{if .OK}}{{t "tok.today"}} {{.TodayText}} · {{t "tok.month"}} {{.MonthText}} · {{t "tok.all"}} {{.AllText}} · {{t "tok.bill" .CostAllText}}{{else}}{{t "tok.nodata"}}{{end}}{{template "lite-lcd-close"}}{{end}}{{end}}
