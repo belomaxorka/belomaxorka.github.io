@@ -256,7 +256,7 @@
   "ups.sources": "исходники:",
   "ups.site": "сайт",
   "ups.label": "ибп",
-  "tok.title": "tokens --wasted",
+  "tok.title": "claude tokens --wasted",
   "tok.post": "счётчик · монтирую журнал…|читаю дни… [===...]|складываю, что сжёг claude [======]",
   "tok.today": "сегодня",
   "tok.month": "за месяц",
