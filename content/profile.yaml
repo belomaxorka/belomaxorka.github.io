@@ -20,6 +20,9 @@ pgp: "139C 8E4A 1A2B 4823 3AE3 EFEF D815 7C4D 4C4C 6DB4"
 # age - the public key for age (age-encryption.org): anyone can encrypt a file to me with it. A second sticker under
 #   the PGP one. The private key never leaves my machine.
 age: "age17qp94tl4mxjecknypsjzdezu43fwlsllselhraewmdhfjyw84ynsk94609"
+# keys - where my public SSH key is (the file `keys` at the site's root, like github.com/<user>.keys): a third
+#   sticker with the one-liner that lets me into a server. The private key never leaves my machine.
+keys: https://belomaxorka.dev/keys
 tapes:
   - - {t: me.pronouns}
     - {age: true}

@@ -48,6 +48,7 @@
       {{/* The asset tag sticker: the full PGP fingerprint, printed, so it shows without power too and can be selected. */}}
       {{with .Data.pgp}}<div class="asset-tag"><span class="silk">pgp · {{t "me.pgp"}}</span><code translate="no">{{.}}</code><i class="bars" aria-hidden="true"></i></div>{{end}}
       {{with .Data.age}}<div class="asset-tag age"><span class="silk">age · {{t "me.age"}}</span><code translate="no">{{.}}</code></div>{{end}}
+      {{with .Data.keys}}<div class="asset-tag ssh"><a class="silk" href="{{.}}">ssh · {{t "me.ssh"}}</a><code translate="no">curl -fsSL {{.}} >> ~/.ssh/authorized_keys</code></div>{{end}}
     </div>
   </div>
   <div class="note" data-sticker="srv" data-back="{{t "note.back"}}">{{th "note.dont"}}</div>

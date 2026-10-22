@@ -106,6 +106,7 @@
   "bios.help": "↑↓ select · enter change ·",
   "me.age": "public key",
   "me.pgp": "key fingerprint",
+  "me.ssh": "let me into your server",
   "lcd.lab": "homelab & net",
   "lcd.lab2": "proxmox, devops",
   "note.back": "stick it back",

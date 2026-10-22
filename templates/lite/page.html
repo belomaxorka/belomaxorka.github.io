@@ -97,7 +97,7 @@ best viewed with any browser</font></td></tr>
 {{t "lcd.lab"}} · {{t "lcd.lab2"}}<br>
 {{with .Data.mbti}}{{.}} · {{t "lcd.mbti2"}}{{end}}{{template "lite-lcd-close"}}
 {{template "f"}}{{with .Data.colors}}<br>{{t "lcd.colors"}}: {{range .}}<font color="{{.}}">■</font> {{end}}{{end}}
-{{with .Data.pgp}}<br>pgp · {{t "me.pgp"}}:<br><tt>{{.}}</tt>{{end}}{{with .Data.age}}<br>age · {{t "me.age"}}:<br><tt>{{.}}</tt>{{end}}{{template "f-end"}}
+{{with .Data.pgp}}<br>pgp · {{t "me.pgp"}}:<br><tt>{{.}}</tt>{{end}}{{with .Data.age}}<br>age · {{t "me.age"}}:<br><tt>{{.}}</tt>{{end}}{{with .Data.keys}}<br>ssh · <a href="{{.}}">{{t "me.ssh"}}</a>:<br><tt>curl -fsSL {{.}} &gt;&gt; ~/.ssh/authorized_keys</tt>{{end}}{{template "f-end"}}
 </td></tr></table>{{end}}{{end}}
 
 {{/* The media server is Koito: what is playing. */}}
