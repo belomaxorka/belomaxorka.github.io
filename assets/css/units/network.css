@@ -59,7 +59,8 @@
 
 /* ---------- router ---------- */
 .rtr-ports { display: flex; align-items: center; gap: 6px; }
-.rtr-ports .jack.wan { box-shadow: inset 0 0 0 2px #000, 0 0 0 1.5px var(--tape-b); margin-right: 8px; }
+/* The WAN jack is framed in blue, as on a router; a ring outside the jack would be cut by its clip-path. */
+.rtr-ports .jack.wan { box-shadow: inset 0 0 0 2px var(--tape-b); margin-right: 8px; }
 .rtr .lcd { margin-left: auto; font-size: 17px; padding: 4px 10px; white-space: nowrap; }
 /* The site's other ways in: link jacks after LAN; a lamp is a Gatus check, dark without the router's WAN or LAN. */
 .rtr .uplinks { display: flex; align-items: center; gap: 10px; margin-left: 6px; padding-left: 12px; border-left: 1px solid var(--edge); }
