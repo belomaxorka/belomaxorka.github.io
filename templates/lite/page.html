@@ -118,7 +118,7 @@ best viewed with any browser</font></td></tr>
 {{end}}{{else}}{{t "log.quiet"}}{{end}}{{template "lite-lcd-close"}}{{end}}
 
 {{/* The token meter. */}}
-{{define "lite-tokens"}}{{template "lite-silk" (print (t "tok.title") " · " (t "tok.sub"))}}{{with .Tokens}}
+{{define "lite-tokens"}}{{template "lite-silk" (t "tok.title")}}{{with .Tokens}}
 {{template "lite-lcd-open"}}{{if .OK}}{{t "tok.today"}} {{.TodayText}} · {{t "tok.month"}} {{.MonthText}} · {{t "tok.all"}} {{.AllText}} · {{t "tok.bill" .CostAllText}}{{else}}{{t "tok.nodata"}}{{end}}{{template "lite-lcd-close"}}{{end}}{{end}}
 
 {{/* The contacts switch. */}}

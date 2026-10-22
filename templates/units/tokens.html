@@ -3,7 +3,7 @@
 {{define "unit-tokens"}}
 <section class="u tokens" style="--h:1" aria-labelledby="tokens-h">
   <div class="face">
-    <div class="tok-id"><span class="tape r" id="tokens-h">{{t "tok.title"}}</span><span class="silk">{{t "tok.sub"}}</span></div>
+    <span class="tape r" id="tokens-h">{{t "tok.title"}}</span>
     <div class="lcd tok-lcd{{if .Stale}} stale{{end}}">
       {{if .OK}}<span><span class="d">{{t "tok.today"}}</span> {{.TodayText}}</span><span><span class="d">{{t "tok.month"}}</span> {{.MonthText}}</span><span><span class="d">{{t "tok.all"}}</span> {{.AllText}}</span>{{else}}<span class="d">{{t "tok.nodata"}}</span>{{end}}
     </div>
