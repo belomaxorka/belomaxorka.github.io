@@ -53,7 +53,7 @@
 
   function fall(key) {
     const src = sticker(key), R = room();
-    if (!src || !R || live.has(key) || !src.offsetParent) return; // on a phone the server's sticker is hidden
+    if (!src || !R || live.has(key) || !src.offsetParent) return; // a hidden sticker has nowhere to fall from
     const rr = R.getBoundingClientRect(), b = src.getBoundingClientRect();
     const s = {
       el: clone(src), w: src.offsetWidth, h: src.offsetHeight,

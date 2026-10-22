@@ -83,11 +83,4 @@ button.port { font: inherit; color: inherit; background: none; border: 0; paddin
 .ic { width: 1em; height: 1em; flex: none; vertical-align: -.14em; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .ic .solid { fill: currentColor; stroke: none; }
 
-.note {
-  position: absolute; z-index: 5; max-width: 180px;
-  font: 600 19px/1.1 var(--f-hand); color: var(--note-fg); background: var(--note-bg);
-  padding: 8px 11px 10px; box-shadow: 0 8px 14px -6px #000c;
-}
-@media (max-width: 760px) {
-  .note { display: none; }
 }

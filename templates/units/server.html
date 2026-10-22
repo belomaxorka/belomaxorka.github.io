@@ -2,7 +2,6 @@
 {{define "unit-server"}}
 <section class="u srv" style="--h:4" aria-labelledby="who" data-key="srv" data-power data-net="wan" data-feed="site telegram">
   <div class="face">
-    <div class="col">
     {{with .Photos}}{{$n := len .}}
     {{/* The photo remote: keys, a counter and a lamp per photo (at most 12); without JS the strip swipes. */}}
     <div class="album" x-data="gallery({{$n}})" role="region" aria-roledescription="carousel" aria-label="{{t "me.photos"}}">
@@ -23,9 +22,6 @@
     {{else}}
     <div class="photo" role="img" aria-label="{{t "me.photo"}}"><span>photo</span></div>
     {{end}}
-    {{/* The note at the column's foot, in the flow: it can overlap nothing, whatever wraps. */}}
-    <div class="note" data-sticker="srv" data-back="{{t "note.back"}}">{{th "note.dont"}}</div>
-    </div>
     <div class="ident">
       <h1 class="name" id="who">belomaxorka<small>{{t "me.sub"}}</small></h1>
       {{$p := .}}

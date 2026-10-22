@@ -25,10 +25,6 @@
   .status-col .lcd.two { max-width: 420px; }
 }
 .lcd.two { font-size: 22px; }
-/* The left column: the album (or the photo) and, at its foot, the note; in the flow, so it overlaps nothing whatever
-   wraps. Narrower than 761px (parts.css) the note is not shown. */
-.srv .col { display: flex; flex-direction: column; gap: 14px; flex: none; align-self: stretch; }
-.srv .note { position: relative; margin-top: auto; align-self: flex-start; max-width: 176px; transform: rotate(-4deg); }
 /* Avatars from Telegram: a square that swipes (scroll-snap); with JS a remote under it with keys, a counter
    and a lamp per photo. */
 .album { width: 176px; flex: none; align-self: flex-start; display: grid; gap: 8px; }
