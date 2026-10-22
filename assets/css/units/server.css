@@ -15,6 +15,14 @@
 .name small { display: block; font: 500 11px/1.4 var(--f-silk); letter-spacing: .18em; color: var(--dim); text-transform: uppercase; margin-top: 6px; }
 .intro { margin: 0; max-width: 60ch; color: var(--ink); }
 .status-col { flex: 0 1 230px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+/* Narrower than 862px (the album, the name's column and this one no longer share the row) the status column wraps
+   under the intro: it takes the whole row then, the screen and the lamps first and the stickers side by side, as
+   many as fit, instead of a 230px strip with a blank right side. */
+@media (max-width: 861px) and (min-width: 561px) {
+  .status-col { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 14px; }
+  .status-col > .lcd, .status-col > .leds { flex: 1 1 100%; }
+  .status-col .lcd.two { max-width: 420px; }
+}
 .lcd.two { font-size: 22px; }
 /* The left column: the album (or the photo) and, at its foot, the note; in the flow, so it overlaps nothing whatever
    wraps. Narrower than 761px (parts.css) the note is not shown. */
