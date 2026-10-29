@@ -1,39 +1,10 @@
-# The /projects rack (templates/units/projects.html): a unit per project, in this order, top to bottom.
-#   id      - the unit's name on the page (letters, digits, dashes);
-#   name    - the nameplate;
-#   repo    - owner/name, on the silkscreen;
-#   link    - the repository; site - its own site (optional);
-#   role    - who I am there, desc - a line or two about it (a string or {en, ru});
-#   stack   - tapes under the description; the first one is the main language, also on the LCD;
-#   license - SPDX id; since - the year it started; version - the last release (optional);
-#   state   - active (in development) or archived;
-#   tape    - the nameplate's colour: empty (black), r (red), b (blue).
-- id: yaopl
-  name: yaopl
-  repo: yaopl/yaopl
-  link: https://github.com/yaopl/yaopl
-  site: https://yaopl.github.io/yaopl/
-  role: {en: maintainer, ru: мейнтейнер}
-  desc:
-    en: "yet another open ps2 loader: a fork of open ps2 loader that keeps it going. it loads games and apps on the playstation 2."
-    ru: "yet another open ps2 loader: форк open ps2 loader, который продолжает его развитие. загружает игры и приложения на playstation 2."
-  stack: [c, ps2, homebrew]
-  license: AFL-3.0
-  since: 2026
-  state: active
+# The /projects rack (templates/units/projects.html): a unit per repository, in this order, top to bottom.
+# Everything the unit shows (description, topics, language, licence, stars, the latest release, the last commit, the
+# site) is what GitHub says of the repository: site-api reads it every 30 minutes, a new one on its next round.
+#   repo - owner/name on GitHub;
+#   tape - the nameplate's colour: empty (black), r (red), b (blue).
+- repo: yaopl/yaopl
   tape: r
 
-- id: torrentpier
-  name: torrentpier
-  repo: torrentpier/torrentpier
-  link: https://github.com/torrentpier/torrentpier
-  role: {en: ex-contributor, ru: бывший контрибьютор}
-  desc:
-    en: "a bull-powered bittorrent tracker engine in php: the tracker and its forum in one. the repository is archived now."
-    ru: "движок bittorrent-трекера на php: трекер и форум при нём в одном. сейчас репозиторий в архиве."
-  stack: [php, bittorrent, forum]
-  license: MIT
-  since: 2014
-  version: v3.0.5
-  state: archived
+- repo: torrentpier/torrentpier
   tape: b

@@ -1,23 +1,23 @@
-{{/* The /projects rack: a storage server per project in content/projects.yaml. The drive bays are decoration; the
-     LCD says whether it is still being worked on, the keys lead to the repository and the project's site. */}}
+{{/* The /projects rack: a server per repository of content/projects.yaml (.Projects). Everything on it is what
+     GitHub says of the repository, as it is: the description, the topics, the latest release, the last commit. Until
+     GitHub has answered only the name and the link. */}}
 {{define "unit-projects"}}
-{{range .Content.projects}}{{$arch := eq .state "archived"}}
-<section class="u prj{{if $arch}} arch{{end}}" style="--h:2" aria-labelledby="prj-{{.id}}" data-key="prj-{{.id}}" data-power data-net="wan">
+{{range .Projects}}
+<section class="u prj{{if .Archived}} arch{{end}}" style="--h:2" aria-labelledby="prj-{{.ID}}" data-key="prj-{{.ID}}" data-power data-net="wan" data-feed="github">
   <div class="face">
-    <div class="bays" aria-hidden="true">{{range seq 6}}<span class="bay"><i class="led{{if $arch}} off{{end}}"></i></span>{{end}}</div>
     <div class="ident">
-      <span class="silk">{{.repo}} · {{loc .role}}</span>
-      <h2 class="prj-name" id="prj-{{.id}}"><a class="tape{{with .tape}} {{.}}{{end}}" href="{{.link}}"{{ext .link}}>{{.name}}</a></h2>
-      <p class="desc">{{loc .desc}}</p>
-      {{with .stack}}<div class="tapes stack">{{range .}}<span class="tape">{{.}}</span>{{end}}</div>{{end}}
+      <span class="silk">{{.Slug}}{{if .OK}}{{with .Language}} · {{.}}{{end}}{{with .License}} · {{.}}{{end}}{{end}}</span>
+      <h2 class="prj-name" id="prj-{{.ID}}"><a class="tape{{with .Tape}} {{.}}{{end}}" href="{{.URL}}"{{ext .URL}}>{{.Name}}</a>{{if .Archived}} <span class="tape r arch-tape">{{t "prj.archived"}}</span>{{end}}</h2>
+      {{with .Description}}<p class="desc">{{.}}</p>{{end}}
+      {{with .Topics}}<div class="tapes topics">{{range $i, $tp := .}}{{if lt $i 6}}<span class="tape">{{$tp}}</span>{{end}}{{end}}</div>{{end}}
     </div>
     <div class="side">
-      <div class="lcd two" data-post="{{t "prj.post" .name}}">{{if $arch}}{{t "prj.archived"}}{{else}}{{t "prj.active"}}{{end}}{{with .version}} · {{.}}{{end}}<br><span class="d">{{with .stack}}{{index . 0}} · {{end}}{{.license}} · {{t "prj.since" .since}}</span></div>
+      <div class="lcd two" data-post="{{t "prj.post" .Name}}">{{if .OK}}{{with .Release.Tag}}{{.}}{{else}}{{t "prj.norelease"}}{{end}}{{if .Release.Tag}} <span class="d">· {{date .Release.At}}</span>{{end}}<br><span class="d">{{if .Commit.IsZero}}{{t "prj.nocommits"}}{{else}}{{t "prj.commit" (date .Commit)}}{{end}}</span>{{else}}{{t "prj.silent"}}<br><span class="d">{{t "prj.silent2"}}</span>{{end}}</div>
+      {{if .OK}}<span class="silk prj-stats">{{t "prj.stats" .Stars .Forks}}</span>{{end}}
       <div class="ports">
-        <a class="key" href="{{.link}}"{{ext .link}}>{{t "prj.repo"}}</a>
-        {{with .site}}<a class="key" href="{{.}}"{{ext .}}>{{t "prj.site"}}</a>{{end}}
+        <a class="key" href="{{.URL}}"{{ext .URL}}>{{t "prj.repo"}}</a>
+        {{with .Homepage}}<a class="key" href="{{.}}"{{ext .}}>{{t "prj.site"}}</a>{{end}}
       </div>
-      <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led{{if $arch}} off{{end}}"></i>{{if $arch}}{{t "prj.led_arch"}}{{else}}{{t "prj.led_dev"}}{{end}}</span></div>
     </div>
   </div>
 </section>

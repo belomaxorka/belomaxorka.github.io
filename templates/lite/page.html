@@ -125,12 +125,12 @@ best viewed with any browser</font></td></tr>
 {{define "lite-tokens"}}{{template "lite-silk" (t "tok.title")}}{{with .Tokens}}
 {{template "lite-lcd-open"}}{{if .OK}}{{t "tok.today"}} {{.TodayText}} · {{t "tok.month"}} {{.MonthText}} · {{t "tok.all"}} {{.AllText}} · {{t "tok.bill" .CostAllText}}{{else}}{{t "tok.nodata"}}{{end}}{{template "lite-lcd-close"}}{{end}}{{end}}
 
-{{/* The projects: a row each, the name links to the repository. */}}
+{{/* The projects: a row each, as GitHub describes them; the name links to the repository. */}}
 {{define "lite-projects"}}{{template "lite-silk" (t "prj.aria")}}
 <table border="0" cellspacing="0" cellpadding="3" width="100%">
-{{range .Content.projects}}{{$arch := eq .state "archived"}}<tr><td valign="top" width="12">{{if $arch}}{{template "lite-led" "off"}}{{else}}{{template "lite-led" ""}}{{end}}</td><td valign="top">{{template "f"}}<a href="{{.link}}"><b>{{.name}}</b></a> <font size="1" color="#9aa0a8">{{.repo}} · {{loc .role}}</font><br>
-{{loc .desc}}<br>
-<font size="1" color="#9aa0a8">{{if $arch}}{{t "prj.archived"}}{{else}}{{t "prj.active"}}{{end}}{{with .version}} · {{.}}{{end}} · {{range $i, $s := .stack}}{{if $i}}, {{end}}{{$s}}{{end}} · {{.license}} · {{t "prj.since" .since}}</font>{{with .site}} · <a href="{{.}}">{{t "prj.site"}}</a>{{end}}{{template "f-end"}}</td></tr>
+{{range .Projects}}<tr><td valign="top">{{template "f"}}<a href="{{.URL}}"><b>{{.Name}}</b></a> <font size="1" color="#9aa0a8">{{.Slug}}{{if .Archived}} · <font color="#ff7a6b">{{t "prj.archived"}}</font>{{end}}</font>
+{{if .OK}}{{with .Description}}<br>{{.}}{{end}}<br>
+<font size="1" color="#9aa0a8">{{if .Release.Tag}}{{.Release.Tag}} · {{date .Release.At}}{{else}}{{t "prj.norelease"}}{{end}} · {{if .Commit.IsZero}}{{t "prj.nocommits"}}{{else}}{{t "prj.commit" (date .Commit)}}{{end}}{{with .Language}} · {{.}}{{end}}{{with .License}} · {{.}}{{end}} · {{t "prj.stats" .Stars .Forks}}</font>{{with .Homepage}} · <a href="{{.}}">{{t "prj.site"}}</a>{{end}}{{else}}<br><font size="1" color="#9aa0a8">{{t "prj.silent"}} · {{t "prj.silent2"}}</font>{{end}}{{template "f-end"}}</td></tr>
 {{end}}</table>{{end}}
 
 {{/* The contacts switch. */}}
