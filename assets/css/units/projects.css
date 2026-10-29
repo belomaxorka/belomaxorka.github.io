@@ -1,0 +1,38 @@
+/* The /projects rack: a storage server per project (templates/units/projects.html). Drive bays on the left, the
+   name on a label maker tape, the description and the stack; the LCD, the keys and the lamps on the right. */
+.prj .face { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(200px, 250px); gap: 12px 22px; align-items: center; padding-block: 12px; }
+.prj .ident { display: grid; gap: 7px; align-content: center; }
+.prj-name { margin: 0; line-height: 1; }
+.prj-name .tape { font-size: 20px; padding: 5px 11px 4px; text-decoration: none; }
+.prj-name .tape:hover { filter: brightness(1.2); }
+.prj .desc { margin: 0; max-width: 62ch; color: var(--ink); text-wrap: pretty; }
+.prj .stack .tape { font-size: 9.5px; padding: 2px 6px 1px; background: var(--key); color: var(--key-ink); text-shadow: none; box-shadow: inset 0 0 0 1px var(--edge); transform: none; }
+.prj .side { display: grid; gap: 8px; align-content: center; min-width: 0; }
+.prj .side .lcd.two { font-size: 19px; }
+.prj .side .ports { gap: 6px; }
+.prj .side .key { flex: 1 1 0; justify-content: center; }
+.prj.arch .prj-name .tape { opacity: .8; }
+
+/* Hot-swap drive caddies, two columns of three: a grille and an activity lamp each; dark on an archived project. */
+.prj .bays { display: grid; grid-template-columns: repeat(2, 26px); grid-auto-rows: 22px; gap: 4px; padding: 5px; border-radius: 3px; background: var(--hole); box-shadow: inset 0 0 0 1px #000; }
+.prj .bay {
+  position: relative; border-radius: 2px;
+  background: repeating-linear-gradient(90deg, var(--panel-hi) 0 2px, var(--panel) 2px 4px);
+  box-shadow: inset 0 0 0 1px var(--edge), inset 0 1px 0 #ffffff14;
+}
+.prj .bay .led { position: absolute; right: 3px; top: 3px; width: 4px; height: 4px; }
+.prj .bay:nth-child(3n+2) .led:not(.off) { background: var(--led-off); box-shadow: inset 0 1px 1px #0006; }
+
+/* Up to 940px the screen and the keys go under the description, in a row. */
+@media (max-width: 939px) {
+  .prj .face { grid-template-columns: auto minmax(0, 1fr); }
+  .prj .side { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .prj .side .leds { grid-column: 1 / -1; }
+}
+/* A phone: no drive bays, the screen over the keys. */
+@media (max-width: 560px) {
+  .prj .face { grid-template-columns: minmax(0, 1fr); }
+  .prj .bays { display: none; }
+  .prj .side { grid-template-columns: minmax(0, 1fr); }
+  .prj-name .tape { font-size: 17px; }
+}

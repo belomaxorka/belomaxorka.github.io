@@ -125,6 +125,14 @@ best viewed with any browser</font></td></tr>
 {{define "lite-tokens"}}{{template "lite-silk" (t "tok.title")}}{{with .Tokens}}
 {{template "lite-lcd-open"}}{{if .OK}}{{t "tok.today"}} {{.TodayText}} · {{t "tok.month"}} {{.MonthText}} · {{t "tok.all"}} {{.AllText}} · {{t "tok.bill" .CostAllText}}{{else}}{{t "tok.nodata"}}{{end}}{{template "lite-lcd-close"}}{{end}}{{end}}
 
+{{/* The projects: a row each, the name links to the repository. */}}
+{{define "lite-projects"}}{{template "lite-silk" (t "prj.aria")}}
+<table border="0" cellspacing="0" cellpadding="3" width="100%">
+{{range .Content.projects}}{{$arch := eq .state "archived"}}<tr><td valign="top" width="12">{{if $arch}}{{template "lite-led" "off"}}{{else}}{{template "lite-led" ""}}{{end}}</td><td valign="top">{{template "f"}}<a href="{{.link}}"><b>{{.name}}</b></a> <font size="1" color="#9aa0a8">{{.repo}} · {{loc .role}}</font><br>
+{{loc .desc}}<br>
+<font size="1" color="#9aa0a8">{{if $arch}}{{t "prj.archived"}}{{else}}{{t "prj.active"}}{{end}}{{with .version}} · {{.}}{{end}} · {{range $i, $s := .stack}}{{if $i}}, {{end}}{{$s}}{{end}} · {{.license}} · {{t "prj.since" .since}}</font>{{with .site}} · <a href="{{.}}">{{t "prj.site"}}</a>{{end}}{{template "f-end"}}</td></tr>
+{{end}}</table>{{end}}
+
 {{/* The contacts switch. */}}
 {{define "lite-switch"}}{{template "lite-silk" (t "sw.title")}}
 {{template "f"}}{{range .Content.contacts}}{{if .link}}{{template "lite-led" (or .led "")}}&nbsp;<a href="{{.link}}">{{loc .name}}</a>{{else if .copy}}{{template "lite-led" (or .led "")}}&nbsp;{{loc .name}} <tt>{{.copy}}</tt>{{else}}{{template "lite-led" "off"}}&nbsp;<font color="#9aa0a8">{{loc .name}}</font>{{end}} &nbsp; {{end}}{{template "f-end"}}{{end}}

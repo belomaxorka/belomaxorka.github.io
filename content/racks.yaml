@@ -12,3 +12,7 @@
 - id: lab
   path: /lab
   units: [patch, brush, tor, brush, mgmt, pve, guests, monitor, ups]
+
+- id: projects
+  path: /projects
+  units: [patch, brush, tor, brush, mgmt, projects, ups]

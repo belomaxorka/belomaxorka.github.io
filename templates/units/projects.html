@@ -1,0 +1,25 @@
+{{/* The /projects rack: a storage server per project in content/projects.yaml. The drive bays are decoration; the
+     LCD says whether it is still being worked on, the keys lead to the repository and the project's site. */}}
+{{define "unit-projects"}}
+{{range .Content.projects}}{{$arch := eq .state "archived"}}
+<section class="u prj{{if $arch}} arch{{end}}" style="--h:2" aria-labelledby="prj-{{.id}}" data-key="prj-{{.id}}" data-power data-net="wan">
+  <div class="face">
+    <div class="bays" aria-hidden="true">{{range seq 6}}<span class="bay"><i class="led{{if $arch}} off{{end}}"></i></span>{{end}}</div>
+    <div class="ident">
+      <span class="silk">{{.repo}} · {{loc .role}}</span>
+      <h2 class="prj-name" id="prj-{{.id}}"><a class="tape{{with .tape}} {{.}}{{end}}" href="{{.link}}"{{ext .link}}>{{.name}}</a></h2>
+      <p class="desc">{{loc .desc}}</p>
+      {{with .stack}}<div class="tapes stack">{{range .}}<span class="tape">{{.}}</span>{{end}}</div>{{end}}
+    </div>
+    <div class="side">
+      <div class="lcd two" data-post="{{t "prj.post" .name}}">{{if $arch}}{{t "prj.archived"}}{{else}}{{t "prj.active"}}{{end}}{{with .version}} · {{.}}{{end}}<br><span class="d">{{with .stack}}{{index . 0}} · {{end}}{{.license}} · {{t "prj.since" .since}}</span></div>
+      <div class="ports">
+        <a class="key" href="{{.link}}"{{ext .link}}>{{t "prj.repo"}}</a>
+        {{with .site}}<a class="key" href="{{.}}"{{ext .}}>{{t "prj.site"}}</a>{{end}}
+      </div>
+      <div class="leds silk"><span><i class="led pwr"></i>pwr</span><span><i class="led{{if $arch}} off{{end}}"></i>{{if $arch}}{{t "prj.led_arch"}}{{else}}{{t "prj.led_dev"}}{{end}}</span></div>
+    </div>
+  </div>
+</section>
+{{end}}
+{{end}}
