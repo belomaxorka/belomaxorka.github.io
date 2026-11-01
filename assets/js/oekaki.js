@@ -1,10 +1,14 @@
 // The guestbook's drawing pad: a white 640x400 canvas (site-api takes no more), a brush with pen pressure, eraser,
 // fill, colours, size, undo/redo, full screen. Every action writes the picture into a hidden field, so htmx and a plain
-// form both send it.
+// form both send it. What was written and drawn is kept as a draft until it is sent: a refused entry (the server answers
+// with a new, empty form), a reload or a closed tab lose nothing.
 document.addEventListener('alpine:init', () => {
   const Alpine = window.Alpine;
+  const store = window.Rack.store;
   const W = 640, H = 400;
-  const MAX_URL = 400 << 10;   // site-api: guestbook.MaxDrawing
+  const MAX_URL = 1524362;     // site-api: guestbook.MaxDrawing, any 640x440 PNG
+  const DRAFT = 'gb-draft';
+  const DRAFT_TTL = 24 * 60 * 60 * 1000; // site-api: a form older than a day is stale anyway
   const HISTORY = 25;          // undo steps (1 MB a step)
   const BASE = ['#111111', '#ffffff', '#8a8f98', '#e0322b', '#ff8a00', '#ffd23f', '#3daa63', '#2bb3c0',
     '#3a7bd5', '#7b4fd6', '#ff6fb5', '#8b5a2b'];
@@ -45,8 +49,18 @@ document.addEventListener('alpine:init', () => {
       this.unit?.addEventListener('rack:unit', this.onPower);
       // The open canvas changes the unit's height: lay out the rack and the cables again.
       this.$watch('open', () => this.$nextTick(() => document.dispatchEvent(new Event('rack:layout'))));
+      // The draft: sent (the status above the form says so), it is forgotten; otherwise it comes back.
+      if (this.$root.previousElementSibling?.matches('.gb-status.ok')) store.set(DRAFT, '');
+      else this.restore();
+      this.$root.addEventListener('input', () => this.later());
+      this.$root.addEventListener('submit', () => this.save(), true);
+      // A drawing the server would refuse is not sent: the canvas stays, with the warning in view.
+      this.$root.addEventListener('htmx:beforeRequest', (e) => {
+        if (this.tooBig && this.$refs.drawing.value) { e.preventDefault(); this.open = true; }
+      });
     },
     destroy() {
+      clearTimeout(this.saveTimer); // swapped after sending: a late save would bring the sent draft back
       removeEventListener('keydown', this.onKey);
       this.unit?.removeEventListener('rack:unit', this.onPower);
       document.documentElement.classList.remove('pad-full');
@@ -70,6 +84,35 @@ document.addEventListener('alpine:init', () => {
       probe.remove();
       const n = (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number).map((x) => (c.startsWith('color(') ? x * 255 : x));
       return n.length === 3 ? '#' + n.map((x) => Math.round(x).toString(16).padStart(2, '0')).join('') : null;
+    },
+
+    // ---------- the draft ----------
+    field(name) { return this.$root.elements.namedItem(name); },
+    save() {
+      clearTimeout(this.saveTimer);
+      const name = this.field('name').value, text = this.field('text').value, drawing = this.$refs.drawing.value;
+      if (!name.trim() && !text.trim() && !drawing) { store.set(DRAFT, ''); return; }
+      store.setJSON(DRAFT, { at: Date.now(), name, text, private: this.field('private').checked, drawing });
+    },
+    later() {
+      clearTimeout(this.saveTimer);
+      this.saveTimer = setTimeout(() => this.save(), 800);
+    },
+    restore() {
+      const d = store.json(DRAFT, null);
+      if (!d || typeof d.at !== 'number' || Date.now() - d.at > DRAFT_TTL) return;
+      if (typeof d.name === 'string') this.field('name').value = d.name;
+      if (typeof d.text === 'string') this.field('text').value = d.text;
+      this.field('private').checked = !!d.private;
+      if (typeof d.drawing !== 'string' || !d.drawing.startsWith('data:image/png;base64,')) return;
+      const img = new Image();
+      img.onload = () => {
+        this.g.globalCompositeOperation = 'source-over';
+        this.g.drawImage(img, 0, 0, W, H);
+        this.commit(); // undo still goes back to the blank canvas
+        this.open = true;
+      };
+      img.src = d.drawing;
     },
 
     // ---------- buttons ----------
@@ -100,6 +143,7 @@ document.addEventListener('alpine:init', () => {
       if (this.past.length > HISTORY + 1) this.past.shift();
       this.future = [];
       this.sync();
+      this.later();
     },
     sync() {
       this.undoN = this.past.length - 1;
@@ -118,6 +162,7 @@ document.addEventListener('alpine:init', () => {
       this.future.push(this.past.pop());
       this.g.putImageData(this.past[this.past.length - 1], 0, 0);
       this.sync();
+      this.later();
     },
     redo() {
       if (!this.future.length) return;
@@ -125,6 +170,7 @@ document.addEventListener('alpine:init', () => {
       this.past.push(img);
       this.g.putImageData(img, 0, 0);
       this.sync();
+      this.later();
     },
     clear() { this.wipe(); this.commit(); },
 
