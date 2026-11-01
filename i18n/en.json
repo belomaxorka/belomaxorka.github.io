@@ -214,6 +214,7 @@
   "gb.err.expired": "the form went stale, reload the page",
   "gb.err.rate": "too many messages, try again in ten minutes",
   "gb.err.busy": "the guestbook is swamped right now, try again in an hour",
+  "gb.err.queue": "too many drawings arriving at once, send again in a minute",
   "gb.err.fail": "something broke on my side, try later",
   "gb.err.nolink": "not sent: connection lost. bring the link back and send again",
   "gb.err.nonet": "not sent: no internet. bring the link back and send again",
