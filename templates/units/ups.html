@@ -13,7 +13,7 @@
     <div class="sticker" aria-hidden="true" data-sticker="ups" data-back="{{t "note.back"}}">{{th "ups.sticker"}}</div>
     <div class="meta">
       {{- $l := .Content.links}}
-      <span><b>hosted on <a href="{{$l.infra}}"{{ext $l.infra}}>belomaxorka infrastructure</a></b></span>
+      <span><b>hosted on <a href="{{$l.infra}}"{{ext $l.infra}}>belomaxorka infrastructure</a></b>{{if ge .Online 0}} ·&nbsp;{{t "ups.days_online" .Online (tn "days" .Online)}}{{end}}</span>
       {{with .Visits}}{{if .OK}}<span>{{t "visits" (num .Views) (num .Visitors)}}</span>{{end}}{{end}}
       <span>{{t "ups.updated" (date .Updated)}} · {{t "ups.sources"}} <a href="{{$l.source}}"{{ext $l.source}}>{{t "ups.site"}}</a>, <a href="{{$l.api}}"{{ext $l.api}}>site-api</a></span>
     </div>

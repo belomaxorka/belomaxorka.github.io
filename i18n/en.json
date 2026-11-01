@@ -259,6 +259,7 @@
   "ups.runtime": "~%d min",
   "ups.nodata": "no data",
   "visits": "views: %s · visitors: %s",
+  "ups.days_online": "online for %d %s",
   "ups.power": "rack power: off / on",
   "kvm.nosignal": "no signal",
   "kvm.post": "kvm · port 1 of 4\nsignal: 1024×768 @ 60 hz|\n\nguest@belomaxorka:~$ ./guestbook|\nloading the entries…|\nready. be nice :)",

@@ -1,0 +1,4 @@
+# The site itself.
+#   launched - the day it went up (this repository's first commit): the UPS's footer counts the days online from
+#              it, in the site's time zone (site-api's Page.Online). YYYY-MM-DD; leave it out and the count is gone.
+launched: "2023-02-11"
