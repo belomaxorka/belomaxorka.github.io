@@ -32,6 +32,9 @@
 
   let shown = null, back = null, clock = 0;
   function open() {
+    // The BIOS left open went with its KVM (the aisle swapped racks, the guestbook form swapped the unit): forget it,
+    // or it would be "shown" for good and never open again.
+    if (shown && !shown.isConnected) close();
     const kvm = document.querySelector('#rack-body > .u.kvm');
     const bios = kvm?.querySelector(':scope > .bios');
     if (!bios || kvm.classList.contains('off') || shown) return;
