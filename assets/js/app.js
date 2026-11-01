@@ -218,7 +218,12 @@
 
     // A unit that pulls out: the handle on its left ear. Without JS a link to ?open=<unit>; with JS htmx loads the drawer
     // (the request comes from the handle, so net.js knows whose drawer it is).
+    // A handle htmx swapped in with its unit (a poll) takes the drawer's state from the drawer.
     Alpine.data('pull', () => ({
+      init() {
+        const box = document.getElementById('drawer-' + this.$el.dataset.unit);
+        if (box) this.$el.setAttribute('aria-expanded', String(box.classList.contains('open')));
+      },
       toggle() {
         const el = this.$el, name = el.dataset.unit, box = document.getElementById('drawer-' + name);
         if (!box || !window.htmx) { location.href = el.href; return; }
@@ -234,15 +239,16 @@
       init() {
         // The drawer is the component's root. In the methods this.$el is the element of the event (the "push back"
         // button), so keep the drawer here.
-        const el = this.box = this.$root, name = el.id.replace('drawer-', '');
-        this.handle = document.querySelector(`.pull[data-unit="${name}"]`);
-        if (this.handle) this.handle.setAttribute('aria-expanded', 'true');
+        const el = this.box = this.$root;
+        this.handle()?.setAttribute('aria-expanded', 'true');
         el.addEventListener('drawer:shut', () => this.shut());
         // It slides out by itself (CSS @starting-style); lay the rack out now and once it is out.
         const layout = () => document.dispatchEvent(new Event('rack:layout'));
         layout();
         el.addEventListener('transitionend', layout, { once: true });
       },
+      // The handle now: a poll may have swapped the unit, and the handle with it, while the drawer was out.
+      handle() { return document.querySelector(`.pull[data-unit="${this.box.id.replace('drawer-', '')}"]`); },
       shut() {
         const el = this.box;
         // Opened by ?open=<unit> (no JS drawer at first): the address goes back to the rack's, without a reload.
@@ -254,9 +260,10 @@
           empty.className = 'drawer';
           empty.id = el.id;
           el.replaceWith(empty);
-          if (this.handle && this.handle.isConnected) {
-            this.handle.setAttribute('aria-expanded', 'false');
-            this.handle.focus({ preventScroll: true });
+          const handle = this.handle();
+          if (handle) {
+            handle.setAttribute('aria-expanded', 'false');
+            handle.focus({ preventScroll: true });
           }
           document.dispatchEvent(new Event('rack:layout'));
         };
