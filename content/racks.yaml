@@ -3,8 +3,8 @@
 #   path  - the page's address; the first rack must be "/" (the home page has the otoring ring on top);
 #   units - the units from top to bottom: a name is a template in templates/units/*.html with {{define "unit-<name>"}};
 #   stub  - the rack is still being mounted: blanks instead of units.
-# A new unit is a line here and a lite-<name> template; a new rack is a block here and rack.<id>, rack.<id>.sub in
-# i18n/en.json.
+# A new unit is a line here and a lite-<name> template; a new rack is a block here and rack.<id>, rack.<id>.sub and
+# meta.title.<id> (the page's title, in sentence case) in i18n/en.json.
 - id: home
   path: /
   units: [patch, brush, tor, brush, router, mgmt, server, media, monitor, syslog, activity, tokens, switch, kvm, buttons, blank, ups]

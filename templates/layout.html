@@ -10,7 +10,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 {{- /* Canonical is the rack's address. Pulled-out units and stub racks are noindex. */ -}}
 {{- $home := eq .Rack.Path "/"}}
-{{- $title := t "meta.title.home"}}{{if not $home}}{{$title = t "meta.title" (t (print "rack." .Rack.ID)) (t (print "rack." .Rack.ID ".sub"))}}{{end}}
+{{- /* The page's title is meta.title.<rack> in sentence case; the signs keep their lowercase rack.<rack>. */ -}}
+{{- $title := t (print "meta.title." .Rack.ID)}}
 {{- $desc := t "meta.desc"}}
 {{- $url := print .URL .Rack.Path}}
 <title>{{$title}}</title>
