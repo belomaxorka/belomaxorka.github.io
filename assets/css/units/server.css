@@ -13,6 +13,37 @@
 .ident { flex: 1 1 320px; min-width: 0; display: grid; gap: 8px; align-content: start; }
 .name { font: 700 clamp(28px, 5.4vw, 48px)/0.95 var(--f-silk); letter-spacing: .02em; margin: 0; text-wrap: balance; }
 .name small { display: block; font: 500 11px/1.4 var(--f-silk); letter-spacing: .18em; color: var(--dim); text-transform: uppercase; margin-top: 6px; }
+/* A glint on the name, as on a diamond in the sun: every 7s a thin streak crosses the letters and, where it leaves the
+   last one, a four-point star flashes. The letters are painted by their background: the ink and the streak over it.
+   The ink is near white in the dark theme, so there the streak has grey edges or it would not show; on the light
+   theme's dark letters a pale streak shows by itself. Still letters without motion or without background-clip. */
+.glint { position: relative; display: inline-block; }
+.glint i { position: absolute; right: -.18em; top: .12em; width: .62em; height: .62em; pointer-events: none; opacity: 0; transform: translate(50%, -50%) scale(0); filter: drop-shadow(0 0 .08em var(--glint-rim)) drop-shadow(0 0 .25em var(--accent)); }
+/* A white star is lost on the light theme's beige panel: there its rim is the accent, the star itself stays white. */
+.glint i { --glint-rim: color-mix(in srgb, var(--accent) var(--L), #fff); }
+.glint i::before, .glint i::after { content: ""; position: absolute; inset: 0; }
+.glint i::after { background: radial-gradient(circle, #fff 0 8%, #fff8 14%, #fff0 40%); }
+.glint i::before { background: #fff; clip-path: polygon(50% 0, 57% 43%, 100% 50%, 57% 57%, 50% 100%, 43% 57%, 0 50%, 43% 43%); }
+@media (prefers-reduced-motion: no-preference) {
+  @supports (background-clip: text) or (-webkit-background-clip: text) {
+    .glint {
+      --glint-edge: color-mix(in srgb, #2b292500 var(--L), #5e616acc);
+      --glint-core: color-mix(in srgb, #f6f1e5 var(--L), #fff);
+      color: transparent; -webkit-background-clip: text; background-clip: text; background-repeat: no-repeat;
+      background-image: linear-gradient(110deg, #fff0 38%, var(--glint-edge) 45%, var(--glint-core) 50%, var(--glint-edge) 55%, #fff0 62%), linear-gradient(var(--ink), var(--ink));
+      background-size: 250% 100%, 100% 100%; background-position: 100% 0, 0 0;
+      animation: glint-sweep 7s ease-in-out 1.5s infinite;
+    }
+    .glint i { animation: glint-star 7s ease-out 1.5s infinite; }
+  }
+}
+@keyframes glint-sweep { 0% { background-position: 100% 0, 0 0; } 18%, 100% { background-position: 0% 0, 0 0; } }
+@keyframes glint-star {
+  0%, 15% { opacity: 0; transform: translate(50%, -50%) scale(0) rotate(0); }
+  19% { opacity: 1; transform: translate(50%, -50%) scale(1.1) rotate(45deg); }
+  23% { opacity: .9; transform: translate(50%, -50%) scale(.7) rotate(70deg); }
+  30%, 100% { opacity: 0; transform: translate(50%, -50%) scale(0) rotate(100deg); }
+}
 .intro { margin: 0; max-width: 60ch; color: var(--ink); }
 .status-col { flex: 0 1 230px; display: grid; gap: 8px; align-content: start; min-width: 0; }
 /* Narrower than 940px (the album, the name's column and this one no longer share the row: the face loses 174px to
