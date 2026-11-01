@@ -54,13 +54,21 @@ document.addEventListener('alpine:init', () => {
       else this.restore();
       this.$root.addEventListener('input', () => this.later());
       this.$root.addEventListener('submit', () => this.save(), true);
+      // Leaving within the save's delay (a reload, a closed tab) keeps the last keystrokes too.
+      this.onHide = () => this.flush();
+      addEventListener('pagehide', this.onHide);
       // A drawing the server would refuse is not sent: the canvas stays, with the warning in view.
       this.$root.addEventListener('htmx:beforeRequest', (e) => {
         if (this.tooBig && this.$refs.drawing.value) { e.preventDefault(); this.open = true; }
       });
     },
     destroy() {
-      clearTimeout(this.saveTimer); // swapped after sending: a late save would bring the sent draft back
+      // Swapped out (the aisle went to another rack, the server answered the form) a moment after a keystroke: the
+      // save still waiting is done now. app.js and aisle.js destroy the old form before the new one starts, and a new
+      // form after a sent entry forgets the draft.
+      this.flush();
+      this.gone = true;
+      removeEventListener('pagehide', this.onHide);
       removeEventListener('keydown', this.onKey);
       this.unit?.removeEventListener('rack:unit', this.onPower);
       document.documentElement.classList.remove('pad-full');
@@ -90,14 +98,17 @@ document.addEventListener('alpine:init', () => {
     field(name) { return this.$root.elements.namedItem(name); },
     save() {
       clearTimeout(this.saveTimer);
+      this.saveTimer = 0;
       const name = this.field('name').value, text = this.field('text').value, drawing = this.$refs.drawing.value;
       if (!name.trim() && !text.trim() && !drawing) { store.set(DRAFT, ''); return; }
       store.setJSON(DRAFT, { at: Date.now(), name, text, private: this.field('private').checked, drawing });
     },
     later() {
       clearTimeout(this.saveTimer);
+      if (this.gone) return; // a drawing restored after the form was swapped out: not this form's draft any more
       this.saveTimer = setTimeout(() => this.save(), 800);
     },
+    flush() { if (this.saveTimer) this.save(); },
     restore() {
       const d = store.json(DRAFT, null);
       if (!d || typeof d.at !== 'number' || Date.now() - d.at > DRAFT_TTL) return;
