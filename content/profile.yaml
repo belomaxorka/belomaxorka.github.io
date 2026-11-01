@@ -8,10 +8,10 @@ birthday: "2006-05-25"
 # mbti — the personality type: a tape under the name (mbti: true in tapes) and a frame of the server's LCD.
 mbti: infp-t
 person:
-  first: {en: Roman, ru: Роман}
-  last: {en: Kelesidis, ru: Келесидис}
+  first: Roman
+  last: Kelesidis
   username: belomaxorka
-  job: {en: full-stack web developer, ru: фулстек веб-разработчик}
+  job: full-stack web developer
 # colors - favourite colours: squares on the server's LCD, taking turns with the other frames.
 # pgp - the whole PGP key fingerprint: the asset tag on the server, its last 8 characters on the LCD. Only the
 #   fingerprint: the key itself (it holds an e-mail address) is not published.

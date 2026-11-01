@@ -1,5 +1,5 @@
 # The contacts switch, port by port, in the order shown.
-#   name: the label (a string or {en, ru}); link: where the port leads; copy: a name the port copies instead (an
+#   name: the label; link: where the port leads; copy: a name the port copies instead (an
 #   account with no public link, like Discord's); without either the port is dark.
 #   tape: empty, r, b; led: empty (green), warn, off; title: the hint on hover;
 #   me: true: my own profile, rel="me" and in the JSON-LD sameAs.
@@ -15,7 +15,7 @@
 - name: steam
   link: https://steamcommunity.com/id/wour/
   me: true
-- name: {en: mail, ru: почта}
+- name: mail
   link: mailto:ascouted@gmail.com
   tape: r
   title: ascouted@gmail.com

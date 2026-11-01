@@ -1,4 +1,4 @@
-{{/* Management: the sections, the language (plain links), the screen and theme toggles (hidden until Alpine
+{{/* Management: the sections, the screen and theme toggles (hidden until Alpine
      starts). */}}
 {{define "unit-mgmt"}}
 <div class="u mgmt" style="--h:1" data-key="mgmt" data-power data-net="wan" data-vlan="mgmt">
@@ -8,10 +8,6 @@
       {{end}}
     </nav>
     <div class="ports">
-      <nav class="langs" aria-label="{{t "lang.aria"}}">
-        {{range langs}}<a class="key{{if eq . $.Lang}} on{{end}}" href="?lang={{.}}" hreflang="{{.}}" lang="{{.}}"{{if eq . $.Lang}} aria-current="true"{{end}}>{{.}}</a>
-        {{end}}
-      </nav>
       <button class="key" type="button" hidden x-data="lcdToggle" data-cover="{{t "lcd.cover"}}" data-amber="{{t "lcd.amber"}}" @click="toggle" x-text="label">{{t "lcd.cover"}}</button>
       <button class="key" type="button" hidden x-data="themeToggle" data-dark="{{t "theme.dark"}}" data-light="{{t "theme.light"}}" @click="toggle" aria-label="{{t "theme.aria"}}"><i class="led pwr"></i><span x-text="label">{{t "theme.dark"}}</span></button>
       {{/* Sound (sound.js): off by default, no button without JS. */}}

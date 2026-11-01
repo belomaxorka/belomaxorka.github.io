@@ -3,26 +3,26 @@
 #   id   - the name: web, lite, tor, ygg. By id: for tor site-api sends url in the Onion-Location header (Tor Browser
 #          offers the onion address), lite is "you are here" in the light version;
 #   port - the tape on the router's jack (no port, no jack: that is https itself); name the caption; url the address;
-#          note what it is for (a string or {en, ru}); check the Gatus check (infra gatus/config.yaml) that lights
+#          note what it is for; check the Gatus check (infra gatus/config.yaml) that lights
 #          the way's lamp (none for Tor and Yggdrasil).
 - id: web
   check: belomaxorka.dev
   name: https
   url: https://belomaxorka.dev
-  note: {en: "the internet, through cloudflare", ru: "интернет, через cloudflare"}
+  note: "the internet, through cloudflare"
 - id: tor
   port: tor
   name: tor
   url: http://belomahi5ltqfhdrpqjlivzwycawvllixi3lksfnhpyzfsk2nngnydid.onion
-  note: {en: "onion service, open in tor browser", ru: "onion-сервис, открывать в tor browser"}
+  note: "onion service, open in tor browser"
 - id: ygg
   port: ygg
   name: yggdrasil
   url: http://[200:88bc:4f5d:30b5:52c0:3b61:6d30:a916]/
-  note: {en: "the yggdrasil mesh network", ru: "mesh-сеть yggdrasil"}
+  note: "the yggdrasil mesh network"
 - id: lite
   port: http
   check: Site (light, http)
   name: http 1.0
   url: http://lite.belomaxorka.dev
-  note: {en: "html 4.01 for old browsers: netscape, internet explorer, lynx", ru: "html 4.01 для старых браузеров: netscape, internet explorer, lynx"}
+  note: "html 4.01 for old browsers: netscape, internet explorer, lynx"

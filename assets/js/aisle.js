@@ -16,7 +16,7 @@
   let aim = -1; // where we are going or have arrived: the arrow keys count from it (the sign changes only after the swap)
 
   // ---------- which links to take over ----------
-  // The plain left click only, on this site, to a rack's path without a query (?lang and ?open need a real load).
+  // The plain left click only, on this site, to a rack's path without a query (?open needs a real load).
   function linkOf(e) {
     if (e.defaultPrevented || e.button !== 0 || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return null;
     const a = e.target instanceof Element && e.target.closest('a[href]');

@@ -18,7 +18,7 @@ interface state. No build step.
   the infrastructure page (`infra.html`)
 - `content/*.yaml`: racks, contacts, buttons, links and other lists; `content/memes/`: the pictures of
   [infra.belomaxorka.dev](https://infra.belomaxorka.dev)
-- `i18n/`: English and Russian texts
+- `i18n/en.json`: the texts
 - `assets/`: CSS, scripts, fonts, 88x31 buttons; `88x31/`: my own buttons
 - `index.html`: the fallback page for when site-api is down
 - `tools/`: CI checks, the 88x31 and link preview generators, a screenshot script (not deployed)

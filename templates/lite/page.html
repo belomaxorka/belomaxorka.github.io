@@ -4,7 +4,7 @@
      use quirks mode. */}}
 {{define "lite" -}}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
+<html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>{{if eq .Rack.Path "/"}}{{t "meta.title.home"}}{{else}}{{t "meta.title" (t (print "rack." .Rack.ID)) (t (print "rack." .Rack.ID ".sub"))}}{{end}}</title>
@@ -17,10 +17,9 @@
 <tr>
 <td valign="bottom"><font face="Verdana,Arial,Helvetica,sans-serif" size="5" color="#ffffff"><b>belomaxorka.dev</b></font><br>
 <font face="Verdana,Arial,Helvetica,sans-serif" size="2" color="#9aa0a8">{{t "rack.cap"}} · r{{.Rack.N}} · {{t (print "rack." .Rack.ID)}}{{if ne .Rack.Path "/"}} — {{t (print "rack." .Rack.ID ".sub")}}{{end}}</font></td>
-<td align="right" valign="bottom">{{template "f"}}{{range $i, $l := langs}}{{if $i}} {{end}}{{if eq $l $.Lang}}<b>[{{$l}}]</b>{{else}}[<a href="?lang={{$l}}">{{$l}}</a>]{{end}}{{end}}{{template "f-end"}}</td>
 </tr>
 <tr>
-<td colspan="2">{{template "f"}}{{t "lite.racks"}}: {{range .Racks}}{{if .Current}}<b>[r{{.N}} {{t (print "rack." .ID)}}]</b>{{else}}<a href="{{.Path}}">r{{.N}} {{t (print "rack." .ID)}}</a>{{end}} {{end}}{{template "f-end"}}</td>
+<td>{{template "f"}}{{t "lite.racks"}}: {{range .Racks}}{{if .Current}}<b>[r{{.N}} {{t (print "rack." .ID)}}]</b>{{else}}<a href="{{.Path}}">r{{.N}} {{t (print "rack." .ID)}}</a>{{end}} {{end}}{{template "f-end"}}</td>
 </tr>
 </table>
 
@@ -76,7 +75,7 @@ best viewed with any browser</font></td></tr>
 {{/* The router: the ways into the site (content/uplinks.yaml); a lamp is the Gatus check named in check. */}}
 {{define "lite-router"}}{{template "lite-silk" (print "opnsense · " (t "net.router") " · " (t "lite.uplinks"))}}
 <table border="0" cellspacing="0" cellpadding="2">
-{{range .Content.uplinks}}{{$u := .}}{{$st := "off"}}{{range $.Status.Lamps}}{{if eq .Name $u.check}}{{$st = .State}}{{end}}{{end}}<tr><td valign="top">{{if .check}}{{template "lite-led" $st}}{{end}}</td><td valign="top">{{template "f"}}<b>{{.name}}</b>{{template "f-end"}}</td><td valign="top">{{template "f"}}<a href="{{.url}}">{{.url}}</a>{{if eq .id "lite"}} <font color="#ffc53d">← {{t "lite.here"}}</font>{{end}}{{template "f-end"}}<br><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8">{{loc .note}}</font></td></tr>
+{{range .Content.uplinks}}{{$u := .}}{{$st := "off"}}{{range $.Status.Lamps}}{{if eq .Name $u.check}}{{$st = .State}}{{end}}{{end}}<tr><td valign="top">{{if .check}}{{template "lite-led" $st}}{{end}}</td><td valign="top">{{template "f"}}<b>{{.name}}</b>{{template "f-end"}}</td><td valign="top">{{template "f"}}<a href="{{.url}}">{{.url}}</a>{{if eq .id "lite"}} <font color="#ffc53d">← {{t "lite.here"}}</font>{{end}}{{template "f-end"}}<br><font face="Verdana,Arial,Helvetica,sans-serif" size="1" color="#9aa0a8">{{.note}}</font></td></tr>
 {{end}}</table>{{end}}
 
 {{/* Management: the sections. */}}
@@ -135,7 +134,7 @@ best viewed with any browser</font></td></tr>
 
 {{/* The contacts switch. */}}
 {{define "lite-switch"}}{{template "lite-silk" (t "sw.title")}}
-{{template "f"}}{{range .Content.contacts}}{{if .link}}{{template "lite-led" (or .led "")}}&nbsp;<a href="{{.link}}">{{loc .name}}</a>{{else if .copy}}{{template "lite-led" (or .led "")}}&nbsp;{{loc .name}} <tt>{{.copy}}</tt>{{else}}{{template "lite-led" "off"}}&nbsp;<font color="#9aa0a8">{{loc .name}}</font>{{end}} &nbsp; {{end}}{{template "f-end"}}{{end}}
+{{template "f"}}{{range .Content.contacts}}{{if .link}}{{template "lite-led" (or .led "")}}&nbsp;<a href="{{.link}}">{{.name}}</a>{{else if .copy}}{{template "lite-led" (or .led "")}}&nbsp;{{.name}} <tt>{{.copy}}</tt>{{else}}{{template "lite-led" "off"}}&nbsp;<font color="#9aa0a8">{{.name}}</font>{{end}} &nbsp; {{end}}{{template "f-end"}}{{end}}
 
 {{/* The KVM is the guestbook: the entries and the form (a plain POST, as on the rack without JS). */}}
 {{define "lite-kvm"}}<a name="guestbook"></a>{{template "lite-silk" (print (t "gb.title") " · " (t "gb.moderated"))}}{{with .Guestbook}}

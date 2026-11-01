@@ -3,7 +3,7 @@
      name (photo_2026-10-12_02-11-28.jpg or 2026-02-20_name.jpg); site-api crops them square and pages them by 24. */}}
 {{define "infra" -}}
 <!doctype html>
-<html lang="{{lang}}">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'">
@@ -66,8 +66,6 @@
   <a href="{{$src}}"{{ext $src}}>{{t "infra.source"}}</a>
   //
   <a href="{{.URL}}"{{ext .URL}}>belomaxorka.dev</a>
-  //
-  {{- range langs}}{{if ne . lang}} <a href="?lang={{.}}" hreflang="{{.}}" lang="{{.}}">{{.}}</a>{{end}}{{end}}
 </footer>
 {{- $code := printf `<a href="%s"><img src="%s/88x31/infra.gif" width="88" height="31" alt="hosted on belomaxorka infrastructure"></a>` .Content.links.infra .URL}}
 <div class="badge">

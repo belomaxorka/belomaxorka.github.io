@@ -10,7 +10,7 @@
     const Alpine = window.Alpine;
 
     // The LCD colour: from the cover (site-api sends the palette) or plain amber. The buttons' captions are in data
-    // attributes, in the page's language.
+    // attributes.
     Alpine.store('lcd', {
       cover: root.dataset.lcd !== 'amber',
       toggle() {
@@ -76,7 +76,7 @@
       destroy() { clearInterval(this.timer); },
     }));
 
-    // A 88x31 button's code to the clipboard; the captions are in data attributes, in the page's language.
+    // A 88x31 button's code to the clipboard; the captions are in data attributes.
     Alpine.data('copyCode', () => ({
       label: '',
       init() { this.label = this.$root.querySelector('[data-copy]').dataset.copy; },
