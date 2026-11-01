@@ -152,8 +152,12 @@
     for (const { name, value } of [...doc.documentElement.attributes]) {
       if (!OWN.has(name) && root.getAttribute(name) !== value) root.setAttribute(name, value);
     }
-    const room = doc.getElementById('room');
-    $('#room').replaceWith(room); // the old units: Alpine cleans them up, htmx polls of detached elements stop by themselves
+    const room = doc.getElementById('room'), old = $('#room');
+    // The old units' components are destroyed here: Alpine's own clean-up skips a removed element it never started,
+    // and the first page's #room is one, so its components (the guestbook's draft, listeners on window) would live on.
+    // htmx polls of detached elements stop by themselves.
+    window.Alpine?.destroyTree(old);
+    old.replaceWith(room);
     if (window.htmx) htmx.process(room);
     fetch('/events/visit', { method: 'POST', keepalive: true }).catch(() => {}); // the rack is shown: a page view
     document.dispatchEvent(new CustomEvent('rack:swap', { detail: { quiet } }));

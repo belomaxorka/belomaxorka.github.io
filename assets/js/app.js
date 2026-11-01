@@ -577,6 +577,13 @@
     queueMicrotask(() => { wire(); snap(); });
     later();
   });
+  // A unit or a drawer htmx swaps out: its components are destroyed now. Alpine's own clean-up skips a removed element
+  // it never started, which a unit of the first page is, so the old guestbook form would keep its draft timer and its
+  // listeners on window.
+  document.addEventListener('htmx:beforeCleanupElement', (e) => {
+    const el = e.target;
+    if (window.Alpine && el instanceof Element && el.matches('#rack-body > .u, #rack-body > .drawer, .drawer > .slide')) Alpine.destroyTree(el);
+  });
   // A poll whose answer equals the unit's last one is not swapped: every swap lays the whole rack out. The lamps on the
   // way still blink (live.js).
   const answers = new Map(); // unit id -> its last answer
