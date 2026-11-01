@@ -53,25 +53,69 @@
       destroy() { clearInterval(this.timer); },
     }));
 
-    // The VU meter: alive only while something plays.
+    // The VU meter: alive only while something plays. Koito names the track but gives no sound, position or tempo, so
+    // the levels are made up, though like a real meter's: one programme level drives both channels, L and R part only
+    // by a slow drift, the lamps rise fast and fall slowly, and the highest one holds for a moment. The tempo and the
+    // loudness come from the track (its link on the LCD) and the motion from the clock, so every visitor sees the same.
+    const hash = (a, b) => {
+      let h = Math.imul(a ^ 0x9e3779b9, 0x85ebca6b) ^ Math.imul(b | 0, 0xc2b2ae35);
+      h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d);
+      h = Math.imul(h ^ (h >>> 12), 0x297a2d39);
+      return ((h ^ (h >>> 15)) >>> 0) / 4294967296;
+    };
+    const noise = (seed, x) => { // smooth, 0..1, a new value every 1 of x
+      const k = Math.floor(x), f = x - k, s = f * f * (3 - 2 * f);
+      return hash(seed, k) * (1 - s) + hash(seed, k + 1) * s;
+    };
     Alpine.data('vu', (playing) => ({
       init() {
-        const rows = [...this.$el.querySelectorAll('.row')];
-        rows.forEach(r => {
-          for (let i = 0; i < 14; i++) {
+        const N = 14;
+        const track = [...(this.$root.closest('.u')?.querySelector('.lcd a')?.getAttribute('href') || '')]
+          .reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16777619), 2166136261); // FNV-1a of the track's link
+        const rows = [...this.$el.querySelectorAll('.row')].map(r => {
+          for (let i = 0; i < N; i++) {
             const s = document.createElement('i');
             if (i >= 12) s.className = 'e'; else if (i >= 9) s.className = 'w';
             s.style.setProperty('--i', i); // its place, for the test at power-up (toys.css)
             r.appendChild(s);
           }
+          return [...r.children];
         });
-        const lv = [7, 6];
-        const tick = () => rows.forEach((r, k) => {
-          lv[k] = playing ? Math.max(2, Math.min(14, lv[k] + Math.random() * 6 - 3.1)) : 0;
-          [...r.children].forEach((s, i) => s.classList.toggle('on', i < lv[k]));
+        const show = (lv, pk) => rows.forEach((cs, k) => { // the held lamp only up in the yellow and red
+          const n = Math.round(lv[k]), p = Math.round(pk[k]);
+          cs.forEach((s, i) => s.classList.toggle('on', i < n || (p > n && p > 9 && i === p - 1)));
         });
-        tick();
-        if (playing && motion()) this.timer = setInterval(tick, 120);
+        if (!playing) return show([0, 0], [0, 0]);
+
+        // The track's character: 84–132 bpm, where the bars sit (in lamps), how far L and R wander apart.
+        const beat = 60 / (84 + 48 * hash(track, -1)), loud = 6 + 1.6 * hash(track, -2), width = 0.5 + 0.6 * hash(track, -3);
+        const programme = (t) => {
+          const b = t / beat, n = Math.floor(b), ph = b - n;
+          const kick = Math.exp(-ph * 3) * (n % 4 === 0 ? 1 : n % 2 === 0 ? 0.75 : 0.6); // the bar's first beat loudest
+          const hat = ph > 0.5 ? Math.exp((0.5 - ph) * 12) * 0.6 : 0;                  // a lighter hit between beats
+          return loud + (noise(track, t / 9) - 0.5) * 3.2                           // quieter and louder parts
+            + (kick + hat) * 5 + (noise(track + 1, t * 6) - 0.5) * 1.8;             // the beat, and grain between
+        };
+        const target = (t) => {
+          const m = programme(t), d = (noise(track + 2, t / 4) - 0.5) * width;
+          return [0, 1].map(k => Math.min(N, Math.max(0, m + (k ? -d : d) + (noise(track + 3 + k, t * 5) - 0.5) * 0.5)));
+        };
+        const lv = target(Date.now() / 1000), pk = [...lv], held = [0, 0];
+        show(lv, [0, 0]);
+        if (!motion()) return;
+
+        let last = performance.now();
+        this.timer = setInterval(() => {
+          const now = performance.now(), dt = Math.min(200, now - last);
+          last = now;
+          if (document.hidden) return;
+          target(Date.now() / 1000).forEach((x, k) => {
+            lv[k] += (x - lv[k]) * (1 - Math.exp(-dt / (x > lv[k] ? 25 : 120))); // attack 25 ms, release 120 ms
+            if (lv[k] >= pk[k]) { pk[k] = lv[k]; held[k] = now; }
+            else if (now - held[k] > 800) pk[k] = Math.max(lv[k], pk[k] - dt / 110); // held, then a lamp per 110 ms
+          });
+          show(lv, pk);
+        }, 50);
       },
       destroy() { clearInterval(this.timer); },
     }));
