@@ -35,6 +35,8 @@
     return a < 0 || b < 0 || a === b ? '' : b < a ? 'back' : 'forward';
   }
   function apply(vt, d) {
+    // A skipped transition rejects ready: not an error, and not "Uncaught (in promise)" in the console either.
+    if (vt.ready) vt.ready.catch(function () {});
     if (!d) vt.skipTransition();
     else if (vt.types) vt.types.add(d);
   }
